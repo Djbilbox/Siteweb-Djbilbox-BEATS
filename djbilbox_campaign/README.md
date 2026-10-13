@@ -20,3 +20,9 @@ Un accès Gumroad authentifié a ensuite permis de lire les statistiques et le c
 Aucun connecteur e-mail n’est activé dans la session. Aucun brouillon n’a été ajouté à une boîte aux lettres. La tâche hebdomadaire est active le lundi à 08:00, fuseau Europe/Paris; elle prépare des relances en brouillon seulement et produit le compte rendu dans la tâche, pas par e-mail. Les accès statistiques et l’exécution ultérieure dépendent de la disponibilité de la session connectée.
 
 La page KVR exige une demande d’accès développeur faite par un humain et interdit les e-mails envoyés par agent IA; le brouillon d’e-mail ne doit pas être utilisé pour cette cible.
+
+## Livrables ajoutés (13/10/2026)
+- `fiches_produits/fiches_EN_FR.md` : 6 fiches AIDA/PAS EN+FR (crochets = specs à vérifier).
+- `emails/sequences_automatiques.md` : lead magnet, welcome, panier, up/cross-sell, réactivation.
+- `videos/10_scripts_shorts.md` : 10 scripts courts.
+- `strategie/plan_expansion_international.md` : marchés, bundles, prix, plan 90 jours.
