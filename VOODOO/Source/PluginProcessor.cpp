@@ -22,6 +22,10 @@ void VoodooProcessor::prepareToPlay (double sr, int block)
     dly.prepare (sr);
     reverb.setSampleRate (sr);
     lastMonoNote = -1;
+    monoMidi.ensureSize (4096);
+    dcRm = 1.f - juce::MathConstants<float>::twoPi * 8.f / (float) sr; dcXl = dcYl = dcXr = dcYr = 0.f;
+    distSm.reset (sr, 0.02); delaySm.reset (sr, 0.02);
+    distSm.setCurrentAndTargetValue (0.f); delaySm.setCurrentAndTargetValue (0.f);
 }
 
 void VoodooProcessor::applyPreset (int index)
@@ -44,11 +48,12 @@ void VoodooProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     juce::ScopedNoDenormals nd;
     const int n = buffer.getNumSamples();
     buffer.clear();
+    if (n == 0 || buffer.getNumChannels() < 1) return;
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
 
     if (ptrs (mono) > 0.5f) // mono : derniere note prioritaire, coupe la precedente
     {
-        juce::MidiBuffer out;
+        auto& out = monoMidi; out.clear();
         for (auto m : midi)
         {
             const auto msg = m.getMessage();
@@ -58,6 +63,7 @@ void VoodooProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
                 lastMonoNote = msg.getNoteNumber();
             }
             else if (msg.isNoteOff() && msg.getNoteNumber() == lastMonoNote) lastMonoNote = -1;
+            else if (msg.isAllNotesOff() || msg.isAllSoundOff()) lastMonoNote = -1;
             out.addEvent (msg, m.samplePosition);
         }
         midi.swapWith (out);
@@ -67,15 +73,16 @@ void VoodooProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     synth.renderNextBlock (buffer, midi, 0, n);
 
     float* L = buffer.getWritePointer (0);
-    float* R = buffer.getWritePointer (1);
+    float* R = buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : L;
 
     // distorsion
-    const float dist = ptrs (Voodoo::dist);
-    if (dist > 0.005f)
+    distSm.setTargetValue (ptrs (Voodoo::dist));
+    if (distSm.getCurrentValue() > 0.005f || distSm.getTargetValue() > 0.005f)
     {
-        const float drive = 1.f + dist * 14.f, wet = juce::jmin (1.f, dist * 2.f), comp = 1.f / (1.f + dist * 1.5f);
         for (int i = 0; i < n; ++i)
         {
+            const float dist = distSm.getNextValue();
+            const float drive = 1.f + dist * 14.f, wet = juce::jmin (1.f, dist * 2.f), comp = 1.f / (1.f + dist * 1.5f);
             L[i] = (L[i] * (1 - wet) + std::tanh (L[i] * drive) * 0.8f * wet) * comp;
             R[i] = (R[i] * (1 - wet) + std::tanh (R[i] * drive) * 0.8f * wet) * comp;
         }
@@ -92,13 +99,14 @@ void VoodooProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     }
 
     // delay ping-pong
-    const float dmix = ptrs (Voodoo::delay);
-    if (dmix > 0.005f)
+    delaySm.setTargetValue (ptrs (Voodoo::delay));
+    if (delaySm.getCurrentValue() > 0.005f || delaySm.getTargetValue() > 0.005f)
     {
         const float fbk = ptrs (fb), targetLen = juce::jlimit (8.f, (float) dly.bl.size() - 4.f, ptrs (dtime) * (float) sampleRate);
         const int size = (int) dly.bl.size();
         for (int i = 0; i < n; ++i)
         {
+            const float dmix = delaySm.getNextValue();
             dly.smoothLen += (targetLen - dly.smoothLen) * 0.0005f;
             const float dl = dly.read (dly.bl, dly.smoothLen), dr = dly.read (dly.br, dly.smoothLen);
             dly.bl[(size_t) dly.w] = L[i] + dr * fbk;
@@ -118,7 +126,14 @@ void VoodooProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         reverb.processStereo (L, R, n);
     }
 
-    for (int i = 0; i < n; ++i) { L[i] = std::tanh (L[i]); R[i] = std::tanh (R[i]); }
+    for (int i = 0; i < n; ++i) // bloqueur DC master puis limiteur doux
+    {
+        const float l = L[i], r = R[i];
+        const float yl = l - dcXl + dcRm * dcYl, yr = r - dcXr + dcRm * dcYr;
+        dcXl = l; dcYl = yl; dcXr = r; dcYr = yr;
+        L[i] = std::tanh (yl);
+        if (R != L) R[i] = std::tanh (yr);
+    }
 }
 
 void VoodooProcessor::getStateInformation (juce::MemoryBlock& dest)

@@ -20,7 +20,7 @@ public:
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
-    double getTailLengthSeconds() const override { return 6.0; }
+    double getTailLengthSeconds() const override { return 12.0; }
 
     int getNumPrograms() override { return (int) Voodoo::presets().size(); }
     int getCurrentProgram() override { return juce::jmax (0, presetIndex); }
@@ -60,7 +60,9 @@ private:
     StereoDelay dly;
     double sampleRate = 44100.0;
     int lastMonoNote = -1;
-    juce::SmoothedValue<float> gainSm;
+    juce::MidiBuffer monoMidi;
+    float dcXl = 0.f, dcYl = 0.f, dcXr = 0.f, dcYr = 0.f, dcRm = 0.999f;
+    juce::SmoothedValue<float> distSm, delaySm;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VoodooProcessor)
 };

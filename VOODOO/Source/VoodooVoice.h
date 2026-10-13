@@ -61,6 +61,7 @@ public:
         for (auto* s : { &breathBP, &sym1, &sym2, &f1, &f2, &fl, &voiceFilter }) s->reset();
         pan = (rng.nextFloat() - 0.5f) * 2.f;
         lfoPh = 0.0; shValue = rng.nextFloat() * 2.f - 1.f;
+        freshNote = true; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
         adsr.noteOn();
     }
 
@@ -87,6 +88,8 @@ public:
         const float uiBend = P (bend), masterVol = P (volume);
         const float tb[5] = { P (t1), P (t2), P (t3), P (t4), P (t5) };
         adsr.setParameters ({ P (atk), P (dec), P (sus), P (rel) });
+        if (freshNote) { smVol = masterVol; smSemi = semis; smBend = uiBend; smCut = cutoff; freshNote = false; }
+        const float smK = 1.f - std::exp (-1.f / (0.006f * (float) sr));
         const float glideCoef = gl < 0.001f ? 1.f : 1.f - std::exp (-1.f / (gl * (float) sr * 0.35f));
         float* L = out.getWritePointer (0);
         float* R = out.getNumChannels() > 1 ? out.getWritePointer (1) : nullptr;
@@ -95,6 +98,8 @@ public:
         for (int i = 0; i < num; ++i)
         {
             curFreq += (targetFreq - curFreq) * glideCoef;
+            smVol += (masterVol - smVol) * smK; smSemi += (semis - smSemi) * smK;
+            smBend += (uiBend - smBend) * smK; smCut += (cutoff - smCut) * smK;
 
             lfoPh += lfoRate / sr;
             if (lfoPh >= 1.0) { lfoPh -= 1.0; shValue = rng.nextFloat() * 2.f - 1.f; }
@@ -108,7 +113,7 @@ public:
             }
             const float mod = lfo * amt;
 
-            float semiTotal = semis + (midiBend + uiBend) * 2.f;
+            float semiTotal = smSemi + (midiBend + smBend) * 2.f;
             if (dst == 0) semiTotal += mod * 1.0f;
             const double freq = (double) curFreq * std::exp2 (semiTotal / 12.f);
 
@@ -116,17 +121,18 @@ public:
             for (int k = 0; k < 5; ++k) t[k] = juce::jlimit (0.f, 1.f, tb[k] + (dst == 3 ? mod * 0.5f : 0.f));
 
             float y = renderEngine (freq, t, (float) sr);
+            { const float dcOut = y - dcX + dcR * dcY; dcX = y; dcY = dcOut; y = dcOut; } // bloqueur DC
 
             if ((i & 7) == 0)
             {
-                float fc = cutoff * std::exp2 ((dst == 1 ? mod * 3.f : 0.f) + (float) std::log2 (freq / 261.6) * 0.25f);
+                float fc = smCut * std::exp2 ((dst == 1 ? mod * 3.f : 0.f) + (float) std::log2 (freq / 261.6) * 0.25f);
                 voiceFilter.set (fc, 0.7f + tb[1] * 1.2f, sr);
             }
             auto fo = voiceFilter.process (y);
             y = ft == 0 ? fo.lp : ft == 1 ? fo.hp : fo.bp * 1.5f;
 
             const float env = adsr.getNextSample();
-            float amp = env * (0.35f + 0.65f * vel) * masterVol * 0.5f;
+            float amp = env * (0.35f + 0.65f * vel) * smVol * 0.5f;
             if (dst == 2) amp *= 1.f - 0.5f * amt * (0.5f + 0.5f * lfo);
             y *= amp;
 
@@ -244,6 +250,9 @@ private:
     int ksW = 0, eng = 0, age = 0;
     float ksPrev = 0.f, exciteLP = 0.f, targetFreq = 440.f, curFreq = 440.f, vel = 1.f, pan = 0.f;
     float midiBend = 0.f, midiMod = 0.f, shValue = 0.f;
+    float smVol = 0.f, smSemi = 0.f, smBend = 0.f, smCut = 9000.f;
+    bool freshNote = true;
+    float dcX = 0.f, dcY = 0.f, dcR = 0.998f;
     double ph[6] {}, lfoPh = 0.0;
 };
 }
