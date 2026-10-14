@@ -1,0 +1,27 @@
+name: HUMPIRE Windows installer
+on:
+  push:
+    branches: [claude/blissful-newton-cxepis]
+    paths: ['HUMPIRE_LOADOUT/**', '.github/workflows/humpire-windows.yml']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults: { run: { working-directory: HUMPIRE_LOADOUT } }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Police LCD
+        shell: bash
+        run: ./scripts/fetch_fonts.sh
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DHUMPIRE_BUILD_STANDALONE=OFF
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Installateur
+        run: |
+          choco install innosetup -y --no-progress
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\humpire.iss
+      - name: Zip
+        run: Compress-Archive -Path dist\HUMPIRE_LOADOUT_Setup.exe -DestinationPath dist\HUMPIRE_LOADOUT_Installer.zip
+      - uses: actions/upload-artifact@v4
+        with: { name: HUMPIRE_LOADOUT_Installer, path: HUMPIRE_LOADOUT/dist/HUMPIRE_LOADOUT_Installer.zip }
