@@ -1,0 +1,90 @@
+// HUMPIRE CHAABI ORCHESTRA - Mandole algérien
+// Genere par tools/make_placeholders.py - format SFZ (ouvert, libre de droits)
+
+<control>
+default_path=samples/
+
+<global>
+// Keyswitch : 12 = médiator (défaut), 13 = trémolo (tenue en boucle)
+sw_lokey=12 sw_hikey=23 sw_default=12
+ampeg_release=0.30
+
+
+// ---------- Articulation 12 : médiator (2 vitesses x 3 round-robins)
+
+<group>
+sw_last=12 lovel=1 hivel=80 seq_length=3 amp_veltrack=70
+
+<region> sample=pick/mandole_pick_052_soft_rr1.wav lokey=50 hikey=53 pitch_keycenter=52 seq_position=1
+<region> sample=pick/mandole_pick_052_soft_rr2.wav lokey=50 hikey=53 pitch_keycenter=52 seq_position=2
+<region> sample=pick/mandole_pick_052_soft_rr3.wav lokey=50 hikey=53 pitch_keycenter=52 seq_position=3
+<region> sample=pick/mandole_pick_055_soft_rr1.wav lokey=54 hikey=56 pitch_keycenter=55 seq_position=1
+<region> sample=pick/mandole_pick_055_soft_rr2.wav lokey=54 hikey=56 pitch_keycenter=55 seq_position=2
+<region> sample=pick/mandole_pick_055_soft_rr3.wav lokey=54 hikey=56 pitch_keycenter=55 seq_position=3
+<region> sample=pick/mandole_pick_058_soft_rr1.wav lokey=57 hikey=59 pitch_keycenter=58 seq_position=1
+<region> sample=pick/mandole_pick_058_soft_rr2.wav lokey=57 hikey=59 pitch_keycenter=58 seq_position=2
+<region> sample=pick/mandole_pick_058_soft_rr3.wav lokey=57 hikey=59 pitch_keycenter=58 seq_position=3
+<region> sample=pick/mandole_pick_061_soft_rr1.wav lokey=60 hikey=62 pitch_keycenter=61 seq_position=1
+<region> sample=pick/mandole_pick_061_soft_rr2.wav lokey=60 hikey=62 pitch_keycenter=61 seq_position=2
+<region> sample=pick/mandole_pick_061_soft_rr3.wav lokey=60 hikey=62 pitch_keycenter=61 seq_position=3
+<region> sample=pick/mandole_pick_064_soft_rr1.wav lokey=63 hikey=65 pitch_keycenter=64 seq_position=1
+<region> sample=pick/mandole_pick_064_soft_rr2.wav lokey=63 hikey=65 pitch_keycenter=64 seq_position=2
+<region> sample=pick/mandole_pick_064_soft_rr3.wav lokey=63 hikey=65 pitch_keycenter=64 seq_position=3
+<region> sample=pick/mandole_pick_067_soft_rr1.wav lokey=66 hikey=68 pitch_keycenter=67 seq_position=1
+<region> sample=pick/mandole_pick_067_soft_rr2.wav lokey=66 hikey=68 pitch_keycenter=67 seq_position=2
+<region> sample=pick/mandole_pick_067_soft_rr3.wav lokey=66 hikey=68 pitch_keycenter=67 seq_position=3
+<region> sample=pick/mandole_pick_070_soft_rr1.wav lokey=69 hikey=71 pitch_keycenter=70 seq_position=1
+<region> sample=pick/mandole_pick_070_soft_rr2.wav lokey=69 hikey=71 pitch_keycenter=70 seq_position=2
+<region> sample=pick/mandole_pick_070_soft_rr3.wav lokey=69 hikey=71 pitch_keycenter=70 seq_position=3
+<region> sample=pick/mandole_pick_073_soft_rr1.wav lokey=72 hikey=74 pitch_keycenter=73 seq_position=1
+<region> sample=pick/mandole_pick_073_soft_rr2.wav lokey=72 hikey=74 pitch_keycenter=73 seq_position=2
+<region> sample=pick/mandole_pick_073_soft_rr3.wav lokey=72 hikey=74 pitch_keycenter=73 seq_position=3
+<region> sample=pick/mandole_pick_076_soft_rr1.wav lokey=75 hikey=78 pitch_keycenter=76 seq_position=1
+<region> sample=pick/mandole_pick_076_soft_rr2.wav lokey=75 hikey=78 pitch_keycenter=76 seq_position=2
+<region> sample=pick/mandole_pick_076_soft_rr3.wav lokey=75 hikey=78 pitch_keycenter=76 seq_position=3
+
+<group>
+sw_last=12 lovel=81 hivel=127 seq_length=3 amp_veltrack=70
+
+<region> sample=pick/mandole_pick_052_hard_rr1.wav lokey=50 hikey=53 pitch_keycenter=52 seq_position=1
+<region> sample=pick/mandole_pick_052_hard_rr2.wav lokey=50 hikey=53 pitch_keycenter=52 seq_position=2
+<region> sample=pick/mandole_pick_052_hard_rr3.wav lokey=50 hikey=53 pitch_keycenter=52 seq_position=3
+<region> sample=pick/mandole_pick_055_hard_rr1.wav lokey=54 hikey=56 pitch_keycenter=55 seq_position=1
+<region> sample=pick/mandole_pick_055_hard_rr2.wav lokey=54 hikey=56 pitch_keycenter=55 seq_position=2
+<region> sample=pick/mandole_pick_055_hard_rr3.wav lokey=54 hikey=56 pitch_keycenter=55 seq_position=3
+<region> sample=pick/mandole_pick_058_hard_rr1.wav lokey=57 hikey=59 pitch_keycenter=58 seq_position=1
+<region> sample=pick/mandole_pick_058_hard_rr2.wav lokey=57 hikey=59 pitch_keycenter=58 seq_position=2
+<region> sample=pick/mandole_pick_058_hard_rr3.wav lokey=57 hikey=59 pitch_keycenter=58 seq_position=3
+<region> sample=pick/mandole_pick_061_hard_rr1.wav lokey=60 hikey=62 pitch_keycenter=61 seq_position=1
+<region> sample=pick/mandole_pick_061_hard_rr2.wav lokey=60 hikey=62 pitch_keycenter=61 seq_position=2
+<region> sample=pick/mandole_pick_061_hard_rr3.wav lokey=60 hikey=62 pitch_keycenter=61 seq_position=3
+<region> sample=pick/mandole_pick_064_hard_rr1.wav lokey=63 hikey=65 pitch_keycenter=64 seq_position=1
+<region> sample=pick/mandole_pick_064_hard_rr2.wav lokey=63 hikey=65 pitch_keycenter=64 seq_position=2
+<region> sample=pick/mandole_pick_064_hard_rr3.wav lokey=63 hikey=65 pitch_keycenter=64 seq_position=3
+<region> sample=pick/mandole_pick_067_hard_rr1.wav lokey=66 hikey=68 pitch_keycenter=67 seq_position=1
+<region> sample=pick/mandole_pick_067_hard_rr2.wav lokey=66 hikey=68 pitch_keycenter=67 seq_position=2
+<region> sample=pick/mandole_pick_067_hard_rr3.wav lokey=66 hikey=68 pitch_keycenter=67 seq_position=3
+<region> sample=pick/mandole_pick_070_hard_rr1.wav lokey=69 hikey=71 pitch_keycenter=70 seq_position=1
+<region> sample=pick/mandole_pick_070_hard_rr2.wav lokey=69 hikey=71 pitch_keycenter=70 seq_position=2
+<region> sample=pick/mandole_pick_070_hard_rr3.wav lokey=69 hikey=71 pitch_keycenter=70 seq_position=3
+<region> sample=pick/mandole_pick_073_hard_rr1.wav lokey=72 hikey=74 pitch_keycenter=73 seq_position=1
+<region> sample=pick/mandole_pick_073_hard_rr2.wav lokey=72 hikey=74 pitch_keycenter=73 seq_position=2
+<region> sample=pick/mandole_pick_073_hard_rr3.wav lokey=72 hikey=74 pitch_keycenter=73 seq_position=3
+<region> sample=pick/mandole_pick_076_hard_rr1.wav lokey=75 hikey=78 pitch_keycenter=76 seq_position=1
+<region> sample=pick/mandole_pick_076_hard_rr2.wav lokey=75 hikey=78 pitch_keycenter=76 seq_position=2
+<region> sample=pick/mandole_pick_076_hard_rr3.wav lokey=75 hikey=78 pitch_keycenter=76 seq_position=3
+
+// ---------- Articulation 13 : trémolo (tenue en boucle, loop_start/loop_end)
+
+<group>
+sw_last=13 loop_mode=loop_continuous ampeg_attack=0.02 ampeg_release=0.35
+
+<region> sample=tremolo/mandole_trem_052.wav lokey=50 hikey=53 pitch_keycenter=52 loop_start=2205 loop_end=37580
+<region> sample=tremolo/mandole_trem_055.wav lokey=54 hikey=56 pitch_keycenter=55 loop_start=2205 loop_end=37529
+<region> sample=tremolo/mandole_trem_058.wav lokey=57 hikey=59 pitch_keycenter=58 loop_start=2205 loop_end=37547
+<region> sample=tremolo/mandole_trem_061.wav lokey=60 hikey=62 pitch_keycenter=61 loop_start=2205 loop_end=37502
+<region> sample=tremolo/mandole_trem_064.wav lokey=63 hikey=65 pitch_keycenter=64 loop_start=2205 loop_end=37580
+<region> sample=tremolo/mandole_trem_067.wav lokey=66 hikey=68 pitch_keycenter=67 loop_start=2205 loop_end=37573
+<region> sample=tremolo/mandole_trem_070.wav lokey=69 hikey=71 pitch_keycenter=70 loop_start=2205 loop_end=37544
+<region> sample=tremolo/mandole_trem_073.wav lokey=72 hikey=74 pitch_keycenter=73 loop_start=2205 loop_end=37484
+<region> sample=tremolo/mandole_trem_076.wav lokey=75 hikey=78 pitch_keycenter=76 loop_start=2205 loop_end=37513

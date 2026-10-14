@@ -1,0 +1,6 @@
+build/
+Builds/
+*.wav
+*.flac
+*.ogg
+!Samples/**/.gitkeep
