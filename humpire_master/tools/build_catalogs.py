@@ -143,7 +143,10 @@ w("site_seo/products/index.html", f"""<!doctype html><html lang="en"><head><meta
 <title>VST3 Plugins & Sample Packs Catalogue | HUMPIRE Plugins</title><meta name="description" content="Full catalogue of HUMPIRE VST3 plugins and DJBILBOX BEATS sample packs: synths, effects, drum machines, guitar pedals, G-Funk, West Coast, Trap and Oriental.">
 <link rel="canonical" href="{SITE}/products/"><style>{CSS}</style></head><body><h1>HUMPIRE Plugins — Catalogue</h1>{li}</body></html>""")
 urls = [SITE+"/", SITE+"/products/"] + [page_url(p) for p in pub]
-w("site_seo/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  "".join(f"  <url><loc>{u}</loc><lastmod>{TODAY}</lastmod></url>\n" for u in urls) + "</urlset>\n")
-w("site_seo/robots.txt", f"User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: {SITE}/sitemap.xml\n")
+import re as _re
+_ex = open(os.path.join(OUT, "data", "site_sitemap_existing.xml"), encoding="utf-8").read()
+_have = set(_re.findall(r"<loc>([^<]+)</loc>", _ex))
+_new = "".join(f"  <url><loc>{u}</loc><lastmod>{TODAY}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n" for u in urls[1:] if u not in _have)
+w("site_seo/sitemap.xml", _ex.replace("</urlset>", _new + "</urlset>"))
+
 print("catalogs ok", len(pub), len(paid), len(urls))

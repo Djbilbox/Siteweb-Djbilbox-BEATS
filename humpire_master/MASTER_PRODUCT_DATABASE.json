@@ -4,7 +4,7 @@
   "HUMPIRE Plugins",
   "DJBILBOX BEATS"
  ],
- "site": "https://humpireplugins.netlify.app",
+ "site": "https://djbilboxbeats.com",
  "counts": {
   "catalogue_rows": 70,
   "published": 69,
@@ -44,7 +44,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/6jiatg1h8i1fzzn6fx95dnv53xcq",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "BLOOD KEYS — Horror Piano VST3 Plugin (Windows & Mac). Formats: VST3. By HUMPIRE.",
@@ -57,7 +57,7 @@
     "music production",
     "blood keys"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/blood-keys/",
+   "site_page": "https://djbilboxbeats.com/products/blood-keys/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -82,7 +82,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "21 real instruments, riff generator, 1,944 presets.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/jfn5s9h6yr8lsvdk1bby36exbgng",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "JUKEBOX NEW YORK — Sampler VST3 Plugin (21 Real Instruments, Riff Generator, 1,944 Presets). 21 real instruments, riff generator, 1,944 presets. Formats: VST3. By HUMPIRE.",
@@ -94,7 +94,7 @@
     "music production",
     "jukebox new york"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/jukebox-new-york/",
+   "site_page": "https://djbilboxbeats.com/products/jukebox-new-york/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -119,7 +119,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/7hqkqo44ftrujdf2yi7656oqxvh6",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "ROBOTALK — Talkbox, Vocoder & Autotune Plugin (VST3 / AU, Windows & Mac). Formats: VST3, AU. From $30. By HUMPIRE.",
@@ -131,7 +131,7 @@
     "music production",
     "robotalk"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/robotalk/",
+   "site_page": "https://djbilboxbeats.com/products/robotalk/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -156,7 +156,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://assets.gumroad.com/images/opengraph_image.png",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "DJBILBOX BEATS Complete Paid Packs, Kits & Loops. Royalty-free sounds for your beats. By DJBILBOX BEATS.",
@@ -167,7 +167,7 @@
     "music production",
     "djbilbox beats complete paid packs, kits & loops"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/djbilbox-beats-complete-paid-packs-kits-and-loops/",
+   "site_page": "https://djbilboxbeats.com/products/djbilbox-beats-complete-paid-packs-kits-and-loops/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -192,7 +192,7 @@
    "published": true,
    "sales_displayed": 6,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://assets.gumroad.com/images/opengraph_image.png",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "DJBILBOX BEATS Free Packs, Kits & Loops. Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -203,7 +203,7 @@
     "music production",
     "djbilbox beats free packs, kits & loops"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/djbilbox-beats-free-packs-kits-and-loops/",
+   "site_page": "https://djbilboxbeats.com/products/djbilbox-beats-free-packs-kits-and-loops/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -228,7 +228,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "25 VST3 plugins: synths, guitar, vocals and mixing.",
-   "image_link": "",
+   "image_link": "https://assets.gumroad.com/images/opengraph_image.png",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "HUMPIRE VST & Effects — 25 VST3 Plugins: Synths, Guitar, Vocals & Mixing. 25 VST3 plugins: synths, guitar, vocals and mixing. Formats: VST3. By HUMPIRE.",
@@ -240,7 +240,7 @@
     "music production",
     "humpire vst & effects"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/humpire-vst-and-effects/",
+   "site_page": "https://djbilboxbeats.com/products/humpire-vst-and-effects/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -265,7 +265,7 @@
    "published": true,
    "sales_displayed": 4,
    "facts": "6 free plugins and demos (VST3).",
-   "image_link": "",
+   "image_link": "https://assets.gumroad.com/images/opengraph_image.png",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "HUMPIRE Free VST Collection — 6 Plugins & Demos (VST3). 6 free plugins and demos (VST3). Formats: VST3. Free download (pay what you want). By HUMPIRE.",
@@ -277,7 +277,7 @@
     "music production",
     "humpire free vst collection"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/humpire-free-vst-collection/",
+   "site_page": "https://djbilboxbeats.com/products/humpire-free-vst-collection/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -302,7 +302,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "7 VST3 plugins, 6,142 presets plus MIDI.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/9shp7bz53fe0ox22wf00t2axnkpq",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "HUMPIRE VST SUITE — 7 VST3 Plugins, 6,142 Presets + MIDI. 7 VST3 plugins, 6,142 presets plus MIDI. Formats: VST3. By HUMPIRE.",
@@ -314,7 +314,7 @@
     "music production",
     "humpire vst suite"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/humpire-vst-suite/",
+   "site_page": "https://djbilboxbeats.com/products/humpire-vst-suite/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -339,7 +339,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/oqcr393zx08zxsal6q9quqwogxhw",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "CHOCOLATINE — Bus Glue Compressor & Saturation VST3 Plugin. Formats: VST3. By HUMPIRE.",
@@ -351,7 +351,7 @@
     "music production",
     "chocolatine"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/chocolatine/",
+   "site_page": "https://djbilboxbeats.com/products/chocolatine/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -376,7 +376,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "Saturation, wow & flutter.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ayjdpo6vdjchp3oxsdibx2s0kzux",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "LA BAGUETTE — Tape Compressor VST3 Plugin (Saturation, Wow & Flutter). Saturation, wow & flutter. Formats: VST3. By HUMPIRE.",
@@ -388,7 +388,7 @@
     "music production",
     "la baguette"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/la-baguette/",
+   "site_page": "https://djbilboxbeats.com/products/la-baguette/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -413,7 +413,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "Bassline generator.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/rsnmzaczqcxtojdd8xae3dtgwtpg",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "CAMEL PILOT — Bass Synth VST3 Plugin with Bassline Generator. Bassline generator. Formats: VST3. By HUMPIRE.",
@@ -425,7 +425,7 @@
     "music production",
     "camel pilot"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/camel-pilot/",
+   "site_page": "https://djbilboxbeats.com/products/camel-pilot/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -450,7 +450,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "Pattern generator, slides and glides.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/xgxfpgvphq65832p6bujp0if71cr",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "ALIEN 808 — 808 & Sub Bass VST3 Plugin with Pattern Generator (Slides & Glides). Pattern generator, slides and glides. Formats: VST3. By HUMPIRE.",
@@ -462,7 +462,7 @@
     "music production",
     "alien 808"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/alien-808/",
+   "site_page": "https://djbilboxbeats.com/products/alien-808/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -487,7 +487,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "16 pads, beat generator, real drummers.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/pbjegxy8r4p67gj46tvdg1pk7mfv",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "BLOCK GORILLA — 16-Pad Drum Machine VST3 Plugin (Beat Generator + Real Drummers). 16 pads, beat generator, real drummers. Formats: VST3. By HUMPIRE.",
@@ -499,7 +499,7 @@
     "music production",
     "block gorilla"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/block-gorilla/",
+   "site_page": "https://djbilboxbeats.com/products/block-gorilla/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -524,7 +524,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "36 genres, maqam modes.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ao9wzpt0dpx7y6cxswen3tg7e7ik",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "CASBAH CHORDS — Chord & Melody Generator VST3 Plugin (36 Genres, Maqam Modes). 36 genres, maqam modes. Formats: VST3. By HUMPIRE.",
@@ -536,7 +536,7 @@
     "music production",
     "casbah chords"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/casbah-chords/",
+   "site_page": "https://djbilboxbeats.com/products/casbah-chords/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -561,7 +561,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "36 genres, real drummer grooves.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/9k3y63tg4pgq98bycv75itck6s38",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "TAXI ALGER — Beat Generator VST3 Plugin (36 Genres, Real Drummer Grooves). 36 genres, real drummer grooves. Formats: VST3. By HUMPIRE.",
@@ -573,7 +573,7 @@
     "music production",
     "taxi alger"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/taxi-alger/",
+   "site_page": "https://djbilboxbeats.com/products/taxi-alger/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -601,7 +601,7 @@
    "published": true,
    "sales_displayed": 2,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/6mdqyq076zchk7mw0if8welbdgt2",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "SUNSET — Kit Loop by HUMPIRE (West Coast & G-Funk). Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -614,7 +614,7 @@
     "music production",
     "sunset"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/sunset/",
+   "site_page": "https://djbilboxbeats.com/products/sunset/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -639,7 +639,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/a19giu8vzj44sptadpas369u1ayk",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "SUPREME — Kit Loop by HUMPIRE (Miami Up-Tempo & Synth). Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -650,7 +650,7 @@
     "music production",
     "supreme"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/supreme/",
+   "site_page": "https://djbilboxbeats.com/products/supreme/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -677,7 +677,7 @@
    "published": true,
    "sales_displayed": 1,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/6usbaej31tw8igma64wyyc3t19pj",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "VIPER — Kit Loop by HUMPIRE (Dark Trap & 808). Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -689,7 +689,7 @@
     "music production",
     "viper"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/viper/",
+   "site_page": "https://djbilboxbeats.com/products/viper/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -714,7 +714,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "10 guitar pedal plugins: VST3, AU and standalone.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/pqzdjtalzhtsmi804k3vis1wiwls",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "CAMEL PEDALS — 10 Guitar Pedal Plugins Pack (VST3 / AU / Standalone). 10 guitar pedal plugins: VST3, AU and standalone. Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -726,7 +726,7 @@
     "music production",
     "camel pedals"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/camel-pedals/",
+   "site_page": "https://djbilboxbeats.com/products/camel-pedals/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -751,7 +751,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/0cai6ruuxgk6w0jvxmzpqnrfwip5",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "PHARAOH COMP — Compressor Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -763,7 +763,7 @@
     "music production",
     "pharaoh comp"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/pharaoh-comp/",
+   "site_page": "https://djbilboxbeats.com/products/pharaoh-comp/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -788,7 +788,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ffnm9mf54budr8dhhijlgqh8vujf",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "SURF TREMOLO — Tremolo Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -800,7 +800,7 @@
     "music production",
     "surf tremolo"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/surf-tremolo/",
+   "site_page": "https://djbilboxbeats.com/products/surf-tremolo/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -825,7 +825,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ffax8u1prhv004x3e2fpfxxdpq8w",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "NEON PHASER — Phaser Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -837,7 +837,7 @@
     "music production",
     "neon phaser"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/neon-phaser/",
+   "site_page": "https://djbilboxbeats.com/products/neon-phaser/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -862,7 +862,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/0voebssr3068felxtu6ctwdixx9q",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "CORAL CHORUS — Chorus Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -874,7 +874,7 @@
     "music production",
     "coral chorus"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/coral-chorus/",
+   "site_page": "https://djbilboxbeats.com/products/coral-chorus/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -899,7 +899,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/6mdghniyehjbzavx232lx4frlnp0",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "AURORA VERB — Reverb Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -911,7 +911,7 @@
     "music production",
     "aurora verb"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/aurora-verb/",
+   "site_page": "https://djbilboxbeats.com/products/aurora-verb/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -936,7 +936,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/psurxip1xot2ghp8rhgd55w6gfu9",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "CANYON ECHO — Delay Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -948,7 +948,7 @@
     "music production",
     "canyon echo"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/canyon-echo/",
+   "site_page": "https://djbilboxbeats.com/products/canyon-echo/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -973,7 +973,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/6g8a5flli3rjr0lsmsqgyqkpnpqv",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "LAVA FUZZ — Fuzz Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -985,7 +985,7 @@
     "music production",
     "lava fuzz"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/lava-fuzz/",
+   "site_page": "https://djbilboxbeats.com/products/lava-fuzz/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1010,7 +1010,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ohzq0xftx5si7vquyi8ddar6pd2r",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "STORM RIDER — Distortion Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -1022,7 +1022,7 @@
     "music production",
     "storm rider"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/storm-rider/",
+   "site_page": "https://djbilboxbeats.com/products/storm-rider/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1047,7 +1047,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/8ov9ioh8q94vd453a8mq68cxwtxa",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "CAMEL PEDAL — Overdrive Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -1059,7 +1059,7 @@
     "music production",
     "camel pedal"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/camel-pedal/",
+   "site_page": "https://djbilboxbeats.com/products/camel-pedal/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1084,7 +1084,7 @@
    "published": true,
    "sales_displayed": 3,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/zkv5un2bagr213aztrxg1fw2f66z",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "EQ-PRO SPIDER — Free 8-Band EQ Plugin (VST3 / AU, Windows & Mac). Formats: VST3, AU. From $10. By HUMPIRE.",
@@ -1096,7 +1096,7 @@
     "music production",
     "eq-pro spider"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/eq-pro-spider/",
+   "site_page": "https://djbilboxbeats.com/products/eq-pro-spider/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1124,7 +1124,7 @@
    "published": true,
    "sales_displayed": 43,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ml69gv6necookbtfesi0nw2s359f",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "MENACE TO MELODY — Free G-Funk & Westcoast Melody Loops Kit (2026). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1137,7 +1137,7 @@
     "music production",
     "menace to melody"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/menace-to-melody/",
+   "site_page": "https://djbilboxbeats.com/products/menace-to-melody/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1165,7 +1165,7 @@
    "published": true,
    "sales_displayed": 43,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/y6zy7zfakzrdbt3nskj0bawz3rp6",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "BOYZ N DA LOOP — Free G-Funk & Westcoast Drum Loops Kit (2026). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1178,7 +1178,7 @@
     "music production",
     "boyz n da loop"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/boyz-n-da-loop/",
+   "site_page": "https://djbilboxbeats.com/products/boyz-n-da-loop/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1203,7 +1203,7 @@
    "published": true,
    "sales_displayed": 614,
    "facts": "Free VST3 drum machine with 64 pads and 1,000 grooves.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/lc1q6ba8wk42ssf2me8el5wq0v36",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "MINI MPC HUMPIRE — Free Drum Machine VST3, 64 Pads & 1,000 Grooves. Free VST3 drum machine with 64 pads and 1,000 grooves. Formats: VST3. Free download (pay what you want). By HUMPIRE.",
@@ -1215,7 +1215,7 @@
     "music production",
     "mini mpc humpire"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/mini-mpc-humpire/",
+   "site_page": "https://djbilboxbeats.com/products/mini-mpc-humpire/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1240,7 +1240,7 @@
    "published": true,
    "sales_displayed": 28,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ztn9hdoxluo33jt34ggotfh2ivoo",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "VENOM — Free FL Studio Drum Loop Template (FLP Project File). Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -1251,7 +1251,7 @@
     "music production",
     "venom"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/venom/",
+   "site_page": "https://djbilboxbeats.com/products/venom/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1278,7 +1278,7 @@
    "published": true,
    "sales_displayed": 41,
    "facts": "30-day trial of the THUGLIFE G-Funk synth.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ilz75zd1udey9oj5mbfkrv09obki",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "THUGLIFE Free Demo — G-Funk Synth VST3 Plugin (30-Day Trial). 30-day trial of the THUGLIFE G-Funk synth. Formats: VST3. Free download (pay what you want). By HUMPIRE.",
@@ -1291,7 +1291,7 @@
     "music production",
     "thuglife free demo"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/thuglife-free-demo/",
+   "site_page": "https://djbilboxbeats.com/products/thuglife-free-demo/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1319,7 +1319,7 @@
    "published": true,
    "sales_displayed": 1,
    "facts": "G-Funk synth VST3 for West Coast leads and bass. 30-day free demo available (THUGLIFE Free Demo).",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/yrpbtbc3hyo50t4dbyf42r90li48",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "THUGLIFE — G-Funk Synth VST3 Plugin (West Coast Leads & Bass). G-Funk synth VST3 for West Coast leads and bass. 30-day free demo available (THUGLIFE Free Demo). Formats: VST3. By HUMPIRE.",
@@ -1333,7 +1333,7 @@
     "music production",
     "thuglife"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/thuglife/",
+   "site_page": "https://djbilboxbeats.com/products/thuglife/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1360,7 +1360,7 @@
    "published": true,
    "sales_displayed": 75,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/actj70jqi7onmpj6aurf0vtrgqog",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "Cali G-Funk Melody Loops 2026 — Free 6GB Sample Pack. Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -1372,7 +1372,7 @@
     "music production",
     "cali g-funk melody loops 2026"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/cali-g-funk-melody-loops-2026/",
+   "site_page": "https://djbilboxbeats.com/products/cali-g-funk-melody-loops-2026/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1400,7 +1400,7 @@
    "published": true,
    "sales_displayed": 140,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/qkkr525xgxp3hxqieachw2plniar",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "Lowrider Drum Loops 2026 — Free G-Funk & West Coast Sample Pack. Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -1413,7 +1413,7 @@
     "music production",
     "lowrider drum loops 2026"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/lowrider-drum-loops-2026/",
+   "site_page": "https://djbilboxbeats.com/products/lowrider-drum-loops-2026/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1438,7 +1438,7 @@
    "published": true,
    "sales_displayed": 153,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/948l6iiou6nmjv2cdponokpszuqn",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "STATION SYNTH Free Demo — Synth VST3 / AU Plugin. Formats: VST3, AU. Free download (pay what you want). By HUMPIRE.",
@@ -1450,7 +1450,7 @@
     "music production",
     "station synth free demo"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/station-synth-free-demo/",
+   "site_page": "https://djbilboxbeats.com/products/station-synth-free-demo/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1475,7 +1475,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "4,000 presets bundle.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/9rdgnyr11ng41xxgws4uzpxcuakx",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "STATION SYNTH — Synth VST3 Plugin + 4000 Presets Bundle. 4,000 presets bundle. Formats: VST3. By HUMPIRE.",
@@ -1487,7 +1487,7 @@
     "music production",
     "station synth"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/station-synth/",
+   "site_page": "https://djbilboxbeats.com/products/station-synth/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1514,7 +1514,7 @@
    "published": true,
    "sales_displayed": 71,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/id4vetr3bbo2s777211tmjqlwaaz",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "WESTCOAST VYBES Vol.1 — West Coast Sample Pack (Royalty Free). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1526,7 +1526,7 @@
     "music production",
     "westcoast vybes vol.1"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/westcoast-vybes-vol-1/",
+   "site_page": "https://djbilboxbeats.com/products/westcoast-vybes-vol-1/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1551,7 +1551,7 @@
    "published": true,
    "sales_displayed": 374,
    "facts": "16 pads, 50 kits (G-Funk, Boom Bap, Trap, Drill, House, Techno, Lo-Fi, Afro, Electro, Reggaeton), tempo-synced sequencer, MIDI/keyboard/mouse triggering. No sample bank included: it maps sounds already installed on the computer. VST3/standalone on Windows, AU/VST3/standalone on macOS.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/lvp5ba58xg0tofrm1u5tda36tzu6",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "MPC 2026 — Free Beat Machine & Drum Sampler (16 Pads). 16 pads, 50 kits (G-Funk, Boom Bap, Trap, Drill, House, Techno, Lo-Fi, Afro, Electro, Reggaeton), tempo-synced sequencer, MIDI/keyboard/mouse triggering. No sample bank included: it maps sounds already installed on the computer. VST3/standalone on Windows, AU/VST3/standalone on macOS. Formats: VST3, AU, Standalone. Free download (pay what you want). By HUMPIRE.",
@@ -1563,7 +1563,7 @@
     "music production",
     "mpc 2026"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/mpc-2026/",
+   "site_page": "https://djbilboxbeats.com/products/mpc-2026/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1588,7 +1588,7 @@
    "published": true,
    "sales_displayed": 2,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/mlmxsyjdskc2rko6c0f5mdv8za2t",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "KIT DRUM FUNK — Funk Drum Kit One-Shots (Royalty Free). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1599,7 +1599,7 @@
     "music production",
     "kit drum funk"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/kit-drum-funk/",
+   "site_page": "https://djbilboxbeats.com/products/kit-drum-funk/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1626,7 +1626,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/t2ao0idr5gmwxegis87kiosb9itz",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "BREAK YA NECK Vol.2 — Hip-Hop Drum Loops Sample Pack. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1638,7 +1638,7 @@
     "music production",
     "break ya neck vol.2"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/break-ya-neck-vol-2/",
+   "site_page": "https://djbilboxbeats.com/products/break-ya-neck-vol-2/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1665,7 +1665,7 @@
    "published": true,
    "sales_displayed": 676,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ir8p5c4wxyoppoj35gcb3twaomkv",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "NEON SYNTH 80s — Free Synthwave Synth VST3 Plugin. Formats: VST3. Free download (pay what you want). By HUMPIRE.",
@@ -1678,7 +1678,7 @@
     "music production",
     "neon synth 80s"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/neon-synth-80s/",
+   "site_page": "https://djbilboxbeats.com/products/neon-synth-80s/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1703,7 +1703,7 @@
    "published": true,
    "sales_displayed": 1,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/hv22tjlwwhevv2f0s1lzumylbrzz",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "MASTERING — Mastering Limiter VST3 Plugin (Loudness & Mixing). Formats: VST3. By HUMPIRE.",
@@ -1715,7 +1715,7 @@
     "music production",
     "mastering"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/mastering/",
+   "site_page": "https://djbilboxbeats.com/products/mastering/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1740,7 +1740,7 @@
    "published": true,
    "sales_displayed": 1,
    "facts": "8 VST plugins in a single payment.",
-   "image_link": "",
+   "image_link": "https://assets.gumroad.com/images/opengraph_image.png",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "DJBILBOX PRO BUNDLE — 8 VST Plugins, One Payment. 8 VST plugins in a single payment. Formats: VST3. By HUMPIRE.",
@@ -1752,7 +1752,7 @@
     "music production",
     "djbilbox pro bundle"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/djbilbox-pro-bundle/",
+   "site_page": "https://djbilboxbeats.com/products/djbilbox-pro-bundle/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1780,7 +1780,7 @@
    "published": true,
    "sales_displayed": 54,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ug0r5yh8z1z2an9naugf29gkfjwk",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "WEST SIDE DRUM KIT — G-Funk & West Coast Drum One-Shots. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1793,7 +1793,7 @@
     "music production",
     "west side drum kit"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/west-side-drum-kit/",
+   "site_page": "https://djbilboxbeats.com/products/west-side-drum-kit/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1821,7 +1821,7 @@
    "published": true,
    "sales_displayed": 2,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/mwtehu0e1sq4dt0kama6ecndy4jy",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "MATRIX MODULAR — Oriental & West Coast Effect VST3 Plugin. Formats: VST3. By HUMPIRE.",
@@ -1835,7 +1835,7 @@
     "music production",
     "matrix modular"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/matrix-modular/",
+   "site_page": "https://djbilboxbeats.com/products/matrix-modular/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1860,7 +1860,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/a69jff3upwwuqbukhos5lr5kh6bl",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "JET FLANGER — Flanger Guitar Pedal Plugin (VST3 / AU / Standalone). Formats: VST3, AU, Standalone. By HUMPIRE.",
@@ -1872,7 +1872,7 @@
     "music production",
     "jet flanger"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/jet-flanger/",
+   "site_page": "https://djbilboxbeats.com/products/jet-flanger/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -1897,7 +1897,7 @@
    "published": true,
    "sales_displayed": 1,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/k0xuddq9n6lny42jjqzy87o9xoss",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "TONE VAULT — Instrument One-Shot Sample Kit (Royalty Free). Royalty-free sounds for your beats. By DJBILBOX BEATS.",
@@ -1908,7 +1908,7 @@
     "music production",
     "tone vault"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/tone-vault/",
+   "site_page": "https://djbilboxbeats.com/products/tone-vault/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1933,7 +1933,7 @@
    "published": true,
    "sales_displayed": 24,
    "facts": "19 GB SFX and cinematic sound design library.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/smno8uanyagvf2jc0it74oqj1g9h",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "VOID SIGNALS — 19GB SFX & Cinematic Sound Design Library. 19 GB SFX and cinematic sound design library. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1944,7 +1944,7 @@
     "music production",
     "void signals"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/void-signals/",
+   "site_page": "https://djbilboxbeats.com/products/void-signals/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -1969,7 +1969,7 @@
    "published": true,
    "sales_displayed": 40,
    "facts": "Vocal hooks, chops and acapellas (WAV 24-bit, 4 GB announced).",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/f44p3kk7v0sk3avblc5koe43544s",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "GHOST VOICE — Vocal Hooks, Chops & Acapella Sample Pack. Vocal hooks, chops and acapellas (WAV 24-bit, 4 GB announced). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -1980,7 +1980,7 @@
     "music production",
     "ghost voice"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/ghost-voice/",
+   "site_page": "https://djbilboxbeats.com/products/ghost-voice/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2008,7 +2008,7 @@
    "published": true,
    "sales_displayed": 28,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/613fq3h3oorndwjpeih5omorlz0n",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "RAW ELEMENTS — Hip-Hop & Trap Drum Kit One-Shots (808s). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2021,7 +2021,7 @@
     "music production",
     "raw elements"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/raw-elements/",
+   "site_page": "https://djbilboxbeats.com/products/raw-elements/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2048,7 +2048,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/oi0cu4up55o6ioetscpdrxmsouy9",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "VINYL BREAKER — Scratch & Vinyl Sample Kit (Boom Bap, Lo-Fi). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2060,7 +2060,7 @@
     "music production",
     "vinyl breaker"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/vinyl-breaker/",
+   "site_page": "https://djbilboxbeats.com/products/vinyl-breaker/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2087,7 +2087,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/6578zfadsc66smtgw5w4ywfzp89g",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "NEON PULSE — House, Techno & Progressive Drum Loops. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2099,7 +2099,7 @@
     "music production",
     "neon pulse"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/neon-pulse/",
+   "site_page": "https://djbilboxbeats.com/products/neon-pulse/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2127,7 +2127,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/52tckopzmsgcdoegrjvezqq5glc2",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "CONCRETE VAULT — Hip-Hop, Trap & Drill Drum Loops. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2140,7 +2140,7 @@
     "music production",
     "concrete vault"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/concrete-vault/",
+   "site_page": "https://djbilboxbeats.com/products/concrete-vault/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2168,7 +2168,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/8u06hlikvwjql698almxixl4xp8q",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "WESTCOAST CHROME — G-Funk & West Coast Drum Loops. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2181,7 +2181,7 @@
     "music production",
     "westcoast chrome"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/westcoast-chrome/",
+   "site_page": "https://djbilboxbeats.com/products/westcoast-chrome/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2208,7 +2208,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/fztq4g4vsmrclptxmpj7uch7fyv9",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "ETHNIC RITMIK — Afrobeat & Reggae Drum Loops Vol.1. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2220,7 +2220,7 @@
     "music production",
     "ethnic ritmik"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/ethnic-ritmik/",
+   "site_page": "https://djbilboxbeats.com/products/ethnic-ritmik/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2248,7 +2248,7 @@
    "published": true,
    "sales_displayed": 1,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/34u8nv2zd55hyxf5a9brhnb80vqe",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "BIGBASS — 808 & Sub Bass VST3 Plugin (Hip-Hop, Trap). Formats: VST3. By HUMPIRE.",
@@ -2262,7 +2262,7 @@
     "music production",
     "bigbass"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/bigbass/",
+   "site_page": "https://djbilboxbeats.com/products/bigbass/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -2289,7 +2289,7 @@
    "published": true,
    "sales_displayed": 1,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/4hrx7s4erhvc69i7ycn9l5tuunhu",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "VICE CITY — Polyphonic Synth VST3 Plugin (80s Synthwave). Formats: VST3. By HUMPIRE.",
@@ -2302,7 +2302,7 @@
     "music production",
     "vice city"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/vice-city/",
+   "site_page": "https://djbilboxbeats.com/products/vice-city/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -2327,7 +2327,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/lqgvk94zp2z58jq38t3tdh77pxgv",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "VOL.1 DRUMS LOOP — Drums Loop Sample Pack. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2338,7 +2338,7 @@
     "music production",
     "vol.1 drums loop"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/vol-1-drums-loop/",
+   "site_page": "https://djbilboxbeats.com/products/vol-1-drums-loop/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2366,7 +2366,7 @@
    "published": true,
    "sales_displayed": 26,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/8ru4ks5ri845291ihnntcvtnzehi",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "FUTUR MELODY — Melody Loops Sample Pack (Hip-Hop, Trap). Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2379,7 +2379,7 @@
     "music production",
     "futur melody"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/futur-melody/",
+   "site_page": "https://djbilboxbeats.com/products/futur-melody/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2406,7 +2406,7 @@
    "published": true,
    "sales_displayed": 22,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/8yhkokk2740uqtomsdtvt0mptq43",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "VOL.3 BLUE PACK — Hip-Hop Drum Loops Sample Pack. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2418,7 +2418,7 @@
     "music production",
     "vol.3 blue pack"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/vol-3-blue-pack/",
+   "site_page": "https://djbilboxbeats.com/products/vol-3-blue-pack/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2445,7 +2445,7 @@
    "published": true,
    "sales_displayed": 64,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/51tdau39ltxs084x81oxfu8cdeot",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "ORIENTAL ARABIC — Middle East Loops Sample Pack. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2457,7 +2457,7 @@
     "music production",
     "oriental arabic"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/oriental-arabic/",
+   "site_page": "https://djbilboxbeats.com/products/oriental-arabic/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2485,7 +2485,7 @@
    "published": true,
    "sales_displayed": 23,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/ub3z7qj9ieatipclisbl3n611cwv",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "VICE CITY Vol.4 — Drill & Afrotrap Sample Pack. Royalty-free sounds for your beats. Free download. By DJBILBOX BEATS.",
@@ -2498,7 +2498,7 @@
     "music production",
     "vice city vol.4"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/vice-city-vol-4/",
+   "site_page": "https://djbilboxbeats.com/products/vice-city-vol-4/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2525,7 +2525,7 @@
    "published": true,
    "sales_displayed": 105,
    "facts": "Free demo of ORIENTAL INSTRUMENT: 35 presets.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/wylu5rvd79wxgyzm4cnb3lhdp3ds",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "ORIENTAL INSTRUMENT Free Demo — Arabic & Ethnic VST3 Plugin. Free demo of ORIENTAL INSTRUMENT: 35 presets. Formats: VST3. Free download (pay what you want). By HUMPIRE.",
@@ -2538,7 +2538,7 @@
     "music production",
     "oriental instrument free demo"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/oriental-instrument-free-demo/",
+   "site_page": "https://djbilboxbeats.com/products/oriental-instrument-free-demo/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -2565,7 +2565,7 @@
    "published": true,
    "sales_displayed": 2,
    "facts": "7 multisampled instruments, 280 presets in the bundle (35 in the free demo), VST3 for Windows and macOS Universal.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/68ao3i5diq6asneug7yxem8xd9er",
    "kind": "plugin",
    "source": "catalogue_gumroad.csv",
    "description": "ORIENTAL INSTRUMENT — Arabic & Ethnic Sampler VST3 Plugin. 7 multisampled instruments, 280 presets in the bundle (35 in the free demo), VST3 for Windows and macOS Universal. Formats: VST3. By HUMPIRE.",
@@ -2578,7 +2578,7 @@
     "music production",
     "oriental instrument"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/oriental-instrument/",
+   "site_page": "https://djbilboxbeats.com/products/oriental-instrument/",
    "google_category": "Software > Computer Software"
   },
   {
@@ -2603,7 +2603,7 @@
    "published": true,
    "sales_displayed": 145,
    "facts": "931 instrumentals, 8 genres, MP3/WAV, 2.72 GB; free for profit with credit, no resale of the pack.",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/amsxp00pg4kdrai7eesve37vh4h2",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "931 Free Rap Beats — Royalty-Free Instrumental Beat Pack. 931 instrumentals, 8 genres, MP3/WAV, 2.72 GB; free for profit with credit, no resale of the pack. Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -2614,7 +2614,7 @@
     "music production",
     "931 free rap beats"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/931-free-rap-beats/",
+   "site_page": "https://djbilboxbeats.com/products/931-free-rap-beats/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2641,7 +2641,7 @@
    "published": false,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/yme87lm0sgfiekf4zxk8bb9idw6i",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "HAUNTED SOULS — 12 Dark & Horror Melody Loop Kit (Free For Profit). Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -2653,7 +2653,7 @@
     "music production",
     "haunted souls"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/haunted-souls/",
+   "site_page": "https://djbilboxbeats.com/products/haunted-souls/",
    "google_category": "Media > Music & Sound Recordings"
   },
   {
@@ -2681,7 +2681,7 @@
    "published": true,
    "sales_displayed": 0,
    "facts": "",
-   "image_link": "",
+   "image_link": "https://public-files.gumroad.com/y64ywegmw2f01mvy0oai1pq8wdff",
    "kind": "soundware",
    "source": "catalogue_gumroad.csv",
    "description": "NECROPOLIS — Horror & Dark Trap Drum Kit Vol. 1 (Free For Profit). Royalty-free sounds for your beats. Free download (pay what you want). By DJBILBOX BEATS.",
@@ -2694,7 +2694,7 @@
     "music production",
     "necropolis"
    ],
-   "site_page": "https://humpireplugins.netlify.app/products/necropolis/",
+   "site_page": "https://djbilboxbeats.com/products/necropolis/",
    "google_category": "Media > Music & Sound Recordings"
   }
  ],

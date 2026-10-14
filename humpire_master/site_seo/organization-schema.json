@@ -1,12 +1,12 @@
 {
  "@context": "https://schema.org",
  "@type": "Organization",
- "@id": "https://humpireplugins.netlify.app/#organization",
+ "@id": "https://djbilboxbeats.com/#organization",
  "name": "HUMPIRE Plugins",
  "alternateName": [
   "DJBILBOX BEATS"
  ],
- "url": "https://humpireplugins.netlify.app",
+ "url": "https://djbilboxbeats.com",
  "founder": {
   "@type": "Person",
   "name": "DJBILBOX"

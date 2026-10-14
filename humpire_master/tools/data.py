@@ -3,7 +3,7 @@
 import csv, re, os, html
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SRC = os.path.join(ROOT, "djbilbox_campaign", "prospection", "catalogue_gumroad.csv")
-SITE = "https://humpireplugins.netlify.app"
+SITE = "https://djbilboxbeats.com"  # domaine canonique du site (humpireplugins.netlify.app en est le miroir)
 
 # corrections de fautes dans les titres
 FIX = {"BREACK YA NECK": "BREAK YA NECK", "ETNIC RITMIK": "ETHNIC RITMIK"}
@@ -120,6 +120,9 @@ def parse_price(raw):
     val = float(num) if num else 0.0
     return val, cur, raw.endswith("+")
 
+import json as _json
+_IMG = _json.load(open(os.path.join(ROOT, "humpire_master", "data", "gumroad_scrape.json"), encoding="utf-8"))
+
 def load():
     problems, fixed = [], []
     prods = []
@@ -159,7 +162,7 @@ def load():
             role=role, product_type=ptype, formats=fmt, keyword=kw, genres=genres,
             price=price, currency=cur, pay_what_you_want=pwyw, is_free=(price == 0.0),
             price_display=r["prix_affiche"], url=r["url"], status=status, published=(status == "Published"),
-            sales_displayed=sales, facts=facts, image_link="", kind=("plugin" if role in ("instrument","effect","midi","bundle") else "soundware"),
+            sales_displayed=sales, facts=facts, image_link=_IMG.get(r["url"], {}).get("image", ""), kind=("plugin" if role in ("instrument","effect","midi","bundle") else "soundware"),
             source="catalogue_gumroad.csv"))
     # tri : produits légitimes
     for p in prods:
