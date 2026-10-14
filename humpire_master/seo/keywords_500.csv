@@ -1,0 +1,501 @@
+categorie,mot_cle,intention
+VST,vst plugins,navigational/generic
+VST,vst3 plugins,navigational/generic
+VST,free vst,commercial
+VST,vst for fl studio,navigational/generic
+VST,vst bundle,transactional
+VST,vst instruments,navigational/generic
+VST,vst effects,navigational/generic
+VST,best free vst,commercial
+VST,vst3 download,transactional
+VST,windows vst,navigational/generic
+VST,mac vst,navigational/generic
+VST,producer vst,navigational/generic
+VST,vst plugins free,commercial
+VST,vst3 plugins free,commercial
+VST,vst for fl studio free,commercial
+VST,vst bundle free,transactional
+VST,vst instruments free,commercial
+VST,vst effects free,commercial
+VST,vst3 download free,transactional
+VST,windows vst free,commercial
+VST,mac vst free,commercial
+VST,producer vst free,commercial
+VST,vst plugins download,transactional
+VST,vst3 plugins download,transactional
+VST,free vst download,transactional
+VST,vst for fl studio download,transactional
+VST,vst bundle download,transactional
+VST,vst instruments download,transactional
+VST,vst effects download,transactional
+VST,best free vst download,transactional
+VST,vst3 download download,transactional
+VST,windows vst download,transactional
+VST,mac vst download,transactional
+VST,producer vst download,transactional
+VST,best vst plugins,commercial
+VST,best vst3 plugins,commercial
+VST,best vst for fl studio,commercial
+VST,best vst bundle,transactional
+VST,best vst instruments,commercial
+VST,best vst effects,commercial
+VST,best best free vst,commercial
+VST,best vst3 download,transactional
+Vocoder,vocoder plugin,navigational/generic
+Vocoder,vocoder vst,navigational/generic
+Vocoder,free vocoder,commercial
+Vocoder,vocoder vst3,navigational/generic
+Vocoder,vocoder for fl studio,navigational/generic
+Vocoder,vocoder effect,navigational/generic
+Vocoder,robot voice vocoder,navigational/generic
+Vocoder,vocoder autotune,navigational/generic
+Vocoder,vocoder synth,navigational/generic
+Vocoder,vocoder presets,transactional
+Vocoder,vocoder vocal effect,navigational/generic
+Vocoder,talk robot plugin,navigational/generic
+Vocoder,vocoder plugin free,commercial
+Vocoder,vocoder vst free,commercial
+Vocoder,vocoder vst3 free,commercial
+Vocoder,vocoder for fl studio free,commercial
+Vocoder,vocoder effect free,commercial
+Vocoder,robot voice vocoder free,commercial
+Vocoder,vocoder autotune free,commercial
+Vocoder,vocoder synth free,commercial
+Vocoder,vocoder presets free,transactional
+Vocoder,vocoder vocal effect free,commercial
+Vocoder,talk robot plugin free,commercial
+Vocoder,vocoder plugin download,transactional
+Vocoder,vocoder vst download,transactional
+Vocoder,free vocoder download,transactional
+Vocoder,vocoder vst3 download,transactional
+Vocoder,vocoder for fl studio download,transactional
+Vocoder,vocoder effect download,transactional
+Vocoder,robot voice vocoder download,transactional
+Vocoder,vocoder autotune download,transactional
+Vocoder,vocoder synth download,transactional
+Vocoder,vocoder presets download,transactional
+Vocoder,vocoder vocal effect download,transactional
+Vocoder,talk robot plugin download,transactional
+Vocoder,best vocoder plugin,commercial
+Vocoder,best vocoder vst,commercial
+Vocoder,best free vocoder,commercial
+Vocoder,best vocoder vst3,commercial
+Vocoder,best vocoder for fl studio,commercial
+Vocoder,best vocoder effect,commercial
+Vocoder,best robot voice vocoder,commercial
+Talkbox,talkbox plugin,navigational/generic
+Talkbox,talkbox vst,navigational/generic
+Talkbox,free talkbox,commercial
+Talkbox,talkbox vst3,navigational/generic
+Talkbox,talkbox for fl studio,navigational/generic
+Talkbox,talkbox vocal effect,navigational/generic
+Talkbox,talkbox funk,navigational/generic
+Talkbox,talkbox g-funk,navigational/generic
+Talkbox,talkbox synth,navigational/generic
+Talkbox,talkbox software,navigational/generic
+Talkbox,roger troutman talkbox plugin,navigational/generic
+Talkbox,talkbox presets,transactional
+Talkbox,talkbox plugin free,commercial
+Talkbox,talkbox vst free,commercial
+Talkbox,talkbox vst3 free,commercial
+Talkbox,talkbox for fl studio free,commercial
+Talkbox,talkbox vocal effect free,commercial
+Talkbox,talkbox funk free,commercial
+Talkbox,talkbox g-funk free,commercial
+Talkbox,talkbox synth free,commercial
+Talkbox,talkbox software free,commercial
+Talkbox,roger troutman talkbox plugin free,commercial
+Talkbox,talkbox presets free,transactional
+Talkbox,talkbox plugin download,transactional
+Talkbox,talkbox vst download,transactional
+Talkbox,free talkbox download,transactional
+Talkbox,talkbox vst3 download,transactional
+Talkbox,talkbox for fl studio download,transactional
+Talkbox,talkbox vocal effect download,transactional
+Talkbox,talkbox funk download,transactional
+Talkbox,talkbox g-funk download,transactional
+Talkbox,talkbox synth download,transactional
+Talkbox,talkbox software download,transactional
+Talkbox,roger troutman talkbox plugin download,transactional
+Talkbox,talkbox presets download,transactional
+Talkbox,best talkbox plugin,commercial
+Talkbox,best talkbox vst,commercial
+Talkbox,best free talkbox,commercial
+Talkbox,best talkbox vst3,commercial
+Talkbox,best talkbox for fl studio,commercial
+Talkbox,best talkbox vocal effect,commercial
+Talkbox,best talkbox funk,commercial
+Synth,synth vst,navigational/generic
+Synth,synth vst3,navigational/generic
+Synth,free synth plugin,commercial
+Synth,synthesizer plugin,navigational/generic
+Synth,polyphonic synth vst,navigational/generic
+Synth,analog synth vst,navigational/generic
+Synth,synth presets,transactional
+Synth,synth for fl studio,navigational/generic
+Synth,lead synth vst,navigational/generic
+Synth,pad synth vst,navigational/generic
+Synth,software synthesizer,navigational/generic
+Synth,synth plugin 2026,navigational/generic
+Synth,synth vst free,commercial
+Synth,synth vst3 free,commercial
+Synth,synthesizer plugin free,commercial
+Synth,polyphonic synth vst free,commercial
+Synth,analog synth vst free,commercial
+Synth,synth presets free,transactional
+Synth,synth for fl studio free,commercial
+Synth,lead synth vst free,commercial
+Synth,pad synth vst free,commercial
+Synth,software synthesizer free,commercial
+Synth,synth plugin 2026 free,commercial
+Synth,synth vst download,transactional
+Synth,synth vst3 download,transactional
+Synth,free synth plugin download,transactional
+Synth,synthesizer plugin download,transactional
+Synth,polyphonic synth vst download,transactional
+Synth,analog synth vst download,transactional
+Synth,synth presets download,transactional
+Synth,synth for fl studio download,transactional
+Synth,lead synth vst download,transactional
+Synth,pad synth vst download,transactional
+Synth,software synthesizer download,transactional
+Synth,synth plugin 2026 download,transactional
+Synth,best synth vst,commercial
+Synth,best synth vst3,commercial
+Synth,best free synth plugin,commercial
+Synth,best synthesizer plugin,commercial
+Synth,best polyphonic synth vst,commercial
+Synth,best analog synth vst,commercial
+Synth,best synth presets,transactional
+Oriental VST,oriental vst,navigational/generic
+Oriental VST,arabic vst,navigational/generic
+Oriental VST,oriental instruments plugin,navigational/generic
+Oriental VST,arabic sampler vst,navigational/generic
+Oriental VST,middle east vst,navigational/generic
+Oriental VST,oriental melody plugin,navigational/generic
+Oriental VST,maqam vst,navigational/generic
+Oriental VST,oud vst,navigational/generic
+Oriental VST,arabic scales plugin,navigational/generic
+Oriental VST,ethnic vst,navigational/generic
+Oriental VST,oriental trap vst,navigational/generic
+Oriental VST,world instruments vst,navigational/generic
+Oriental VST,oriental vst free,commercial
+Oriental VST,arabic vst free,commercial
+Oriental VST,oriental instruments plugin free,commercial
+Oriental VST,arabic sampler vst free,commercial
+Oriental VST,middle east vst free,commercial
+Oriental VST,oriental melody plugin free,commercial
+Oriental VST,maqam vst free,commercial
+Oriental VST,oud vst free,commercial
+Oriental VST,arabic scales plugin free,commercial
+Oriental VST,ethnic vst free,commercial
+Oriental VST,oriental trap vst free,commercial
+Oriental VST,world instruments vst free,commercial
+Oriental VST,oriental vst download,transactional
+Oriental VST,arabic vst download,transactional
+Oriental VST,oriental instruments plugin download,transactional
+Oriental VST,arabic sampler vst download,transactional
+Oriental VST,middle east vst download,transactional
+Oriental VST,oriental melody plugin download,transactional
+Oriental VST,maqam vst download,transactional
+Oriental VST,oud vst download,transactional
+Oriental VST,arabic scales plugin download,transactional
+Oriental VST,ethnic vst download,transactional
+Oriental VST,oriental trap vst download,transactional
+Oriental VST,world instruments vst download,transactional
+Oriental VST,best oriental vst,commercial
+Oriental VST,best arabic vst,commercial
+Oriental VST,best oriental instruments plugin,commercial
+Oriental VST,best arabic sampler vst,commercial
+Oriental VST,best middle east vst,commercial
+Oriental VST,best oriental melody plugin,commercial
+G-Funk,g-funk vst,navigational/generic
+G-Funk,g-funk synth,navigational/generic
+G-Funk,g-funk plugin,navigational/generic
+G-Funk,g-funk lead synth,navigational/generic
+G-Funk,g-funk bass vst,navigational/generic
+G-Funk,g-funk loops,navigational/generic
+G-Funk,g-funk sample pack,navigational/generic
+G-Funk,g-funk drum kit,navigational/generic
+G-Funk,g-funk melody loops,navigational/generic
+G-Funk,g-funk beat maker,navigational/generic
+G-Funk,g-funk presets,transactional
+G-Funk,g-funk production,navigational/generic
+G-Funk,g-funk vst free,commercial
+G-Funk,g-funk synth free,commercial
+G-Funk,g-funk plugin free,commercial
+G-Funk,g-funk lead synth free,commercial
+G-Funk,g-funk bass vst free,commercial
+G-Funk,g-funk loops free,commercial
+G-Funk,g-funk sample pack free,commercial
+G-Funk,g-funk drum kit free,commercial
+G-Funk,g-funk melody loops free,commercial
+G-Funk,g-funk beat maker free,commercial
+G-Funk,g-funk presets free,transactional
+G-Funk,g-funk production free,commercial
+G-Funk,g-funk vst download,transactional
+G-Funk,g-funk synth download,transactional
+G-Funk,g-funk plugin download,transactional
+G-Funk,g-funk lead synth download,transactional
+G-Funk,g-funk bass vst download,transactional
+G-Funk,g-funk loops download,transactional
+G-Funk,g-funk sample pack download,transactional
+G-Funk,g-funk drum kit download,transactional
+G-Funk,g-funk melody loops download,transactional
+G-Funk,g-funk beat maker download,transactional
+G-Funk,g-funk presets download,transactional
+G-Funk,g-funk production download,transactional
+G-Funk,best g-funk vst,commercial
+G-Funk,best g-funk synth,commercial
+G-Funk,best g-funk plugin,commercial
+G-Funk,best g-funk lead synth,commercial
+G-Funk,best g-funk bass vst,commercial
+G-Funk,best g-funk loops,commercial
+West Coast,west coast vst,navigational/generic
+West Coast,west coast sample pack,navigational/generic
+West Coast,west coast drums,navigational/generic
+West Coast,west coast beats,navigational/generic
+West Coast,west coast hip hop loops,navigational/generic
+West Coast,west coast synth,navigational/generic
+West Coast,west coast drum kit,navigational/generic
+West Coast,west coast melody loops,navigational/generic
+West Coast,west coast producer kit,navigational/generic
+West Coast,west coast bass,navigational/generic
+West Coast,west coast plugin,navigational/generic
+West Coast,west coast fl studio,navigational/generic
+West Coast,west coast vst free,commercial
+West Coast,west coast sample pack free,commercial
+West Coast,west coast drums free,commercial
+West Coast,west coast beats free,commercial
+West Coast,west coast hip hop loops free,commercial
+West Coast,west coast synth free,commercial
+West Coast,west coast drum kit free,commercial
+West Coast,west coast melody loops free,commercial
+West Coast,west coast producer kit free,commercial
+West Coast,west coast bass free,commercial
+West Coast,west coast plugin free,commercial
+West Coast,west coast fl studio free,commercial
+West Coast,west coast vst download,transactional
+West Coast,west coast sample pack download,transactional
+West Coast,west coast drums download,transactional
+West Coast,west coast beats download,transactional
+West Coast,west coast hip hop loops download,transactional
+West Coast,west coast synth download,transactional
+West Coast,west coast drum kit download,transactional
+West Coast,west coast melody loops download,transactional
+West Coast,west coast producer kit download,transactional
+West Coast,west coast bass download,transactional
+West Coast,west coast plugin download,transactional
+West Coast,west coast fl studio download,transactional
+West Coast,best west coast vst,commercial
+West Coast,best west coast sample pack,commercial
+West Coast,best west coast drums,commercial
+West Coast,best west coast beats,commercial
+West Coast,best west coast hip hop loops,commercial
+West Coast,best west coast synth,commercial
+Trap,trap vst,navigational/generic
+Trap,trap drum kit,navigational/generic
+Trap,trap 808 plugin,navigational/generic
+Trap,trap hi hats,navigational/generic
+Trap,trap loops,navigational/generic
+Trap,trap melody loops,navigational/generic
+Trap,trap drum loops,navigational/generic
+Trap,dark trap kit,navigational/generic
+Trap,trap beat maker,navigational/generic
+Trap,trap sample pack,navigational/generic
+Trap,trap presets,transactional
+Trap,trap production tools,navigational/generic
+Trap,trap vst free,commercial
+Trap,trap drum kit free,commercial
+Trap,trap 808 plugin free,commercial
+Trap,trap hi hats free,commercial
+Trap,trap loops free,commercial
+Trap,trap melody loops free,commercial
+Trap,trap drum loops free,commercial
+Trap,dark trap kit free,commercial
+Trap,trap beat maker free,commercial
+Trap,trap sample pack free,commercial
+Trap,trap presets free,transactional
+Trap,trap production tools free,commercial
+Trap,trap vst download,transactional
+Trap,trap drum kit download,transactional
+Trap,trap 808 plugin download,transactional
+Trap,trap hi hats download,transactional
+Trap,trap loops download,transactional
+Trap,trap melody loops download,transactional
+Trap,trap drum loops download,transactional
+Trap,dark trap kit download,transactional
+Trap,trap beat maker download,transactional
+Trap,trap sample pack download,transactional
+Trap,trap presets download,transactional
+Trap,trap production tools download,transactional
+Trap,best trap vst,commercial
+Trap,best trap drum kit,commercial
+Trap,best trap 808 plugin,commercial
+Trap,best trap hi hats,commercial
+Trap,best trap loops,commercial
+Trap,best trap melody loops,commercial
+Beat Generator,beat generator vst,navigational/generic
+Beat Generator,beat generator plugin,navigational/generic
+Beat Generator,random beat generator,navigational/generic
+Beat Generator,drum pattern generator,navigational/generic
+Beat Generator,beat maker vst,navigational/generic
+Beat Generator,drum machine vst,navigational/generic
+Beat Generator,free drum machine,commercial
+Beat Generator,mpc vst,navigational/generic
+Beat Generator,16 pad beat maker,navigational/generic
+Beat Generator,groove generator,navigational/generic
+Beat Generator,midi drum generator,navigational/generic
+Beat Generator,beat maker fl studio,navigational/generic
+Beat Generator,beat generator vst free,commercial
+Beat Generator,beat generator plugin free,commercial
+Beat Generator,random beat generator free,commercial
+Beat Generator,drum pattern generator free,commercial
+Beat Generator,beat maker vst free,commercial
+Beat Generator,drum machine vst free,commercial
+Beat Generator,mpc vst free,commercial
+Beat Generator,16 pad beat maker free,commercial
+Beat Generator,groove generator free,commercial
+Beat Generator,midi drum generator free,commercial
+Beat Generator,beat maker fl studio free,commercial
+Beat Generator,beat generator vst download,transactional
+Beat Generator,beat generator plugin download,transactional
+Beat Generator,random beat generator download,transactional
+Beat Generator,drum pattern generator download,transactional
+Beat Generator,beat maker vst download,transactional
+Beat Generator,drum machine vst download,transactional
+Beat Generator,free drum machine download,transactional
+Beat Generator,mpc vst download,transactional
+Beat Generator,16 pad beat maker download,transactional
+Beat Generator,groove generator download,transactional
+Beat Generator,midi drum generator download,transactional
+Beat Generator,beat maker fl studio download,transactional
+Beat Generator,best beat generator vst,commercial
+Beat Generator,best beat generator plugin,commercial
+Beat Generator,best random beat generator,commercial
+Beat Generator,best drum pattern generator,commercial
+Beat Generator,best beat maker vst,commercial
+Beat Generator,best drum machine vst,commercial
+Chord Generator,chord generator vst,navigational/generic
+Chord Generator,chord generator plugin,navigational/generic
+Chord Generator,midi chord generator,navigational/generic
+Chord Generator,chord progression generator,navigational/generic
+Chord Generator,melody generator vst,navigational/generic
+Chord Generator,chord generator fl studio,navigational/generic
+Chord Generator,scale chord plugin,navigational/generic
+Chord Generator,free chord generator,commercial
+Chord Generator,maqam chord generator,navigational/generic
+Chord Generator,chord generator for producers,navigational/generic
+Chord Generator,midi melody generator,navigational/generic
+Chord Generator,harmony generator plugin,navigational/generic
+Chord Generator,chord generator vst free,commercial
+Chord Generator,chord generator plugin free,commercial
+Chord Generator,midi chord generator free,commercial
+Chord Generator,chord progression generator free,commercial
+Chord Generator,melody generator vst free,commercial
+Chord Generator,chord generator fl studio free,commercial
+Chord Generator,scale chord plugin free,commercial
+Chord Generator,maqam chord generator free,commercial
+Chord Generator,chord generator for producers free,commercial
+Chord Generator,midi melody generator free,commercial
+Chord Generator,harmony generator plugin free,commercial
+Chord Generator,chord generator vst download,transactional
+Chord Generator,chord generator plugin download,transactional
+Chord Generator,midi chord generator download,transactional
+Chord Generator,chord progression generator download,transactional
+Chord Generator,melody generator vst download,transactional
+Chord Generator,chord generator fl studio download,transactional
+Chord Generator,scale chord plugin download,transactional
+Chord Generator,free chord generator download,transactional
+Chord Generator,maqam chord generator download,transactional
+Chord Generator,chord generator for producers download,transactional
+Chord Generator,midi melody generator download,transactional
+Chord Generator,harmony generator plugin download,transactional
+Chord Generator,best chord generator vst,commercial
+Chord Generator,best chord generator plugin,commercial
+Chord Generator,best midi chord generator,commercial
+Chord Generator,best chord progression generator,commercial
+Chord Generator,best melody generator vst,commercial
+Chord Generator,best chord generator fl studio,commercial
+Bass Plugin,bass vst,navigational/generic
+Bass Plugin,bass synth vst,navigational/generic
+Bass Plugin,808 vst,navigational/generic
+Bass Plugin,808 bass plugin,navigational/generic
+Bass Plugin,sub bass plugin,navigational/generic
+Bass Plugin,free bass vst,commercial
+Bass Plugin,bassline generator,navigational/generic
+Bass Plugin,bass plugin for fl studio,navigational/generic
+Bass Plugin,reese bass vst,navigational/generic
+Bass Plugin,808 slides plugin,navigational/generic
+Bass Plugin,bass synth free,commercial
+Bass Plugin,bass vst3,navigational/generic
+Bass Plugin,bass vst free,commercial
+Bass Plugin,bass synth vst free,commercial
+Bass Plugin,808 vst free,commercial
+Bass Plugin,808 bass plugin free,commercial
+Bass Plugin,sub bass plugin free,commercial
+Bass Plugin,bassline generator free,commercial
+Bass Plugin,bass plugin for fl studio free,commercial
+Bass Plugin,reese bass vst free,commercial
+Bass Plugin,808 slides plugin free,commercial
+Bass Plugin,bass vst3 free,commercial
+Bass Plugin,bass vst download,transactional
+Bass Plugin,bass synth vst download,transactional
+Bass Plugin,808 vst download,transactional
+Bass Plugin,808 bass plugin download,transactional
+Bass Plugin,sub bass plugin download,transactional
+Bass Plugin,free bass vst download,transactional
+Bass Plugin,bassline generator download,transactional
+Bass Plugin,bass plugin for fl studio download,transactional
+Bass Plugin,reese bass vst download,transactional
+Bass Plugin,808 slides plugin download,transactional
+Bass Plugin,bass synth free download,transactional
+Bass Plugin,bass vst3 download,transactional
+Bass Plugin,best bass vst,commercial
+Bass Plugin,best bass synth vst,commercial
+Bass Plugin,best 808 vst,commercial
+Bass Plugin,best 808 bass plugin,commercial
+Bass Plugin,best sub bass plugin,commercial
+Bass Plugin,best free bass vst,commercial
+Bass Plugin,best bassline generator,commercial
+Guitar FX,guitar fx plugin,navigational/generic
+Guitar FX,guitar pedal plugin,navigational/generic
+Guitar FX,guitar effects vst,navigational/generic
+Guitar FX,free guitar pedal vst,commercial
+Guitar FX,fuzz pedal plugin,navigational/generic
+Guitar FX,overdrive pedal vst,navigational/generic
+Guitar FX,delay pedal plugin,navigational/generic
+Guitar FX,reverb pedal vst,navigational/generic
+Guitar FX,chorus pedal plugin,navigational/generic
+Guitar FX,phaser pedal vst,navigational/generic
+Guitar FX,tremolo pedal plugin,navigational/generic
+Guitar FX,guitar pedal vst3,navigational/generic
+Guitar FX,guitar fx plugin free,commercial
+Guitar FX,guitar pedal plugin free,commercial
+Guitar FX,guitar effects vst free,commercial
+Guitar FX,fuzz pedal plugin free,commercial
+Guitar FX,overdrive pedal vst free,commercial
+Guitar FX,delay pedal plugin free,commercial
+Guitar FX,reverb pedal vst free,commercial
+Guitar FX,chorus pedal plugin free,commercial
+Guitar FX,phaser pedal vst free,commercial
+Guitar FX,tremolo pedal plugin free,commercial
+Guitar FX,guitar pedal vst3 free,commercial
+Guitar FX,guitar fx plugin download,transactional
+Guitar FX,guitar pedal plugin download,transactional
+Guitar FX,guitar effects vst download,transactional
+Guitar FX,free guitar pedal vst download,transactional
+Guitar FX,fuzz pedal plugin download,transactional
+Guitar FX,overdrive pedal vst download,transactional
+Guitar FX,delay pedal plugin download,transactional
+Guitar FX,reverb pedal vst download,transactional
+Guitar FX,chorus pedal plugin download,transactional
+Guitar FX,phaser pedal vst download,transactional
+Guitar FX,tremolo pedal plugin download,transactional
+Guitar FX,guitar pedal vst3 download,transactional
+Guitar FX,best guitar fx plugin,commercial
+Guitar FX,best guitar pedal plugin,commercial
+Guitar FX,best guitar effects vst,commercial
+Guitar FX,best free guitar pedal vst,commercial
+Guitar FX,best fuzz pedal plugin,commercial
+Guitar FX,best overdrive pedal vst,commercial

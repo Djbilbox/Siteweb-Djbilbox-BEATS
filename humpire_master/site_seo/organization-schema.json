@@ -1,0 +1,24 @@
+{
+ "@context": "https://schema.org",
+ "@type": "Organization",
+ "@id": "https://humpireplugins.netlify.app/#organization",
+ "name": "HUMPIRE Plugins",
+ "alternateName": [
+  "DJBILBOX BEATS"
+ ],
+ "url": "https://humpireplugins.netlify.app",
+ "founder": {
+  "@type": "Person",
+  "name": "DJBILBOX"
+ },
+ "sameAs": [
+  "https://djbilboxbeats.gumroad.com/"
+ ],
+ "makesOffer": [
+  {
+   "@type": "Offer",
+   "url": "https://djbilboxbeats.gumroad.com/"
+  }
+ ],
+ "description": "VST3 plugins (synths, effects, drum machines, guitar pedals) and royalty-free sample packs for Hip-Hop, G-Funk, West Coast, Trap and Oriental production."
+}
