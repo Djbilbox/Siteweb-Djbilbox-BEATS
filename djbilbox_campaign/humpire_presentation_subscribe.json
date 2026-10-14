@@ -1,0 +1,102 @@
+{
+  "brand": "HUMPIRE by DJBILBOX BEATS",
+  "goal": "channel presentation videos that push viewers to subscribe",
+  "language": "en",
+  "links": {
+    "youtube": "youtube.com/@Djbilboxbeats",
+    "instagram": "instagram.com/humpireplugins",
+    "gumroad": "djbilboxbeats.gumroad.com",
+    "website": "humpireplugins.netlify.app"
+  },
+  "defaults": {
+    "aspect_ratio": "9:16",
+    "resolution": "720p",
+    "voiceover": "record yourself or generate with Higgsfield generate_audio; mix over a DJBILBOX beat",
+    "text_overlay_rule": "never generate text with AI; add logo, subscribe button and captions in CapCut",
+    "negative": "text, watermark, logo, distorted hands, blurry, low quality"
+  },
+  "videos": [
+    {
+      "id": 1,
+      "title": "Welcome to the HUMPIRE",
+      "duration_s": 15,
+      "style": "epic brand intro",
+      "voiceover": "Welcome to the HUMPIRE. Free VSTs, plugins, drum kits and beats, built by a producer for producers. G-Funk, trap, afrotrap, oriental. Subscribe, and build your empire.",
+      "shots": [
+        "0-3s: low-angle gold-lit throne of drum machines and speakers, smoke, first kick shakes the frame",
+        "3-9s: fast cuts of glowing plugin interfaces, MPC pads, waveforms exploding into gold particles",
+        "9-15s: camera pushes to the producer silhouette who points at the lens"
+      ],
+      "prompt": "Vertical 9:16 epic cinematic brand intro. Low-angle shot of a throne built from drum machines and speakers in gold smoke, a heavy kick shakes the frame. Fast cuts of glowing plugin interfaces, MPC pads and waveforms exploding into gold particles. Final push-in on a producer silhouette pointing at the camera. West Coast sunset gold and purple lighting.",
+      "cta_overlay": "SUBSCRIBE | HUMPIRE by DJBILBOX BEATS"
+    },
+    {
+      "id": 2,
+      "title": "Why subscribe? 3 reasons",
+      "duration_s": 15,
+      "style": "fast list explainer",
+      "voiceover": "Three reasons to subscribe. One: free VSTs every month. Two: new beats and drum kits, ready for your DAW. Three: tutorials to make hits faster. Hit subscribe, and join the HUMPIRE.",
+      "shots": [
+        "0-5s: gift box slams onto desk, holographic synth opens",
+        "5-10s: stack of glowing drum kit boxes and a beat waveform rolls across a wall of speakers",
+        "10-15s: DAW cascade of plugin windows opening to the beat, cursor clicks a red subscribe-style button"
+      ],
+      "prompt": "Vertical 9:16 punchy explainer. A glowing gift box slams onto a studio desk and a holographic synth opens above it. Then a stack of black drum kit boxes with glowing edges, then plugin windows cascading open on a monitor to the beat. Bright accent lighting, quick snappy cuts, friendly high energy.",
+      "cta_overlay": "FREE VSTs | NEW BEATS | TUTORIALS | SUBSCRIBE"
+    },
+    {
+      "id": 3,
+      "title": "Meet the Producer",
+      "duration_s": 15,
+      "style": "documentary-style personal brand",
+      "voiceover": "I'm DJBILBOX. Beatmaker, plugin developer, builder of the HUMPIRE. I make the sounds you hear, and the tools you use. Subscribe and watch it grow.",
+      "shots": [
+        "0-5s: night studio, hands on MIDI keyboard, neon through the window",
+        "5-10s: C++ code on a screen morphing into a plugin knob turning",
+        "10-15s: slow push-in on the producer's face, smirk, glow of the screen"
+      ],
+      "prompt": "Vertical 9:16 cinematic documentary. Night studio, hands on a MIDI keyboard, neon city through the window. Lines of C++ code on a monitor morph into a glowing plugin knob that turns. Slow push-in on the producer's face lit by screen glow, subtle smirk. Moody teal and orange, shallow depth of field.",
+      "cta_overlay": "DJBILBOX | Beatmaker + Plugin Dev | SUBSCRIBE"
+    },
+    {
+      "id": 4,
+      "title": "Free Download Hook",
+      "duration_s": 10,
+      "style": "high-conversion short",
+      "voiceover": "Want free plugins? Stop scrolling. Subscribe, and grab the free HUMPIRE VSTs, link in bio.",
+      "shots": [
+        "0-2s: hand stops a scrolling phone feed mid-swipe, freeze, shockwave",
+        "2-7s: phone screen turns into a 3D plugin interface floating off the screen",
+        "7-10s: plugin bursts into particles, subscribe-bell glow"
+      ],
+      "prompt": "Vertical 9:16 scroll-stopper. A hand freezes a phone feed mid-swipe, shockwave ripple. The phone screen peels into a 3D glowing plugin interface floating in the air, then bursts into golden particles with a glowing notification bell. Dark background, vivid orange and cyan accents, fast snappy motion.",
+      "cta_overlay": "FREE VSTs | LINK IN BIO | SUBSCRIBE"
+    },
+    {
+      "id": 5,
+      "title": "Halloween Sale + Subscribe",
+      "duration_s": 12,
+      "style": "horror-comedy promo",
+      "voiceover": "Trick or beat. Thirty percent off all HUMPIRE plugins and packs, code HUMPIRE thirty, until October thirty-first. Subscribe if you dare.",
+      "shots": [
+        "0-3s: crypt door slams open, orange light, skeleton producer hits a pad",
+        "3-9s: skeletons headbang, bats burst from a synth, pumpkin skull with headphones",
+        "9-12s: skull points at the camera, bell glow"
+      ],
+      "prompt": "Vertical 9:16 cinematic horror-comedy. A crypt door slams open in orange light, a skeleton producer hits a glowing pad, skeletons with headphones headbang to a G-Funk trap beat, bats burst out of a giant synth, a jack-o'-lantern skull with gold chains points at the camera. Orange and purple volumetric lighting, fast energetic camera.",
+      "cta_overlay": "-30% | CODE HUMPIRE30 | UNTIL OCT 31 | SUBSCRIBE"
+    },
+    {
+      "id": 6,
+      "title": "Subscribe Outro (loop)",
+      "duration_s": 6,
+      "style": "reusable end card",
+      "voiceover": "Enjoyed this? Subscribe to HUMPIRE by DJBILBOX BEATS. New drops every week.",
+      "shots": [
+        "0-6s: gold crown floats above a glowing speaker stack, waveform pulses, particles loop seamlessly"
+      ],
+      "prompt": "Vertical 9:16 seamless loop. A gold crown floats above a glowing speaker stack, waveform rings pulse outward, golden particles drift. Dark studio background, warm gold rim light, slow gentle camera drift, perfect loop.",
+      "cta_overlay": "SUBSCRIBE | HUMPIRE by DJBILBOX BEATS"
+    }
+  ]
+}
