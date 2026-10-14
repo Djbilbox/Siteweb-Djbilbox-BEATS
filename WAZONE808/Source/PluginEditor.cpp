@@ -302,6 +302,7 @@ void WarzonePanel::paint (juce::Graphics& g)
     // cassette
     auto cas = R (165, 110, 315, 485).toFloat();
     g.setColour (green.withAlpha (0.25f)); g.fillRoundedRectangle (cas.expanded (3.f), 10.f);
+    g.setColour (juce::Colours::white);   // drawImage applique l'alpha de la couleur courante
     g.drawImage (cassette, cas.reduced (4.f), juce::RectanglePlacement::centred);
     g.setColour (juce::Colour (0xffb0b0b0)); g.setFont (juce::FontOptions (16.f));
     g.drawFittedText ("EXPANSION", R (165, 45, 315, 60), juce::Justification::centred, 1);

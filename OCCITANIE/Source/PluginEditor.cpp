@@ -298,6 +298,7 @@ void OccPanel::paint (juce::Graphics& g)
     // cassette
     auto cas = R (207, 105, 280, 405).toFloat();
     g.setColour (amber.withAlpha (0.25f)); g.fillRoundedRectangle (cas.expanded (3.f), 10.f);
+    g.setColour (juce::Colours::white);   // drawImage applique l'alpha de la couleur courante
     g.drawImage (cassette, cas, juce::RectanglePlacement::centred);
     g.setColour (juce::Colour (0xffb0a8a0)); g.setFont (juce::FontOptions (16.f));
     g.drawFittedText ("EXPANSION", R (207, 45, 280, 50), juce::Justification::centred, 1);
