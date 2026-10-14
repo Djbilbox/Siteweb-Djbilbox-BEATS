@@ -1,8 +1,6 @@
 name: HUMPIRE Windows installer
+# Remplace par djbilbox-all-plugins.yml (installateur unique) : lancement manuel uniquement
 on:
-  push:
-    branches: [claude/blissful-newton-cxepis]
-    paths: ['HUMPIRE_LOADOUT/**', '.github/workflows/humpire-windows.yml']
   workflow_dispatch:
 permissions:
   contents: write

@@ -25,7 +25,7 @@ target_link_libraries(HumpireCore INTERFACE
     juce::juce_gui_extra)
 
 # Police LCD (Press Start 2P, OFL) : optionnelle. Lancer scripts/fetch_fonts.sh
-set(HC_FONT ${CMAKE_SOURCE_DIR}/assets/fonts/PressStart2P-Regular.ttf)
+set(HC_FONT ${PROJECT_SOURCE_DIR}/assets/fonts/PressStart2P-Regular.ttf)
 if(EXISTS ${HC_FONT})
     juce_add_binary_data(HumpireFonts
         HEADER_NAME HumpireFontsData.h

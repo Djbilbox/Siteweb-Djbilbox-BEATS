@@ -1,0 +1,82 @@
+// HUMPIRE CHAABI ORCHESTRA - Derbouka
+// Genere par tools/make_placeholders.py - format SFZ (ouvert, libre de droits)
+
+<control>
+default_path=samples/
+
+<global>
+// Percussion : one_shot, pas de pitch-tracking. DUM 36-37 / TEK 38-39 / KA 40 / SLAP 41-42 / GHOST 43-44
+loop_mode=one_shot pitch_keytrack=0 ampeg_release=0.08
+
+
+// ---------- DUM
+
+<group>
+lovel=1 hivel=80 seq_length=3 pitch_keycenter=36
+
+<region> sample=dum/derbouka_dum_soft_rr1.wav lokey=36 hikey=37 seq_position=1
+<region> sample=dum/derbouka_dum_soft_rr2.wav lokey=36 hikey=37 seq_position=2
+<region> sample=dum/derbouka_dum_soft_rr3.wav lokey=36 hikey=37 seq_position=3
+
+<group>
+lovel=81 hivel=127 seq_length=3 pitch_keycenter=36
+
+<region> sample=dum/derbouka_dum_hard_rr1.wav lokey=36 hikey=37 seq_position=1
+<region> sample=dum/derbouka_dum_hard_rr2.wav lokey=36 hikey=37 seq_position=2
+<region> sample=dum/derbouka_dum_hard_rr3.wav lokey=36 hikey=37 seq_position=3
+
+// ---------- TEK
+
+<group>
+lovel=1 hivel=80 seq_length=3 pitch_keycenter=38
+
+<region> sample=tek/derbouka_tek_soft_rr1.wav lokey=38 hikey=39 seq_position=1
+<region> sample=tek/derbouka_tek_soft_rr2.wav lokey=38 hikey=39 seq_position=2
+<region> sample=tek/derbouka_tek_soft_rr3.wav lokey=38 hikey=39 seq_position=3
+
+<group>
+lovel=81 hivel=127 seq_length=3 pitch_keycenter=38
+
+<region> sample=tek/derbouka_tek_hard_rr1.wav lokey=38 hikey=39 seq_position=1
+<region> sample=tek/derbouka_tek_hard_rr2.wav lokey=38 hikey=39 seq_position=2
+<region> sample=tek/derbouka_tek_hard_rr3.wav lokey=38 hikey=39 seq_position=3
+
+// ---------- KA
+
+<group>
+lovel=1 hivel=80 seq_length=3 pitch_keycenter=40
+
+<region> sample=ka/derbouka_ka_soft_rr1.wav lokey=40 hikey=40 seq_position=1
+<region> sample=ka/derbouka_ka_soft_rr2.wav lokey=40 hikey=40 seq_position=2
+<region> sample=ka/derbouka_ka_soft_rr3.wav lokey=40 hikey=40 seq_position=3
+
+<group>
+lovel=81 hivel=127 seq_length=3 pitch_keycenter=40
+
+<region> sample=ka/derbouka_ka_hard_rr1.wav lokey=40 hikey=40 seq_position=1
+<region> sample=ka/derbouka_ka_hard_rr2.wav lokey=40 hikey=40 seq_position=2
+<region> sample=ka/derbouka_ka_hard_rr3.wav lokey=40 hikey=40 seq_position=3
+
+// ---------- SLAP
+
+<group>
+lovel=1 hivel=80 seq_length=2 pitch_keycenter=41
+
+<region> sample=slap/derbouka_slap_soft_rr1.wav lokey=41 hikey=42 seq_position=1
+<region> sample=slap/derbouka_slap_soft_rr2.wav lokey=41 hikey=42 seq_position=2
+
+<group>
+lovel=81 hivel=127 seq_length=2 pitch_keycenter=41
+
+<region> sample=slap/derbouka_slap_hard_rr1.wav lokey=41 hikey=42 seq_position=1
+<region> sample=slap/derbouka_slap_hard_rr2.wav lokey=41 hikey=42 seq_position=2
+
+// ---------- GHOST
+
+<group>
+lovel=1 hivel=127 seq_length=3 pitch_keycenter=43
+
+<region> sample=ghost/derbouka_ghost_soft_rr1.wav lokey=43 hikey=44 seq_position=1
+<region> sample=ghost/derbouka_ghost_soft_rr2.wav lokey=43 hikey=44 seq_position=2
+<region> sample=ghost/derbouka_ghost_soft_rr3.wav lokey=43 hikey=44 seq_position=3
+

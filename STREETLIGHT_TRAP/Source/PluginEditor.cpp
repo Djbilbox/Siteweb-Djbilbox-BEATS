@@ -1,0 +1,371 @@
+#include "PluginEditor.h"
+#include "BinaryData.h"
+
+using namespace Sl;
+
+namespace
+{
+const juce::Colour amber { 0xffffa030 }, ember { 0xffa86bff }, dark { 0xff0d0a12 };
+constexpr float K = 0.5f;   // coordonnees maquette (2000 px) -> 1000 px
+juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
+juce::Rectangle<int> C (int cx, int cy, int w, int h) { return R (cx - w / 2, cy - h / 2, w, h); }
+juce::Colour ramp (float t) { return amber.interpolatedWith (ember, juce::jlimit (0.f, 1.f, t)); }
+}
+
+SlLNF::SlLNF()
+{
+    setColour (juce::ComboBox::textColourId, juce::Colour (0xffffd9a0));
+    setColour (juce::PopupMenu::backgroundColourId, dark);
+    setColour (juce::PopupMenu::textColourId, juce::Colour (0xffffd9a0));
+    setColour (juce::PopupMenu::highlightedBackgroundColourId, juce::Colour (0xff4a2a14));
+}
+
+void SlLNF::drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float a0, float a1, juce::Slider& s)
+{
+    const auto c = juce::Rectangle<float> ((float) x, (float) y, (float) w, (float) h).reduced (3.f);
+    const float r = juce::jmin (c.getWidth(), c.getHeight()) * 0.5f;
+    const auto ctr = c.getCentre();
+    const float ang = a0 + pos * (a1 - a0);
+    const auto col = ramp (pos);
+    juce::Path track; track.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, a1, true);
+    g.setColour (juce::Colours::white.withAlpha (0.08f)); g.strokePath (track, juce::PathStrokeType (4.f));
+    juce::Path val; val.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, ang, true);
+    g.setColour (col.withAlpha (0.3f)); g.strokePath (val, juce::PathStrokeType (8.f));
+    g.setColour (col); g.strokePath (val, juce::PathStrokeType (3.5f));
+    const float kr = r * 0.74f;
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffeaeaea), ctr.x - kr * 0.4f, ctr.y - kr * 0.5f, juce::Colour (0xff3d3d3d), ctr.x + kr * 0.6f, ctr.y + kr * 0.7f, false));
+    g.fillEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2);
+    g.setColour (juce::Colours::black.withAlpha (0.7f)); g.drawEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2, 1.4f);
+    juce::Path p; p.addRoundedRectangle (-1.6f, -kr, 3.2f, kr * 0.42f, 1.4f);
+    g.setColour (juce::Colour (0xff1a1a1a)); g.fillPath (p, juce::AffineTransform::rotation (ang).translated (ctr.x, ctr.y));
+    juce::ignoreUnused (s);
+}
+
+void SlLNF::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float, float, juce::Slider::SliderStyle, juce::Slider& s)
+{
+    const bool wheel = s.getProperties()["wheel"];
+    const float cx = (float) x + (float) w * 0.5f;
+    if (wheel)
+    {
+        g.setColour (juce::Colour (0xff050505)); g.fillRoundedRectangle ((float) x + 6, (float) y, (float) w - 12, (float) h, 8.f);
+        const float th = 52.f;
+        auto cap = juce::Rectangle<float> (cx - 20.f, pos - th * 0.5f, 40.f, th);
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xff5d5d5d), cap.getX(), 0, juce::Colour (0xff222222), cap.getRight(), 0, false));
+        g.fillRoundedRectangle (cap, 8.f);
+        g.setColour (juce::Colours::black); for (int i = 1; i < 7; ++i) g.drawHorizontalLine ((int) (cap.getY() + i * th / 7.f), cap.getX() + 4, cap.getRight() - 4);
+        return;
+    }
+    g.setColour (juce::Colour (0xff060606)); g.fillRoundedRectangle (cx - 3.f, (float) y, 6.f, (float) h, 2.f);
+    const float t = 1.f - (pos - (float) y) / (float) h;
+    g.setColour (ramp (1.f - t).withAlpha (0.9f)); g.fillRoundedRectangle (cx - 2.f, pos, 4.f, (float) y + (float) h - pos, 2.f);
+    for (int i = 0; i <= 8; ++i)   // graduations braise
+    {
+        const float yy = (float) y + (float) h * (float) i / 8.f;
+        g.setColour (ramp ((float) i / 8.f).withAlpha (0.6f));
+        g.fillRect (cx - 16.f, yy, 5.f, 2.f); g.fillRect (cx + 11.f, yy, 5.f, 2.f);
+    }
+    auto cap = juce::Rectangle<float> (cx - 12.f, pos - 7.f, 24.f, 14.f);
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffdcdcdc), 0, cap.getY(), juce::Colour (0xff4b4b4b), 0, cap.getBottom(), false));
+    g.fillRoundedRectangle (cap, 3.f);
+    g.setColour (juce::Colours::black); g.drawRoundedRectangle (cap, 3.f, 1.2f); g.drawHorizontalLine ((int) cap.getCentreY(), cap.getX() + 3, cap.getRight() - 3);
+}
+
+void SlLNF::drawComboBox (juce::Graphics& g, int w, int h, bool, int, int, int, int, juce::ComboBox&)
+{
+    const auto r = juce::Rectangle<float> (0, 0, (float) w, (float) h).reduced (1.5f);
+    g.setColour (amber.withAlpha (0.18f)); g.fillRoundedRectangle (r.expanded (1.5f), 9.f);
+    g.setColour (dark); g.fillRoundedRectangle (r, 8.f);
+    g.setGradientFill (juce::ColourGradient (amber, r.getX(), 0, ember, r.getRight(), 0, false));
+    g.drawRoundedRectangle (r, 8.f, 1.7f);
+    juce::Path t; const float cx = (float) w - 18.f, cy = (float) h * 0.5f;
+    t.addTriangle (cx - 5, cy - 3, cx + 5, cy - 3, cx, cy + 4);
+    g.setColour (juce::Colour (0xffffd9a0)); g.fillPath (t);
+}
+
+void SlLNF::positionComboBoxText (juce::ComboBox& b, juce::Label& l)
+{
+    l.setBounds (10, 1, b.getWidth() - 34, b.getHeight() - 2);
+    l.setFont (getComboBoxFont (b));
+    l.setJustificationType (juce::Justification::centredLeft);
+}
+
+void SlLNF::drawButtonBackground (juce::Graphics& g, juce::Button& b, const juce::Colour&, bool over, bool down)
+{
+    if (b.getProperties()["flat"]) return;   // bouton invisible (cassette)
+    const auto r = b.getLocalBounds().toFloat().reduced (1.f);
+    g.setColour (down ? juce::Colour (0xff4a2a14) : over ? juce::Colour (0xff33200f) : dark.withAlpha (0.85f));
+    g.fillRoundedRectangle (r, 6.f);
+    g.setColour (amber.withAlpha (0.7f)); g.drawRoundedRectangle (r, 6.f, 1.2f);
+}
+
+//==============================================================================
+SlPanel::SlPanel (SlProcessor& p)
+    : proc (p), keys (p.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
+{
+    setLookAndFeel (&lnf);
+    auto load = [] (const void* d, int n) { return juce::ImageFileFormat::loadFrom (d, (size_t) n); };
+    camel = load (BinaryData::camel_png, BinaryData::camel_pngSize);
+    logo = load (BinaryData::logo_png, BinaryData::logo_pngSize);
+    cassette = load (BinaryData::cassette_png, BinaryData::cassette_pngSize);
+
+    addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "PITCH");
+    addKnob (glide, P::glide, "GLIDE");    addKnob (filter, P::filter, "FILTER");
+    addKnob (tone, P::t1, "TONE");       addKnob (body, P::t2, "BODY");       addKnob (bright, P::t3, "BRIGHT");
+    addKnob (width, P::t4, "WIDTH");       addKnob (texture, P::t5, "TEXTURE");
+    addKnob (volume, P::volume, "VOLUME"); addKnob (reverb, P::reverb, "REVERB");  addKnob (chorus, P::chorus, "CHORUS");
+    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DELAY");
+    addKnob (dtime, P::dtime, "TIME");     addKnob (feedback, P::fb, "FEEDBACK");
+    const char* en[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
+    for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], juce::Slider::LinearVertical);
+    addKnob (fenvK, P::fenv, "ENV"); addKnob (resoK, P::reso, "RES");
+    const char* tn[4] = { "A", "D", "S", "R" };
+    const int ti[4] = { P::fatk, P::fdec, P::fsus, P::frel };
+    for (int i = 0; i < 4; ++i) addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical);
+    addKnob (velK, P::velocity, "VELOCITY");
+    addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
+    addKnob (modw, P::modw, "", juce::Slider::LinearVertical);
+    bend.s.getProperties().set ("wheel", true); modw.s.getProperties().set ("wheel", true);
+    all.erase (std::remove (all.begin(), all.end(), &bend), all.end()); all.erase (std::remove (all.begin(), all.end(), &modw), all.end());
+    bend.s.onDragEnd = [this] { bend.s.setValue (0.0, juce::sendNotificationSync); };
+    for (auto* k : { &tone, &body, &bright, &width, &texture, &fenvK, &resoK, &velK, &reverb }) k->s.getProperties().set ("small", true);
+
+    addCombo (cWave, P::wave, engineNames);  addCombo (cLfo, P::lfosrc, lfoNames);  addCombo (cDest, P::dest, destNames);
+    addCombo (cFilt, P::ftype, filterNames); addCombo (cMono, P::mono, monoNames);
+
+    for (auto* b : { &prev, &next, &folder, &save }) { addAndMakeVisible (*b); b->setButtonText (""); b->getProperties().set ("flat", true); }
+    addAndMakeVisible (expansion);
+    expansion.getProperties().set ("flat", true);
+    prev.onClick = [this] { stepPreset (-1); };
+    next.onClick = [this] { stepPreset (1); };
+    folder.onClick = [this] { showPresetMenu(); };
+    save.onClick = [this] { savePreset(); };
+    expansion.onClick = [this] { showExpansion(); };
+
+    presetLabel.setJustificationType (juce::Justification::centred);
+    presetLabel.setFont (juce::FontOptions (19.f, juce::Font::plain));
+    presetLabel.setColour (juce::Label::textColourId, juce::Colour (0xffffd9a0));
+    presetLabel.setInterceptsMouseClicks (false, false);
+    addAndMakeVisible (presetLabel);
+
+    keys.setKeyWidth (31.f);
+    keys.setLowestVisibleKey (36);
+    keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, amber.withAlpha (0.6f));
+    keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, ember.withAlpha (0.3f));
+    keys.setScrollButtonsVisible (false);
+    addAndMakeVisible (keys);
+
+    refreshPresetLabel();
+    setSize (1000, 746);
+}
+
+SlPanel::~SlPanel() { setLookAndFeel (nullptr); }
+
+void SlPanel::addKnob (Knob& k, int idx, const juce::String& label, juce::Slider::SliderStyle style)
+{
+    k.label = label; k.lin = style == juce::Slider::LinearVertical;
+    k.s.setSliderStyle (style);
+    k.s.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+    k.s.setRotaryParameters (juce::MathConstants<float>::pi * 1.2f, juce::MathConstants<float>::pi * 2.8f, true);
+    k.s.setPopupDisplayEnabled (true, true, this);
+    k.a = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (proc.apvts, ids[idx], k.s);
+    addAndMakeVisible (k.s);
+    all.push_back (&k);
+}
+
+void SlPanel::addCombo (Combo& c, int idx, const juce::StringArray& items)
+{
+    c.c.addItemList (items, 1);
+    c.a = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (proc.apvts, ids[idx], c.c);
+    addAndMakeVisible (c.c);
+}
+
+void SlPanel::refreshPresetLabel() { presetLabel.setText (proc.currentPresetName(), juce::dontSendNotification); }
+
+void SlPanel::stepPreset (int d)
+{
+    const int n = proc.getNumPrograms();
+    const int base = proc.presetIndex < 0 ? (d > 0 ? -1 : 0) : proc.presetIndex;
+    proc.applyPreset (((base + d) % n + n) % n);
+    refreshPresetLabel();
+}
+
+juce::File SlPanel::userPresetDir()
+{
+    auto d = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("DJBILBOX BEATS").getChildFile ("STREETLIGHT_TRAP").getChildFile ("Presets");
+    d.createDirectory();
+    return d;
+}
+
+void SlPanel::showPresetMenu()
+{
+    juce::PopupMenu menu, sub; juce::String cur;
+    const auto& list = presets();
+    for (size_t i = 0; i < list.size(); ++i)
+    {
+        if (cur != list[i].bank) { if (cur.isNotEmpty()) menu.addSubMenu (cur, sub); sub = juce::PopupMenu(); cur = list[i].bank; }
+        sub.addItem ((int) i + 1, list[i].name, true, (int) i == proc.presetIndex);
+    }
+    menu.addSubMenu (cur, sub);
+    menu.addSeparator();
+    auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.slpreset"); files.sort();
+    juce::PopupMenu user;
+    for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
+    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    menu.addSubMenu ("User", user);
+    menu.addItem (999, "Ouvrir un fichier .slpreset...");
+    menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
+    {
+        if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
+        else if (r == 999)
+        {
+            chooser = std::make_unique<juce::FileChooser> ("Charger un preset", userPresetDir(), "*.slpreset");
+            chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                                  [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
+        }
+        else if (r > 0 && r < 999) { proc.applyPreset (r - 1); refreshPresetLabel(); }
+    });
+}
+
+void SlPanel::savePreset()
+{
+    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.slpreset");
+    chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
+                          [this] (const juce::FileChooser& fc)
+    {
+        auto f = fc.getResult(); if (f == juce::File()) return;
+        if (auto xml = proc.apvts.copyState().createXml()) xml->writeTo (f.withFileExtension ("slpreset"));
+        proc.presetName = f.getFileNameWithoutExtension(); refreshPresetLabel();
+    });
+}
+
+void SlPanel::loadUserPreset (const juce::File& f)
+{
+    if (auto xml = juce::XmlDocument::parse (f))
+        if (xml->hasTagName (proc.apvts.state.getType()))
+        {
+            auto vt = juce::ValueTree::fromXml (*xml);
+            for (int i = 0; i < COUNT; ++i)
+                if (auto* prm = proc.apvts.getParameter (ids[i]))
+                    if (auto child = vt.getChildWithProperty ("id", ids[i]); child.isValid() && i != P::bend && i != P::modw)
+                        prm->setValueNotifyingHost (prm->convertTo0to1 ((float) child.getProperty ("value", prm->convertFrom0to1 (prm->getValue()))));
+            proc.presetIndex = -1; proc.presetName = f.getFileNameWithoutExtension(); refreshPresetLabel();
+        }
+}
+
+void SlPanel::showExpansion()
+{
+    juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "EXPANSION VOL.1",
+        "Les packs d'expansion arrivent bientot.\n\nhttps://djbilboxbeats.gumroad.com/");
+}
+
+void SlPanel::paint (juce::Graphics& g)
+{
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xff17121f), 0, 0, juce::Colour (0xff07060a), 0, (float) getHeight(), false));
+    g.fillAll();
+    g.setColour (juce::Colour (0xff120f16)); g.fillRect (R (180, 100, 1642, 1315));
+    g.setColour (juce::Colour (0xff050407));   // separations de panneaux
+    for (int y : { 497, 1062 }) g.fillRect (R (180, y - 2, 1642, 4));
+    for (int side = 0; side < 2; ++side)   // rails acier + filet lumineux
+    {
+        auto r = side == 0 ? R (85, 98, 95, 1320) : R (1822, 98, 95, 1320);
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffb2b2ba), (float) r.getX(), 0, juce::Colour (0xff4a4a52), (float) r.getRight(), 0, false));
+        g.fillRoundedRectangle (r.toFloat(), 4.f);
+        g.setColour (juce::Colour (0xff22222a)); g.fillRoundedRectangle (r.reduced (22, 100).toFloat(), 8.f);
+        g.setColour ((side == 0 ? amber : ember).withAlpha (0.85f)); g.fillRect (side == 0 ? r.getRight() - 2 : r.getX(), r.getY() + 6, 2, r.getHeight() - 12);
+        for (int y : { 150, 1365 }) { g.setColour (juce::Colour (0xff1a1a1f)); g.fillEllipse ((float) r.getCentreX() - 13, y * K - 13, 26.f, 26.f); g.setColour (juce::Colour (0xff9a9aa2)); g.fillEllipse ((float) r.getCentreX() - 9, y * K - 9, 18.f, 18.f); }
+    }
+    for (int x : { 210, 1790 }) for (int y : { 135, 460, 525, 1022, 1090, 1388 })
+    { g.setColour (juce::Colour (0xff6a6a72)); g.fillEllipse ((float) (x * K) - 5, (float) (y * K) - 5, 10.f, 10.f); }
+    g.drawImage (camel, R (797, 322, 406, 406).toFloat(), juce::RectanglePlacement::centred);
+    {   // logo DB
+        auto lr = R (1522, 180, 110, 106).toFloat();
+        g.setGradientFill (juce::ColourGradient (amber, lr.getX(), lr.getY(), ember, lr.getRight(), lr.getBottom(), false)); g.fillRoundedRectangle (lr.expanded (2.f), 6.f);
+        g.setColour (juce::Colours::white); g.drawImage (logo, lr, juce::RectanglePlacement::centred);
+    }
+    {   // DJBILBOXBEATS
+        juce::AttributedString as; as.setJustification (juce::Justification::centred);
+        const auto fnt = juce::FontOptions (25.f, juce::Font::bold);
+        as.append ("DJ", fnt, juce::Colour (0xfff4f0ff)); as.append ("BILBOX", fnt, juce::Colour (0xffffb050)); as.append ("BEATS", fnt, juce::Colour (0xffe9c6ff));
+        as.draw (g, R (1270, 330, 560, 90).toFloat());
+    }
+    // titre graffiti
+    const auto titleR = R (690, 680, 620, 115);
+    g.setFont (juce::FontOptions (33.f, juce::Font::bold | juce::Font::italic));
+    for (int dx = -3; dx <= 3; dx += 3) for (int dy = -3; dy <= 3; dy += 3)
+    { g.setColour (juce::Colour (0xff6a2bd6)); g.drawFittedText ("STREETLIGHT TRAP", titleR.translated (dx, dy), juce::Justification::centred, 1); }
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffffd070), 0, 342.f, juce::Colour (0xffff7a30), 0, 380.f, false));
+    g.drawFittedText ("STREETLIGHT TRAP", titleR, juce::Justification::centred, 1);
+    g.setColour (juce::Colour (0xffb8b0c0)); g.setFont (juce::FontOptions (19.f));
+    g.drawFittedText ("By Humpire", R (880, 785, 240, 44), juce::Justification::centred, 1);
+    // ecran preset
+    auto scr = R (635, 168, 730, 120).toFloat();
+    g.setGradientFill (juce::ColourGradient (amber, scr.getX(), 0, ember, scr.getRight(), 0, false)); g.fillRoundedRectangle (scr.expanded (3.f), 14.f);
+    g.setColour (juce::Colour (0xff0e0a14)); g.fillRoundedRectangle (scr.reduced (3.f), 12.f);
+    g.setColour (juce::Colour (0xff1b1226)); g.fillRoundedRectangle (R (740, 190, 470, 80).toFloat(), 5.f);
+    {   // icones
+        g.setColour (amber); const auto f = R (676, 213, 40, 32).toFloat();
+        juce::Path fo; fo.addRoundedRectangle (f.getX(), f.getY() + 5, f.getWidth(), f.getHeight() - 5, 3.f); fo.addRoundedRectangle (f.getX(), f.getY(), f.getWidth() * 0.45f, 8.f, 2.f);
+        g.strokePath (fo, juce::PathStrokeType (1.6f));
+        const auto d = R (1288, 212, 40, 40).toFloat(); g.setColour (ember);
+        g.drawRoundedRectangle (d, 3.f, 1.8f); g.drawRect (d.getX() + d.getWidth() * 0.2f, d.getY(), d.getWidth() * 0.55f, d.getHeight() * 0.35f, 1.5f);
+        g.drawRect (d.getX() + d.getWidth() * 0.2f, d.getY() + d.getHeight() * 0.58f, d.getWidth() * 0.6f, d.getHeight() * 0.42f, 1.5f);
+        g.setColour (amber);
+        for (int sgn : { -1, 1 })
+        { const float cx = sgn < 0 ? (float) R (1224, 0, 0, 0).getX() : (float) R (1265, 0, 0, 0).getX(), cy = (float) R (0, 229, 0, 0).getY();
+          juce::Path c; c.startNewSubPath (cx - sgn * 5.f, cy - 9.f); c.lineTo (cx + sgn * 5.f, cy); c.lineTo (cx - sgn * 5.f, cy + 9.f); g.strokePath (c, juce::PathStrokeType (2.f)); }
+    }
+    // cassette
+    {
+        auto fr = R (235, 200, 380, 232).toFloat();
+        g.setColour (juce::Colour (0xff0a090d)); g.fillRoundedRectangle (fr, 8.f);
+        g.setColour (juce::Colour (0xff3a3446)); g.drawRoundedRectangle (fr, 8.f, 1.5f);
+        g.setColour (juce::Colours::white);   // drawImage applique l'alpha de la couleur courante
+        g.drawImage (cassette, R (252, 212, 346, 206).toFloat(), juce::RectanglePlacement::centred);
+        g.setColour (juce::Colour (0xffc8c0d4)); g.setFont (juce::FontOptions (13.f));
+        g.drawFittedText ("EXPANSION", R (305, 440, 240, 36), juce::Justification::centred, 1);
+    }
+    // plaque des molettes
+    g.setColour (juce::Colour (0xff09080b)); g.fillRoundedRectangle (R (235, 1085, 305, 285).toFloat(), 10.f);
+    g.setColour (juce::Colour (0xff2c2834)); g.drawRoundedRectangle (R (235, 1085, 305, 285).toFloat(), 10.f, 2.f);
+    // labels
+    g.setColour (juce::Colour (0xffc6bfd2));
+    for (auto* k : all)
+    {
+        const auto r = k->s.getBounds();
+        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 10.f : 11.5f)));
+        g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : 0), r.getWidth() + 50, 18, juce::Justification::centred, 1);
+    }
+    g.setFont (juce::FontOptions (15.f));
+    g.drawFittedText ("LFO", R (365, 553, 120, 40), juce::Justification::centred, 1);
+    g.drawFittedText ("FX", R (1473, 777, 80, 40), juce::Justification::centred, 1);
+    g.setColour (juce::Colour (0xff8a8498));   // accolades LFO / FX
+    g.drawLine (R (303, 585, 0, 0).getX() * 1.f, (float) R (0, 585, 0, 0).getY(), (float) R (547, 0, 0, 0).getX(), (float) R (0, 585, 0, 0).getY(), 1.f);
+    g.drawLine ((float) R (1295, 0, 0, 0).getX(), (float) R (0, 805, 0, 0).getY(), (float) R (1731, 0, 0, 0).getX(), (float) R (0, 805, 0, 0).getY(), 1.f);
+    g.setColour (juce::Colour (0xffc6bfd2)); g.setFont (juce::FontOptions (9.5f));
+    g.drawFittedText ("PITCH BEND", R (246, 1318, 160, 34), juce::Justification::centred, 1);
+    g.drawFittedText ("MODULATION", R (370, 1318, 160, 34), juce::Justification::centred, 1);
+}
+
+void SlPanel::resized()
+{
+    auto place = [] (Knob& k, int cx, int cy, int sz) { k.s.setBounds (C (cx, cy, sz, sz)); };
+    place (rate, 303, 645, 92);  place (amount, 424, 645, 92); place (pitch, 545, 645, 92);
+    place (glide, 838, 868, 92); place (filter, 1145, 868, 92);
+    place (tone, 640, 545, 56);  place (body, 712, 545, 56); place (bright, 640, 620, 56); place (width, 712, 620, 56);
+    place (texture, 660, 775, 56); place (resoK, 640, 860, 56); place (fenvK, 712, 860, 56);
+    place (reverb, 1262, 555, 56); place (velK, 1262, 640, 56);
+    place (volume, 1727, 645, 92);
+    place (chorus, 1295, 868, 92); place (dist, 1404, 868, 92); place (delay, 1513, 868, 92);
+    place (dtime, 1622, 868, 92); place (feedback, 1731, 868, 92);
+    const int ex[4] = { 1343, 1431, 1519, 1607 }, tx[4] = { 301, 383, 465, 547 };
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 30, 535, 60, 170));
+    for (int i = 0; i < 4; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 755, 56, 155));
+    bend.s.setBounds (C (328, 1215, 90, 240)); modw.s.setBounds (C (448, 1215, 90, 240));
+    cWave.c.setBounds (R (275, 990, 273, 48)); cLfo.c.setBounds (R (580, 990, 273, 48)); cDest.c.setBounds (R (884, 990, 273, 48));
+    cFilt.c.setBounds (R (1188, 990, 273, 48)); cMono.c.setBounds (R (1493, 990, 273, 48));
+    folder.setBounds (R (655, 190, 80, 80)); save.setBounds (R (1270, 190, 80, 80));
+    prev.setBounds (R (1205, 190, 40, 80)); next.setBounds (R (1245, 190, 40, 80));
+    presetLabel.setBounds (R (740, 190, 470, 80));
+    expansion.setBounds (R (235, 200, 380, 232));
+    keys.setBounds (R (578, 1085, 1190, 277));
+}

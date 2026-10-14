@@ -1,0 +1,136 @@
+name: DJBILBOX ALL PLUGINS (Windows)
+on:
+  push:
+    branches: [claude/blissful-newton-cxepis]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: djbilbox-all-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 330
+    env:
+      JUCE_DIR: ${{ github.workspace }}\_juce
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Outils (MSVC x64, Ninja, JUCE 8.0.4)
+        uses: ilammy/msvc-dev-cmd@v1
+        with: { arch: x64 }
+      - name: Ninja + JUCE
+        shell: pwsh
+        run: |
+          pip install ninja
+          git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git "$env:JUCE_DIR"
+          bash HUMPIRE_LOADOUT/scripts/fetch_fonts.sh
+
+      # ---------------- 1) super-build : 18 synthes + HUMPIRE LOADOUT
+      - name: Configure (synthes + LOADOUT)
+        run: cmake -S ALL_PLUGINS -B build/all -G Ninja -DCMAKE_BUILD_TYPE=Release -DFETCHCONTENT_SOURCE_DIR_JUCE="${{ env.JUCE_DIR }}"
+      - name: Build (synthes + LOADOUT)
+        id: super
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $targets = (ninja -C build/all -t targets all) | ForEach-Object { if ($_ -match '^([A-Za-z0-9_]+_VST3):' -and $Matches[1] -notlike 'cmake_*') { $Matches[1] } } | Sort-Object -Unique
+          Write-Host "Cibles : $($targets -join ' ')"
+          ninja -C build/all -k 0 @targets
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      # ---------------- 2) HUMPIRE ORBIT
+      - name: Build HUMPIRE ORBIT
+        id: orbit
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          cmake -S HUMPIRE_ORBIT -B build/orbit -G Ninja -DCMAKE_BUILD_TYPE=Release -DFETCHCONTENT_SOURCE_DIR_JUCE="$env:JUCE_DIR" -DHUMPIRE_BUILD_STANDALONE=OFF -DHUMPIRE_BUILD_TESTS=OFF
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $targets = (ninja -C build/orbit -t targets all) | ForEach-Object { if ($_ -match '^([A-Za-z0-9_]+_VST3):' -and $Matches[1] -notlike 'cmake_*') { $Matches[1] } } | Sort-Object -Unique
+          ninja -C build/orbit -k 0 @targets
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      # ---------------- 3) HUMPIRE CHAABI ORCHESTRA (+ samples de test)
+      - name: Build HUMPIRE CHAABI ORCHESTRA
+        id: chaabi
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          cmake -S HUMPIRE_Chaabi_Orchestra -B build/chaabi -G Ninja -DCMAKE_BUILD_TYPE=Release -DHUMPIRE_JUCE_DIR="$env:JUCE_DIR" -DHUMPIRE_COPY_PLUGIN=OFF -DHUMPIRE_BUILD_TESTS=OFF
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          ninja -C build/chaabi -k 0 HumpireChaabiOrchestra_VST3
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Samples de test Chaabi
+        continue-on-error: true
+        run: python HUMPIRE_Chaabi_Orchestra/tools/make_placeholders.py --out stage/chaabi_samples
+
+      # ---------------- 4) staging
+      - name: Rassembler les VST3
+        shell: pwsh
+        run: |
+          function Stage($src, $dst) {
+            New-Item -ItemType Directory -Force -Path "stage/$dst" | Out-Null
+            if (-not (Test-Path $src)) { return }
+            Get-ChildItem $src -Recurse -Directory -Filter *.vst3 | Where-Object { $_.Parent.Name -eq 'VST3' } | ForEach-Object {
+              Write-Host "[$dst] $($_.Name)"
+              Copy-Item $_.FullName "stage/$dst/$($_.Name)" -Recurse -Force
+            }
+          }
+          Stage "build/all/HUMPIRE_LOADOUT" "loadout"
+          Get-ChildItem build/all -Directory | Where-Object { $_.Name -notin @('HUMPIRE_LOADOUT','_deps','CMakeFiles') } | ForEach-Object { Stage $_.FullName "synths" }
+          Stage "build/orbit" "orbit"
+          Stage "build/chaabi" "chaabi"
+
+      - name: pluginval (informatif)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Windows.zip -OutFile pv.zip
+          Expand-Archive pv.zip pv -Force
+          $env:HUMPIRE_SAMPLES = (Resolve-Path stage/chaabi_samples -ErrorAction SilentlyContinue)
+          $report = @()
+          Get-ChildItem stage -Recurse -Directory -Filter *.vst3 | Where-Object { $_.Parent.Parent.Name -eq 'stage' } | ForEach-Object {
+            ./pv/pluginval.exe --strictness-level 5 --validate-in-process --skip-gui-tests --timeout-ms 180000 $_.FullName | Out-File "pv_$($_.BaseName).log"
+            $res = if ($LASTEXITCODE -eq 0) { "OK" } else { "ECHEC" }
+            $report += "$res  $($_.BaseName)"
+            Write-Host "$res  $($_.BaseName)"
+          }
+          $report | Out-File stage/pluginval_report.txt
+
+      # ---------------- 5) installateur + zip + release
+      - name: Installateur Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          ./ALL_PLUGINS/make_installer.ps1 -Stage stage -Out dist -Version "1.0.${{ github.run_number }}"
+          if (Test-Path stage/pluginval_report.txt) { Copy-Item stage/pluginval_report.txt dist/ }
+      - name: Zip
+        shell: pwsh
+        run: |
+          $items = @("dist/DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe", "dist/LISEZMOI.txt")
+          if (Test-Path dist/pluginval_report.txt) { $items += "dist/pluginval_report.txt" }
+          Compress-Archive -Path $items -DestinationPath dist/DJBILBOX_BEATS_ALL_PLUGINS.zip -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DJBILBOX_BEATS_ALL_PLUGINS
+          path: |
+            dist/DJBILBOX_BEATS_ALL_PLUGINS.zip
+            dist/LISEZMOI.txt
+      - name: Release GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: djbilbox-all-plugins-v1.0.${{ github.run_number }}
+          name: DJBILBOX BEATS - ALL PLUGINS v1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          body_path: dist/LISEZMOI.txt
+          files: |
+            dist/DJBILBOX_BEATS_ALL_PLUGINS.zip
+            dist/DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe
+      - name: Statut des builds
+        if: always()
+        shell: pwsh
+        run: |
+          Write-Host "super-build : ${{ steps.super.outcome }} | orbit : ${{ steps.orbit.outcome }} | chaabi : ${{ steps.chaabi.outcome }}"
+          if ("${{ steps.super.outcome }}" -ne "success" -or "${{ steps.orbit.outcome }}" -ne "success" -or "${{ steps.chaabi.outcome }}" -ne "success") { Write-Host "::warning::Au moins un projet n'a pas compile - voir LISEZMOI (section NON INCLUS)" }
