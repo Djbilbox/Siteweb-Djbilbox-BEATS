@@ -38,7 +38,7 @@ public:
     juce::AudioProcessorValueTreeState apvts;
     juce::MidiKeyboardState keyboardState;
     int presetIndex = -1;
-    juce::String presetName { "SAN_ANDREAS_LEAD - Init Patch" };
+    juce::String presetName { "SAN ANDREAS LEAD - Init Patch" };
 
 private:
     struct StereoDelay

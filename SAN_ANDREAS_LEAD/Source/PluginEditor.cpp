@@ -288,9 +288,9 @@ void SaPanel::paint (juce::Graphics& g)
     g.drawImage (camel, R (792, 350, 416, 410).toFloat(), juce::RectanglePlacement::centred);
     g.drawImage (logo, R (1552, 192, 194, 176).toFloat(), juce::RectanglePlacement::centred);
     for (float a : { 0.2f, 0.35f })
-    { g.setColour (ember.withAlpha (a)); g.setFont (juce::FontOptions (30.f + (0.4f - a) * 4.f, juce::Font::bold)); g.drawFittedText ("DJBILBOX BEATS", R (1440, 90, 440, 75), juce::Justification::centred, 1); }
+    { g.setColour (ember.withAlpha (a)); g.setFont (juce::FontOptions (27.f + (0.4f - a) * 4.f, juce::Font::bold)); g.drawFittedText ("DJBILBOX BEATS", R (1420, 90, 400, 75), juce::Justification::centred, 1); }
     g.setColour (juce::Colour (0xffffc878)); g.setFont (juce::FontOptions (29.f, juce::Font::bold));
-    g.drawFittedText ("DJBILBOX BEATS", R (1440, 90, 440, 75), juce::Justification::centred, 1);
+    g.drawFittedText ("DJBILBOX BEATS", R (1420, 90, 400, 75), juce::Justification::centred, 1);
     // titre chrome / orange
     const auto titleR = R (690, 742, 620, 85);
     g.setFont (juce::FontOptions (44.f, juce::Font::bold));
@@ -353,8 +353,8 @@ void SaPanel::resized()
     place (volume, 1330, 876, 100); place (reverb, 1508, 803, 100); place (chorus, 1643, 803, 100); place (dist, 1777, 803, 100);
     place (dtime, 1508, 975, 100); place (feedback, 1643, 975, 100); place (delay, 1777, 975, 100);
     place (glide, 671, 876, 100); place (filter, 812, 876, 100);
-    place (tone, 695, 395, 64); place (body, 695, 483, 64); place (bright, 695, 571, 64); place (width, 695, 659, 64);
-    place (texture, 1305, 395, 64); place (resoK, 1305, 483, 64); place (fenvK, 1305, 571, 64);
+    place (tone, 695, 395, 50); place (body, 695, 483, 50); place (bright, 695, 571, 50); place (width, 695, 659, 50);
+    place (texture, 1305, 395, 50); place (resoK, 1305, 483, 50); place (fenvK, 1305, 571, 50);
     const int ex[4] = { 224, 319, 415, 511 }, tx[5] = { 1477, 1551, 1625, 1698, 1790 };
     for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 28, 785, 56, 235));
     for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 445, 56, 235));

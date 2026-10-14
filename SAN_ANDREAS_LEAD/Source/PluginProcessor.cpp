@@ -151,7 +151,7 @@ void SaProcessor::setStateInformation (const void* data, int size)
         {
             auto vt = juce::ValueTree::fromXml (*xml);
             presetIndex = vt.getProperty ("presetIndex", -1);
-            presetName = vt.getProperty ("presetName", "SAN_ANDREAS_LEAD - Init Patch").toString();
+            presetName = vt.getProperty ("presetName", "SAN ANDREAS LEAD - Init Patch").toString();
             apvts.replaceState (vt);
         }
 }

@@ -124,7 +124,7 @@ public:
             float t[5];
             for (int k = 0; k < 5; ++k) t[k] = juce::jlimit (0.f, 1.f, tb[k] + (dst == 3 ? mod * 0.5f : 0.f));
 
-            static constexpr float trim[8] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };   // equilibrage des niveaux entre moteurs
+            static constexpr float trim[8] = { 1.0f, 1.3f, 1.2f, 0.33f, 1.0f, 1.0f, 1.7f, 0.85f };   // equilibrage des niveaux entre moteurs
             float y = renderEngine (freq, t, (float) sr) * trim[eng];
             { const float dcOut = y - dcX + dcR * dcY; dcX = y; dcY = dcOut; y = dcOut; } // bloqueur DC
 
