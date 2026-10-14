@@ -1,0 +1,133 @@
+{
+  "brand": "HUMPIRE by DJBILBOX BEATS",
+  "promo": {"code": "HUMPIRE30", "discount": "-30%", "ends": "2026-10-31"},
+  "defaults": {
+    "aspect_ratio": "9:16",
+    "resolution": "720p",
+    "audio": "add real DJBILBOX beat in CapCut; AI audio optional",
+    "text_overlay_rule": "never generate text with AI; add logo, code and CTA in post",
+    "negative": "text, watermark, logo, distorted hands, extra fingers, blurry, low quality, deformed instruments"
+  },
+  "spots": [
+    {
+      "id": 1,
+      "title": "Crypt Studio - Halloween Sale",
+      "product": "plugin bundle",
+      "duration_s": 8,
+      "style": "cinematic horror-comedy",
+      "hook_0_1.5s": "hand slams glowing orange pad, ground cracks, coffin blasts open",
+      "prompt": "Vertical 9:16 cinematic horror-comedy. Extreme close-up of a producer's hand slamming a glowing orange drum pad in a candlelit crypt studio, fog on the floor. The kick cracks the ground and a coffin lid blasts open. Skeletons in oversized headphones rise and headbang in sync to a heavy G-Funk trap beat, bats burst out of a giant analog synth. Fast push-in to a jack-o'-lantern skull with gold chains and headphones who turns to camera and smirks.",
+      "camera": "macro start, whip-pan, fast push-in",
+      "lighting": "orange and purple, volumetric fog, lightning accents",
+      "cta_overlay": "HUMPIRE | -30% | CODE HUMPIRE30 | until Oct 31"
+    },
+    {
+      "id": 2,
+      "title": "Plugin Comes Alive",
+      "product": "VST3/AU plugin",
+      "duration_s": 8,
+      "style": "premium tech product film",
+      "hook_0_1.5s": "knob turns by itself with red glitch flash",
+      "prompt": "Vertical 9:16 premium product film. Dark minimalist studio, a laptop DAW screen glows with a futuristic [PLUGIN_NAME] interface. A knob turns by itself, red glitch flash, the whole room pulses to the kick, studio monitors shake, dust and sparks float in slow motion. Final shot: a producer silhouette lifts his head, eyes glowing [COLOR].",
+      "camera": "slow dolly-in on screen, rack focus to speakers, final low angle",
+      "lighting": "rim light, [COLOR] neon accents, shallow depth of field",
+      "cta_overlay": "[PLUGIN_NAME] | VST3 / AU | Download now"
+    },
+    {
+      "id": 3,
+      "title": "Before / After Sound",
+      "product": "mixing or saturation plugin",
+      "duration_s": 6,
+      "style": "dramatic reveal",
+      "hook_0_1.5s": "gray silent room, hard cut at the drop",
+      "prompt": "Vertical 9:16. Left half of the story: a dull gray empty studio, flat lifeless lighting, silent. Hard cut at the drop: the same room explodes into color, gold and magenta lights, vibrating subwoofers, glowing audio waveforms spiraling in the air like confetti. Fast whip transition, high energy.",
+      "camera": "locked-off first shot, then fast orbit",
+      "lighting": "desaturated flat to saturated neon gold and magenta",
+      "cta_overlay": "BEFORE / AFTER | HUMPIRE"
+    },
+    {
+      "id": 4,
+      "title": "Empire du Beat",
+      "product": "brand / beats",
+      "duration_s": 8,
+      "style": "epic West Coast cinematic",
+      "hook_0_1.5s": "throne of drum machines rises at the first kick",
+      "prompt": "Vertical 9:16 epic cinematic. Low-angle shot of a king-like beatmaker seated on a throne built from drum machines and speakers, a crowd of silhouettes below, gold smoke rolling. At the drop the throne rises, lights flare, the camera orbits fast around him. G-Funk West Coast vibe, sunset gold and purple.",
+      "camera": "low angle hero shot, fast 360 orbit",
+      "lighting": "golden hour backlight, purple haze, lens flares",
+      "cta_overlay": "HUMPIRE BEATS | djbilboxbeats.gumroad.com"
+    },
+    {
+      "id": 5,
+      "title": "Drum Kit Unboxing",
+      "product": "drum kit / sample pack",
+      "duration_s": 6,
+      "style": "clean product-shot",
+      "hook_0_1.5s": "black box opens and drum hits burst out in slow motion",
+      "prompt": "Vertical 9:16 clean product-shot. Hands open a glowing matte-black box, 3D drum hits, vinyl pieces and audio waveforms float out in slow motion. The camera dives into the box and reveals a pristine producer studio. Crisp highlights, reflective black surface, [COLOR] accent light.",
+      "camera": "top-down macro, dive-in transition",
+      "lighting": "softbox key, [COLOR] edge light, glossy reflections",
+      "cta_overlay": "[KIT_NAME] | Drum Kit | Instant download"
+    },
+    {
+      "id": 6,
+      "title": "Free VST Drop",
+      "product": "free VST instrument",
+      "duration_s": 6,
+      "style": "hype social ad",
+      "hook_0_1.5s": "gift box lands with shockwave and sparks",
+      "prompt": "Vertical 9:16 high-energy ad. A glowing gift box slams onto a studio desk with a shockwave, sparks and floating musical notes. The lid flies open and a holographic synth interface projects above it, keys lighting up one by one. Fast, punchy, friendly, bright colors.",
+      "camera": "static impact shot, quick push-in to hologram",
+      "lighting": "bright key, cyan and orange accents, particle glow",
+      "cta_overlay": "FREE VST | Link in bio"
+    },
+    {
+      "id": 7,
+      "title": "Guitar Pedal Effects",
+      "product": "guitar pedal effect plugin",
+      "duration_s": 8,
+      "style": "gritty rock-meets-hip-hop",
+      "hook_0_1.5s": "boot stomps a pedal and the amp erupts in sparks",
+      "prompt": "Vertical 9:16 gritty cinematic. A worn leather boot stomps a vintage guitar effects pedal, the LED flashes red, a tube amplifier erupts in warm sparks and smoke. Slow-motion guitar strings vibrate, sound waves distort the air visibly. Dark garage-studio, analog textures.",
+      "camera": "ground-level boot stomp, slow-motion string close-up",
+      "lighting": "tungsten practicals, red LED accent, smoke backlight",
+      "cta_overlay": "Pedal FX | VST3 / AU"
+    },
+    {
+      "id": 8,
+      "title": "Oriental Trap",
+      "product": "oriental melody loops / sample pack",
+      "duration_s": 8,
+      "style": "luxury cinematic Arabian night",
+      "hook_0_1.5s": "lantern light flares as a trap kick hits",
+      "prompt": "Vertical 9:16 luxury cinematic. Arabian-night rooftop at dusk, glowing lanterns, a producer behind a sleek MIDI keyboard. At the first kick golden light ripples across the city, ornate patterns of light dance in the air to an oriental melody. Slow elegant camera glide ending on the producer's silhouette against a huge moon.",
+      "camera": "slow crane glide, parallax over rooftops",
+      "lighting": "deep indigo sky, gold lantern glow, moon rim light",
+      "cta_overlay": "ORIENTAL LOOPS | HUMPIRE"
+    },
+    {
+      "id": 9,
+      "title": "FL Studio Producer POV",
+      "product": "plugins and DAW workflow",
+      "duration_s": 6,
+      "style": "first-person hype POV",
+      "hook_0_1.5s": "POV hands slam the keyboard, screens flash to the beat",
+      "prompt": "Vertical 9:16 first-person POV. Hands over a MIDI controller and laptop at 3 a.m., neon city through the window. Hands slam the pads, three monitors flash to the beat, plugin windows slide open one after another in a rhythmic cascade, cables glow. Cut at the final hit to a satisfied smirk reflected in a screen.",
+      "camera": "handheld POV, quick rack focuses, mirror-reflection ending",
+      "lighting": "neon pink and cyan city light, screen glow",
+      "cta_overlay": "Make hits faster | HUMPIRE Plugins"
+    },
+    {
+      "id": 10,
+      "title": "Merch Drop Fourthwall",
+      "product": "merch / shop",
+      "duration_s": 6,
+      "style": "streetwear lookbook",
+      "hook_0_1.5s": "hoodie whip-pans into frame with smoke burst",
+      "prompt": "Vertical 9:16 streetwear lookbook. A model in a black hoodie and gold chain whip-pans into frame with a smoke burst, urban night alley, fast cuts of fabric details, a sneaker stomp, a cap spin. Slow-motion finish with the model turning to camera against neon haze.",
+      "camera": "whip-pan entry, fast detail cuts, slow-motion finish",
+      "lighting": "neon haze, hard flash fill, wet pavement reflections",
+      "cta_overlay": "DJBILBOX BEATS SHOP | Link in bio"
+    }
+  ]
+}
