@@ -8,7 +8,7 @@ VoodooProcessor::VoodooProcessor()
       apvts (*this, nullptr, "VOODOO", createLayout())
 {
     ptrs.bind (apvts);
-    for (int i = 0; i < 12; ++i) synth.addVoice (new VoodooVoice (ptrs, glideState));
+    for (int i = 0; i < 16; ++i) synth.addVoice (new VoodooVoice (ptrs, glideState));
     synth.addSound (new VoodooSound());
 }
 

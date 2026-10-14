@@ -13,11 +13,11 @@ public:
     void drawButtonBackground (juce::Graphics&, juce::Button&, const juce::Colour&, bool, bool) override;
 };
 
-class VoodooEditor : public juce::AudioProcessorEditor
+class VoodooPanel : public juce::Component
 {
 public:
-    explicit VoodooEditor (VoodooProcessor&);
-    ~VoodooEditor() override;
+    explicit VoodooPanel (VoodooProcessor&);
+    ~VoodooPanel() override;
     void paint (juce::Graphics&) override;
     void resized() override;
 
@@ -32,6 +32,8 @@ private:
     void stepPreset (int d);
     void savePreset();
     void showExpansion();
+    void loadUserPreset (const juce::File&);
+    static juce::File userPresetDir();
 
     VoodooProcessor& proc;
     VoodooLNF lnf;
@@ -45,4 +47,25 @@ private:
     juce::Image camel, logo;
     std::unique_ptr<juce::FileChooser> chooser;
     std::vector<Knob*> all;
+};
+
+// Editeur redimensionnable : le panneau reste en 1000x746 et est mis a l'echelle.
+class VoodooEditor : public juce::AudioProcessorEditor
+{
+public:
+    explicit VoodooEditor (VoodooProcessor& p) : AudioProcessorEditor (&p), panel (p)
+    {
+        addAndMakeVisible (panel);
+        setResizable (true, true);
+        setResizeLimits (500, 373, 2000, 1492);
+        getConstrainer()->setFixedAspectRatio (1000.0 / 746.0);
+        setSize (1000, 746);
+    }
+    void resized() override
+    {
+        panel.setBounds (0, 0, 1000, 746);
+        panel.setTransform (juce::AffineTransform::scale ((float) getWidth() / 1000.f));
+    }
+private:
+    VoodooPanel panel;
 };

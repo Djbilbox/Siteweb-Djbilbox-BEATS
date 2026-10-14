@@ -27,9 +27,12 @@ target_link_libraries(VOODOO PRIVATE VoodooAssets
     juce::juce_audio_utils juce::juce_dsp
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
 
-# Test console : rend les 70 presets en WAV et verifie niveaux / NaN
-juce_add_console_app(VoodooTest PRODUCT_NAME "VoodooTest")
-target_sources(VoodooTest PRIVATE Tools/RenderTest.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
-target_compile_definitions(VoodooTest PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=0)
-target_include_directories(VoodooTest PRIVATE Source)
-target_link_libraries(VoodooTest PRIVATE VoodooAssets juce::juce_audio_utils juce::juce_dsp juce::juce_recommended_config_flags)
+# Test console : rend les 70 presets et execute la suite de validation (desactiver : -DVOODOO_BUILD_TESTS=OFF)
+option(VOODOO_BUILD_TESTS "Build VoodooTest" ON)
+if(VOODOO_BUILD_TESTS)
+    juce_add_console_app(VoodooTest PRODUCT_NAME "VoodooTest")
+    target_sources(VoodooTest PRIVATE Tools/RenderTest.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+    target_compile_definitions(VoodooTest PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+    target_include_directories(VoodooTest PRIVATE Source)
+    target_link_libraries(VoodooTest PRIVATE VoodooAssets juce::juce_audio_utils juce::juce_dsp juce::juce_recommended_config_flags)
+endif()

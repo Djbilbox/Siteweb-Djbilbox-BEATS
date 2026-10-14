@@ -90,8 +90,8 @@ void VoodooLNF::drawButtonBackground (juce::Graphics& g, juce::Button& b, const 
 }
 
 //==============================================================================
-VoodooEditor::VoodooEditor (VoodooProcessor& p)
-    : AudioProcessorEditor (&p), proc (p),
+VoodooPanel::VoodooPanel (VoodooProcessor& p)
+    : proc (p),
       keys (p.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
     setLookAndFeel (&lnf);
@@ -142,9 +142,9 @@ VoodooEditor::VoodooEditor (VoodooProcessor& p)
     setSize (1000, 746);
 }
 
-VoodooEditor::~VoodooEditor() { setLookAndFeel (nullptr); }
+VoodooPanel::~VoodooPanel() { setLookAndFeel (nullptr); }
 
-void VoodooEditor::addKnob (Knob& k, int idx, const juce::String& label, bool purple, juce::Slider::SliderStyle style)
+void VoodooPanel::addKnob (Knob& k, int idx, const juce::String& label, bool purple, juce::Slider::SliderStyle style)
 {
     k.label = label;
     k.s.setSliderStyle (style);
@@ -157,23 +157,23 @@ void VoodooEditor::addKnob (Knob& k, int idx, const juce::String& label, bool pu
     all.push_back (&k);
 }
 
-void VoodooEditor::addCombo (Combo& c, int idx, const juce::StringArray& items)
+void VoodooPanel::addCombo (Combo& c, int idx, const juce::StringArray& items)
 {
     c.c.addItemList (items, 1);
     c.a = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (proc.apvts, ids[idx], c.c);
     addAndMakeVisible (c.c);
 }
 
-void VoodooEditor::refreshPresetLabel() { presetLabel.setText (proc.currentPresetName(), juce::dontSendNotification); }
+void VoodooPanel::refreshPresetLabel() { presetLabel.setText (proc.currentPresetName(), juce::dontSendNotification); }
 
-void VoodooEditor::stepPreset (int d)
+void VoodooPanel::stepPreset (int d)
 {
     const int n = proc.getNumPrograms();
     proc.applyPreset ((proc.presetIndex < 0 ? (d > 0 ? -1 : 0) : proc.presetIndex) + d < 0 ? n - 1 : ((proc.presetIndex < 0 ? (d > 0 ? -1 : 0) : proc.presetIndex) + d) % n);
     refreshPresetLabel();
 }
 
-void VoodooEditor::showPresetMenu()
+void VoodooPanel::showPresetMenu()
 {
     juce::PopupMenu menu;
     juce::String cur; juce::PopupMenu sub; int idx = 0;
@@ -189,13 +189,29 @@ void VoodooEditor::showPresetMenu()
         idx++;
     }
     menu.addSubMenu (cur, sub);
-    menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this] (int r)
-    { if (r > 0) { proc.applyPreset (r - 1); refreshPresetLabel(); } });
+    menu.addSeparator();
+    juce::PopupMenu user; auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.voodoopreset");
+    files.sort();
+    for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
+    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    menu.addSubMenu ("User", user);
+    menu.addItem (999, "Ouvrir un fichier .voodoopreset...");
+    menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
+    {
+        if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
+        else if (r == 999)
+        {
+            chooser = std::make_unique<juce::FileChooser> ("Charger un preset", userPresetDir(), "*.voodoopreset");
+            chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                                  [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
+        }
+        else if (r > 0 && r < 999) { proc.applyPreset (r - 1); refreshPresetLabel(); }
+    });
 }
 
-void VoodooEditor::savePreset()
+void VoodooPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", juce::File::getSpecialLocation (juce::File::userDocumentsDirectory), "*.voodoopreset");
+    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.voodoopreset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
@@ -205,13 +221,34 @@ void VoodooEditor::savePreset()
     });
 }
 
-void VoodooEditor::showExpansion()
+juce::File VoodooPanel::userPresetDir()
+{
+    auto d = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("DJBILBOX BEATS").getChildFile ("VOODOO").getChildFile ("Presets");
+    d.createDirectory();
+    return d;
+}
+
+void VoodooPanel::loadUserPreset (const juce::File& f)
+{
+    if (auto xml = juce::XmlDocument::parse (f))
+        if (xml->hasTagName (proc.apvts.state.getType()))
+        {
+            auto vt = juce::ValueTree::fromXml (*xml);
+            for (int i = 0; i < COUNT; ++i) // ne touche qu'aux parametres existants, valeurs bornees
+                if (auto* prm = proc.apvts.getParameter (ids[i]))
+                    if (auto child = vt.getChildWithProperty ("id", ids[i]); child.isValid() && i != P::bend && i != P::modw)
+                        prm->setValueNotifyingHost (prm->convertTo0to1 ((float) child.getProperty ("value", prm->convertFrom0to1 (prm->getValue()))));
+            proc.presetIndex = -1; proc.presetName = f.getFileNameWithoutExtension(); refreshPresetLabel();
+        }
+}
+
+void VoodooPanel::showExpansion()
 {
     juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "EXPANSION VOL.1",
         "Les packs d'expansion arrivent bientot.\n\nhttps://djbilboxbeats.gumroad.com/");
 }
 
-void VoodooEditor::paint (juce::Graphics& g)
+void VoodooPanel::paint (juce::Graphics& g)
 {
     auto b = getLocalBounds().toFloat();
     g.setGradientFill (juce::ColourGradient (panel.brighter (0.1f), b.getX(), b.getY(), panel.darker (0.12f), b.getRight(), b.getBottom(), false));
@@ -269,7 +306,7 @@ void VoodooEditor::paint (juce::Graphics& g)
     g.drawFittedText ("Modulation", R (400, 1385, 170, 40), juce::Justification::centred, 1);
 }
 
-void VoodooEditor::resized()
+void VoodooPanel::resized()
 {
     auto place = [] (Knob& k, int cx, int cy, int sz) { k.s.setBounds (R (cx - sz / 2, cy - sz / 2, sz, sz)); };
     place (rate, 280, 530, 150);   place (amount, 458, 530, 150);

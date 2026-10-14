@@ -76,6 +76,7 @@ public:
     void aftertouchChanged (int) override {}
     void channelPressureChanged (int) override {}
 
+    using juce::SynthesiserVoice::renderNextBlock;
     void renderNextBlock (juce::AudioBuffer<float>& out, int start, int num) override
     {
         if (! adsr.isActive()) { clearCurrentNote(); return; }
