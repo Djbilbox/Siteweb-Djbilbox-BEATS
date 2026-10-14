@@ -91,6 +91,7 @@ void WarzoneLNF::positionComboBoxText (juce::ComboBox& b, juce::Label& l)
 
 void WarzoneLNF::drawButtonBackground (juce::Graphics& g, juce::Button& b, const juce::Colour&, bool over, bool down)
 {
+    if (b.getProperties()["flat"]) return;   // bouton invisible (cassette)
     const auto r = b.getLocalBounds().toFloat().reduced (1.f);
     g.setColour (down ? juce::Colour (0xff35451f) : over ? juce::Colour (0xff25301a) : dark.withAlpha (0.85f));
     g.fillRoundedRectangle (r, 6.f);
@@ -132,7 +133,7 @@ WarzonePanel::WarzonePanel (WarzoneProcessor& p)
 
     for (auto* b : { &prev, &next, &folder, &save }) addAndMakeVisible (*b);
     addAndMakeVisible (expansion);
-    expansion.setColour (juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
+    expansion.getProperties().set ("flat", true);
     prev.onClick = [this] { stepPreset (-1); };
     next.onClick = [this] { stepPreset (1); };
     folder.onClick = [this] { showPresetMenu(); };
