@@ -24,7 +24,7 @@ HUMPIRE_LOADOUT/
 │   │   ├─ CMakeLists.txt
 │   │   ├─ assets/glitch_body_2x.png   (optionnel, 1520×1120)
 │   │   └─ Source/ GlitchParams.h GlitchDsp.h PluginProcessor.* PluginEditor.*
-│   └─ Skilltree Clutch Overclock Hardcap Respawn Lag Combo   (à venir, voir roadmap)
+│   └─ Skilltree Clutch Overclock Hardcap Respawn Lag Combo   ✅ livrés (Source/Plugin.cpp chacun)
 ├─ Hub/                           (à venir) app standalone : activation, MAJ
 └─ docs/IMAGE_PROMPTS.md          prompts visuels + liste d'assets
 ```

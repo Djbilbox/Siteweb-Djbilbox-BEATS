@@ -3,19 +3,125 @@
     "id": "humpire-loadout",
     "name": "HUMPIRE LOADOUT",
     "tagline": "8 effets VST3 gaming-skeuomorphiques, une seule licence",
-    "price": 99.00, "currency": "EUR",
-    "individualTotal": 238.00, "saving": 139.00,
-    "formats": ["VST3"], "platforms": ["Windows 10/11 x64"],
+    "price": 99.0,
+    "currency": "EUR",
+    "individualTotal": 238.0,
+    "saving": 139.0,
+    "formats": [
+      "VST3"
+    ],
+    "platforms": [
+      "Windows 10/11 x64"
+    ],
     "note": "Prix a valider par DJBILBOX BEATS"
   },
   "plugins": [
-    {"id":"skilltree","name":"HUMPIRE SKILLTREE","type":"EQ","price":39,"status":"roadmap","description":"EQ 6 bandes, Mid/Side, phase min/lineaire, analyseur FFT, ecran CRT.","features":["6 bandes","HP/LP","Mid/Side","FFT temps reel"]},
-    {"id":"clutch","name":"HUMPIRE CLUTCH","type":"Compresseur","price":29,"status":"roadmap","description":"Compresseur Clean/Punch/Crush, sidechain HPF, mix parallele, barre de vie LED.","features":["3 modes","Sidechain HPF","Parallel mix"]},
-    {"id":"overclock","name":"HUMPIRE OVERCLOCK","type":"Enhancer","price":29,"status":"roadmap","description":"Densite, harmoniques et loudness perçu, knob Power, band split.","features":["Power","Curve","Band split"]},
-    {"id":"hardcap","name":"HUMPIRE HARDCAP","type":"Limiteur master","price":39,"status":"roadmap","description":"Limiteur lookahead true-peak, auto-release, meter LUFS EBU R128.","features":["True-peak","Auto-release","LUFS"]},
-    {"id":"respawn","name":"HUMPIRE RESPAWN","type":"Reverb","price":29,"status":"roadmap","description":"Reverb FDN, pre-delay, damping, EQ, ducking, presets Plate/Hall/Hammam/Cathedrale.","features":["FDN","Ducking","EQ integre"]},
-    {"id":"lag","name":"HUMPIRE LAG","type":"Delay","price":29,"status":"roadmap","description":"Delay stereo sync BPM, feedback filtre, ducking, 4 snapshots morphing.","features":["Sync BPM","Ducking","Snapshots A-D"]},
-    {"id":"glitch","name":"HUMPIRE GLITCH","type":"Lo-Fi","price":19,"status":"available","description":"Bitcrusher 1-16 bits, reducteur de sample-rate, filtre haut-parleur mono, dither.","features":["1-16 bits","Sample-rate reducer","Speaker","Dither","20 presets"]},
-    {"id":"combo","name":"HUMPIRE COMBO","type":"Performance","price":24,"status":"roadmap","description":"Stutter, Tape Stop, Filter Sweep, Reverse, 2 XY pads, MIDI learn.","features":["4 effets one-shot","XY pads","MIDI learn"]}
+    {
+      "id": "skilltree",
+      "name": "HUMPIRE SKILLTREE",
+      "type": "EQ",
+      "price": 39,
+      "status": "available",
+      "description": "EQ 6 bandes, Mid/Side, phase min/lineaire, analyseur FFT, ecran CRT.",
+      "features": [
+        "6 bandes",
+        "HP/LP",
+        "Mid/Side",
+        "FFT temps reel"
+      ]
+    },
+    {
+      "id": "clutch",
+      "name": "HUMPIRE CLUTCH",
+      "type": "Compresseur",
+      "price": 29,
+      "status": "available",
+      "description": "Compresseur Clean/Punch/Crush, sidechain HPF, mix parallele, barre de vie LED.",
+      "features": [
+        "3 modes",
+        "Sidechain HPF",
+        "Parallel mix"
+      ]
+    },
+    {
+      "id": "overclock",
+      "name": "HUMPIRE OVERCLOCK",
+      "type": "Enhancer",
+      "price": 29,
+      "status": "available",
+      "description": "Densite, harmoniques et loudness perçu, knob Power, band split.",
+      "features": [
+        "Power",
+        "Curve",
+        "Band split"
+      ]
+    },
+    {
+      "id": "hardcap",
+      "name": "HUMPIRE HARDCAP",
+      "type": "Limiteur master",
+      "price": 39,
+      "status": "available",
+      "description": "Limiteur lookahead true-peak, auto-release, meter LUFS EBU R128.",
+      "features": [
+        "True-peak",
+        "Auto-release",
+        "LUFS"
+      ]
+    },
+    {
+      "id": "respawn",
+      "name": "HUMPIRE RESPAWN",
+      "type": "Reverb",
+      "price": 29,
+      "status": "available",
+      "description": "Reverb FDN, pre-delay, damping, EQ, ducking, presets Plate/Hall/Hammam/Cathedrale.",
+      "features": [
+        "FDN",
+        "Ducking",
+        "EQ integre"
+      ]
+    },
+    {
+      "id": "lag",
+      "name": "HUMPIRE LAG",
+      "type": "Delay",
+      "price": 29,
+      "status": "available",
+      "description": "Delay stereo sync BPM, feedback filtre, ducking, 4 snapshots morphing.",
+      "features": [
+        "Sync BPM",
+        "Ducking",
+        "Snapshots A-D"
+      ]
+    },
+    {
+      "id": "glitch",
+      "name": "HUMPIRE GLITCH",
+      "type": "Lo-Fi",
+      "price": 19,
+      "status": "available",
+      "description": "Bitcrusher 1-16 bits, reducteur de sample-rate, filtre haut-parleur mono, dither.",
+      "features": [
+        "1-16 bits",
+        "Sample-rate reducer",
+        "Speaker",
+        "Dither",
+        "20 presets"
+      ]
+    },
+    {
+      "id": "combo",
+      "name": "HUMPIRE COMBO",
+      "type": "Performance",
+      "price": 24,
+      "status": "available",
+      "description": "Stutter, Tape Stop, Filter Sweep, Reverse, 2 XY pads, MIDI learn.",
+      "features": [
+        "4 effets one-shot",
+        "XY pads",
+        "MIDI learn"
+      ]
+    }
   ]
 }

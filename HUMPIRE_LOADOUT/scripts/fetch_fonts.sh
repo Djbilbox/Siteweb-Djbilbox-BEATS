@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Telecharge Press Start 2P (SIL OFL 1.1) dans assets/fonts/
 set -euo pipefail
+mkdir -p "$(dirname "$0")/../assets/fonts"
 cd "$(dirname "$0")/../assets/fonts"
 curl -fsSL -o PressStart2P-Regular.ttf \
   https://github.com/google/fonts/raw/main/ofl/pressstart2p/PressStart2P-Regular.ttf

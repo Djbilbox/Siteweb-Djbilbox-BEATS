@@ -12,7 +12,9 @@ target_sources(HumpireCore INTERFACE
     ${HC_DIR}/XYPad.cpp
     ${HC_DIR}/ConsoleButton.cpp
     ${HC_DIR}/PresetManager.cpp
-    ${HC_DIR}/TopBar.cpp)
+    ${HC_DIR}/TopBar.cpp
+    ${HC_DIR}/HumpireProcessor.cpp
+    ${HC_DIR}/GenericEditor.cpp)
 
 target_include_directories(HumpireCore INTERFACE ${HC_DIR}/..)
 

@@ -11,6 +11,14 @@ struct FactoryPreset
     std::vector<std::pair<juce::String, float>> values;
 };
 
+inline FactoryPreset fp (const char* name, const char* cat,
+                         std::initializer_list<std::pair<const char*, float>> v)
+{
+    FactoryPreset p { name, cat, {} };
+    for (auto& kv : v) p.values.emplace_back (kv.first, kv.second);
+    return p;
+}
+
 /** Presets (usine + utilisateur XML), navigation < >, A/B. Thread message uniquement. */
 class PresetManager : public juce::ChangeBroadcaster
 {

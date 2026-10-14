@@ -4,6 +4,8 @@ on:
     branches: [claude/blissful-newton-cxepis]
     paths: ['HUMPIRE_LOADOUT/**', '.github/workflows/humpire-windows.yml']
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: windows-latest
@@ -15,13 +17,36 @@ jobs:
         run: ./scripts/fetch_fonts.sh
       - name: Configure
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DHUMPIRE_BUILD_STANDALONE=OFF
-      - name: Build
+      - name: Build (8 plugins)
         run: cmake --build build --config Release --parallel
-      - name: Installateur
+      - name: pluginval (informatif)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Windows.zip -OutFile pv.zip
+          Expand-Archive pv.zip pv
+          Get-ChildItem build -Recurse -Directory -Filter *.vst3 | ForEach-Object {
+            Write-Host "== $($_.Name)"
+            ./pv/pluginval.exe --strictness-level 5 --validate-in-process --timeout-ms 120000 $_.FullName
+            if ($LASTEXITCODE -ne 0) { Write-Host "pluginval a signale des erreurs pour $($_.Name)" }
+          }
+      - name: Installateur Inno Setup
         run: |
           choco install innosetup -y --no-progress
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\humpire.iss
       - name: Zip
-        run: Compress-Archive -Path dist\HUMPIRE_LOADOUT_Setup.exe -DestinationPath dist\HUMPIRE_LOADOUT_Installer.zip
+        shell: pwsh
+        run: |
+          "HUMPIRE LOADOUT - lancer HUMPIRE_LOADOUT_Setup.exe (droits admin). Les VST3 sont installes dans C:\Program Files\Common Files\VST3. Dans FL Studio : Options > Manage plugins > Find installed plugins." | Out-File dist\LISEZMOI.txt -Encoding utf8
+          Compress-Archive -Path dist\HUMPIRE_LOADOUT_Setup.exe, dist\LISEZMOI.txt -DestinationPath dist\HUMPIRE_LOADOUT_Installer.zip
       - uses: actions/upload-artifact@v4
         with: { name: HUMPIRE_LOADOUT_Installer, path: HUMPIRE_LOADOUT/dist/HUMPIRE_LOADOUT_Installer.zip }
+      - name: Release GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: humpire-loadout-v1.0.${{ github.run_number }}
+          name: HUMPIRE LOADOUT v1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          files: |
+            HUMPIRE_LOADOUT/dist/HUMPIRE_LOADOUT_Installer.zip
+            HUMPIRE_LOADOUT/dist/HUMPIRE_LOADOUT_Setup.exe
