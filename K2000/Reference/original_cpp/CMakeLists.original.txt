@@ -1,0 +1,111 @@
+cmake_minimum_required(VERSION 3.22)
+project(K2000 VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+# JUCE path
+set(JUCE_DIR "C:/Users/djbil/Documents/DJBILBOX/JUCE" CACHE PATH "Path to JUCE")
+
+# Add JUCE
+add_subdirectory("${JUCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/JUCE")
+
+# Plugin source files
+set(PLUGIN_SOURCES
+    Source/Main/PluginProcessor.cpp
+    Source/Main/PluginEditor.cpp
+    Source/Params/ExpansionPack.cpp
+    Source/Licensing/LicenseManager.cpp
+    Source/DSP/Oscillator.cpp
+    Source/DSP/Filter.cpp
+    Source/DSP/Envelope.cpp
+    Source/DSP/LFO.cpp
+    Source/DSP/SynthEngine.cpp
+    Source/Effects/DistortionEffect.cpp
+    Source/Effects/ChorusEffect.cpp
+    Source/Effects/DelayEffect.cpp
+    Source/Effects/ReverbEffect.cpp
+)
+
+# Create VST3 + Standalone plugin targets
+juce_add_plugin(K2000
+    COMPANY_NAME "DJBILBOX BEATS"
+    BUNDLE_ID "com.djbilboxbeats.k2000"
+    PLUGIN_MANUFACTURER_CODE "DjBx"
+    PLUGIN_CODE "K200"
+    FORMATS VST3 Standalone
+    PRODUCT_NAME "K2000"
+    DESCRIPTION "80s Synthwave Synthesizer by Humpire / DJBILBOX BEATS"
+    VERSION 1.0.0
+    IS_SYNTH TRUE
+    NEEDS_MIDI_INPUT TRUE
+    NEEDS_MIDI_OUTPUT FALSE
+    IS_MIDI_EFFECT FALSE
+    EDITOR_WANTS_KEYBOARD_FOCUS TRUE
+    COPY_PLUGIN_AFTER_BUILD TRUE
+    PLUGIN_VST3_CATEGORY "Instrument|Synth"
+)
+
+# Generates JuceHeader.h so `#include <JuceHeader.h>` resolves in every source file
+juce_generate_juce_header(K2000)
+
+target_sources(K2000 PRIVATE ${PLUGIN_SOURCES})
+
+target_compile_features(K2000 PRIVATE cxx_std_17)
+
+target_compile_definitions(K2000 PRIVATE
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+    JUCE_VST3_CAN_REPLACE_VST2=0
+)
+
+target_link_libraries(K2000 PRIVATE
+    juce::juce_audio_utils
+    juce::juce_audio_processors
+    juce::juce_dsp
+    juce::juce_cryptography
+    juce::juce_gui_extra
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+)
+
+# Assets copy post-build
+if (APPLE)
+    add_custom_command(TARGET K2000_VST3 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:K2000_VST3>/../Resources/Assets"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/Assets/faceplate.jpg"
+            "$<TARGET_FILE_DIR:K2000_VST3>/../Resources/Assets/faceplate.jpg"
+        VERBATIM)
+
+    add_custom_command(TARGET K2000_Standalone POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:K2000_Standalone>/../Resources/Assets"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/Assets/faceplate.jpg"
+            "$<TARGET_FILE_DIR:K2000_Standalone>/../Resources/Assets/faceplate.jpg"
+        VERBATIM)
+else()
+    set(K2000_SYSTEM_VST3 "C:/Program Files/Common Files/VST3/K2000.vst3")
+
+    add_custom_command(TARGET K2000_VST3 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:K2000_VST3>/../../Assets"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/Assets/faceplate.jpg"
+            "$<TARGET_FILE_DIR:K2000_VST3>/../../Assets/faceplate.jpg"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${K2000_SYSTEM_VST3}/Assets"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/Assets/faceplate.jpg"
+            "${K2000_SYSTEM_VST3}/Assets/faceplate.jpg"
+        VERBATIM)
+
+    add_custom_command(TARGET K2000_Standalone POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:K2000_Standalone>/Assets"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/Assets/faceplate.jpg"
+            "$<TARGET_FILE_DIR:K2000_Standalone>/Assets/faceplate.jpg"
+        VERBATIM)
+endif()
