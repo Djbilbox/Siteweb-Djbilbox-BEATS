@@ -89,15 +89,24 @@ jobs:
         run: |
           Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Windows.zip -OutFile pv.zip
           Expand-Archive pv.zip pv -Force
-          $env:HUMPIRE_SAMPLES = (Resolve-Path stage/chaabi_samples -ErrorAction SilentlyContinue)
+          $pv = (Resolve-Path ./pv/pluginval.exe).Path
+          if (Test-Path stage/chaabi_samples) { $env:HUMPIRE_SAMPLES = (Resolve-Path stage/chaabi_samples).Path }
+          New-Item -ItemType Directory -Force -Path pvlogs | Out-Null
           $report = @()
           Get-ChildItem stage -Recurse -Directory -Filter *.vst3 | Where-Object { $_.Parent.Parent.Name -eq 'stage' } | ForEach-Object {
-            ./pv/pluginval.exe --strictness-level 5 --validate-in-process --skip-gui-tests --timeout-ms 180000 $_.FullName | Out-File "pv_$($_.BaseName).log"
-            $res = if ($LASTEXITCODE -eq 0) { "OK" } else { "ECHEC" }
+            $log = "pvlogs/$($_.BaseName).log"
+            # pluginval.exe est une appli GUI : Start-Process -Wait pour attendre la fin et lire le vrai code retour
+            $p = Start-Process -FilePath $pv -ArgumentList @('--strictness-level','5','--validate-in-process','--skip-gui-tests','--timeout-ms','180000',"`"$($_.FullName)`"") -NoNewWindow -Wait -PassThru -RedirectStandardOutput $log
+            $res = if ($p.ExitCode -eq 0) { "OK   " } else { "ECHEC" }
             $report += "$res  $($_.BaseName)"
             Write-Host "$res  $($_.BaseName)"
+            if ($p.ExitCode -ne 0) { Get-Content $log | Select-String -Pattern '!!!|FAILED|Error|error' | Select-Object -First 15 | ForEach-Object { Write-Host "     $_" } }
           }
           $report | Out-File stage/pluginval_report.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with: { name: pluginval-logs, path: pvlogs }
 
       # ---------------- 5) installateur + zip + release
       - name: Installateur Inno Setup
