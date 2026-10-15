@@ -2,6 +2,16 @@
 
 namespace humpire
 {
+static void keepPreserved (juce::ValueTree& target, const juce::ValueTree& current, const juce::StringArray& keep)
+{
+    for (auto& id : keep)
+    {
+        auto src = current.getChildWithProperty ("id", id);
+        auto dst = target.getChildWithProperty ("id", id);
+        if (src.isValid() && dst.isValid()) dst.setProperty ("value", src.getProperty ("value"), nullptr);
+    }
+}
+
 PresetManager::PresetManager (juce::AudioProcessorValueTreeState& s, const juce::String& n,
                               std::vector<FactoryPreset> factory, juce::StringArray keep)
     : apvts (s), pluginName (n), preserved (std::move (keep))
@@ -66,7 +76,9 @@ void PresetManager::applyUser (const juce::File& f)
         if (xml->hasTagName (apvts.state.getType()))
         {
             if (apvts.undoManager != nullptr) apvts.undoManager->beginNewTransaction ("Preset");
-            apvts.replaceState (juce::ValueTree::fromXml (*xml));
+            auto vt = juce::ValueTree::fromXml (*xml);
+            keepPreserved (vt, apvts.copyState(), preserved);
+            apvts.replaceState (vt);
         }
 }
 
@@ -110,7 +122,7 @@ void PresetManager::toggleAB()
     (onB ? slotB : slotA) = apvts.copyState();          // memorise l'etat courant dans son slot
     onB = ! onB;
     auto& target = onB ? slotB : slotA;
-    if (target.isValid()) apvts.replaceState (target.createCopy());
+    if (target.isValid()) { auto vt = target.createCopy(); keepPreserved (vt, apvts.copyState(), preserved); apvts.replaceState (vt); }
     sendChangeMessage();
 }
 } // namespace humpire

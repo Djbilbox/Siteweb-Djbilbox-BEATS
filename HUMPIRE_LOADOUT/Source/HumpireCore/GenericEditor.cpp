@@ -115,7 +115,8 @@ void GenericEditor::timerCallback()
 
 void GenericEditor::paintBody (Graphics& g)
 {
-    const bool clean = Theme::isClean();
+    const bool clean = proc.getBool ("clean");
+    Theme::setClean (clean);   // etat global = celui de l'editeur en cours de dessin
     if (clean) drawBodyClean (g);
     else
     {

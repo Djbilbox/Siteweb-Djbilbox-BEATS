@@ -31,6 +31,7 @@ bool GlitchAudioProcessor::isBusesLayoutSupported (const BusesLayout& l) const
 void GlitchAudioProcessor::prepareToPlay (double sr, int maxBlock)
 {
     dsp.prepare (sr, maxBlock);
+    prepared = true;
     scopeStride = juce::jmax (1, (int) (sr / 50.0));       // 50 colonnes/s -> ~1.3 s d'historique
     setLatencySamples (0);                                  // aucun lookahead
 }
@@ -42,7 +43,9 @@ void GlitchAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     for (int c = getTotalNumInputChannels(); c < getTotalNumOutputChannels(); ++c)
         buffer.clear (c, 0, n);
 
+    if (! prepared || buffer.getNumChannels() == 0) { buffer.clear(); return; }
     humpire::atomicMax (inPeak, buffer.getMagnitude (0, n));
+    if (bypassParam != nullptr && bypassParam->get()) { humpire::atomicMax (outPeak, buffer.getMagnitude (0, n)); return; }
 
     glitch::DspParams p;
     p.bits    = pBits->load();      p.rate  = pRate->load();     p.drive = pDrive->load();

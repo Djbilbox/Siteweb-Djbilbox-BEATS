@@ -29,6 +29,7 @@ class RespawnProcessor : public HumpireProcessor
 {
 public:
     RespawnProcessor() : HumpireProcessor ("HUMPIRE RESPAWN", "RESPAWN", makeLayout(), presets_()) {}
+    double getTailLengthSeconds() const override { return 21.0; }
     juce::AudioProcessorEditor* createEditor() override;
 
     static juce::AudioProcessorValueTreeState::ParameterLayout makeLayout()
@@ -72,9 +73,9 @@ public:
         fs = sr;
         for (auto& d : lines) d.init ((int) (0.2 * sr));
         for (auto& d : pre)   d.init ((int) (0.25 * sr));
-        for (auto& d : erIn)  d.init ((int) (0.1 * sr));
+        for (auto& d : erIn)  d.init ((int) (0.115 * sr));
         for (auto& z : lp) z = 0.0f;
-        env = 0.0f;  phase = 0.0f;
+        env = 0.0f;  for (auto& p : lfoPh) p = 0.0f;
         for (int c = 0; c < 2; ++c) { lc[c].reset(); hc[c].reset(); }
     }
 
@@ -113,11 +114,11 @@ public:
                 eR += erIn[1].read (d * 1.13f) * earlyG[k] * (k % 2 ? 1.0f : -1.0f);
             }
 
-            phase += 0.37f / (float) fs;  if (phase > 1.0f) phase -= 1.0f;
             float y[N], sum = 0.0f;
             for (int k = 0; k < N; ++k)
             {
-                const float lfo = std::sin (6.2831853f * (phase * (1.0f + 0.13f * (float) k) + 0.125f * (float) k));
+                lfoPh[k] += 0.37f * (1.0f + 0.13f * (float) k) / (float) fs;  if (lfoPh[k] >= 1.0f) lfoPh[k] -= 1.0f;
+                const float lfo = std::sin (6.2831853f * (lfoPh[k] + 0.125f * (float) k));
                 y[k] = lines[(size_t) k].read (dl[k] + mod * 0.0004f * (float) fs * lfo);
                 lp[k] = (1.0f - dampA) * y[k] + dampA * lp[k];               // damping HF
                 y[k] = lp[k] * g[k];
@@ -146,7 +147,7 @@ public:
 private:
     double fs = 44100;
     DelayLine lines[N], pre[2], erIn[2];
-    float lp[N] {}, env = 0, phase = 0;
+    float lp[N] {}, lfoPh[N] {}, env = 0;
     Biquad lc[2], hc[2];
 };
 

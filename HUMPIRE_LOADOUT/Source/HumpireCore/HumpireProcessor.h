@@ -19,7 +19,7 @@ public:
     virtual void process (juce::AudioBuffer<float>&, juce::MidiBuffer&) = 0;
 
     // ---- AudioProcessor
-    void prepareToPlay (double sr, int maxBlock) override { prepare (sr, maxBlock); }
+    void prepareToPlay (double sr, int maxBlock) override { preparedBlock = juce::jmax (1, maxBlock); prepare (sr, maxBlock); isPrepared = true; }
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout&) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
@@ -59,6 +59,8 @@ private:
     juce::String name;
     bool midi;
     juce::AudioParameterBool* bypassParam = nullptr;
+    bool isPrepared = false;
+    int  preparedBlock = 512;
 };
 
 // ---- helpers de layout
@@ -69,7 +71,7 @@ inline std::unique_ptr<juce::AudioParameterFloat> mkFloat (const char* id, const
     return std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { id, 1 }, name,
         juce::NormalisableRange<float> (lo, hi, 0.0f, skew), def,
         juce::AudioParameterFloatAttributes().withStringFromValueFunction ([u, decimals] (float v, int)
-            { return juce::String (v, decimals) + (u.isEmpty() ? "" : " " + u); }));
+            { const auto s = decimals > 0 ? juce::String (v, decimals) : juce::String (juce::roundToInt (v)); return u.isEmpty() ? s : s + " " + u; }));
 }
 inline std::unique_ptr<juce::AudioParameterBool> mkBool (const char* id, const char* name, bool def = false, bool automatable = true)
 {

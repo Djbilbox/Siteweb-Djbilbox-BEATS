@@ -34,8 +34,25 @@ void HumpireProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
     juce::ScopedNoDenormals nd;
     const int n = buffer.getNumSamples();
     for (int c = getTotalNumInputChannels(); c < getTotalNumOutputChannels(); ++c) buffer.clear (c, 0, n);
-    atomicMax (inPeak, buffer.getMagnitude (0, n));
-    process (buffer, m);
+    if (buffer.getNumChannels() == 0 || n == 0) return;
+    if (! isPrepared) { buffer.clear(); return; }
+
+    const float inMag = buffer.getMagnitude (0, n);
+    atomicMax (inPeak, inMag);
+
+    // Bypass : passage direct du signal (le wrapper VST3 appelle processBlock dans tous les cas).
+    if (bypassParam != nullptr && bypassParam->get()) { atomicMax (outPeak, inMag); return; }
+
+    // Un hote peut envoyer des blocs plus grands que celui annonce dans prepareToPlay : on decoupe.
+    float* const* ptrs = buffer.getArrayOfWritePointers();
+    const int nch = buffer.getNumChannels();
+    juce::MidiBuffer noMidi;
+    for (int start = 0; start < n; start += preparedBlock)
+    {
+        const int len = juce::jmin (preparedBlock, n - start);
+        juce::AudioBuffer<float> chunk (ptrs, nch, start, len);
+        process (chunk, start == 0 ? m : noMidi);
+    }
     atomicMax (outPeak, buffer.getMagnitude (0, n));
 }
 

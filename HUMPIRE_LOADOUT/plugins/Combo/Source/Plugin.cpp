@@ -59,7 +59,7 @@ public:
             const auto m = meta.getMessage();
             if (m.isNoteOn())
             {
-                const int tgt = learnTarget.load();
+                const int tgt = getBool ("learn") ? learnTarget.load() : -1;
                 if (tgt >= 0) { noteMap[tgt].store (m.getNoteNumber()); learnTarget.store (-1); learnDone.store (true); }
                 for (int i = 0; i < 4; ++i) if (m.getNoteNumber() == noteMap[i].load()) held |= (1 << i);
             }
@@ -77,10 +77,11 @@ public:
         const int revLen  = juce::jlimit (64, len / 2, (int) (revBeats[juce::jlimit (0, 3, (int) (ry * 4.0f))] * 60.0 / bpm * fs));
         const float stopTime = 0.1f + 1.9f * rx;
         const float cutTarget = 40.0f * std::pow (18000.0f / 40.0f, ly);
+        const float maxCut = juce::jmin (18000.0f, 0.45f * (float) fs);   // filtre stable meme a bas sample rate
 
         // fronts montants -> capture
         if (act[0] && ! was[0]) { stutStart = (wPos - stutLen + len) % len; stutPos = 0; }
-        if (act[1] && ! was[1]) { tapePos = (float) wPos; tapeSpeed = 1.0f; }
+        if (act[1] && ! was[1]) { tapePos = (float) (wPos - 1 + len); tapeSpeed = 1.0f; }
         if (act[3] && ! was[3]) { revPos = (float) (wPos - 1 + len); revCount = 0; }
         for (int i = 0; i < 4; ++i) was[i] = act[i];
 
@@ -99,7 +100,7 @@ public:
 
             for (int k = 0; k < 4; ++k) eng[k] += ((act[k] ? 1.0f : 0.0f) - eng[k]) * (act[k] ? up : dn);
             sweepAmt += ((act[2] ? 1.0f : 0.0f) - sweepAmt) * (1.0f / (0.35f * (float) fs)) * (act[2] ? 1.0f : 3.0f);
-            svf[0].setCutoffFrequency (18000.0f * std::pow (cutTarget / 18000.0f, juce::jlimit (0.0f, 1.0f, sweepAmt)));
+            svf[0].setCutoffFrequency (juce::jmin (maxCut, 18000.0f * std::pow (cutTarget / 18000.0f, juce::jlimit (0.0f, 1.0f, sweepAmt))));
             svf[1].setCutoffFrequency (svf[0].getCutoffFrequency());
 
             float s[2] { dry[0], dry[1] };
@@ -109,20 +110,23 @@ public:
                 tapeSpeed = juce::jmax (0.0f, tapeSpeed - 1.0f / (stopTime * (float) fs));
                 if (! act[1]) tapeSpeed = 1.0f;
                 tapePos += tapeSpeed;
-                for (int c = 0; c < 2; ++c) s[c] += (readBuf (c, tapePos) - s[c]) * eng[1];
+                const float tg = juce::jmin (1.0f, tapeSpeed * 4.0f);   // le signal s'eteint avec la vitesse (pas de DC fige)
+                for (int c = 0; c < 2; ++c) s[c] += (readBuf (c, tapePos) * tg - s[c]) * eng[1];
             }
             // stutter
             if (eng[0] > 0.001f)
             {
+                if (stutPos >= stutLen) stutPos = 0;
                 const int idx = (stutStart + stutPos) % len;
-                const float fade = juce::jmin (1.0f, juce::jmin ((float) stutPos, (float) (stutLen - stutPos)) / 48.0f);
+                const float fade = juce::jlimit (0.0f, 1.0f, juce::jmin ((float) stutPos, (float) (stutLen - stutPos)) / 48.0f);
                 for (int c = 0; c < 2; ++c) s[c] += (buf[(size_t) c][(size_t) idx] * fade - s[c]) * eng[0];
                 if (++stutPos >= stutLen) stutPos = 0;
             }
             // reverse
             if (eng[3] > 0.001f)
             {
-                for (int c = 0; c < 2; ++c) s[c] += (readBuf (c, revPos) - s[c]) * eng[3];
+                const float rf = juce::jlimit (0.0f, 1.0f, (float) juce::jmin (revCount, revLen - revCount) / 48.0f);   // fondu au saut de boucle
+                for (int c = 0; c < 2; ++c) s[c] += (readBuf (c, revPos) * rf - s[c]) * eng[3];
                 revPos -= 1.0f;
                 if (++revCount >= revLen) { revCount = 0; revPos = (float) (wPos - 1 + len); }
             }

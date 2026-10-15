@@ -52,6 +52,7 @@ public:
         lowBuf.setSize (2, maxBlock);  highBuf.setSize (2, maxBlock);
         osLow.reset(); osHigh.reset(); lr.reset();
         dc[0] = dc[1] = dcX[0] = dcX[1] = 0.0f;
+        dcR = (float) std::exp (-juce::MathConstants<double>::twoPi * 35.0 / sr);
         setLatencySamples (juce::roundToInt (osLow.getLatencyInSamples()));
     }
 
@@ -86,13 +87,14 @@ public:
         {
             juce::dsp::AudioBlock<float> blk (b);
             auto sub = blk.getSubBlock (0, (size_t) n).getSubsetChannelBlock (0, (size_t) nch);
+            const float off0 = shape (0.0f, g);          // silence -> 0 (pas d'offset DC statique)
             auto up = os.processSamplesUp (sub);
             for (size_t c = 0; c < up.getNumChannels(); ++c)
             {
                 float* d = up.getChannelPointer (c);
                 for (size_t i = 0; i < up.getNumSamples(); ++i)
                 {
-                    const float x = d[i], y = shape (x, g);
+                    const float x = d[i], y = shape (x, g) - off0;
                     // bande haute : on n'ajoute que les harmoniques generees (y - x), bande basse : melange densite
                     d[i] = isHigh ? x + amount * (y - x) : x + amount * (y - x);
                 }
@@ -109,7 +111,7 @@ public:
             for (int i = 0; i < n; ++i)
             {
                 float y = (lo[i] + hi[i]);
-                const float yd = y - dcX[c] + 0.995f * dc[c];  dcX[c] = y;  dc[c] = yd;  y = yd * outG;
+                const float yd = y - dcX[c] + dcR * dc[c];  dcX[c] = y;  dc[c] = yd;  y = yd * outG;
                 if (std::abs (y) > 0.9f) y = std::copysign (0.9f + 0.1f * std::tanh ((std::abs (y) - 0.9f) / 0.1f), y);
                 out[i] = y;
             }
@@ -121,7 +123,7 @@ private:
     juce::dsp::LinkwitzRileyFilter<float> lr;
     juce::dsp::Oversampling<float> osLow, osHigh;
     juce::AudioBuffer<float> lowBuf, highBuf;
-    float dc[2] { 0, 0 }, dcX[2] { 0, 0 };
+    float dc[2] { 0, 0 }, dcX[2] { 0, 0 }, dcR = 0.995f;
 };
 
 class OverclockEditor : public GenericEditor

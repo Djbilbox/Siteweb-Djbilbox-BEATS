@@ -46,7 +46,7 @@ public:
 
     juce::AudioProcessorEditor* createEditor() override;
 
-    void prepare (double sr, int) override { fs = sr; grDb = 0.0f; for (auto& h : hpY) h = hpX = 0.0f; hpX = 0; flash = 0; }
+    void prepare (double sr, int) override { fs = sr; grDb = 0.0f; hpY[0] = hpY[1] = hpXs[0] = hpXs[1] = 0.0f; }
 
     void process (juce::AudioBuffer<float>& buf, juce::MidiBuffer&) override
     {

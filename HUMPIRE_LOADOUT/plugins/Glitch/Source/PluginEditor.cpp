@@ -149,7 +149,8 @@ void GlitchEditor::cycleDither()
 void GlitchEditor::paintBody (juce::Graphics& g)
 {
     using namespace juce;
-    const bool clean = humpire::Theme::isClean();
+    const bool clean = lastClean;
+    humpire::Theme::setClean (clean);   // etat global = celui de cette instance
     if (clean) drawBodyClean (g);
     else
     {

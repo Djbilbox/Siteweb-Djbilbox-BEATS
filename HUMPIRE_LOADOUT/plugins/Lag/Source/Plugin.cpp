@@ -15,6 +15,7 @@ class LagProcessor : public HumpireProcessor
 {
 public:
     LagProcessor() : HumpireProcessor ("HUMPIRE LAG", "LAG", makeLayout(), presets_()) {}
+    double getTailLengthSeconds() const override { return 30.0; }
     juce::AudioProcessorEditor* createEditor() override;
 
     static juce::AudioProcessorValueTreeState::ParameterLayout makeLayout()
@@ -59,7 +60,7 @@ public:
     void prepare (double sr, int) override
     {
         fs = sr;
-        const size_t len = (size_t) (2.2 * sr);
+        const size_t len = (size_t) (8.5 * sr);   // assez pour la division 1/1 jusqu'a ~28 BPM
         for (auto& b : buf) b.assign (len, 0.0f);
         wPos = 0;
         for (auto& s : tSm) s.reset (sr, 0.08);
@@ -95,7 +96,7 @@ public:
             float wet[2];
             for (int c = 0; c < 2; ++c)
             {
-                float p = (float) wPos - tSm[c].getNextValue();  while (p < 0) p += (float) len;
+                float p = (float) wPos - tSm[c].getNextValue();  while (p < 0) p += (float) len;  if (p >= (float) len) p -= (float) len;
                 const int i0 = (int) p, i1 = (i0 + 1) % len;  const float f = p - (float) i0;
                 wet[c] = buf[c][(size_t) i0] * (1.0f - f) + buf[c][(size_t) i1] * f;
             }
@@ -163,6 +164,11 @@ public:
         content.addAndMakeVisible (*store);
         refreshLeds();
         finishSetup();
+    }
+
+    ~LagEditor() override
+    {
+        if (morphing) for (int k = 0; k < 7; ++k) if (auto* prm = lag.apvts.getParameter (LagProcessor::snapId (k))) prm->endChangeGesture();
     }
 
     static UiSpec makeSpec()
@@ -237,8 +243,9 @@ private:
             return;
         }
         for (int k = 0; k < 7; ++k) from[(size_t) k] = lag.get (LagProcessor::snapId (k));
-        lag.activeSnap = i;  morphT = 0;  morphing = true;
-        for (int k = 0; k < 7; ++k) if (auto* prm = lag.apvts.getParameter (LagProcessor::snapId (k))) prm->beginChangeGesture();
+        lag.activeSnap = i;  morphT = 0;
+        if (! morphing) for (int k = 0; k < 7; ++k) if (auto* prm = lag.apvts.getParameter (LagProcessor::snapId (k))) prm->beginChangeGesture();
+        morphing = true;
     }
     void refreshLeds() { for (int i = 0; i < 4; ++i) slot[i]->setToggleState (i == lag.activeSnap, juce::dontSendNotification); }
 

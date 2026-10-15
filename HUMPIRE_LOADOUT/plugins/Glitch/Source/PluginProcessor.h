@@ -48,6 +48,7 @@ private:
     juce::AudioParameterBool* bypassParam = nullptr;
     std::atomic<float> *pBits, *pRate, *pDrive, *pSpeaker, *pTone, *pDither, *pMix, *pOut;
     int scopeStride = 960;
+    bool prepared = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlitchAudioProcessor)
 };

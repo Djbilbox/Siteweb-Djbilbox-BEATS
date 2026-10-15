@@ -49,7 +49,7 @@ public:
         // K-weighting (BS.1770) : shelf +4 dB @1.68k puis HP 38 Hz
         for (int c = 0; c < 2; ++c) { kShelf[c].set (Biquad::Type::highShelf, sr, 1681.97, 0.7072, 3.9998); kHp[c].set (Biquad::Type::highPass, sr, 38.135, 0.5003, 0); kShelf[c].reset(); kHp[c].reset(); }
         blockSamples = (int) (0.1 * sr);  sumSq = 0;  cnt = 0;
-        sub.assign (30, 0.0);  blocks.clear();  integrated = shortTerm = momentary = -70.0f;  gatedSum = 0;  gatedN = 0;  lastLevel = 0;
+        sub.assign (30, 0.0);  blk.assign ((size_t) 36000, 0.0);  blkHead = blkCount = 0;  integrated = shortTerm = momentary = -70.0f;  gatedSum = 0;  gatedN = 0;  lastLevel = 0;
         updateLatency();
     }
 
@@ -140,15 +140,14 @@ private:
         shortTerm = lufs (s30 / (double) sub.size());
         if (fill100 % 1 == 0 && momentary > -70.0f)                // gating absolu -70, relatif -10 LU (approx. sur blocs 400 ms)
         {
-            blocks.push_back (s4 / 4.0);
-            if (blocks.size() > 36000) blocks.pop_front();
+            blk[(size_t) blkHead] = s4 / 4.0;  blkHead = (blkHead + 1) % 36000;  if (blkCount < 36000) ++blkCount;
             double abs = 0; int na = 0;
-            for (auto v : blocks) if (lufs (v) > -70.0f) { abs += v; ++na; }
+            for (int i = 0; i < blkCount; ++i) { const double v = blk[(size_t) i]; if (lufs (v) > -70.0f) { abs += v; ++na; } }
             if (na > 0)
             {
                 const float rel = lufs (abs / na) - 10.0f;
                 double g = 0; int ng = 0;
-                for (auto v : blocks) if (lufs (v) > rel) { g += v; ++ng; }
+                for (int i = 0; i < blkCount; ++i) { const double v = blk[(size_t) i]; if (lufs (v) > rel) { g += v; ++ng; } }
                 if (ng > 0) integrated = lufs (g / ng);
             }
         }
@@ -162,7 +161,7 @@ private:
     std::array<std::array<float, 4>, 2> hist {};
     Biquad kShelf[2], kHp[2];
     std::vector<double> sub = std::vector<double> (30, 0.0);
-    std::deque<double> blocks;
+    std::vector<double> blk;  int blkHead = 0, blkCount = 0;
 };
 
 class HardcapEditor : public GenericEditor

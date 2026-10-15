@@ -38,24 +38,28 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createLayout()
     layout.add (std::make_unique<AudioParameterFloat> (ver (id::rate), "Sample Rate",
         NormalisableRange<float> (500.0f, 48000.0f, 1.0f, 0.3f), 48000.0f,
         AudioParameterFloatAttributes().withStringFromValueFunction ([] (float v, int)
-            { return v >= 1000.0f ? String (v / 1000.0f, 1) + " kHz" : String ((int) v) + " Hz"; })));
+            { return v >= 1000.0f ? String (v / 1000.0f, 1) + " kHz" : String ((int) v) + " Hz"; })
+            .withValueFromStringFunction ([] (const String& t) { const float x = t.getFloatValue(); return t.containsIgnoreCase ("k") ? x * 1000.0f : x; })));
 
     layout.add (std::make_unique<AudioParameterFloat> (ver (id::drive), "Drive",
         NormalisableRange<float> (0.0f, 1.0f, 0.001f), 0.0f,
-        AudioParameterFloatAttributes().withStringFromValueFunction ([] (float v, int) { return String (roundToInt (v * 100.0f)) + " %"; })));
+        AudioParameterFloatAttributes().withStringFromValueFunction ([] (float v, int) { return String (roundToInt (v * 100.0f)) + " %"; })
+        .withValueFromStringFunction ([] (const String& t) { return t.getFloatValue() / 100.0f; })));
 
     layout.add (std::make_unique<AudioParameterBool> (ver (id::speaker), "Speaker", false));
 
     layout.add (std::make_unique<AudioParameterFloat> (ver (id::tone), "Speaker Size",
         NormalisableRange<float> (0.0f, 1.0f, 0.001f), 0.4f,
-        AudioParameterFloatAttributes().withStringFromValueFunction ([] (float v, int) { return String (roundToInt (v * 100.0f)) + " %"; })));
+        AudioParameterFloatAttributes().withStringFromValueFunction ([] (float v, int) { return String (roundToInt (v * 100.0f)) + " %"; })
+        .withValueFromStringFunction ([] (const String& t) { return t.getFloatValue() / 100.0f; })));
 
     layout.add (std::make_unique<AudioParameterChoice> (ver (id::dither), "Dither",
         StringArray { "Off", "RPDF", "TPDF" }, 0));
 
     layout.add (std::make_unique<AudioParameterFloat> (ver (id::mix), "Mix",
         NormalisableRange<float> (0.0f, 1.0f, 0.001f), 1.0f,
-        AudioParameterFloatAttributes().withStringFromValueFunction ([] (float v, int) { return String (roundToInt (v * 100.0f)) + " %"; })));
+        AudioParameterFloatAttributes().withStringFromValueFunction ([] (float v, int) { return String (roundToInt (v * 100.0f)) + " %"; })
+        .withValueFromStringFunction ([] (const String& t) { return t.getFloatValue() / 100.0f; })));
 
     layout.add (std::make_unique<AudioParameterFloat> (ver (id::out), "Output",
         NormalisableRange<float> (-24.0f, 12.0f, 0.1f), 0.0f,

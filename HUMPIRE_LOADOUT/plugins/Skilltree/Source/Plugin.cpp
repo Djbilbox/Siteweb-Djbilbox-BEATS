@@ -8,6 +8,10 @@ namespace
 {
 constexpr int nBands = 6, kFir = 4096, kLat = kFir / 2;
 constexpr float defF[nBands] = { 60, 200, 600, 2000, 6000, 12000 }, defQ[nBands] = { 0.7f, 1.0f, 1.0f, 1.0f, 1.0f, 0.7f };
+constexpr const char* bandF[nBands]  = { "b1f", "b2f", "b3f", "b4f", "b5f", "b6f" };
+constexpr const char* bandG[nBands]  = { "b1g", "b2g", "b3g", "b4g", "b5g", "b6g" };
+constexpr const char* bandQ[nBands]  = { "b1q", "b2q", "b3q", "b4q", "b5q", "b6q" };
+constexpr const char* bandOn[nBands] = { "b1on", "b2on", "b3on", "b4on", "b5on", "b6on" };
 
 struct Cascade { Biquad bq[10]; };      // 0-5 bandes, 6-7 passe-haut, 8-9 passe-bas (24 dB/oct)
 
@@ -19,6 +23,7 @@ class SkilltreeProcessor : public HumpireProcessor, private juce::AsyncUpdater, 
 public:
     SkilltreeProcessor() : HumpireProcessor ("HUMPIRE SKILLTREE", "SKILLTREE", makeLayout(), presets_())
     {
+        for (auto& d : dly) d.assign ((size_t) kFir, 0.0f);   // alloue avant tout prepareToPlay
         for (auto* p : getParameters())
             if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (p)) apvts.addParameterListener (r->paramID, this);
         for (auto& r : ring) r.store (0.0f);
@@ -77,12 +82,11 @@ public:
         Cascade c;
         for (int i = 0; i < nBands; ++i)
         {
-            const juce::String pre = "b" + juce::String (i + 1);
-            const bool on = getBool ((pre + "on").toRawUTF8());
-            const float g = get ((pre + "g").toRawUTF8());
+            const bool on = getBool (bandOn[i]);
+            const float g = get (bandG[i]);
             if (! on || std::abs (g) < 0.01f) { setIdentity (c.bq[i]); continue; }
             c.bq[i].set (i == 0 ? Biquad::Type::lowShelf : (i == nBands - 1 ? Biquad::Type::highShelf : Biquad::Type::peak),
-                         sr, get ((pre + "f").toRawUTF8()), get ((pre + "q").toRawUTF8()), g);
+                         sr, get (bandF[i]), get (bandQ[i]), g);
         }
         const float hp = get ("hp"), lp = get ("lp");
         if (hp > 20.5f) { c.bq[6].set (Biquad::Type::highPass, sr, hp, 0.5412, 0); c.bq[7].set (Biquad::Type::highPass, sr, hp, 1.3066, 0); }
@@ -187,11 +191,13 @@ private:
             const float w = 0.5f - 0.5f * std::cos (6.2831853f * (float) i / (float) (kFir - 1));       // Hann
             ir.setSample (0, i, data[(size_t) ((i - kLat + kFir) % kFir)] * scale * w);
         }
+        suspendProcessing (true);                  // le thread audio ne traite pas pendant le rechargement
         for (auto& c : conv)
         {
             juce::AudioBuffer<float> copy (ir);
             c.loadImpulseResponse (std::move (copy), fs, juce::dsp::Convolution::Stereo::no, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
         }
+        suspendProcessing (false);
     }
 
     double fs = 44100;
@@ -373,7 +379,13 @@ private:
             ed.setReal (pre + "g", ed.yToDb (m.position.y, a), true, ! began);
             began = true;
         }
-        void mouseUp (const juce::MouseEvent&) override { ed.endGestures(); ed.selected = -1; began = false; }
+        void mouseUp (const juce::MouseEvent&) override
+        {
+            if (began && ed.selected >= 0)
+                for (auto* s : { "f", "g" })
+                    if (auto* p = ed.sk.apvts.getParameter ("b" + juce::String (ed.selected + 1) + s)) p->endChangeGesture();
+            ed.selected = -1;  began = false;
+        }
         void mouseDoubleClick (const juce::MouseEvent& m) override
         {
             const int i = ed.nodeAt (m.position);
