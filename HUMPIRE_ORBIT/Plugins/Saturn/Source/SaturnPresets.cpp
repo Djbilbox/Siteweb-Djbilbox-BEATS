@@ -5,95 +5,113 @@ using namespace saturn;
 
 namespace
 {
-    // Une voix : active, demi-tons, degres, niveau dB, pan (-100..100), detune ct, delai ms
-    struct V { bool on; int semi, deg; float level, pan, detune, delay; };
-    // Un preset : categorie, nom, mode (0 demi-tons / 1 degres), gamme, formant, glide ms, correction %, humanize %, largeur %, mix %
-    struct P { const char* cat; const char* name; int mode; int scale; bool formant;
-               float glide, corr, human, width, mix; V v[kNumVoices]; };
+    /** Voice settings of a preset: on, semitones, degrees, level (dB), pan (-100..100), detune (cents). */
+    struct VoiceP { bool on; int semi, deg; float level, pan, detune; };
 
-    const V off { false, 0, 0, -12.0f, 0.0f, 0.0f, 0.0f };
+    constexpr VoiceP kOff { false, 0, 0, -6.0f, 0.0f, 0.0f };
 
+    struct P
+    {
+        const char* category;
+        const char* name;
+        int mode;               // IntervalMode
+        int scale;              // Scale
+        int key;                // 0 = C
+        float glide;            // ms
+        float mix;              // %
+        VoiceP voices[kNumVoices];
+    };
+
+    // Degree intervals are scale steps relative to the sung note; semitone fields approximate them.
     const P kList[] = {
-        // ---------------------------------------------------------------- Voix Trap
-        { "Voix Trap", "Trap Hook Stack", ModeDegrees, Minor, true, 20, 0, 15, 80, 50,
-          { { true, 4, 2, -5, -45, -3, 0 }, { true, 7, 4, -7, 45, 3, 0 }, { true, -12, -7, -8, 0, 0, 0 }, off } },
-        { "Voix Trap", "Trap Octave Sombre", ModeDegrees, Minor, true, 15, 0, 10, 60, 45,
-          { { true, -12, -7, -3, -15, -4, 0 }, { true, -12, -7, -6, 15, 6, 12 }, off, off } },
-        { "Voix Trap", "Drill Octaves", ModeSemitones, Minor, true, 10, 0, 5, 70, 45,
-          { { true, -12, -7, -4, -20, 0, 0 }, { true, 12, 7, -11, 20, 0, 0 }, off, off } },
-        // ---------------------------------------------------------------- Afrotrap
-        { "Afrotrap", "Afrotrap Chorus", ModeDegrees, Major, true, 35, 0, 40, 90, 50,
-          { { true, 4, 2, -6, -40, -5, 14 }, { true, 7, 4, -7, 40, 5, 22 }, { true, -8, -3, -10, 0, 0, 0 }, off } },
-        { "Afrotrap", "Afro Call & Response", ModeDegrees, Major, true, 40, 0, 35, 100, 50,
-          { { true, 4, 2, -5, -70, 0, 30 }, { true, -3, -2, -6, 70, 0, 45 }, off, off } },
-        { "Afrotrap", "Afrotrap Ad-lib Stack", ModeSemitones, Major, false, 15, 0, 25, 100, 45,
-          { { true, 7, 4, -6, -60, -6, 18 }, { true, 12, 7, -9, 60, 6, 28 }, off, off } },
-        // ---------------------------------------------------------------- Oriental / Rai
-        { "Oriental / Rai", "Rai Hijaz Tierce", ModeDegrees, Hijaz, true, 45, 0, 30, 70, 50,
-          { { true, 4, 2, -6, -30, 0, 0 }, { true, -12, -7, -8, 30, 0, 0 }, off, off } },
-        { "Oriental / Rai", "Maqam Rast Choeur", ModeDegrees, Rast, true, 50, 30, 35, 90, 50,
-          { { true, 4, 2, -6, -50, -4, 10 }, { true, 7, 4, -7, 50, 4, 16 }, { true, -12, -7, -9, 0, 0, 0 }, off } },
-        { "Oriental / Rai", "Bayati Unisson Large", ModeDegrees, Bayati, true, 30, 0, 40, 100, 50,
-          { { true, 0, 0, -5, -80, -11, 16 }, { true, 0, 0, -5, 80, 11, 26 }, { true, -12, -7, -10, 0, 0, 0 }, off } },
-        { "Oriental / Rai", "Rai Mawal Quintes", ModeDegrees, HijazKar, true, 60, 0, 30, 70, 50,
-          { { true, 7, 4, -6, -35, 0, 0 }, { true, -5, -3, -8, 35, 0, 0 }, off, off } },
-        { "Oriental / Rai", "Saba Melancolie", ModeDegrees, Saba, true, 50, 20, 30, 80, 50,
-          { { true, 3, 2, -6, -40, 0, 0 }, { true, -3, -2, -8, 40, 0, 0 }, off, off } },
-        // ---------------------------------------------------------------- Deep House
-        { "Deep House", "Deep House Quintes", ModeSemitones, Minor, true, 0, 0, 10, 90, 45,
-          { { true, 7, 4, -7, -50, 0, 0 }, { true, -5, -3, -9, 50, 0, 0 }, { true, -12, -7, -12, 0, 0, 0 }, off } },
-        { "Deep House", "House Diva Stack", ModeDegrees, Minor, true, 20, 0, 25, 100, 50,
-          { { true, 3, 2, -6, -55, 0, 8 }, { true, 7, 4, -7, 55, 0, 12 }, { true, 12, 7, -12, 0, 0, 0 }, off } },
-        // ---------------------------------------------------------------- G-Funk
-        { "G-Funk", "G-Funk Talkbox Octaves", ModeSemitones, Mixolydian, false, 30, 0, 5, 40, 55,
-          { { true, -12, -7, -3, 0, 0, 0 }, { true, 12, 7, -12, 0, 6, 0 }, off, off } },
-        { "G-Funk", "G-Funk Smooth Choir", ModeDegrees, Mixolydian, true, 70, 0, 30, 85, 50,
-          { { true, 4, 2, -6, -45, 0, 0 }, { true, 7, 4, -7, 45, 0, 0 }, { true, -8, -3, -9, 0, 0, 0 }, off } },
-        // ---------------------------------------------------------------- R&B
-        { "R&B", "RnB Neo Soul Stack", ModeDegrees, Dorian, true, 40, 40, 35, 100, 50,
-          { { true, 3, 2, -6, -50, -3, 6 }, { true, 7, 4, -7, 50, 3, 9 }, { true, 10, 6, -10, -20, 0, 0 }, { true, -12, -7, -11, 20, 0, 0 } } },
-        { "R&B", "RnB Gospel Choir", ModeDegrees, Major, true, 35, 0, 45, 100, 55,
-          { { true, 4, 2, -6, -60, 0, 10 }, { true, 7, 4, -7, 60, 0, 15 }, { true, -8, -3, -8, -25, 0, 20 }, { true, -12, -7, -9, 25, 0, 5 } } },
-        { "R&B", "RnB Doubler Large", ModeSemitones, Major, true, 10, 0, 30, 100, 50,
-          { { true, 0, 0, -4, -85, -9, 18 }, { true, 0, 0, -4, 85, 9, 27 }, off, off } },
-        // ---------------------------------------------------------------- Podcast / Voix parlee
-        { "Podcast / Voix parlee", "Podcast Epaisseur", ModeSemitones, Chromatic, true, 10, 0, 20, 60, 40,
-          { { true, 0, 0, -14, -30, -6, 12 }, { true, 0, 0, -14, 30, 6, 19 }, off, off } },
-        { "Podcast / Voix parlee", "Voix Robot Annonce", ModeSemitones, Chromatic, false, 0, 0, 0, 0, 60,
-          { { true, -12, -7, -3, 0, 0, 0 }, { true, 7, 4, -6, 0, 0, 0 }, off, off } },
-        { "Podcast / Voix parlee", "Voix Monstre", ModeSemitones, Chromatic, false, 0, 0, 0, 30, 75,
-          { { true, -12, -7, -1, -30, 0, 0 }, { true, -7, -4, -5, 30, 0, 0 }, off, off } },
-        // ---------------------------------------------------------------- Pop / Choeurs
-        { "Pop / Choeurs", "Pop Tierce Haute", ModeDegrees, Major, true, 20, 0, 15, 60, 50,
-          { { true, 4, 2, -5, -20, 0, 0 }, off, off, off } },
-        { "Pop / Choeurs", "Choeur Celeste", ModeDegrees, Major, true, 80, 0, 55, 100, 55,
-          { { true, 7, 4, -8, -70, 0, 35 }, { true, 12, 7, -10, 70, 0, 48 }, { true, -12, -7, -10, -30, 0, 22 }, { true, 4, 2, -9, 30, 0, 40 } } },
+        // ---- Trap Vocals ----
+        { "Trap Vocals", "Trap Stack Thirds", ModeDegrees, Minor, 0, 20.0f, 100.0f, {
+            { true,   4,  2,  -6.0f, -35.0f,  0.0f }, { true,   7,  4,  -8.0f,  35.0f,  0.0f }, kOff, kOff } },
+        { "Trap Vocals", "Trap Octave Double", ModeDegrees, Minor, 9, 15.0f, 100.0f, {
+            kOff, kOff, { true, -12, -7, -10.0f, -15.0f,  4.0f }, { true, 12, 7, -14.0f, 15.0f, -4.0f } } },
+        { "Trap Vocals", "Dark Fifth Pad", ModeDegrees, HarmonicMinor, 2, 60.0f, 80.0f, {
+            { true,   7,  4, -10.0f, -30.0f,  6.0f }, { true, -12, -7, -14.0f, 25.0f, -6.0f }, kOff, kOff } },
+
+        // ---- Afrotrap ----
+        { "Afrotrap", "Afro Pentatonic Lift", ModeDegrees, MajorPentatonic, 7, 25.0f, 100.0f, {
+            { true,   4,  2,  -6.0f, -40.0f,  0.0f }, { true,   9,  4, -10.0f,  35.0f,  0.0f }, kOff, kOff } },
+        { "Afrotrap", "Amapiano Sixths", ModeDegrees, Major, 5, 35.0f, 100.0f, {
+            { true,   9,  5,  -6.0f, -30.0f,  3.0f }, { true,   4,  2,  -9.0f,  30.0f, -3.0f }, kOff, kOff } },
+        { "Afrotrap", "Afrobeat Silk Harmony", ModeDegrees, Mixolydian, 2, 30.0f, 90.0f, {
+            { true,   4,  2,  -7.0f, -35.0f,  0.0f }, { true,   7,  4,  -9.0f,  35.0f,  5.0f }, kOff, kOff } },
+
+        // ---- Oriental / Rai ----
+        { "Oriental / Rai", "Oriental Hijaz Stack", ModeDegrees, Hijaz, 4, 25.0f, 100.0f, {
+            { true,   4,  2,  -6.0f, -35.0f,  0.0f }, { true,   7,  4,  -8.0f,  35.0f,  0.0f }, kOff, kOff } },
+        { "Oriental / Rai", "Rai Bayati Choir", ModeDegrees, Bayati, 2, 40.0f, 100.0f, {
+            { true,   3,  2,  -6.0f, -40.0f, -8.0f }, { true,  -4, -2,  -8.0f,  40.0f,  8.0f },
+            { true,   7,  4, -12.0f,   0.0f,  0.0f }, kOff } },
+        { "Oriental / Rai", "Maqam Rast Pair", ModeDegrees, Rast, 0, 25.0f, 85.0f, {
+            { true,   4,  2,  -5.0f, -30.0f,  0.0f }, { true,  -7, -4,  -8.0f,  30.0f,  0.0f }, kOff, kOff } },
+        { "Oriental / Rai", "Saba Shade", ModeDegrees, Saba, 9, 50.0f, 70.0f, {
+            { true,   3,  2,  -9.0f, -25.0f,  0.0f }, { true, -10, -6, -12.0f,  25.0f, -10.0f }, kOff, kOff } },
+
+        // ---- Deep House ----
+        { "Deep House", "Deep House Haze", ModeDegrees, Minor, 0, 90.0f, 70.0f, {
+            { true,   3,  2, -12.0f, -50.0f,  7.0f }, { true,   7,  4, -14.0f,  50.0f, -7.0f }, kOff, kOff } },
+        { "Deep House", "Dorian Chord Pad", ModeDegrees, Dorian, 7, 120.0f, 85.0f, {
+            { true,   3,  2, -10.0f, -60.0f,  0.0f }, { true,   7,  4, -12.0f,   0.0f,  0.0f },
+            { true,  10,  6, -14.0f,  60.0f,  0.0f }, kOff } },
+
+        // ---- G-Funk ----
+        { "G-Funk", "G-Funk Synth Talk", ModeDegrees, MinorPentatonic, 7, 15.0f, 100.0f, {
+            { true,   5,  2,  -8.0f, -45.0f,  0.0f }, { true,   7,  3, -10.0f,  40.0f,  0.0f }, kOff, kOff } },
+        { "G-Funk", "Blues Octave Talk", ModeDegrees, Blues, 4, 20.0f, 100.0f, {
+            kOff, { true, -12, -6, -10.0f, -35.0f,  0.0f }, { true, 12, 6, -16.0f, 35.0f, 0.0f }, kOff } },
+
+        // ---- R&B ----
+        { "R&B", "R&B Silk Thirds", ModeDegrees, Major, 5, 35.0f, 100.0f, {
+            { true,   4,  2,  -5.0f, -30.0f,  4.0f }, { true,   9,  5,  -9.0f,  30.0f, -4.0f }, kOff, kOff } },
+        { "R&B", "Neo Soul Stack", ModeDegrees, Dorian, 9, 40.0f, 100.0f, {
+            { true,   3,  2,  -7.0f, -45.0f,  0.0f }, { true,   7,  4,  -9.0f,   0.0f,  0.0f },
+            { true,  10,  6, -11.0f,  45.0f,  0.0f }, kOff } },
+        { "R&B", "Fem Soul Doubles", ModeSemitones, Major, 0, 22.0f, 100.0f, {
+            { true,   0,  0,  -8.0f, -40.0f, 12.0f }, { true,   0,  0,  -8.0f,  40.0f, -12.0f }, kOff, kOff } },
+
+        // ---- Spoken Word / Podcast ----
+        { "Spoken Word / Podcast", "Podcast Warm Thirds", ModeDegrees, Major, 0, 60.0f, 30.0f, {
+            { true,   4,  2, -12.0f, -20.0f,  0.0f }, kOff, kOff, kOff } },
+        { "Spoken Word / Podcast", "Narration Width", ModeSemitones, Chromatic, 0, 80.0f, 35.0f, {
+            { true,   0,  0, -14.0f, -60.0f, 10.0f }, { true,   0,  0, -14.0f,  60.0f, -10.0f }, kOff, kOff } },
+        { "Spoken Word / Podcast", "Narrator Sub Warmth", ModeDegrees, Minor, 4, 100.0f, 25.0f, {
+            kOff, { true, -12, -7, -16.0f, -20.0f,  3.0f }, kOff, kOff } },
     };
 }
 
 std::vector<HumpirePreset> makeSaturnFactoryPresets()
 {
     std::vector<HumpirePreset> out;
-    for (auto& p : kList)
+    out.reserve (sizeof (kList) / sizeof (kList[0]));
+
+    for (const auto& p : kList)
     {
-        HumpirePreset hp;
-        hp.category = p.cat;
-        hp.name = p.name;
-        hp.values = { { id::mode, (float) p.mode }, { id::scale, (float) p.scale }, { id::formant, p.formant ? 1.0f : 0.0f },
-                      { id::glide, p.glide }, { id::correction, p.corr }, { id::humanize, p.human },
-                      { id::width, p.width }, { id::mix, p.mix } };
+        HumpirePreset preset;
+        preset.category = p.category;
+        preset.name = p.name;
+
+        auto add = [&preset] (juce::String paramId, float value) { preset.values.emplace_back (std::move (paramId), value); };
+        add (id::mode, (float) p.mode);
+        add (id::key, (float) p.key);
+        add (id::scale, (float) p.scale);
+        add (id::glide, p.glide);
+        add (id::mix, p.mix);
+
         for (int v = 0; v < kNumVoices; ++v)
         {
-            const auto& vv = p.v[v];
-            hp.values.push_back ({ voiceId (v, vOn),     vv.on ? 1.0f : 0.0f });
-            hp.values.push_back ({ voiceId (v, vSemi),   (float) vv.semi });
-            hp.values.push_back ({ voiceId (v, vDeg),    (float) vv.deg });
-            hp.values.push_back ({ voiceId (v, vLevel),  vv.level });
-            hp.values.push_back ({ voiceId (v, vPan),    vv.pan });
-            hp.values.push_back ({ voiceId (v, vDetune), vv.detune });
-            hp.values.push_back ({ voiceId (v, vDelay),  vv.delay });
+            const VoiceP& vp = p.voices[v];
+            add (voiceId (v, vOn), vp.on ? 1.0f : 0.0f);
+            add (voiceId (v, vSemi), (float) vp.semi);
+            add (voiceId (v, vDeg), (float) vp.deg);
+            add (voiceId (v, vLevel), vp.level);
+            add (voiceId (v, vPan), vp.pan);
+            add (voiceId (v, vDetune), vp.detune);
         }
-        out.push_back (std::move (hp));
+        out.push_back (std::move (preset));
     }
     return out;
 }

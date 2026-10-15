@@ -1,128 +1,142 @@
 #pragma once
-#include <array>
+#include <algorithm>
 #include <cmath>
 #include <vector>
-#include <algorithm>
+#include "SaturnParams.h"
 
-// Pitch shift "2 prises" adapte de Plugins/Solar/Source/PitchShifter.h (HUMPIRE SOLAR) pour 4 voix :
-//  - une seule ligne a retard mono partagee par toutes les voix (signal + residu LPC pour le mode Formant),
-//  - chaque voix ne garde que sa phase de balayage (deux prises en quadrature, fondu sin^2),
-//  - fenetre W synchrone au pitch : W/2 = k * periode, donc les deux prises restent en phase (pas de peigne),
-//  - retard moyen des prises = latence fixe annoncee (le sec est aligne exactement dessus).
-// Aucune allocation hors prepare().
+/** HUMPIRE SATURN - two-tap pitch-shift kernel, adapted from HUMPIRE SOLAR's PitchShifter.
+
+    One delay line is shared by all voices. Each voice reads two taps half a grain apart and
+    crossfades them with sin^2 windows. The grain length W is an even multiple of the input period,
+    so the two taps read the same waveform phase and the crossfade does not cancel.
+    The mean read delay of the taps is the announced latency, which keeps the dry signal and
+    every harmony voice time-aligned. Nothing is allocated outside prepare(). */
 namespace saturn
 {
-    /** Ligne a retard mono partagee : x = voix d'entree, e = residu LPC (excitation sans formants). */
-    class SharedDelayRing
+    /** Shared delay line with three channels: 0 = left, 1 = right, 2 = mono sum (used by the voices). */
+    class SharedDelayLine
     {
     public:
-        void prepare (int minSize)
-        {
-            int sz = 1; while (sz < minSize) sz <<= 1;
-            mask = sz - 1;
-            x.assign ((size_t) sz, 0.0f);
-            e.assign ((size_t) sz, 0.0f);
-            reset();
-        }
+        static constexpr int channels = 3;
 
-        void reset()
+        void prepare (int minLength)
         {
-            std::fill (x.begin(), x.end(), 0.0f);
-            std::fill (e.begin(), e.end(), 0.0f);
+            int sz = 2;
+            while (sz < minLength) sz <<= 1;
+            size = sz;
+            mask = sz - 1;
+            for (auto& b : buf) b.assign ((size_t) sz, 0.0f);
             wr = 0;
         }
 
-        bool isReady() const noexcept { return mask > 0; }
+        void reset() noexcept
+        {
+            for (auto& b : buf) std::fill (b.begin(), b.end(), 0.0f);
+            wr = 0;
+        }
 
-        /** Ecrit l'echantillon courant (lu ensuite par les voix avec un retard >= 2), puis advance(). */
-        void write (float xs, float es) noexcept { x[(size_t) wr] = xs; e[(size_t) wr] = es; }
+        /** Stores one frame (channels values) at the write position. */
+        void write (const float* frame) noexcept
+        {
+            for (int c = 0; c < channels; ++c)
+                buf[(size_t) c][(size_t) wr] = frame[c];
+        }
+
+        /** Moves the write position forward. Call once per sample, after all reads. */
         void advance() noexcept { wr = (wr + 1) & mask; }
 
-        float readX (double delay) const noexcept { return read (x, delay); }
-        float readE (double delay) const noexcept { return read (e, delay); }
-
-        /** Retard maximal lisible sans repli (echantillons). */
-        double maxDelay() const noexcept { return (double) mask - 4.0; }
-
-    private:
-        /** Lecture Hermite cubique a `delay` echantillons (>= 2) derriere l'ecriture courante (comme SOLAR). */
-        float read (const std::vector<float>& b, double delay) const noexcept
+        /** Cubic Hermite read `delay` samples behind the frame just written (delay >= 2, delay < size). */
+        float read (int c, double delay) const noexcept
         {
             const double rp = (double) wr - delay;
-            const double fl = std::floor (rp);
-            const int i0 = (int) fl;
-            const float f = (float) (rp - fl);
-            const float y0 = b[(size_t) ((i0 - 1) & mask)], y1 = b[(size_t) (i0 & mask)],
-                        y2 = b[(size_t) ((i0 + 1) & mask)], y3 = b[(size_t) ((i0 + 2) & mask)];
+            const int i0 = (int) std::floor (rp);
+            const float f = (float) (rp - (double) i0);
+            const auto& b = buf[(size_t) c];
+            const int base = size;                       // keeps every index positive
+            const float y0 = b[(size_t) ((i0 - 1 + base) & mask)];
+            const float y1 = b[(size_t) ((i0 + base) & mask)];
+            const float y2 = b[(size_t) ((i0 + 1 + base) & mask)];
+            const float y3 = b[(size_t) ((i0 + 2 + base) & mask)];
             const float c1 = 0.5f * (y2 - y0);
             const float c2 = y0 - 2.5f * y1 + 2.0f * y2 - 0.5f * y3;
             const float c3 = 0.5f * (y3 - y0) + 1.5f * (y1 - y2);
             return ((c3 * f + c2) * f + c1) * f + y1;
         }
 
-        std::vector<float> x, e;
-        int mask = 0, wr = 0;
+    private:
+        std::vector<float> buf[channels];
+        int size = 2, mask = 1, wr = 0;
     };
 
-    //==========================================================================
-    /** Longueur de fenetre commune aux voix, synchronisee sur la periode detectee. */
-    class WindowControl
+    /** Pitch-synchronous grain length. W = 2 * j * period, so the tap separation W/2 is a whole number of
+        input periods. Grain bounds: 11-22 ms at 48 kHz (scaled with the sample rate). Inputs below about
+        90 Hz get the largest allowed grain, where coherence is no longer guaranteed. */
+    class GrainWindow
     {
     public:
-        void prepare (double sr)
+        void prepare (double sampleRate)
         {
-            wMax = 0.024 * sr;
-            wDefault = 0.020 * sr;
-            W = Wtarget = wDefault;
-            slew = 1.0 / (0.05 * sr);          // lissage ~50 ms (pas de saut de retard)
+            sr = sampleRate;
+            wLo = 0.011 * sr;
+            wHi = 0.022 * sr;
+            W = Wtarget = 0.5 * (wLo + wHi);
+            wSlew = 1.0 / (0.05 * sr);     // 50 ms glide of the grain length
         }
 
-        void reset() noexcept { W = Wtarget = wDefault; }
-
-        /** Latence fixe (retard moyen des prises) : W/2 max + 2 echantillons de marge Hermite. */
-        int latencySamples() const noexcept { return (int) std::ceil (0.5 * wMax) + 2; }
-
-        /** W = plus grand multiple de 2 x periode <= wMax (les deux prises, separees de W/2, restent en phase). */
+        /** Input period in samples (ignored when not positive). */
         void setPeriod (double periodSamples) noexcept
         {
             if (periodSamples <= 1.0) return;
-            const double k = std::floor (wMax / (2.0 * periodSamples));
-            Wtarget = k >= 1.0 ? 2.0 * k * periodSamples : wMax;
+            const double twoT = 2.0 * periodSamples;
+            const double j = std::max (1.0, std::ceil (wLo / twoT));
+            Wtarget = std::min (wHi, std::max (wLo, j * twoT));
         }
 
-        void tick() noexcept { W += (Wtarget - W) * slew; }
-        double get() const noexcept { return W; }
+        void tick() noexcept { W += (Wtarget - W) * wSlew; }
+
+        double length() const noexcept { return W; }
+
+        /** Announced latency in samples: the mean read delay of the taps. Constant, so it never changes. */
+        int latencySamples() const noexcept { return (int) std::ceil (0.5 * wHi) + 4; }
 
     private:
-        double wMax = 1152.0, wDefault = 960.0, W = 960.0, Wtarget = 960.0, slew = 0.0004;
+        double sr = 44100.0, wLo = 0.0, wHi = 0.0, W = 0.0, Wtarget = 0.0, wSlew = 0.0;
     };
 
-    //==========================================================================
-    /** Etat "deux prises" d'une voix (approche SOLAR) : phase de balayage a la vitesse (1 - ratio),
-        prises A et B decalees d'une demi-fenetre, gains sin^2 complementaires. Au repos (ratio ~ 1),
-        la phase revient doucement a 0 ou 0.5 : une seule prise active, au retard exact du signal sec. */
-    struct TwoTapState
+    /** Read state of one voice: phase of tap A in grains (0..1), tap B half a grain later, sin^2 crossfade. */
+    struct TwoTap
     {
         double phase = 0.0, pB = 0.5;
         float gA = 0.0f, gB = 1.0f;
 
-        void reset() noexcept { phase = 0.0; pB = 0.5; gA = 0.0f; gB = 1.0f; }
-
-        void step (double ratio, double W) noexcept
+        void reset (double initialPhase) noexcept
         {
-            const double rate = 1.0 - ratio;
+            phase = initialPhase;
+            updateGains();
+        }
+
+        /** rate = 1 - ratio (phase advances by rate / W per sample). homeStep = largest phase move per sample at rest. */
+        void step (double rate, double W, double homeStep) noexcept
+        {
             if (std::abs (rate) < 5e-4)
             {
+                // at rest: drift to phase 0 or 0.5, where a single tap is audible (no comb filtering)
                 const double home = std::round (phase * 2.0) * 0.5;
-                const double stepMax = 0.01 / W;
-                phase += std::max (-stepMax, std::min (stepMax, home - phase));
+                phase += std::max (-homeStep, std::min (homeStep, home - phase));
             }
             else
                 phase += rate / W;
-            phase -= std::floor (phase);
 
-            pB = phase + 0.5; pB -= std::floor (pB);
-            const double sA = std::sin (3.14159265358979323846 * phase), sB = std::sin (3.14159265358979323846 * pB);
+            phase -= std::floor (phase);
+            updateGains();
+        }
+
+    private:
+        void updateGains() noexcept
+        {
+            pB = phase + 0.5;
+            pB -= std::floor (pB);
+            const double sA = std::sin (kPi * phase), sB = std::sin (kPi * pB);
             gA = (float) (sA * sA);
             gB = (float) (sB * sB);
         }

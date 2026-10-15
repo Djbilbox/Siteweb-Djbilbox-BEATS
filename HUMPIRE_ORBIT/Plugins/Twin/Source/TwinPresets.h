@@ -2,5 +2,5 @@
 #include <vector>
 #include "Core/PresetManager.h"
 
-/** 22 presets d'usine de HUMPIRE TWIN, classes par genre / usage. */
+/** 20 factory presets of HUMPIRE TWIN, grouped by genre / usage. */
 std::vector<HumpirePreset> makeTwinFactoryPresets();

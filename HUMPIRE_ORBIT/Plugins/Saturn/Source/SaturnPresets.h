@@ -2,5 +2,5 @@
 #include <vector>
 #include "Core/PresetManager.h"
 
-/** 23 presets d'usine HUMPIRE SATURN classes par genre / usage (la tonalite du morceau est conservee). */
+/** 20 factory presets for HUMPIRE SATURN, grouped by genre and use. */
 std::vector<HumpirePreset> makeSaturnFactoryPresets();

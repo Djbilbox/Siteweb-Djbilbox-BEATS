@@ -5,351 +5,338 @@
 #include <cstdint>
 #include <vector>
 #include <juce_core/juce_core.h>
+#include "TwinParams.h"
 
-/** HUMPIRE TWIN - moteur d'auto-doublage.
-
-    Principe (double track realiste, sans latence) :
-    - la voix (somme mono, filtree HP/LP) est ecrite dans une ligne a retard partagee ;
-    - chaque doublure est une "prise" qui lit cette ligne avec un retard de 5-50 ms ;
-    - le micro-detune est obtenu en faisant glisser lentement le retard (d(retard)/dt = 1 - ratio) :
-      la hauteur est decalee exactement de `ratio` ; quand la prise atteint le bord de sa fenetre de glissement
-      (+/- 0,5..4 ms), une seconde prise repart de l'autre bord et on fond les deux (10-40 ms, smoothstep) ;
-    - l'humanisation module lentement et aleatoirement (bruit lisse interpole) le retard, le detune et le niveau
-      de chaque doublure, a la vitesse "Drift" ;
-    - les doublures sont placees en stereo (loi a puissance constante) selon Width, normalisees en 1/sqrt(N).
-
-    Les commandes sont calculees a cadence de controle (tous les 16 echantillons) avec rampes lineaires par
-    echantillon : aucun zipper, aucune allocation hors prepare(), resultat independant de la taille des blocs. */
+/** HUMPIRE TWIN - DSP core.
+    One shared mono delay line feeds up to four doubles. Each double is a Doppler pitch shifter
+    (two taps cross-faded with a sin^2 window over a 10 ms cycle) with its own micro-detune, its own
+    micro-delay (5-40 ms) and a slow random modulation (Humanize / Drift). The doubles are panned,
+    summed to a stereo wet bus, then high-pass and low-pass filtered. No allocation in process(). */
 namespace twin
 {
-    //==========================================================================
-    /** Filtre a variable d'etat TPT (Zavalishin), 2 poles, Q = 0,707 : sorties passe-bas et passe-haut. */
-    struct Svf
+    inline constexpr float kMinDelayMs = 5.0f;
+    inline constexpr float kMaxDelayMs = 40.0f;
+
+    /** Real-unit settings, pushed once per block. */
+    struct DoublerSettings
     {
-        float g = 0.0f, k = 1.41421356f, a1 = 0.0f, a2 = 0.0f, a3 = 0.0f, ic1 = 0.0f, ic2 = 0.0f;
-
-        void setCutoff (float hz, float sampleRate) noexcept
-        {
-            const float fc = juce::jlimit (10.0f, 0.45f * sampleRate, hz);
-            g  = std::tan (juce::MathConstants<float>::pi * fc / sampleRate);
-            a1 = 1.0f / (1.0f + g * (g + k));
-            a2 = g * a1;
-            a3 = g * a2;
-        }
-        void reset() noexcept { ic1 = ic2 = 0.0f; }
-
-        inline void tick (float v0, float& lp, float& hp) noexcept
-        {
-            const float v3 = v0 - ic2;
-            const float v1 = a1 * ic1 + a2 * v3;
-            const float v2 = ic2 + a2 * ic1 + a3 * v3;
-            ic1 = 2.0f * v1 - ic1;
-            ic2 = 2.0f * v2 - ic2;
-            lp = v2;
-            hp = v0 - k * v1 - v2;
-        }
+        int   voices   = 2;
+        float detuneCt = 12.0f;    // maximum micro-detune of a double, cents
+        float delayMs  = 18.0f;    // base micro-delay, 5..40 ms
+        float humanize = 0.4f;     // 0..1, depth of the random modulation
+        float driftHz  = 0.35f;    // average rate of the random modulation
+        float width    = 0.8f;     // 0..1, stereo spread of the doubles
+        float hpHz     = 120.0f;
+        float lpHz     = 12000.0f;
     };
 
-    /** Generateur pseudo-aleatoire xorshift32 (deterministe, sans allocation). Sortie dans [-1, 1]. */
-    struct Rng
-    {
-        std::uint32_t s = 0x9E3779B9u;
-        float next() noexcept
-        {
-            s ^= s << 13; s ^= s >> 17; s ^= s << 5;
-            return (float) (s >> 8) * (1.0f / 8388608.0f) - 1.0f;
-        }
-    };
-
-    /** Bruit lisse : nouvelle cible aleatoire a chaque periode, interpolation smoothstep (derivee nulle aux noeuds). */
-    struct SmoothRandom
-    {
-        float a = 0.0f, b = 0.0f, ph = 0.0f;
-        void reset (Rng& r) noexcept { a = 0.0f; b = r.next(); ph = 0.0f; }
-        float tick (float inc, Rng& r) noexcept
-        {
-            ph += inc;
-            if (ph >= 1.0f)
-            {
-                ph -= std::floor (ph);
-                a = b;
-                b = r.next();
-            }
-            const float w = ph * ph * (3.0f - 2.0f * ph);
-            return a + (b - a) * w;
-        }
-    };
-
-    //==========================================================================
-    class DoublerEngine
+    /** Second-order RBJ biquad, Direct Form II transposed. */
+    class Biquad
     {
     public:
-        static constexpr int maxVoices = 4;
-        static constexpr int tickLen = 16;
+        void reset() noexcept { z1 = 0.0f; z2 = 0.0f; }
 
-        struct Settings
+        void setLowPass (double sr, double freq, double q) noexcept
         {
-            int   voices = 2;
-            float detuneCents = 12.0f, delayMs = 18.0f, spread = 0.5f, humanize = 0.4f,
-                  driftHz = 0.35f, width = 0.8f, hpfHz = 120.0f, lpfHz = 14000.0f;
-        };
-
-        /** Lecture seule pour l'UI (copiee par le processeur dans des atomics). */
-        struct VoiceView { float delayMs, cents, pan, env, peak; };
-
-        void prepare (double sampleRate)
-        {
-            sr = sampleRate > 1000.0 ? sampleRate : 44100.0;
-            int sz = 1;
-            while (sz < (int) (0.12 * sr) + 8) sz <<= 1;          // > 120 ms : retard max ~ 60 ms
-            buf.assign ((size_t) sz, 0.0f);
-            mask = sz - 1;
-            msToSamp   = sr * 0.001;
-            minDelay   = std::max (2.0, 0.0005 * sr);
-            maxDelay   = (double) sz - 4.0;
-            jumpThresh = 0.003 * sr;
-            slew       = 0.01;                                     // pente max de suivi du retard (~17 cents)
-            const double tl = (double) tickLen;
-            smoothCoef = (float) (1.0 - std::exp (-tl / (0.05 * sr)));
-            envCoef    = (float) (1.0 - std::exp (-tl / (0.025 * sr)));
-            panCoef    = (float) (1.0 - std::exp (-tl / (0.04 * sr)));
-            reset();
+            const double w0 = 2.0 * juce::MathConstants<double>::pi * freq / sr;
+            const double cw = std::cos (w0), alpha = std::sin (w0) / (2.0 * q), a0 = 1.0 + alpha;
+            store ((1.0 - cw) * 0.5 / a0, (1.0 - cw) / a0, (1.0 - cw) * 0.5 / a0, -2.0 * cw / a0, (1.0 - alpha) / a0);
         }
 
-        void reset() noexcept
+        void setHighPass (double sr, double freq, double q) noexcept
         {
-            std::fill (buf.begin(), buf.end(), 0.0f);
-            wpos = 0;
-            tickPos = 0;
-            hp.reset(); lp.reset();
-            initialised = false;
-            for (int k = 0; k < maxVoices; ++k)
-            {
-                auto& v = voices[(size_t) k];
-                v = Voice();
-                v.rng.s = 0x1234567u + 0x9E3779B9u * (std::uint32_t) (k + 1);
-                v.rD.reset (v.rng); v.rP.reset (v.rng); v.rG.reset (v.rng);
-            }
+            const double w0 = 2.0 * juce::MathConstants<double>::pi * freq / sr;
+            const double cw = std::cos (w0), alpha = std::sin (w0) / (2.0 * q), a0 = 1.0 + alpha;
+            store ((1.0 + cw) * 0.5 / a0, -(1.0 + cw) / a0, (1.0 + cw) * 0.5 / a0, -2.0 * cw / a0, (1.0 - alpha) / a0);
         }
 
-        bool isPrepared() const noexcept { return ! buf.empty(); }
-
-        void setSettings (const Settings& s) noexcept { target = s; }
-
-        /** Traite un echantillon de source mono ; renvoie les doublures en stereo (L, R) et en mono (C). */
-        inline void process (float src, float& outL, float& outR, float& outC) noexcept
+        float process (float x) noexcept
         {
-            if (tickPos == 0) controlTick();
-            if (++tickPos >= tickLen) tickPos = 0;
-
-            float lo, hi, lo2, hi2;
-            hp.tick (src, lo, hi);           // passe-haut
-            lp.tick (hi, lo2, hi2);          // puis passe-bas
-            buf[(size_t) wpos] = lo2;
-
-            float L = 0.0f, R = 0.0f, C = 0.0f;
-            for (auto& v : voices)
-            {
-                if (! v.alive) continue;
-                const float s = renderVoice (v);
-                L += s * v.gL; R += s * v.gR; C += s * v.gC;
-                v.peak = std::max (v.peak, std::abs (s * v.gC));
-                v.gL += v.dL; v.gR += v.dR; v.gC += v.dC;
-            }
-            wpos = (wpos + 1) & mask;
-            outL = L; outR = R; outC = C;
-        }
-
-        VoiceView getVoiceView (int k) const noexcept
-        {
-            const auto& v = voices[(size_t) juce::jlimit (0, maxVoices - 1, k)];
-            const auto& t = v.tap[(size_t) v.act];
-            return { v.alive ? (float) ((t.c + t.v) / msToSamp) : 0.0f, v.cents, v.pan, v.env, v.peak };
-        }
-        void clearPeaks() noexcept { for (auto& v : voices) v.peak = 0.0f; }
-
-        // Constantes de placement (publiques pour l'UI)
-        static constexpr float detunePattern[maxVoices] = { 1.0f, -1.0f, 0.6f, -0.6f };
-        static constexpr float spreadDev[maxVoices]     = { 0.0f, -0.25f, 0.25f, -0.4f };
-        static float panFor (int numVoices, int k) noexcept
-        {
-            static constexpr float table[maxVoices][maxVoices] = {
-                { -0.6f,  0.0f,  0.0f,  0.0f  },    // 1 doublure : legerement a gauche (lead au centre)
-                { -1.0f,  1.0f,  0.0f,  0.0f  },    // 2 : paire gauche / droite
-                { -1.0f,  1.0f,  0.0f,  0.0f  },    // 3 : paire + centre
-                { -1.0f,  1.0f, -0.45f, 0.45f },    // 4 : deux paires
-            };
-            return table[juce::jlimit (0, maxVoices - 1, numVoices - 1)][juce::jlimit (0, maxVoices - 1, k)];
+            const float y = b0 * x + z1;
+            z1 = b1 * x - a1 * y + z2;
+            z2 = b2 * x - a2 * y;
+            return y;
         }
 
     private:
-        struct Tap { double c = 0.0, v = 0.0; };    // retard = c (centre suivi) + v (glissement detune), en echantillons
-
-        struct Voice
+        void store (double nb0, double nb1, double nb2, double na1, double na2) noexcept
         {
-            Tap tap[2];
-            int act = 0;
-            bool fading = false, alive = false;
-            float xf = 0.0f, xfInc = 0.0f;
-            double nominal = 0.0, halfSpan = 0.0, rate = 0.0;
-            float env = 0.0f, pan = 0.0f, cents = 0.0f, peak = 0.0f;
-            float gL = 0.0f, gR = 0.0f, gC = 0.0f, dL = 0.0f, dR = 0.0f, dC = 0.0f;
-            SmoothRandom rD, rP, rG;
-            Rng rng;
-        };
-
-        //======================================================================
-        void controlTick() noexcept
-        {
-            const Settings& s = target;
-            const float kS = initialised ? smoothCoef : 1.0f;
-            const float kE = initialised ? envCoef : 1.0f;
-            const float kP = initialised ? panCoef : 1.0f;
-            const float fsr = (float) sr;
-
-            detuneSm += (s.detuneCents - detuneSm) * kS;
-            hpLog += (std::log (juce::jlimit (10.0f, 20000.0f, s.hpfHz)) - hpLog) * kS;
-            lpLog += (std::log (juce::jlimit (10.0f, 24000.0f, s.lpfHz)) - lpLog) * kS;
-            hp.setCutoff (std::exp (hpLog), fsr);
-            lp.setCutoff (std::exp (lpLog), fsr);
-
-            const int N = juce::jlimit (1, maxVoices, s.voices);
-            float envSum = 0.0f;
-            for (int k = 0; k < maxVoices; ++k)
-            {
-                auto& v = voices[(size_t) k];
-                const bool on = k < N;
-                v.env += ((on ? 1.0f : 0.0f) - v.env) * kE;
-                if (! on && v.env < 1.0e-4f) { v.env = 0.0f; v.alive = false; }
-                envSum += v.env;
-            }
-            const float norm = 1.0f / std::sqrt (std::max (1.0f, envSum));
-            const float hum = juce::jlimit (0.0f, 1.0f, s.humanize);
-            const float speedMul[maxVoices] = { 1.0f, 0.83f, 1.21f, 0.93f };
-
-            for (int k = 0; k < maxVoices; ++k)
-            {
-                auto& v = voices[(size_t) k];
-                const bool on = k < N;
-                if (! on && ! v.alive)
-                {
-                    v.gL = v.gR = v.gC = v.dL = v.dR = v.dC = 0.0f;
-                    continue;
-                }
-
-                // --- humanisation : trois bruits lisses independants ---
-                const float inc = juce::jlimit (0.01f, 3.0f, s.driftHz) * speedMul[k] * (float) tickLen / fsr;
-                const float hD = v.rD.tick (inc, v.rng);
-                const float hP = v.rP.tick (inc * 0.71f, v.rng);
-                const float hG = v.rG.tick (inc * 1.37f, v.rng);
-
-                // --- retard nominal + fenetre de glissement ---
-                const float baseMs  = juce::jlimit (1.5f, 50.0f, s.delayMs * (1.0f + juce::jlimit (0.0f, 1.0f, s.spread) * spreadDev[k]));
-                const float depthMs = hum * std::min (2.5f, 0.3f * baseMs);
-                v.nominal  = (double) (baseMs + depthMs * hD) * msToSamp;
-                v.halfSpan = (double) juce::jlimit (0.5f, 4.0f, (baseMs - depthMs - 1.0f) / 1.3f) * msToSamp;
-
-                // --- micro-detune : glissement du retard a la pente (1 - ratio) ---
-                v.cents = detuneSm * detunePattern[k] + hum * 5.0f * hP;
-                v.rate  = 1.0 - std::exp2 ((double) v.cents / 1200.0);
-
-                if (! v.alive)
-                {
-                    // (re)naissance de la doublure : prise unique centree sur le retard nominal
-                    v.tap[0].c = v.nominal; v.tap[0].v = 0.0;
-                    v.act = 0; v.fading = false; v.alive = true;
-                    v.gL = v.gR = v.gC = 0.0f;
-                }
-                else if (! v.fading && std::abs (v.nominal - v.tap[(size_t) v.act].c) > jumpThresh)
-                {
-                    // grand changement de Delay / Spread : saut en fondu plutot qu'un glissement (evite le "wow")
-                    startFade (v, v.nominal, 0.0, 0.03 * sr);
-                }
-
-                // --- placement stereo (puissance constante) et gains en rampe ---
-                if (on) v.pan += (panFor (N, k) * juce::jlimit (0.0f, 1.0f, s.width) - v.pan) * kP;
-                const float theta = (v.pan + 1.0f) * juce::MathConstants<float>::pi * 0.25f;
-                const float gain = v.env * (1.0f + 0.11f * hum * hG) * norm;
-                const float tL = std::cos (theta) * gain, tR = std::sin (theta) * gain, tC = 0.70710678f * gain;
-                if (initialised)
-                {
-                    const float inv = 1.0f / (float) tickLen;
-                    v.dL = (tL - v.gL) * inv; v.dR = (tR - v.gR) * inv; v.dC = (tC - v.gC) * inv;
-                }
-                else
-                {
-                    v.gL = tL; v.gR = tR; v.gC = tC; v.dL = v.dR = v.dC = 0.0f;
-                }
-            }
-            initialised = true;
+            b0 = (float) nb0; b1 = (float) nb1; b2 = (float) nb2;
+            a1 = (float) na1; a2 = (float) na2;
         }
 
-        static void startFade (Voice& v, double c, double nv, double lenSamples) noexcept
+        float b0 = 1.0f, b1 = 0.0f, b2 = 0.0f, a1 = 0.0f, a2 = 0.0f, z1 = 0.0f, z2 = 0.0f;
+    };
+
+    /** Small deterministic xorshift generator (no allocation, reproducible). */
+    struct Random
+    {
+        std::uint32_t s = 0x9E3779B9u;
+
+        void seed (std::uint32_t v) noexcept { s = v != 0u ? v : 0x9E3779B9u; }
+
+        std::uint32_t next() noexcept
         {
-            v.act ^= 1;
-            v.tap[(size_t) v.act].c = c;
-            v.tap[(size_t) v.act].v = nv;
-            v.fading = true;
-            v.xf = 0.0f;
-            v.xfInc = (float) (1.0 / std::max (1.0, lenSamples));
-        }
-
-        inline double clampDelay (double d) const noexcept { return d < minDelay ? minDelay : (d > maxDelay ? maxDelay : d); }
-
-        inline float renderVoice (Voice& v) noexcept
-        {
-            Tap& a = v.tap[(size_t) v.act];
-            a.v += v.rate;
-            a.c += juce::jlimit (-slew, slew, v.nominal - a.c);
-            float s = read (clampDelay (a.c + a.v));
-
-            if (v.fading)
-            {
-                Tap& b = v.tap[(size_t) (v.act ^ 1)];
-                b.v += v.rate;
-                v.xf += v.xfInc;
-                if (v.xf >= 1.0f)
-                    v.fading = false;
-                else
-                {
-                    const float w = v.xf * v.xf * (3.0f - 2.0f * v.xf);
-                    s = w * s + (1.0f - w) * read (clampDelay (b.c + b.v));
-                }
-            }
-            else if (a.v > v.halfSpan || a.v < -v.halfSpan)
-            {
-                // bord de fenetre atteint : nouvelle prise a l'autre bord, fondu croise
-                const double h = v.halfSpan;
-                const double nv = a.v > h ? (v.rate > 0.0 ? -h : h) : (v.rate < 0.0 ? h : -h);
-                const double len = juce::jlimit (0.01 * sr, 0.04 * sr, 0.9 * h / std::max (std::abs (v.rate), 1.0e-9));
-                startFade (v, a.c, nv, len);
-            }
+            s ^= s << 13;
+            s ^= s >> 17;
+            s ^= s << 5;
             return s;
         }
 
-        /** Lecture Hermite cubique a `delay` echantillons (>= 2) derriere l'ecriture courante. */
-        inline float read (double delaySamples) const noexcept
+        float unit() noexcept { return (float) (next() & 0xFFFFFFu) * (1.0f / 16777216.0f); }
+        float bipolar() noexcept { return unit() * 2.0f - 1.0f; }
+    };
+
+    /** Slow random modulation: cosine interpolation between random targets, output in -1..1. */
+    struct Drift
+    {
+        Random rng;
+        float from = 0.0f, to = 0.0f, pos = 0.0f, inc = 0.0f;
+
+        void start (std::uint32_t seed) noexcept
         {
-            const double rp = (double) wpos - delaySamples;
-            const double fl = std::floor (rp);
-            const int i0 = (int) fl;
-            const float f = (float) (rp - fl);
-            const float y0 = buf[(size_t) ((i0 - 1) & mask)], y1 = buf[(size_t) (i0 & mask)],
-                        y2 = buf[(size_t) ((i0 + 1) & mask)], y3 = buf[(size_t) ((i0 + 2) & mask)];
-            const float c1 = 0.5f * (y2 - y0);
-            const float c2 = y0 - 2.5f * y1 + 2.0f * y2 - 0.5f * y3;
-            const float c3 = 0.5f * (y3 - y0) + 1.5f * (y1 - y2);
-            return ((c3 * f + c2) * f + c1) * f + y1;
+            rng.seed (seed);
+            from = 0.0f;
+            to = rng.bipolar();
+            pos = 0.0f;
+            inc = 0.0f;
         }
 
-        std::vector<float> buf;
-        std::array<Voice, maxVoices> voices {};
-        Settings target;
-        Svf hp, lp;
-        double sr = 44100.0, msToSamp = 44.1, minDelay = 22.0, maxDelay = 1000.0, jumpThresh = 132.0, slew = 0.01;
-        float smoothCoef = 0.01f, envCoef = 0.01f, panCoef = 0.01f;
-        float detuneSm = 0.0f, hpLog = 4.787f, lpLog = 9.547f;
-        int mask = 0, wpos = 0, tickPos = 0;
-        bool initialised = false;
+        /** rateHz = average number of new random targets per second. */
+        float next (float rateHz, double invSr) noexcept
+        {
+            if (inc <= 0.0f) inc = (float) ((double) rateHz * invSr);
+            pos += inc;
+            if (pos >= 1.0f)
+            {
+                pos -= 1.0f;
+                from = to;
+                to = rng.bipolar();
+                inc = (float) ((double) rateHz * invSr * (0.6 + 0.8 * (double) rng.unit()));
+            }
+            const float w = 0.5f - 0.5f * std::cos (juce::MathConstants<float>::pi * pos);
+            return from + (to - from) * w;
+        }
     };
+
+    /** Per-voice stereo pattern: detune and delay multipliers, and pan positions in -1..1. */
+    inline constexpr float kDelayMul[kMaxVoices]  = {  1.00f,  0.72f,  1.28f,  0.86f };
+    inline constexpr float kDetuneMul[kMaxVoices] = {  1.00f, -0.85f,  0.62f, -1.18f };
+    inline constexpr float kPanPos[kMaxVoices]    = { -1.00f,  1.00f, -0.55f,  0.55f };
+
+    class Doubler
+    {
+    public:
+        /** Sizes the delay line and smoothers. Not real-time safe: call from prepareToPlay only. */
+        void prepare (double sampleRate);
+
+        /** Clears the delay line and snaps every smoother to its target. */
+        void reset() noexcept;
+
+        /** Pushes new settings (called once per block, no allocation). */
+        void setSettings (const DoublerSettings& s) noexcept;
+
+        /** Re-seeds the random modulation. */
+        void reseed (std::uint32_t seed) noexcept;
+
+        /** One sample: mono in, stereo wet out (already filtered). */
+        void process (float monoIn, float& wetL, float& wetR) noexcept;
+
+        int   getActiveVoices() const noexcept { return activeVoices; }
+        float getVoiceDelayMs (int k) const noexcept { return voices[(size_t) k].delayMs; }
+        float getVoiceDetuneCt (int k) const noexcept { return voices[(size_t) k].detuneCt; }
+        float getVoicePan (int k) const noexcept { return voices[(size_t) k].pan; }
+
+    private:
+        struct Voice
+        {
+            // targets, written by setSettings()
+            float targetDelayMs = 18.0f, targetDetuneCt = 0.0f, targetPan = 0.0f;
+            float targetGainL = 0.0f, targetGainR = 0.0f;
+            // smoothed state, advanced per sample
+            float delayMs = 18.0f, detuneCt = 0.0f, pan = 0.0f;
+            float gainL = 0.0f, gainR = 0.0f;
+            float phase = 0.0f;          // Doppler sawtooth, 0..windowSamples
+            Drift delayDrift, detuneDrift;
+        };
+
+        float readAt (float delaySamples) const noexcept;
+        void updateFilters() noexcept;
+
+        double sr = 48000.0, invSr = 1.0 / 48000.0;
+        float samplesPerMs = 48.0f, windowSamples = 480.0f;
+        int bufLen = 0, mask = 0, writeIdx = 0;
+        std::vector<float> buffer;
+
+        std::array<Voice, kMaxVoices> voices;
+        DoublerSettings target;
+        int activeVoices = 2;
+        float depthDelayMs = 0.0f, depthDetuneCt = 0.0f, driftHz = 0.35f;
+        float normTarget = 1.0f, normSm = 1.0f;
+        float hpTargetLog = 0.0f, lpTargetLog = 0.0f, hpLog = 0.0f, lpLog = 0.0f;
+        float coefDelay = 0.0f, coefDetune = 0.0f, coefPan = 0.0f, coefGain = 0.0f, coefFilter = 0.0f;
+        Biquad hpL, hpR, lpL, lpR;
+        unsigned filterCounter = 0u;
+    };
+
+    // ------------------------------------------------------------------------------------------
+    inline void Doubler::prepare (double newSr)
+    {
+        sr = juce::jlimit (8000.0, 384000.0, newSr);
+        invSr = 1.0 / sr;
+        samplesPerMs = (float) (sr * 0.001);
+        windowSamples = (float) (0.010 * sr);            // 10 ms Doppler cycle
+
+        const int need = (int) std::ceil (0.06 * sr) + 64;   // longest tap is ~45 ms
+        int len = 1;
+        while (len < need) len <<= 1;
+        bufLen = len;
+        mask = len - 1;
+        buffer.assign ((size_t) len, 0.0f);
+        writeIdx = 0;
+
+        coefDelay  = (float) (1.0 - std::exp (-1.0 / (0.06 * sr)));
+        coefDetune = (float) (1.0 - std::exp (-1.0 / (0.04 * sr)));
+        coefPan    = (float) (1.0 - std::exp (-1.0 / (0.03 * sr)));
+        coefGain   = (float) (1.0 - std::exp (-1.0 / (0.03 * sr)));
+        coefFilter = (float) (1.0 - std::exp (-32.0 / (0.05 * sr)));   // filters update every 32 samples
+
+        const DoublerSettings current = target;
+        setSettings (current);
+        reset();
+    }
+
+    inline void Doubler::reset() noexcept
+    {
+        if (! buffer.empty()) std::fill (buffer.begin(), buffer.end(), 0.0f);
+        writeIdx = 0;
+        for (int k = 0; k < kMaxVoices; ++k)
+        {
+            Voice& v = voices[(size_t) k];
+            v.delayMs = v.targetDelayMs;
+            v.detuneCt = v.targetDetuneCt;
+            v.pan = v.targetPan;
+            v.gainL = v.targetGainL;
+            v.gainR = v.targetGainR;
+            v.phase = 0.0f;
+            v.delayDrift.start (0x1234567u + 0x9E3779B9u * (std::uint32_t) (k + 1));
+            v.detuneDrift.start (0x7654321u + 0x85EBCA6Bu * (std::uint32_t) (k + 1));
+        }
+        normSm = normTarget;
+        hpLog = hpTargetLog;
+        lpLog = lpTargetLog;
+        hpL.reset(); hpR.reset(); lpL.reset(); lpR.reset();
+        updateFilters();
+    }
+
+    inline void Doubler::setSettings (const DoublerSettings& s) noexcept
+    {
+        target = s;
+        target.voices = juce::jlimit (1, kMaxVoices, s.voices);
+        activeVoices = target.voices;
+
+        const float humanizeAmount = juce::jlimit (0.0f, 1.0f, s.humanize);
+        const float stereoWidth = juce::jlimit (0.0f, 1.0f, s.width);
+        const float baseDelay = juce::jlimit (kMinDelayMs, kMaxDelayMs, s.delayMs);
+        depthDelayMs  = humanizeAmount * 8.0f;     // +-8 ms at 100 %
+        depthDetuneCt = humanizeAmount * 6.0f;     // +-6 cents at 100 %
+        driftHz       = juce::jlimit (0.02f, 4.0f, s.driftHz);
+        normTarget    = 1.0f / std::sqrt ((float) target.voices);
+        hpTargetLog   = std::log2 (juce::jlimit (20.0f, 800.0f, s.hpHz));
+        lpTargetLog   = std::log2 (juce::jlimit (1000.0f, 20000.0f, s.lpHz));
+
+        for (int k = 0; k < kMaxVoices; ++k)
+        {
+            Voice& v = voices[(size_t) k];
+            const bool on = k < target.voices;
+            const float angle = (stereoWidth * kPanPos[k] + 1.0f) * juce::MathConstants<float>::pi * 0.25f;
+            v.targetDelayMs  = juce::jlimit (kMinDelayMs, kMaxDelayMs, baseDelay * kDelayMul[k]);
+            v.targetDetuneCt = s.detuneCt * kDetuneMul[k];
+            v.targetPan      = stereoWidth * kPanPos[k];
+            v.targetGainL    = on ? std::cos (angle) : 0.0f;   // constant-power pan law
+            v.targetGainR    = on ? std::sin (angle) : 0.0f;
+        }
+    }
+
+    inline void Doubler::reseed (std::uint32_t seed) noexcept
+    {
+        for (int k = 0; k < kMaxVoices; ++k)
+        {
+            Voice& v = voices[(size_t) k];
+            const auto kk = (std::uint32_t) (k + 1);
+            v.delayDrift.start (seed * 2654435761u + kk * 977u);
+            v.detuneDrift.start (seed * 40503u + kk * 7919u + 12345u);
+        }
+    }
+
+    /** Linear-interpolated read `delaySamples` behind the most recent input sample. */
+    inline float Doubler::readAt (float delaySamples) const noexcept
+    {
+        const float pos = (float) (writeIdx + bufLen - 1) - delaySamples;   // positive: delay < bufLen
+        const int i0 = (int) pos;
+        const float frac = pos - (float) i0;
+        const auto a = (size_t) (i0 & mask);
+        const auto b = (size_t) ((i0 + 1) & mask);
+        return buffer[a] + (buffer[b] - buffer[a]) * frac;
+    }
+
+    inline void Doubler::process (float x, float& outL, float& outR) noexcept
+    {
+        buffer[(size_t) writeIdx] = x;
+        writeIdx = (writeIdx + 1) & mask;
+
+        const float halfW = 0.5f * windowSamples;
+        const float winInc = juce::MathConstants<float>::twoPi / windowSamples;
+        float sumL = 0.0f, sumR = 0.0f;
+
+        for (int k = 0; k < kMaxVoices; ++k)
+        {
+            Voice& v = voices[(size_t) k];
+
+            // Smoothed live values: targets plus slow random modulation (Humanize)
+            const float dMod = v.delayDrift.next (driftHz, invSr);
+            const float cMod = v.detuneDrift.next (driftHz, invSr);
+            const float delayGoal = juce::jlimit (kMinDelayMs, kMaxDelayMs, v.targetDelayMs + depthDelayMs * dMod);
+            v.delayMs  += (delayGoal - v.delayMs) * coefDelay;
+            v.detuneCt += (v.targetDetuneCt + depthDetuneCt * cMod - v.detuneCt) * coefDetune;
+            v.pan      += (v.targetPan - v.pan) * coefPan;
+            v.gainL    += (v.targetGainL - v.gainL) * coefGain;
+            v.gainR    += (v.targetGainR - v.gainR) * coefGain;
+
+            // Doppler pitch shifter: the read head runs at `ratio` against the writer,
+            // so its delay grows by (1 - ratio) per sample; the sawtooth wraps every window.
+            const float ratio = std::exp2 (v.detuneCt / 1200.0f);
+            v.phase += 1.0f - ratio;
+            if (v.phase >= windowSamples)  v.phase -= windowSamples;
+            else if (v.phase < 0.0f)       v.phase += windowSamples;
+
+            const float phaseB = v.phase >= halfW ? v.phase - halfW : v.phase + halfW;
+            const float wA = 0.5f - 0.5f * std::cos (winInc * v.phase);   // sin^2 window, wA + wB = 1
+            const float dBase = juce::jmax (1.0f, v.delayMs * samplesPerMs - halfW);
+            const float y = wA * readAt (dBase + v.phase) + (1.0f - wA) * readAt (dBase + phaseB);
+
+            sumL += v.gainL * y;
+            sumR += v.gainR * y;
+        }
+
+        normSm += (normTarget - normSm) * coefGain;
+        sumL *= normSm;
+        sumR *= normSm;
+
+        if ((++filterCounter & 31u) == 0u) updateFilters();
+        outL = lpL.process (hpL.process (sumL));
+        outR = lpR.process (hpR.process (sumR));
+    }
+
+    inline void Doubler::updateFilters() noexcept
+    {
+        hpLog += (hpTargetLog - hpLog) * coefFilter;
+        lpLog += (lpTargetLog - lpLog) * coefFilter;
+        const double hz = std::exp2 ((double) hpLog);
+        const double lz = juce::jmin (std::exp2 ((double) lpLog), 0.45 * sr);
+        hpL.setHighPass (sr, hz, 0.7071);
+        hpR.setHighPass (sr, hz, 0.7071);
+        lpL.setLowPass (sr, lz, 0.7071);
+        lpR.setLowPass (sr, lz, 0.7071);
+    }
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include "Core/HumpireEditorBase.h"
 #include "Core/OrbitKnob.h"
 #include "Core/TopBar.h"
@@ -9,7 +8,7 @@
 #include "TwinOrbitView.h"
 #include "TwinWidgets.h"
 
-/** Editeur HUMPIRE TWIN (960 x 600, redimensionnable 50-200 %), meme langage visuel que SOLAR. */
+/** Editor of HUMPIRE TWIN (960 x 600, resizable 50-200 %). */
 class TwinEditor : public HumpireEditorBase
 {
 public:
@@ -17,28 +16,32 @@ public:
     ~TwinEditor() override = default;
 
 private:
-    void applyVoices (int n);
+    void applyDoubles (int voices);
     void applySimple (bool simple);
 
     TwinAudioProcessor& proc;
 
     HumpireTopBar topBar;
-    TwinOrbitView orbitView;
+    TwinOrbitView orbit;
+    TwinVoiceReadout readout;
     WaveformDisplay waveform;
-    CorrelationMeter corrMeter;
-    TwinVoiceStrip voiceStrip;
     XpBar xpBar;
 
-    juce::Label voicesLabel;
-    std::array<juce::TextButton, twin::kMaxVoices> voiceBtns;
+    juce::OwnedArray<juce::TextButton> doubleButtons;
+    juce::TextButton reseedBtn { "RESEED" };
     juce::ToggleButton simpleBtn { "SIMPLE" };
 
-    OrbitKnob detune { "Detune" }, delay { "Delay" }, spread { "Spread" },
-              humanize { "Humanize", humpire::theme::violet }, drift { "Drift", humpire::theme::violet },
-              width { "Width", humpire::theme::cyan }, lowCut { "Low Cut", humpire::theme::cyan }, highCut { "High Cut", humpire::theme::cyan },
-              mix { "Mix", humpire::theme::ember }, inGain { "Input", humpire::theme::ember }, outGain { "Output", humpire::theme::ember };
+    OrbitKnob detune { "Detune", humpire::theme::amber },
+              delay { "Delay", humpire::theme::amber },
+              width { "Width", humpire::theme::cyan },
+              mix { "Mix", humpire::theme::ember },
+              humanize { "Humanize", humpire::theme::violet },
+              drift { "Drift", humpire::theme::violet },
+              hpKnob { "High-Pass", humpire::theme::cyan },
+              lpKnob { "Low-Pass", humpire::theme::cyan },
+              outGain { "Output", humpire::theme::ember };
 
-    juce::ParameterAttachment voicesAttach, simpleAttach;
+    juce::ParameterAttachment doublesAttach, simpleAttach;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TwinEditor)
 };
