@@ -29,9 +29,9 @@ public:
         auto P = [] (const char* n, const char* c, float m, float t, float r, float a, float rl, float k, float mk, float h, float mx)
         { return fp (n, c, { { "mode", m }, { "thresh", t }, { "ratio", r }, { "attack", a }, { "release", rl }, { "knee", k }, { "makeup", mk }, { "schpf", h }, { "mix", mx } }); };
         return {
-            P ("Voix Trap Lead",    "Voix Trap", 0, -20, 4, 8,   140, 6, 4, 90, 1.0f),
-            P ("Ad-Lib Squash",     "Voix Trap", 2, -26, 8, 2,   90,  3, 6, 120, 0.7f),
-            P ("Vocal Glue",        "Voix Trap", 0, -16, 2.5f, 15, 200, 10, 2, 80, 1.0f),
+            P ("Trap Vocal Lead",    "Trap Vocals", 0, -20, 4, 8,   140, 6, 4, 90, 1.0f),
+            P ("Ad-Lib Squash",     "Trap Vocals", 2, -26, 8, 2,   90,  3, 6, 120, 0.7f),
+            P ("Vocal Glue",        "Trap Vocals", 0, -16, 2.5f, 15, 200, 10, 2, 80, 1.0f),
             P ("808 Tamer",         "808",       0, -14, 6, 20,  250, 4, 2, 30, 1.0f),
             P ("808 Sustain",       "808",       1, -22, 3, 30,  400, 8, 5, 25, 1.0f),
             P ("Kick Punch",        "Kick",      1, -18, 5, 25,  80,  2, 3, 60, 1.0f),

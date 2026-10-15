@@ -33,7 +33,7 @@ public:
             P ("Afrotrap Master",   "Master",    5, -1.0f, 90, 2, -10),  P ("Deep House Smooth","Master",    3, -1.0f, 200, 3, -11),
             P ("Oriental Dynamic",  "Master",    2, -1.0f, 250, 3, -14), P ("G-Funk Warm",      "Master",    3, -1.0f, 150, 2, -12),
             P ("Hip-Hop Punch",     "Master",    5, -1.0f, 60, 1.5f, -9),P ("Bus Drums Catch",  "Bus Drums", 4, -2.0f, 50, 1.5f, -14),
-            P ("808 Guard",         "808",       2, -1.5f, 140, 3, -14), P ("Voix Trap Safety", "Voix Trap", 3, -2.0f, 100, 2, -16),
+            P ("808 Guard",         "808",       2, -1.5f, 140, 3, -14), P ("Trap Vocal Safety", "Trap Vocals", 3, -2.0f, 100, 2, -16),
             P ("Kick Ceiling",      "Kick",      3, -1.0f, 40, 1, -14),  P ("Safe -16 LUFS",    "Master",    0, -1.5f, 150, 2, -16),
         };
     }

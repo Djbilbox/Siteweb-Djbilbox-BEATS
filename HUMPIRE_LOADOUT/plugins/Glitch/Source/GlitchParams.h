@@ -85,10 +85,10 @@ inline std::vector<humpire::FactoryPreset> factoryPresets()
 
     return {
         //   nom                         categorie       bits  rate     drv   spk   tone  dth  mix   out
-        P ("Radio Crush",               "Voix Trap",    10.f, 16000.f, 0.20f, true,  0.35f, 2, 1.00f,  0.f),
-        P ("Telephone Ad-Lib",          "Voix Trap",    12.f, 8000.f,  0.10f, true,  0.05f, 1, 1.00f,  0.f),
-        P ("Dusty Vocal Chop",          "Voix Trap",    9.f,  22050.f, 0.15f, false, 0.40f, 2, 0.70f, -1.f),
-        P ("Megaphone Hook",            "Voix Trap",    11.f, 12000.f, 0.45f, true,  0.15f, 0, 1.00f, -2.f),
+        P ("Radio Crush",               "Trap Vocals",    10.f, 16000.f, 0.20f, true,  0.35f, 2, 1.00f,  0.f),
+        P ("Telephone Ad-Lib",          "Trap Vocals",    12.f, 8000.f,  0.10f, true,  0.05f, 1, 1.00f,  0.f),
+        P ("Dusty Vocal Chop",          "Trap Vocals",    9.f,  22050.f, 0.15f, false, 0.40f, 2, 0.70f, -1.f),
+        P ("Megaphone Hook",            "Trap Vocals",    11.f, 12000.f, 0.45f, true,  0.15f, 0, 1.00f, -2.f),
         P ("Dirty Sub 12bit",           "808",          12.f, 32000.f, 0.25f, false, 0.40f, 2, 1.00f, -1.f),
         P ("808 Grit",                  "808",          8.f,  44100.f, 0.40f, false, 0.40f, 0, 0.60f, -2.f),
         P ("Sampler Crunch 808",        "808",          10.f, 26000.f, 0.30f, false, 0.40f, 1, 0.80f, -1.f),

@@ -32,7 +32,7 @@ public:
         auto P = [] (const char* n, const char* c, float lx, float ly, float rx, float ry, float dr, float mx)
         { return fp (n, c, { { "lx", lx }, { "ly", ly }, { "rx", rx }, { "ry", ry }, { "drive", dr }, { "mix", mx } }); };
         return {
-            P ("Trap Stutter 1/16",   "Voix Trap", 0.30f, 0.5f, 0.3f, 0.5f, 0.0f, 1.0f), P ("Ad-Lib Throw",       "Voix Trap", 0.60f, 0.3f, 0.5f, 0.5f, 0.2f, 0.9f),
+            P ("Trap Stutter 1/16",   "Trap Vocals", 0.30f, 0.5f, 0.3f, 0.5f, 0.0f, 1.0f), P ("Ad-Lib Throw",       "Trap Vocals", 0.60f, 0.3f, 0.5f, 0.5f, 0.2f, 0.9f),
             P ("808 Tape Dive",       "808",       0.50f, 0.5f, 0.8f, 0.5f, 0.0f, 1.0f), P ("808 Slow Stop",       "808",       0.50f, 0.5f, 1.0f, 0.5f, 0.1f, 1.0f),
             P ("Kick Roll 1/32",      "Kick",      0.05f, 0.5f, 0.3f, 0.2f, 0.3f, 1.0f), P ("Kick Reverse",        "Kick",      0.50f, 0.5f, 0.3f, 0.3f, 0.0f, 1.0f),
             P ("Oud Reverse Swell",   "Oud",       0.50f, 0.5f, 0.4f, 0.8f, 0.0f, 0.8f), P ("Oud Filter Close",    "Oud",       0.50f, 0.15f, 0.4f, 0.5f, 0.0f, 1.0f),

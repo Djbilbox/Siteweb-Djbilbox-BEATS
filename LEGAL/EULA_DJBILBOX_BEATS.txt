@@ -1,0 +1,106 @@
+================================================================================
+ DJBILBOX BEATS / HUMPIRE - END USER LICENSE AGREEMENT (EULA)
+ Royalty-free license - Version 1.0
+================================================================================
+
+By installing or using the DJBILBOX BEATS / HUMPIRE software (VST3 plugins,
+presets, sounds, samples and documentation - hereinafter "the Software"), you
+agree to this agreement. If you do not agree, do not install the Software.
+
+1. GRANT OF LICENSE
+   DJBILBOX BEATS (Toulouse, France - "the Publisher") grants you a personal,
+   non-exclusive, non-transferable and non-sublicensable license to use the
+   Software. The Software is licensed, not sold: the Publisher retains all
+   intellectual property rights.
+   You may install the Software on two (2) computers that you own (for example
+   a studio computer and a laptop), provided they are not used simultaneously.
+
+2. ROYALTY-FREE USE
+   Any music, sound, composition or recording that you create with the
+   Software (including with its factory presets and, where applicable, its
+   samples) belongs to you. You may exploit it commercially - releases on
+   streaming platforms, sales, placements, synchronization (film, advertising,
+   video games, television), radio broadcasts, live performances, sale or
+   leasing of beats and instrumentals - without royalties, fees, reporting or
+   mandatory credit to the Publisher.
+   A "Produced with DJBILBOX BEATS / HUMPIRE" credit is appreciated but
+   optional.
+
+3. RESTRICTIONS
+   Unless you have the Publisher's prior written consent, you may not:
+   a) copy, distribute, share, resell, rent, lend or make available the
+      Software, its installers or its files (VST3, presets, samples), in whole
+      or in part, free of charge or for a fee;
+   b) redistribute the factory presets, samples or sounds in isolated form, or
+      as sound banks, sample packs, kits, libraries or competing products,
+      including after modification or isolated resampling. Their use within a
+      musical composition remains free (section 2);
+   c) decompile, disassemble, reverse engineer or modify the Software, except
+      to the extent permitted by applicable law;
+   d) remove or circumvent any proprietary notice or protection mechanism;
+   e) use the Software or its sounds to train an artificial intelligence model
+      intended to replicate the Software or its sounds.
+
+4. INTELLECTUAL PROPERTY
+   The names DJBILBOX BEATS, HUMPIRE and the product names, as well as the
+   graphical interfaces, code, presets and documentation, are the property of
+   the Publisher or its licensors. Third-party components are governed by
+   their own licenses (see THIRD_PARTY_NOTICES.txt).
+   VST is a registered trademark of Steinberg Media Technologies GmbH. FL Studio
+   is a trademark of Image-Line. These mentions do not imply any partnership.
+
+5. UPDATES
+   Bug-fix updates of the purchased major version (1.x) are provided free of
+   charge when released. They are governed by this agreement unless stated
+   otherwise.
+
+6. WARRANTY
+   The Software is provided "as is". To the extent permitted by law, the
+   Publisher does not warrant that it will be error-free or compatible with
+   every configuration. Mandatory statutory warranties under the consumer law
+   of your country remain unaffected.
+
+7. LIMITATION OF LIABILITY
+   To the extent permitted by law, the Publisher shall not be liable for any
+   indirect damages (loss of data, projects or revenue). Back up your projects
+   regularly. The Publisher's total liability is limited to the price paid for
+   the Software.
+
+8. TERMINATION
+   Any breach of this agreement automatically terminates the license; you must
+   then uninstall and destroy all copies of the Software. Music created in good
+   faith before termination remains your property (section 2).
+
+9. GOVERNING LAW
+   This agreement is governed by French law. Failing an amicable settlement,
+   the courts of Toulouse (France) shall have jurisdiction, subject to the
+   mandatory rules protecting consumers in their country of residence.
+
+Contact: djbilboxbeats.com
+
+--------------------------------------------------------------------------------
+ TRADUCTION FRANÇAISE (fournie aux clients francophones - French translation)
+--------------------------------------------------------------------------------
+1. LICENCE : licence personnelle, non exclusive et non transférable,
+   installation sur deux (2) ordinateurs vous appartenant, non utilisés
+   simultanément. Le Logiciel est concédé sous licence, il n'est pas vendu.
+2. LIBRE DE DROITS : toute musique, tout son ou enregistrement créé avec le
+   Logiciel (presets et échantillons d'usine compris) vous appartient et peut
+   être exploité commercialement (streaming, ventes, synchronisation, radio,
+   concerts, vente ou location de beats) sans redevance ni mention obligatoire.
+3. RESTRICTIONS : interdiction de copier, partager, revendre, louer ou
+   redistribuer le Logiciel, ses installateurs, presets ou échantillons ; de
+   redistribuer les sons d'usine de manière isolée ou sous forme de banques de
+   sons, sample packs ou produits concurrents ; de faire de l'ingénierie
+   inverse (sauf dans les limites de la loi) ; d'utiliser le Logiciel ou ses
+   sons pour entraîner une IA destinée à les reproduire.
+4. Tous les noms, interfaces, codes, presets et documents restent la propriété
+   de DJBILBOX BEATS ou de ses concédants. VST est une marque déposée de
+   Steinberg Media Technologies GmbH.
+5. Mises à jour correctives de la version 1.x gratuites.
+6-7. Logiciel fourni « en l'état » dans les limites de la loi ; responsabilité
+   limitée au prix payé ; garanties légales impératives préservées.
+8. Résiliation automatique en cas de violation ; la musique créée de bonne foi
+   avant la résiliation reste la vôtre.
+9. Droit français, tribunaux de Toulouse, sous réserve des règles impératives
+   protégeant le consommateur.

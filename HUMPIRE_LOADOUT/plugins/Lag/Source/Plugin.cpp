@@ -41,9 +41,9 @@ public:
         { return fp (n, c, { { "timeL", tl }, { "timeR", tr }, { "fb", fb }, { "lowcut", lc }, { "highcut", hc }, { "duck", dk }, { "mix", mx },
                              { "sync", sync ? 1.f : 0.f }, { "divL", (float) dl }, { "divR", (float) dr }, { "pingpong", pp ? 1.f : 0.f } }); };
         return {
-            P ("Trap Vocal 1/8",    "Voix Trap", 250, 250, 0.35f, 150, 7000, 0.6f, 0.25f, true, 1, 1, false),
-            P ("Ad-Lib Ping-Pong",  "Voix Trap", 300, 300, 0.45f, 200, 6000, 0.3f, 0.30f, true, 4, 4, true),
-            P ("Dotted Hook",       "Voix Trap", 375, 375, 0.40f, 180, 8000, 0.5f, 0.28f, true, 5, 4, false),
+            P ("Trap Vocal 1/8",    "Trap Vocals", 250, 250, 0.35f, 150, 7000, 0.6f, 0.25f, true, 1, 1, false),
+            P ("Ad-Lib Ping-Pong",  "Trap Vocals", 300, 300, 0.45f, 200, 6000, 0.3f, 0.30f, true, 4, 4, true),
+            P ("Dotted Hook",       "Trap Vocals", 375, 375, 0.40f, 180, 8000, 0.5f, 0.28f, true, 5, 4, false),
             P ("808 Slap",          "808",       80,  95,  0.15f, 120, 3000, 0.0f, 0.15f, false, 1, 1, false),
             P ("Kick Echo Tight",   "Kick",      60,  60,  0.20f, 200, 5000, 0.0f, 0.12f, false, 0, 0, false),
             P ("Oud Wide Echo",     "Oud",       420, 560, 0.45f, 150, 7500, 0.2f, 0.30f, false, 4, 5, false),

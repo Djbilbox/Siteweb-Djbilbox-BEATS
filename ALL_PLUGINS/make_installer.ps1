@@ -1,7 +1,7 @@
 # =============================================================================
 #  DJBILBOX BEATS - generation de l'installateur unique (Inno Setup 6)
 #  Entree : <Stage>\synths|loadout|orbit|chaabi\*.vst3  (+ <Stage>\chaabi_samples\)
-#  Sortie : <Out>\DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe + LISEZMOI.txt
+#  Sortie : <Out>\DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe + README.txt
 # =============================================================================
 param(
     [Parameter(Mandatory = $true)][string]$Stage,
@@ -11,10 +11,12 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $Stage = (Resolve-Path $Stage).Path
+$EulaPath = Join-Path $Stage "docs\EULA_DJBILBOX_BEATS.txt"
+if (-not (Test-Path $EulaPath)) { throw "EULA absente : $EulaPath" }
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 $Out = (Resolve-Path $Out).Path
 
-# Plugins attendus (pour signaler les absents dans le LISEZMOI)
+# Expected plugins (listed as NOT INCLUDED in README.txt when missing)
 $expected = [ordered]@{
     synths  = @("ARENA_BASS","CHINTZWAZ","CYBERPUNK_LEAD","DZPOWER","FUNKYKOPS","GOLDHAWK","HIGHROLLER_GOLD","K2000",
                 "MARABOUT","MIDNIGHT_REELS","OCCITANIE","OCTOPUS","PHANTOM_RIDER","SAN_ANDREAS_LEAD","SHAMAN",
@@ -26,14 +28,17 @@ $expected = [ordered]@{
     chaabi  = @("HUMPIRE CHAABI ORCHESTRA")
 }
 $groupLabel = @{
-    synths  = "Synthetiseurs DJBILBOX BEATS"
-    loadout = "HUMPIRE LOADOUT - 8 effets studio"
-    orbit   = "HUMPIRE ORBIT - effets vocaux"
+    synths  = "DJBILBOX BEATS synthesizers"
+    loadout = "HUMPIRE LOADOUT - 8 studio effects"
+    orbit   = "HUMPIRE ORBIT - vocal effects"
     chaabi  = "HUMPIRE CHAABI ORCHESTRA - sampler"
 }
 
 $components = New-Object System.Collections.Generic.List[string]
 $files      = New-Object System.Collections.Generic.List[string]
+if (Test-Path (Join-Path $Stage "docs")) {
+    $files.Add("Source: ""$Stage\docs\*""; DestDir: ""{commonpf64}\DJBILBOX BEATS\Documentation""; Flags: recursesubdirs ignoreversion")
+}
 $included   = New-Object System.Collections.Generic.List[string]
 $missing    = New-Object System.Collections.Generic.List[string]
 
@@ -64,7 +69,7 @@ if ($included.Count -eq 0) { throw "Aucun plugin VST3 trouve dans $Stage" }
 $iss = @"
 ; Genere automatiquement par ALL_PLUGINS/make_installer.ps1 - ne pas editer a la main
 [Setup]
-AppId={{6B1F2C8E-4D7A-4E3B-9C15-DJB0ALLPLUGINS}
+AppId={{6B1F2C8E-4D7A-4E3B-9C15-0D1B2A3C4E5F}
 AppName=DJBILBOX BEATS - All Plugins
 AppVersion=$Version
 AppPublisher=DJBILBOX BEATS / HUMPIRE
@@ -81,13 +86,15 @@ Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayName=DJBILBOX BEATS - All Plugins
+LicenseFile=$EulaPath
+DisableWelcomePage=no
 
 [Languages]
-Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Types]
-Name: "full"; Description: "Installation complete (tous les plugins)"
-Name: "custom"; Description: "Personnalisee"; Flags: iscustom
+Name: "full"; Description: "Full installation (all plugins)"
+Name: "custom"; Description: "Custom"; Flags: iscustom
 
 [Components]
 $($components -join "`r`n")
@@ -103,22 +110,24 @@ if ($LASTEXITCODE -ne 0) { throw "ISCC a echoue ($LASTEXITCODE)" }
 
 $readme = @"
 DJBILBOX BEATS - ALL PLUGINS v$Version
-=====================================
+======================================
 
-1. Lance DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe (accepte la demande administrateur).
-2. Tous les plugins sont coches par defaut ; decoche ceux que tu ne veux pas.
-3. Les VST3 sont installes dans C:\Program Files\Common Files\VST3
-4. FL Studio : Options > Manage plugins > Find installed plugins (ou "Start scan").
+1. Run DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe and accept the administrator prompt.
+2. Read and accept the license agreement (EULA). The music you make is royalty-free.
+3. All plugins are selected by default; untick the ones you do not want.
+4. VST3 plugins are installed in C:\Program Files\Common Files\VST3
+5. The user manuals and license are in C:\Program Files\DJBILBOX BEATS\Documentation
+6. FL Studio: Options > Manage plugins > Find installed plugins.
 
-HUMPIRE CHAABI ORCHESTRA : des samples de TEST (synthetises) sont installes dans
-C:\ProgramData\HUMPIRE\Chaabi Orchestra\Samples. Remplace-les par tes vrais WAV (memes noms) ;
-l'installateur ne les ecrasera jamais.
+HUMPIRE CHAABI ORCHESTRA: test samples (synthesized) are installed in
+C:\ProgramData\HUMPIRE\Chaabi Orchestra\Samples. Replace them with your own WAV
+files (same names). The installer never overwrites existing sample files.
 
-PLUGINS INCLUS ($($included.Count)) :
+INCLUDED PLUGINS ($($included.Count)):
 $(($included | ForEach-Object { "  + $_" }) -join "`r`n")
 
-NON INCLUS ($($missing.Count)) :
-$(if ($missing.Count -eq 0) { "  (aucun)" } else { ($missing | ForEach-Object { "  - $_" }) -join "`r`n" })
+NOT INCLUDED ($($missing.Count)):
+$(if ($missing.Count -eq 0) { "  (none)" } else { ($missing | ForEach-Object { "  - $_" }) -join "`r`n" })
 "@
-[System.IO.File]::WriteAllText((Join-Path $Out "LISEZMOI.txt"), $readme, (New-Object System.Text.UTF8Encoding($true)))
+[System.IO.File]::WriteAllText((Join-Path $Out "README.txt"), $readme, (New-Object System.Text.UTF8Encoding($true)))
 Write-Host $readme

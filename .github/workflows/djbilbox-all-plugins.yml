@@ -109,6 +109,13 @@ jobs:
         with: { name: pluginval-logs, path: pvlogs }
 
       # ---------------- 5) installateur + zip + release
+      - name: Documentation et licence (dans le paquet)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path stage/docs | Out-Null
+          Copy-Item LEGAL/EULA_DJBILBOX_BEATS.txt, LEGAL/THIRD_PARTY_NOTICES.txt stage/docs/
+          if (Test-Path MANUALS/dist) { Copy-Item MANUALS/dist/*.pdf stage/docs/ -ErrorAction SilentlyContinue }
+
       - name: Installateur Inno Setup
         shell: pwsh
         run: |
@@ -118,7 +125,7 @@ jobs:
       - name: Zip
         shell: pwsh
         run: |
-          $items = @("dist/DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe", "dist/LISEZMOI.txt")
+          $items = @("dist/DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe", "dist/README.txt")
           if (Test-Path dist/pluginval_report.txt) { $items += "dist/pluginval_report.txt" }
           Compress-Archive -Path $items -DestinationPath dist/DJBILBOX_BEATS_ALL_PLUGINS.zip -Force
       - uses: actions/upload-artifact@v4
@@ -126,14 +133,14 @@ jobs:
           name: DJBILBOX_BEATS_ALL_PLUGINS
           path: |
             dist/DJBILBOX_BEATS_ALL_PLUGINS.zip
-            dist/LISEZMOI.txt
+            dist/README.txt
       - name: Release GitHub
         uses: softprops/action-gh-release@v2
         with:
           tag_name: djbilbox-all-plugins-v1.0.${{ github.run_number }}
           name: DJBILBOX BEATS - ALL PLUGINS v1.0.${{ github.run_number }}
           target_commitish: ${{ github.sha }}
-          body_path: dist/LISEZMOI.txt
+          body_path: dist/README.txt
           files: |
             dist/DJBILBOX_BEATS_ALL_PLUGINS.zip
             dist/DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe

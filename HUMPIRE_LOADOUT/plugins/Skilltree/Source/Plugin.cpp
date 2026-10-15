@@ -56,8 +56,8 @@ public:
         using V = std::initializer_list<std::pair<const char*, float>>;
         auto P = [] (const char* n, const char* c, V v) { return fp (n, c, v); };
         return {
-            P ("Voix Trap Air",     "Voix Trap", { { "hp", 90 }, { "b2g", -2 }, { "b2f", 250 }, { "b4g", 2.5f }, { "b4f", 3500 }, { "b6g", 3 }, { "b6f", 11000 } }),
-            P ("Voix Radio",        "Voix Trap", { { "hp", 200 }, { "lp", 9000 }, { "b3g", 4 }, { "b3f", 1500 }, { "b3q", 1.4f } }),
+            P ("Trap Vocal Air",     "Trap Vocals", { { "hp", 90 }, { "b2g", -2 }, { "b2f", 250 }, { "b4g", 2.5f }, { "b4f", 3500 }, { "b6g", 3 }, { "b6f", 11000 } }),
+            P ("Radio Vocal",        "Trap Vocals", { { "hp", 200 }, { "lp", 9000 }, { "b3g", 4 }, { "b3f", 1500 }, { "b3q", 1.4f } }),
             P ("808 Sub Boost",     "808",       { { "hp", 25 }, { "b1g", 4 }, { "b1f", 55 }, { "b2g", -3 }, { "b2f", 220 }, { "lp", 8000 } }),
             P ("808 Clarity",       "808",       { { "b2g", -4 }, { "b2f", 300 }, { "b4g", 2 }, { "b4f", 1200 } }),
             P ("Kick Punch",        "Kick",      { { "b1g", 3 }, { "b1f", 60 }, { "b2g", -4 }, { "b2f", 350 }, { "b4g", 3 }, { "b4f", 4000 } }),

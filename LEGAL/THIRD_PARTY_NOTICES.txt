@@ -1,0 +1,30 @@
+================================================================================
+ DJBILBOX BEATS / HUMPIRE - THIRD-PARTY NOTICES
+================================================================================
+
+1. JUCE 8 (audio application framework)
+   Copyright (c) Raw Material Software Limited.
+   The plugins are built with JUCE 8 under a JUCE commercial license
+   appropriate to the Publisher's revenue.
+   https://juce.com
+
+2. VST3 SDK
+   VST is a registered trademark of Steinberg Media Technologies GmbH,
+   registered in Europe and other countries.
+   The VST 3 SDK is used in accordance with the applicable Steinberg license.
+
+3. "Press Start 2P" font (HUMPIRE LOADOUT, LCD displays)
+   Copyright (c) 2012 The Press Start 2P Project Authors (cody@zone38.net),
+   with Reserved Font Name "Press Start 2P".
+   Licensed under the SIL Open Font License, Version 1.1:
+   https://openfontlicense.org
+   The font is embedded; it may be redistributed with the software but may not
+   be sold on its own.
+
+4. Inno Setup (installer)
+   Copyright (c) Jordan Russell and Martijn Laan. https://jrsoftware.org
+   (installer authoring tool; no Inno Setup code is included in the plugins)
+
+All digital signal processing (DSP) algorithms, graphical interfaces, presets
+and visuals of the DJBILBOX BEATS / HUMPIRE plugins are original works of the
+Publisher.

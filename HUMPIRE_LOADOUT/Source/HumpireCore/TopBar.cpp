@@ -57,10 +57,10 @@ void TopBar::showPresetMenu()
 
 void TopBar::promptSave()
 {
-    auto* w = new juce::AlertWindow ("Sauvegarder le preset", "Nom du preset :", juce::MessageBoxIconType::NoIcon);
+    auto* w = new juce::AlertWindow ("Save preset", "Preset name:", juce::MessageBoxIconType::NoIcon);
     w->addTextEditor ("n", presets.getCurrentName());
-    w->addButton ("Sauver", 1, juce::KeyPress (juce::KeyPress::returnKey));
-    w->addButton ("Annuler", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+    w->addButton ("Save", 1, juce::KeyPress (juce::KeyPress::returnKey));
+    w->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
     juce::Component::SafePointer<TopBar> safe (this);
     w->enterModalState (true, juce::ModalCallbackFunction::create ([safe, w] (int r)
     {

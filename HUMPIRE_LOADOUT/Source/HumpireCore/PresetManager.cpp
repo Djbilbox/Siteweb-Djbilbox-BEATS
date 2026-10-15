@@ -24,7 +24,7 @@ void PresetManager::rescanUser()
     auto files = userDir().findChildFiles (juce::File::findFiles, false, "*.xml");
     files.sort();
     for (auto& f : files)
-        entries.push_back ({ f.getFileNameWithoutExtension(), "Utilisateur", {}, f });
+        entries.push_back ({ f.getFileNameWithoutExtension(), "User", {}, f });
     sendChangeMessage();
 }
 

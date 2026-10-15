@@ -29,8 +29,8 @@ public:
         auto P = [] (const char* n, const char* c, float pw, float cv, float d, float h, float sp, float o)
         { return fp (n, c, { { "power", pw }, { "curve", cv }, { "density", d }, { "harm", h }, { "split", sp }, { "out", o } }); };
         return {
-            P ("Vocal Presence",  "Voix Trap", 0.30f, 0.20f, 0.7f, 0.50f, 800,  -1),
-            P ("Ad-Lib Heat",     "Voix Trap", 0.55f, 0.40f, 0.9f, 0.40f, 600,  -2),
+            P ("Vocal Presence",  "Trap Vocals", 0.30f, 0.20f, 0.7f, 0.50f, 800,  -1),
+            P ("Ad-Lib Heat",     "Trap Vocals", 0.55f, 0.40f, 0.9f, 0.40f, 600,  -2),
             P ("808 Harmonics",   "808",       0.45f, 0.25f, 1.0f, 0.10f, 120,  -2),
             P ("Sub Thicken",     "808",       0.30f, 0.10f, 0.8f, 0.00f, 150,  -1),
             P ("Kick Weight",     "Kick",      0.40f, 0.30f, 0.9f, 0.20f, 200,  -2),

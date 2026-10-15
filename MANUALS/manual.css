@@ -1,0 +1,42 @@
+/* DJBILBOX BEATS / HUMPIRE - feuille de style des manuels (impression A4) */
+@page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+:root { --ink: #16151a; --muted: #5d5a63; --gold: #c98a1a; --gold2: #f5b544; --orange: #ff7a3d; --violet: #6b4fd6; --line: #e4dfd6; --bg-soft: #faf7f1; }
+html { font-family: "Inter", "DejaVu Sans", sans-serif; font-size: 10.2pt; color: var(--ink); line-height: 1.5; }
+body { margin: 0; }
+h1, h2, h3 { font-family: "Inter Display", "Inter", sans-serif; line-height: 1.2; color: #0b0b0f; }
+h1 { font-size: 24pt; margin: 0 0 4mm; padding-bottom: 3mm; border-bottom: 3px solid var(--gold2); break-before: page; }
+h1:first-of-type { break-before: auto; }
+h2 { font-size: 13.5pt; margin: 7mm 0 2.5mm; color: var(--gold); break-after: avoid; }
+h3 { font-size: 11pt; margin: 5mm 0 2mm; break-after: avoid; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--violet); text-decoration: none; }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.8pt; background: var(--bg-soft); padding: 0 1.2mm; border-radius: 1mm; }
+blockquote { margin: 4mm 0; padding: 3mm 4mm; background: var(--bg-soft); border-left: 3px solid var(--orange); color: var(--muted); }
+blockquote p { margin: 0; }
+table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 9pt; break-inside: auto; }
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th { background: #0b0b0f; color: var(--gold2); text-align: left; font-weight: 600; padding: 1.6mm 2.2mm; }
+td { border-bottom: 1px solid var(--line); padding: 1.5mm 2.2mm; vertical-align: top; }
+tr:nth-child(even) td { background: var(--bg-soft); }
+/* tableau d'identite (2 colonnes sans en-tete) */
+table:has(thead th:empty) thead { display: none; }
+table:has(thead th:empty) td:first-child { width: 32%; font-weight: 600; color: var(--muted); }
+ul, ol { padding-left: 6mm; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 6mm 0; }
+/* couverture */
+.cover { height: 257mm; display: flex; flex-direction: column; justify-content: space-between; background: #0b0b0f; color: #fff; margin: -18mm -16mm 0; padding: 26mm 20mm; break-after: page; }
+.cover .brand { font-family: "Inter Display", sans-serif; font-weight: 800; font-size: 13pt; letter-spacing: 3px; color: var(--gold2); }
+.cover .title { font-family: "Inter Display", sans-serif; font-weight: 800; font-size: 36pt; line-height: 1.05; margin-top: 30mm; }
+.cover .subtitle { font-size: 13pt; color: #cfc9be; margin-top: 6mm; }
+.cover .bar { height: 4px; width: 60mm; background: linear-gradient(90deg, var(--gold2), var(--orange)); margin-top: 10mm; }
+.cover .meta { font-size: 9.5pt; color: #8d8b86; }
+/* table des matieres */
+nav#TOC { break-after: page; }
+nav#TOC > ul { list-style: none; padding-left: 0; }
+nav#TOC ul ul { list-style: none; padding-left: 5mm; font-size: 9pt; color: var(--muted); }
+nav#TOC li { margin: 0.6mm 0; }
+nav#TOC::before { content: "Contents"; display: block; font-family: "Inter Display", sans-serif; font-size: 22pt; font-weight: 700; border-bottom: 3px solid var(--gold2); padding-bottom: 3mm; margin-bottom: 5mm; }
+.part { break-before: page; height: 240mm; display: flex; flex-direction: column; justify-content: center; }
+.part h1 { border: 0; font-size: 30pt; break-before: auto; }
+.part p { font-size: 12pt; color: var(--muted); max-width: 140mm; }

@@ -64,10 +64,10 @@ void FilmstripKnob::mouseExit  (const juce::MouseEvent& e) { hover = false; repa
 
 void FilmstripKnob::promptForValue()
 {
-    auto* w = new juce::AlertWindow ("Valeur", getName(), juce::MessageBoxIconType::NoIcon);
+    auto* w = new juce::AlertWindow ("Value", getName(), juce::MessageBoxIconType::NoIcon);
     w->addTextEditor ("v", getTextFromValue (getValue()));
     w->addButton ("OK", 1, juce::KeyPress (juce::KeyPress::returnKey));
-    w->addButton ("Annuler", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+    w->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
 
     juce::Component::SafePointer<FilmstripKnob> safe (this);
     w->enterModalState (true, juce::ModalCallbackFunction::create ([safe, w] (int result)
