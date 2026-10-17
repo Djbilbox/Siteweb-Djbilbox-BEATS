@@ -70,7 +70,9 @@ namespace saturn
 
     /** Pitch-synchronous grain length. W = 2 * j * period, so the tap separation W/2 is a whole number of
         input periods. Grain bounds: 11-22 ms at 48 kHz (scaled with the sample rate). Inputs below about
-        90 Hz get the largest allowed grain, where coherence is no longer guaranteed. */
+        90 Hz get the largest allowed grain, where coherence is no longer guaranteed.
+        The whole number j is kept while the grain stays in 0.85 * 11 ms .. 22 ms (hysteresis), so vibrato around a
+        threshold does not make the grain length flip between two very different values. */
     class GrainWindow
     {
     public:
@@ -81,15 +83,22 @@ namespace saturn
             wHi = 0.022 * sr;
             W = Wtarget = 0.5 * (wLo + wHi);
             wSlew = 1.0 / (0.05 * sr);     // 50 ms glide of the grain length
+            j = 0.0;
         }
 
         /** Input period in samples (ignored when not positive). */
         void setPeriod (double periodSamples) noexcept
         {
-            if (periodSamples <= 1.0) return;
+            if (! (periodSamples > 1.0)) return;
             const double twoT = 2.0 * periodSamples;
-            const double j = std::max (1.0, std::ceil (wLo / twoT));
-            Wtarget = std::min (wHi, std::max (wLo, j * twoT));
+            const double wMin = 0.85 * wLo;
+            double w = j * twoT;
+            if (j < 1.0 || w < wMin || w > wHi)
+            {
+                j = std::max (1.0, std::ceil (wLo / twoT));
+                w = j * twoT;
+            }
+            Wtarget = std::min (wHi, std::max (wMin, w));
         }
 
         void tick() noexcept { W += (Wtarget - W) * wSlew; }
@@ -100,7 +109,7 @@ namespace saturn
         int latencySamples() const noexcept { return (int) std::ceil (0.5 * wHi) + 4; }
 
     private:
-        double sr = 44100.0, wLo = 0.0, wHi = 0.0, W = 0.0, Wtarget = 0.0, wSlew = 0.0;
+        double sr = 44100.0, wLo = 0.0, wHi = 0.0, W = 0.0, Wtarget = 0.0, wSlew = 0.0, j = 0.0;
     };
 
     /** Read state of one voice: phase of tap A in grains (0..1), tap B half a grain later, sin^2 crossfade. */

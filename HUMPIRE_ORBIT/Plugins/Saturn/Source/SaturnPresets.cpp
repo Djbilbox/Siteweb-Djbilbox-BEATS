@@ -81,6 +81,8 @@ namespace
         { "Spoken Word / Podcast", "Narrator Sub Warmth", ModeDegrees, Minor, 4, 100.0f, 25.0f, {
             kOff, { true, -12, -7, -16.0f, -20.0f,  3.0f }, kOff, kOff } },
     };
+
+    static_assert (sizeof (kList) / sizeof (kList[0]) == 20, "HUMPIRE SATURN ships exactly 20 factory presets");
 }
 
 std::vector<HumpirePreset> makeSaturnFactoryPresets()

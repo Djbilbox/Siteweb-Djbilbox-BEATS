@@ -60,7 +60,7 @@ namespace saturn
             counter = 0;
             ring[(size_t) wr] = x;
             wr = (wr + 1) & mask;
-            ++filled;
+            if (filled < need) ++filled;                 // saturates: no signed overflow on long sessions
             if (++sinceHop >= hop && filled >= need)
             {
                 sinceHop = 0;

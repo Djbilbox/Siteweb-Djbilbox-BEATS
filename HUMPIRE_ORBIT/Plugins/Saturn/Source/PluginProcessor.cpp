@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -10,6 +12,18 @@ using namespace saturn;
 namespace
 {
     float dbToGain (float db) noexcept { return juce::Decibels::decibelsToGain (db, -100.0f); }
+
+    /** Voice level in dB -> linear gain. The minimum of the parameter ("-inf dB") is true silence. */
+    float levelToGain (float db) noexcept { return db <= kMinLevelDb + 0.05f ? 0.0f : dbToGain (db); }
+
+    /** NaN and infinity become silence: one bad sample from the host must not poison the pitch-detector filters
+        for good. Bit test instead of std::isfinite, so it also holds with fast-math style compiler options. */
+    float finiteOrZero (float x) noexcept
+    {
+        std::uint32_t bits = 0;
+        std::memcpy (&bits, &x, sizeof bits);
+        return (bits & 0x7f800000u) == 0x7f800000u ? 0.0f : x;
+    }
 }
 
 SaturnAudioProcessor::SaturnAudioProcessor()
@@ -35,6 +49,7 @@ SaturnAudioProcessor::SaturnAudioProcessor()
 
     // Usable before prepareToPlay(): the engine and the smoothers are set up at 44.1 kHz here.
     engine.prepare (sr);
+    bypassDelay.prepare (engine.latencySamples());
     setupSmoothers (sr);
     engine.setSettings (readSettings());
     setLatencySamples (engine.latencySamples());
@@ -49,26 +64,43 @@ bool SaturnAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
 
 void SaturnAudioProcessor::setupSmoothers (double sampleRate)
 {
-    const bool bypassed = pBypass->load() > 0.5f;
+    // Every smoother starts at the current parameter value: no fade when the plugin is loaded or re-prepared.
     mixSm.reset (sampleRate, 0.02);
-    mixSm.setCurrentAndTargetValue (bypassed ? 0.0f : 0.01f * pMix->load());
+    mixSm.setCurrentAndTargetValue (0.01f * pMix->load());
     inSm.reset (sampleRate, 0.02);
     inSm.setCurrentAndTargetValue (dbToGain (pIn->load()));
     outSm.reset (sampleRate, 0.02);
     outSm.setCurrentAndTargetValue (dbToGain (pOut->load()));
+    bypassSm.reset (sampleRate, 0.01);
+    bypassSm.setCurrentAndTargetValue (pBypass->load() > 0.5f ? 1.0f : 0.0f);
 }
 
-void SaturnAudioProcessor::prepareToPlay (double sampleRate, int)
+void SaturnAudioProcessor::resetDisplayData() noexcept
 {
-    sr = sampleRate > 0.0 ? sampleRate : 44100.0;
-    engine.prepare (sr);
-    setLatencySamples (engine.latencySamples());
-    setupSmoothers (sr);
-    engine.setSettings (readSettings());
     waveCounter = 0;
     wavePeak = 0.0f;
     inLevel.store (0.0f);
     outLevel.store (0.0f);
+    uiDetMidi.store (-1.0f);
+    uiTrackedMidi.store (-1.0f);
+    for (int v = 0; v < kNumVoices; ++v)
+    {
+        uiVoiceShift[(size_t) v].store (0.0f);
+        uiVoiceLevel[(size_t) v].store (0.0f);
+    }
+}
+
+void SaturnAudioProcessor::prepareToPlay (double sampleRate, int)
+{
+    // No block-sized buffer exists: processing is sample by sample, so any block length is fine.
+    sr = sampleRate > 0.0 ? sampleRate : 44100.0;
+    engine.prepare (sr);                              // allocates; clears the detector and the delay line
+    bypassDelay.prepare (engine.latencySamples());    // zeroed
+    setLatencySamples (engine.latencySamples());
+    setupSmoothers (sr);
+    engine.setSettings (readSettings());
+    engine.reset();                                   // voices start from the current settings, not from the previous run
+    resetDisplayData();
 }
 
 EngineSettings SaturnAudioProcessor::readSettings() const noexcept
@@ -85,7 +117,7 @@ EngineSettings SaturnAudioProcessor::readSettings() const noexcept
         vs.on = p[vOn]->load() > 0.5f;
         vs.semi = juce::jlimit (-24, 24, (int) std::lround (p[vSemi]->load()));
         vs.deg = juce::jlimit (-14, 14, (int) std::lround (p[vDeg]->load()));
-        vs.gain = dbToGain (p[vLevel]->load());
+        vs.gain = levelToGain (p[vLevel]->load());
         vs.pan = 0.01f * p[vPan]->load();
         vs.detuneCents = p[vDetune]->load();
     }
@@ -94,6 +126,8 @@ EngineSettings SaturnAudioProcessor::readSettings() const noexcept
 
 void SaturnAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
 {
+    // The VST3 wrapper always lands here, even when the host bypasses the plugin: the bypass parameter is
+    // handled inside processInternal (latency-aligned pass-through with a short crossfade).
     processInternal (buffer, false);
 }
 
@@ -108,14 +142,14 @@ void SaturnAudioProcessor::processInternal (juce::AudioBuffer<float>& buffer, bo
 
     const int n = buffer.getNumSamples();
     const int nCh = buffer.getNumChannels();
-    for (int c = 2; c < nCh; ++c) buffer.clear (c, 0, n);
     if (n <= 0 || nCh <= 0) return;
+    for (int c = 2; c < nCh; ++c) buffer.clear (c, 0, n);
 
     engine.setSettings (readSettings());
     inSm.setTargetValue (dbToGain (pIn->load()));
     outSm.setTargetValue (dbToGain (pOut->load()));
-    const bool bypassed = hostBypassed || pBypass->load() > 0.5f;
-    mixSm.setTargetValue (bypassed ? 0.0f : 0.01f * pMix->load());
+    mixSm.setTargetValue (0.01f * pMix->load());
+    bypassSm.setTargetValue (hostBypassed || pBypass->load() > 0.5f ? 1.0f : 0.0f);
 
     float* left = buffer.getWritePointer (0);
     float* right = nCh > 1 ? buffer.getWritePointer (1) : nullptr;
@@ -123,26 +157,52 @@ void SaturnAudioProcessor::processInternal (juce::AudioBuffer<float>& buffer, bo
 
     for (int i = 0; i < n; ++i)
     {
+        const float xl = finiteOrZero (left[i]);
+        const float xr = right != nullptr ? finiteOrZero (right[i]) : xl;
+
+        // bypass path: the untouched input, delayed by the same latency as the processed path
+        float rawL = 0.0f, rawR = 0.0f;
+        bypassDelay.process (xl, xr, rawL, rawR);
+        const float b = bypassSm.getNextValue();       // 0 = processed, 1 = bypassed (exactly)
+
         const float ig = inSm.getNextValue();
-        const float inL = left[i] * ig;
-        const float inR = right != nullptr ? right[i] * ig : inL;
+        const float inL = xl * ig;
+        const float inR = xr * ig;
 
         float dryL = 0.0f, dryR = 0.0f, wetL = 0.0f, wetR = 0.0f;
-        engine.process (inL, inR, dryL, dryR, wetL, wetR);
+        engine.process (inL, inR, dryL, dryR, wetL, wetR, b < 1.0f);
 
         // Mix: 0 % = dry only (aligned with the harmony voices), 100 % = dry + harmony bus.
         const float m = mixSm.getNextValue();
         const float og = outSm.getNextValue();
-        if (right != nullptr)
+
+        float outL, outR = 0.0f;
+        if (b >= 1.0f)
         {
-            left[i] = (dryL + m * wetL) * og;
-            right[i] = (dryR + m * wetR) * og;
-            peakOut = std::max (peakOut, std::max (std::abs (left[i]), std::abs (right[i])));
+            outL = rawL;
+            outR = rawR;
         }
         else
         {
-            left[i] = (dryL + m * 0.5f * (wetL + wetR)) * og;
-            peakOut = std::max (peakOut, std::abs (left[i]));
+            float procL, procR = 0.0f;
+            if (right != nullptr)
+            {
+                procL = (dryL + m * wetL) * og;
+                procR = (dryR + m * wetR) * og;
+            }
+            else
+                procL = (dryL + m * 0.5f * (wetL + wetR)) * og;
+
+            outL = b > 0.0f ? procL + b * (rawL - procL) : procL;
+            outR = b > 0.0f ? procR + b * (rawR - procR) : procR;
+        }
+
+        left[i] = outL;
+        peakOut = std::max (peakOut, std::abs (outL));
+        if (right != nullptr)
+        {
+            right[i] = outR;
+            peakOut = std::max (peakOut, std::abs (outR));
         }
 
         peakIn = std::max (peakIn, std::max (std::abs (inL), std::abs (inR)));
@@ -180,6 +240,7 @@ void SaturnAudioProcessor::getStateInformation (juce::MemoryBlock& dest)
 
 void SaturnAudioProcessor::setStateInformation (const void* data, int size)
 {
+    if (data == nullptr || size <= 0) return;
     if (auto xml = getXmlFromBinary (data, size))
         if (xml->hasTagName (apvts.state.getType()))
             apvts.replaceState (juce::ValueTree::fromXml (*xml));

@@ -10,6 +10,7 @@ TwinAudioProcessor::TwinAudioProcessor()
       apvts (*this, &undoManager, "HUMPIRE_TWIN", createLayout()),
       presets (apvts, "Twin")
 {
+    // Cached parameter pointers: the audio thread never looks parameters up by id
     pDoubles  = apvts.getRawParameterValue (id::doubles);
     pDetune   = apvts.getRawParameterValue (id::detune);
     pDelay    = apvts.getRawParameterValue (id::delay);
@@ -34,20 +35,26 @@ bool TwinAudioProcessor::isBusesLayoutSupported (const BusesLayout& l) const
 
 void TwinAudioProcessor::prepareToPlay (double sampleRate, int)
 {
+    prepared.store (false, std::memory_order_release);
+
     sr = sampleRate > 1000.0 ? sampleRate : 44100.0;
     doubler.prepare (sr);
     doubler.setSettings (readSettings());
     doubler.reset();
     setLatencySamples (0);   // the doubles are an audible delay effect, not a processing latency
 
-    mixSm.reset (sr, 0.02);  mixSm.setCurrentAndTargetValue (targetMix());
-    outSm.reset (sr, 0.02);  outSm.setCurrentAndTargetValue (targetOutGain());
+    mixSm.reset (sr, 0.02);     mixSm.setCurrentAndTargetValue (targetMix());
+    outSm.reset (sr, 0.02);     outSm.setCurrentAndTargetValue (targetOutGain());
+    activeSm.reset (sr, 0.015); activeSm.setCurrentAndTargetValue (targetBypass());
     waveCounter = 0;
     wavePeak = 0.0f;
-    prepared = true;
+    inLevel.store (0.0f, std::memory_order_relaxed);
+    outLevel.store (0.0f, std::memory_order_relaxed);
+
+    prepared.store (true, std::memory_order_release);
 }
 
-DoublerSettings TwinAudioProcessor::readSettings() const
+DoublerSettings TwinAudioProcessor::readSettings() const noexcept
 {
     DoublerSettings s;
     s.voices   = juce::jlimit (1, kMaxVoices, juce::roundToInt (pDoubles->load()));
@@ -61,15 +68,19 @@ DoublerSettings TwinAudioProcessor::readSettings() const
     return s;
 }
 
-float TwinAudioProcessor::targetMix() const
+float TwinAudioProcessor::targetMix() const noexcept
 {
-    if (pBypass->load() > 0.5f) return 0.0f;
     return juce::jlimit (0.0f, 1.0f, pMix->load() * 0.01f);
 }
 
-float TwinAudioProcessor::targetOutGain() const
+float TwinAudioProcessor::targetOutGain() const noexcept
 {
     return juce::Decibels::decibelsToGain (pOutGain->load());
+}
+
+float TwinAudioProcessor::targetBypass() const noexcept
+{
+    return pBypass->load() > 0.5f ? 0.0f : 1.0f;
 }
 
 void TwinAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
@@ -77,10 +88,10 @@ void TwinAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     juce::ScopedNoDenormals noDenormals;
     const int nOut = buffer.getNumChannels();
     const int n = buffer.getNumSamples();
-    if (! prepared || nOut <= 0 || n <= 0) return;   // before prepareToPlay: audio passes through
+    if (nOut <= 0 || n <= 0) return;
+    if (! prepared.load (std::memory_order_acquire)) return;   // before prepareToPlay: audio passes through untouched
 
-    for (int c = 2; c < nOut; ++c) buffer.clear (c, 0, n);
-    const int nCh = juce::jmin (2, nOut);
+    for (int c = 2; c < nOut; ++c) buffer.clear (c, 0, n);     // the bus is mono or stereo; anything else is silence
 
     const auto rs = reseedCounter.load (std::memory_order_relaxed);
     if (rs != lastReseed)
@@ -92,16 +103,20 @@ void TwinAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     doubler.setSettings (readSettings());
     mixSm.setTargetValue (targetMix());
     outSm.setTargetValue (targetOutGain());
+    activeSm.setTargetValue (targetBypass());
 
     float* ch0 = buffer.getWritePointer (0);
-    float* ch1 = nCh > 1 ? buffer.getWritePointer (1) : nullptr;
+    float* ch1 = nOut > 1 ? buffer.getWritePointer (1) : nullptr;
     float peakIn = 0.0f, peakOut = 0.0f;
 
+    // The whole block is processed in one loop, so any block size works (also larger than the one
+    // given to prepareToPlay). The doubler keeps running while bypassed so that leaving bypass is seamless.
     for (int i = 0; i < n; ++i)
     {
         const float dryL = ch0[i];
         const float dryR = ch1 != nullptr ? ch1[i] : dryL;
-        const float mono = ch1 != nullptr ? 0.5f * (dryL + dryR) : dryL;
+        float mono = ch1 != nullptr ? 0.5f * (dryL + dryR) : dryL;
+        if (! (std::abs (mono) < 1.0e6f)) mono = 0.0f;   // NaN / Inf / absurd input must not poison the delay line and filters
 
         float wetL = 0.0f, wetR = 0.0f;
         doubler.process (mono, wetL, wetR);
@@ -109,13 +124,16 @@ void TwinAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
         const float m = mixSm.getNextValue();
         const float g = outSm.getNextValue();
+        const float a = activeSm.getNextValue();   // 1 = processed, 0 = bypassed (exact input)
 
-        const float oL = (dryL * (1.0f - m) + wetL * m) * g;
+        const float pL = (dryL * (1.0f - m) + wetL * m) * g;
+        const float oL = a >= 1.0f ? pL : (a <= 0.0f ? dryL : dryL + (pL - dryL) * a);
         ch0[i] = oL;
         peakOut = juce::jmax (peakOut, std::abs (oL));
         if (ch1 != nullptr)
         {
-            const float oR = (dryR * (1.0f - m) + wetR * m) * g;
+            const float pR = (dryR * (1.0f - m) + wetR * m) * g;
+            const float oR = a >= 1.0f ? pR : (a <= 0.0f ? dryR : dryR + (pR - dryR) * a);
             ch1[i] = oR;
             peakOut = juce::jmax (peakOut, std::abs (oR));
         }
@@ -140,7 +158,7 @@ void TwinAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         ui.pan[i].store (doubler.getVoicePan (k), std::memory_order_relaxed);
     }
 
-    const float decay = std::exp ((float) (-n / (0.3 * sr)));
+    const float decay = std::exp ((float) (-(double) n / (0.3 * sr)));
     inLevel.store (juce::jmax (peakIn, inLevel.load (std::memory_order_relaxed) * decay), std::memory_order_relaxed);
     outLevel.store (juce::jmax (peakOut, outLevel.load (std::memory_order_relaxed) * decay), std::memory_order_relaxed);
 }
@@ -154,6 +172,7 @@ void TwinAudioProcessor::getStateInformation (juce::MemoryBlock& dest)
 
 void TwinAudioProcessor::setStateInformation (const void* data, int size)
 {
+    if (data == nullptr || size <= 0) return;
     if (auto xml = getXmlFromBinary (data, size))
         if (xml->hasTagName (apvts.state.getType()))
             apvts.replaceState (juce::ValueTree::fromXml (*xml));

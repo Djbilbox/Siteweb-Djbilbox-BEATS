@@ -12,6 +12,7 @@ namespace saturn
     constexpr double kPi = 3.14159265358979323846;
     constexpr int kNumVoices = 4;
     constexpr float kMaxShiftSemitones = 24.0f;
+    constexpr float kMinLevelDb = -60.0f;           // voice level at its minimum = silence ("-inf dB")
 
     namespace id
     {
@@ -19,7 +20,8 @@ namespace saturn
             *mix = "mix", *inGain = "inGain", *outGain = "outGain", *bypass = "bypass", *simple = "simple";
     }
 
-    /** Per-voice parameters: "v1On", "v1Semi", "v1Deg", "v1Level", "v1Pan", "v1Detune", "v2On", ... */
+    /** Per-voice parameters: "v1On", "v1Semi", "v1Deg", "v1Level", "v1Pan", "v1Detune", "v2On", ...
+        Builds a String: use it at construction time only, never on the audio thread. */
     enum VoiceParam { vOn = 0, vSemi, vDeg, vLevel, vPan, vDetune, kNumVoiceParams };
 
     inline juce::String voiceId (int voice, VoiceParam p)
@@ -103,6 +105,64 @@ namespace saturn
     }
 
     //==========================================================================
+    /** Text conversion helpers of the parameters (message thread only: they build Strings). */
+    namespace text
+    {
+        /** First number found in a typed text ("+4 st", "-12.5 dB", "35 %", "L 35"); `fallback` if there is none.
+            A comma is accepted as the decimal separator. */
+        inline float parseNumber (const juce::String& s, float fallback)
+        {
+            const auto kept = s.replaceCharacter (',', '.').retainCharacters ("0123456789.+-");
+            if (! kept.containsAnyOf ("0123456789")) return fallback;
+            return kept.getFloatValue();
+        }
+
+        /** "12.5 dB". Never prints a negative zero. */
+        inline juce::String withUnit (float v, int decimals, const char* unit, bool plusSign = false)
+        {
+            if (std::abs (v) < 0.5f * std::pow (10.0f, (float) -decimals)) v = 0.0f;
+            return juce::String ((plusSign && v > 0.0f) ? "+" : "") + juce::String (v, decimals) + " " + unit;
+        }
+
+        inline juce::String percent (float v)   { return juce::String (juce::roundToInt (v)) + " %"; }
+
+        inline juce::String levelDb (float v)
+        {
+            return v <= kMinLevelDb + 0.05f ? juce::String ("-inf dB") : withUnit (v, 1, "dB");
+        }
+
+        inline float levelFromText (const juce::String& s)
+        {
+            if (s.containsIgnoreCase ("inf")) return kMinLevelDb;
+            return parseNumber (s, 0.0f);
+        }
+
+        inline juce::String pan (float v)
+        {
+            const int i = juce::roundToInt (v);
+            if (i == 0) return "C";
+            return i < 0 ? "L " + juce::String (-i) : "R " + juce::String (i);
+        }
+
+        /** "L 35" / "R 20" / "C" / "-35" / "20". */
+        inline float panFromText (const juce::String& s)
+        {
+            const auto t = s.trim();
+            if (t.startsWithIgnoreCase ("c")) return 0.0f;
+            const float n = std::abs (parseNumber (t, 0.0f));
+            if (t.startsWithIgnoreCase ("l")) return -n;
+            if (t.startsWithIgnoreCase ("r")) return n;
+            return parseNumber (t, 0.0f);
+        }
+
+        inline bool boolFromText (const juce::String& s)
+        {
+            const auto t = s.trim().toLowerCase();
+            return t == "on" || t == "1" || t == "true" || t == "yes";
+        }
+    }
+
+    //==========================================================================
     struct VoiceDefaults { bool on; int semi, deg; float level, pan; };
 
     inline constexpr VoiceDefaults kVoiceDefaults[kNumVoices] = {
@@ -112,16 +172,28 @@ namespace saturn
         { false,  12,   7,  -9.0f,  20.0f },     // octave above
     };
 
+    /** Every float and int parameter has both a value-to-text and a text-to-value function. */
     inline juce::AudioProcessorValueTreeState::ParameterLayout createLayout()
     {
         using namespace juce;
         std::vector<std::unique_ptr<RangedAudioParameter>> p;
 
-        auto unitTxt = [] (const char* unit, int decimals) {
-            return [unit, decimals] (float v, int) { return String (v, decimals) + " " + String (unit); };
+        auto floatAttr = [] (std::function<String (float, int)> toText, std::function<float (const String&)> fromText)
+        {
+            return AudioParameterFloatAttributes().withStringFromValueFunction (std::move (toText))
+                                                  .withValueFromStringFunction (std::move (fromText));
         };
-        auto pctTxt = [] (float v, int) { return String (roundToInt (v)) + " %"; };
-        auto dbTxt = [] (float v, int) -> String { return v <= -59.9f ? String ("-inf dB") : String (v, 1) + " dB"; };
+        auto unitAttr = [floatAttr] (const char* unit, int decimals, bool plusSign = false)
+        {
+            return floatAttr ([unit, decimals, plusSign] (float v, int) { return text::withUnit (v, decimals, unit, plusSign); },
+                              [] (const String& s) { return text::parseNumber (s, 0.0f); });
+        };
+        auto boolAttr = []
+        {
+            return AudioParameterBoolAttributes()
+                       .withStringFromValueFunction ([] (bool v, int) -> String { return v ? "On" : "Off"; })
+                       .withValueFromStringFunction ([] (const String& s) { return text::boolFromText (s); });
+        };
 
         p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { id::mode, 1 }, "Interval Mode",
                         StringArray { "Scale Degrees", "Semitones" }, ModeDegrees));
@@ -132,49 +204,46 @@ namespace saturn
         p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { id::scale, 1 }, "Scale", scales, Major));
 
         p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { id::glide, 1 }, "Glide",
-            NormalisableRange<float> (0.0f, 300.0f, 0.1f, 0.5f), 30.0f,
-            AudioParameterFloatAttributes().withStringFromValueFunction (unitTxt ("ms", 0))));
+            NormalisableRange<float> (0.0f, 300.0f, 1.0f, 0.5f), 30.0f, unitAttr ("ms", 0)));
         p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { id::mix, 1 }, "Mix",
-            NormalisableRange<float> (0.0f, 100.0f, 0.1f), 100.0f,
-            AudioParameterFloatAttributes().withStringFromValueFunction (pctTxt)));
+            NormalisableRange<float> (0.0f, 100.0f, 1.0f), 100.0f,
+            floatAttr ([] (float v, int) { return text::percent (v); },
+                       [] (const String& s) { return text::parseNumber (s, 100.0f); })));
         p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { id::inGain, 1 }, "Input",
-            NormalisableRange<float> (-24.0f, 24.0f, 0.1f), 0.0f,
-            AudioParameterFloatAttributes().withStringFromValueFunction (unitTxt ("dB", 1))));
+            NormalisableRange<float> (-24.0f, 24.0f, 0.1f), 0.0f, unitAttr ("dB", 1)));
         p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { id::outGain, 1 }, "Output",
-            NormalisableRange<float> (-24.0f, 24.0f, 0.1f), 0.0f,
-            AudioParameterFloatAttributes().withStringFromValueFunction (unitTxt ("dB", 1))));
+            NormalisableRange<float> (-24.0f, 24.0f, 0.1f), 0.0f, unitAttr ("dB", 1)));
 
-        p.push_back (std::make_unique<AudioParameterBool> (ParameterID { id::bypass, 1 }, "Bypass", false));
-        p.push_back (std::make_unique<AudioParameterBool> (ParameterID { id::simple, 1 }, "Simple", false,
-            AudioParameterBoolAttributes().withAutomatable (false)));
+        p.push_back (std::make_unique<AudioParameterBool> (ParameterID { id::bypass, 1 }, "Bypass", false, boolAttr()));
+        p.push_back (std::make_unique<AudioParameterBool> (ParameterID { id::simple, 1 }, "Simple View", false,
+            boolAttr().withAutomatable (false)));
 
-        auto semiTxt = [] (int v, int) -> String { return String (v > 0 ? "+" : "") + String (v) + " st"; };
-        auto degTxt  = [] (int v, int) -> String { return String (v > 0 ? "+" : "") + String (v) + " deg"; };
-        auto ctTxt   = [] (float v, int) -> String { return String (v > 0.05f ? "+" : "") + String (v, 1) + " ct"; };
-        auto panTxt  = [] (float v, int) -> String {
-            const int i = roundToInt (v);
-            if (i == 0) return String ("C");
-            return i < 0 ? "L " + String (-i) : "R " + String (i);
+        auto intAttr = [] (const char* unit)
+        {
+            return AudioParameterIntAttributes()
+                .withStringFromValueFunction ([unit] (int v, int) -> String { return String (v > 0 ? "+" : "") + String (v) + " " + unit; })
+                .withValueFromStringFunction ([] (const String& s) { return juce::roundToInt (text::parseNumber (s, 0.0f)); });
         };
 
         for (int v = 0; v < kNumVoices; ++v)
         {
             const auto& d = kVoiceDefaults[v];
             const String n = "Voice " + String (v + 1) + " ";
-            p.push_back (std::make_unique<AudioParameterBool> (ParameterID { voiceId (v, vOn), 1 }, n + "On", d.on));
+            p.push_back (std::make_unique<AudioParameterBool> (ParameterID { voiceId (v, vOn), 1 }, n + "On", d.on, boolAttr()));
             p.push_back (std::make_unique<AudioParameterInt> (ParameterID { voiceId (v, vSemi), 1 }, n + "Semitones",
-                            -24, 24, d.semi, AudioParameterIntAttributes().withStringFromValueFunction (semiTxt)));
+                            -24, 24, d.semi, intAttr ("st")));
             p.push_back (std::make_unique<AudioParameterInt> (ParameterID { voiceId (v, vDeg), 1 }, n + "Degrees",
-                            -14, 14, d.deg, AudioParameterIntAttributes().withStringFromValueFunction (degTxt)));
+                            -14, 14, d.deg, intAttr ("deg")));
             p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { voiceId (v, vLevel), 1 }, n + "Level",
-                NormalisableRange<float> (-60.0f, 6.0f, 0.1f), d.level,
-                AudioParameterFloatAttributes().withStringFromValueFunction (dbTxt)));
+                NormalisableRange<float> (kMinLevelDb, 6.0f, 0.1f), d.level,
+                floatAttr ([] (float x, int) { return text::levelDb (x); },
+                           [] (const String& s) { return text::levelFromText (s); })));
             p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { voiceId (v, vPan), 1 }, n + "Pan",
-                NormalisableRange<float> (-100.0f, 100.0f, 0.1f), d.pan,
-                AudioParameterFloatAttributes().withStringFromValueFunction (panTxt)));
+                NormalisableRange<float> (-100.0f, 100.0f, 1.0f), d.pan,
+                floatAttr ([] (float x, int) { return text::pan (x); },
+                           [] (const String& s) { return text::panFromText (s); })));
             p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { voiceId (v, vDetune), 1 }, n + "Detune",
-                NormalisableRange<float> (-50.0f, 50.0f, 0.1f), 0.0f,
-                AudioParameterFloatAttributes().withStringFromValueFunction (ctTxt)));
+                NormalisableRange<float> (-50.0f, 50.0f, 0.1f), 0.0f, unitAttr ("ct", 1, true)));
         }
         return { p.begin(), p.end() };
     }

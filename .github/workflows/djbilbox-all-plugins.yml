@@ -7,7 +7,7 @@ permissions:
   contents: write
 concurrency:
   group: djbilbox-all-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false   # un run Windows dure ~75 min : les pushs suivants attendent au lieu d annuler
 jobs:
   build:
     runs-on: windows-latest

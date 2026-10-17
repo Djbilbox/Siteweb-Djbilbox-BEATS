@@ -21,6 +21,8 @@ private:
 
     SaturnAudioProcessor& proc;
 
+    juce::TooltipWindow tooltipWindow { this, 600 };    // the tooltips below only show up with one of these
+
     HumpireTopBar topBar;
     SaturnOrbitView orbit;
     WaveformDisplay waveform;

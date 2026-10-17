@@ -20,6 +20,9 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout&) const override;
+
+    /** Handles bypass itself: because getBypassParameter() is exposed, the VST3 wrapper always
+        calls processBlock and never processBlockBypassed. */
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     void processBlockBypassed (juce::AudioBuffer<float>& b, juce::MidiBuffer& m) override { processBlock (b, m); }
 
@@ -28,7 +31,7 @@ public:
     const juce::String getName() const override { return "HUMPIRE TWIN"; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
-    double getTailLengthSeconds() const override { return 0.05; }
+    double getTailLengthSeconds() const override { return 0.1; }   // longest delay (40 ms) + range + filters
     int getNumPrograms() override { return 1; }
     int getCurrentProgram() override { return 0; }
     void setCurrentProgram (int) override {}
@@ -52,9 +55,10 @@ public:
     PresetManager presets;
 
 private:
-    twin::DoublerSettings readSettings() const;
-    float targetMix() const;
-    float targetOutGain() const;
+    twin::DoublerSettings readSettings() const noexcept;
+    float targetMix() const noexcept;
+    float targetOutGain() const noexcept;
+    float targetBypass() const noexcept;
 
     juce::AudioParameterBool* bypassParam = nullptr;
     std::atomic<float> *pDoubles = nullptr, *pDetune = nullptr, *pDelay = nullptr, *pHumanize = nullptr,
@@ -62,11 +66,12 @@ private:
                        *pMix = nullptr, *pOutGain = nullptr, *pBypass = nullptr;
 
     twin::Doubler doubler;
-    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> mixSm, outSm;
+    /** mix / output gain / "processed vs dry" (bypass) smoothers; bypass = 0 means untouched input. */
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> mixSm, outSm, activeSm;
     std::atomic<std::uint32_t> reseedCounter { 0u };
     std::uint32_t lastReseed = 0u;
     double sr = 44100.0;
-    bool prepared = false;
+    std::atomic<bool> prepared { false };
     int waveCounter = 0;
     float wavePeak = 0.0f;
 

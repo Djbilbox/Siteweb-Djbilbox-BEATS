@@ -84,14 +84,24 @@ namespace saturn
         /** New settings (read once per block). */
         void setSettings (const EngineSettings& s) noexcept
         {
-            if (s.key != settings.key || s.scale != settings.scale) haveIdx = false;   // degree index changes meaning
+            const bool scaleChanged = s.key != settings.key || s.scale != settings.scale;
             settings = s;
             glideCoef = s.glideMs <= 0.01f ? 1.0 : coefFor (0.001 * (double) s.glideMs);
+            if (scaleChanged)
+            {
+                // The degree index changes meaning: derive it again from the last detected pitch right away
+                // (otherwise the voices would jump to tonic-relative intervals until the next pitch frame).
+                haveIdx = false;
+                if (voiced) trackNote (detMidi);
+            }
             computeTargets();
         }
 
-        /** One sample. dry = input delayed by latency (stereo). wet = harmony bus (stereo). */
-        void process (float inL, float inR, float& dryL, float& dryR, float& wetL, float& wetR) noexcept
+        /** One sample. dry = input delayed by latency (stereo). wet = harmony bus (stereo).
+            voicesActive = false skips the voice rendering (wet = 0) but keeps the delay line and the pitch
+            detector running, so the engine is ready the moment the voices are wanted again (used while bypassed). */
+        void process (float inL, float inR, float& dryL, float& dryR, float& wetL, float& wetR,
+                      bool voicesActive = true) noexcept
         {
             const float mono = 0.5f * (inL + inR);
             const float frame[SharedDelayLine::channels] = { inL, inR, mono };
@@ -109,25 +119,8 @@ namespace saturn
 
             gate += (gateTarget - gate) * gateCoef;
             float wl = 0.0f, wr = 0.0f;
-            for (auto& s : state)
-            {
-                s.shift += (s.targetShift - s.shift) * glideCoef;
-                s.lvl += (s.targetLvl - s.lvl) * levelCoef;
-                s.gl += (s.tgl - s.gl) * levelCoef;
-                s.gr += (s.tgr - s.gr) * levelCoef;
-
-                const double ratio = std::exp2 (s.shift / 12.0);
-                s.tap.step (1.0 - ratio, W, homeStep);
-
-                const double dA = base + s.tap.phase * W;
-                const double dB = base + s.tap.pB * W;
-                const float y = s.tap.gA * line.read (2, dA) + s.tap.gB * line.read (2, dB);
-                const float amp = y * s.lvl * gate;
-
-                wl += amp * s.gl;
-                wr += amp * s.gr;
-                s.peak = std::max (s.peak, std::abs (amp));
-            }
+            if (voicesActive)
+                renderVoices (W, base, wl, wr);
             wetL = wl;
             wetR = wr;
             line.advance();
@@ -148,6 +141,30 @@ namespace saturn
 
     private:
         double coefFor (double seconds) const noexcept { return 1.0 - std::exp (-1.0 / (seconds * sr)); }
+
+        /** One sample of the four voices: glide, level and pan smoothing, two-tap shift, constant-power pan. */
+        void renderVoices (double W, double base, float& wl, float& wr) noexcept
+        {
+            for (auto& s : state)
+            {
+                s.shift += (s.targetShift - s.shift) * glideCoef;
+                s.lvl += (s.targetLvl - s.lvl) * levelCoef;
+                s.gl += (s.tgl - s.gl) * levelCoef;
+                s.gr += (s.tgr - s.gr) * levelCoef;
+
+                const double ratio = std::exp2 (s.shift / 12.0);
+                s.tap.step (1.0 - ratio, W, homeStep);
+
+                const double dA = base + s.tap.phase * W;
+                const double dB = base + s.tap.pB * W;
+                const float y = s.tap.gA * line.read (2, dA) + s.tap.gB * line.read (2, dB);
+                const float amp = y * s.lvl * gate;
+
+                wl += amp * s.gl;
+                wr += amp * s.gr;
+                s.peak = std::max (s.peak, std::abs (amp));
+            }
+        }
 
         void onPitchFrame (float f0) noexcept
         {

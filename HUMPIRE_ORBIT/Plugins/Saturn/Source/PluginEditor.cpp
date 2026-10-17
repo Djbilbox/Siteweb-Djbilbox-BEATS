@@ -63,18 +63,19 @@ SaturnEditor::SaturnEditor (SaturnAudioProcessor& p)
         btn->setBounds (632, rowY + 18, 46, 28);
         voiceAttach.add (new juce::AudioProcessorValueTreeState::ButtonAttachment (p.apvts, voiceId (v, vOn), *btn));
 
-        auto addKnob = [&] (juce::OwnedArray<OrbitKnob>& arr, const char* name, VoiceParam param, int slot)
+        auto addKnob = [&] (juce::OwnedArray<OrbitKnob>& arr, const char* name, const char* tip, VoiceParam param, int slot)
         {
             auto* k = arr.add (new OrbitKnob (name, col));
             content.addAndMakeVisible (k);
             k->attach (p.apvts, voiceId (v, param));
+            k->setTooltip (tip);
             k->setBounds (682 + slot * 66, rowY, 64, 64);
         };
-        addKnob (semiKnobs,   "Semi",   vSemi,   0);
-        addKnob (degKnobs,    "Deg",    vDeg,    0);
-        addKnob (levelKnobs,  "Level",  vLevel,  1);
-        addKnob (panKnobs,    "Pan",    vPan,    2);
-        addKnob (detuneKnobs, "Detune", vDetune, 3);
+        addKnob (semiKnobs,   "Semi",   "Interval in semitones",                      vSemi,   0);
+        addKnob (degKnobs,    "Deg",    "Interval in steps of the selected scale",    vDeg,    0);
+        addKnob (levelKnobs,  "Level",  "Level of this voice (minimum = silent)",     vLevel,  1);
+        addKnob (panKnobs,    "Pan",    "Stereo position of this voice",              vPan,    2);
+        addKnob (detuneKnobs, "Detune", "Fine tuning of this voice in cents",         vDetune, 3);
     }
 
     // --- global knobs ----------------------------------------------------------
@@ -93,6 +94,8 @@ SaturnEditor::SaturnEditor (SaturnAudioProcessor& p)
     }
     glideKnob.setTooltip ("Glide between successive interval changes");
     mixKnob.setTooltip ("0 % = dry only, 100 % = dry plus the harmony voices");
+    inGainKnob.setTooltip ("Input trim before pitch detection");
+    outGainKnob.setTooltip ("Output level");
 
     modeAttach.sendInitialUpdate();
     simpleAttach.sendInitialUpdate();
