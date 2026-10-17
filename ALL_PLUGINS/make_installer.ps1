@@ -46,16 +46,17 @@ foreach ($g in $expected.Keys) {
     $dir = Join-Path $Stage $g
     $bundles = @()
     if (Test-Path $dir) { $bundles = @(Get-ChildItem -Path $dir -Directory -Filter "*.vst3" | Sort-Object Name) }
-    $names = @($bundles | ForEach-Object { $_.BaseName })
+    $names = @($bundles | ForEach-Object { $_.Name -replace '\.vst3$', '' })
     foreach ($e in $expected[$g]) { if ($names -notcontains $e) { $missing.Add("$($groupLabel[$g]) : $e") } }
     if ($bundles.Count -eq 0) { continue }
 
     $components.Add("Name: ""$g""; Description: ""$($groupLabel[$g])""; Types: full custom")
     foreach ($b in $bundles) {
-        $id = ($b.BaseName.ToLower() -replace '[^a-z0-9]', '_')
-        $components.Add("Name: ""$g\$id""; Description: ""$($b.BaseName)""; Types: full custom")
+        $pname = $b.Name -replace '\.vst3$', ''
+        $id = ($pname.ToLower() -replace '[^a-z0-9]', '_')
+        $components.Add("Name: ""$g\$id""; Description: ""$pname""; Types: full custom")
         $files.Add("Source: ""$($b.FullName)\*""; DestDir: ""{commoncf64}\VST3\$($b.Name)""; Components: $g\$id; Flags: recursesubdirs createallsubdirs ignoreversion")
-        $included.Add("$($groupLabel[$g]) : $($b.BaseName)")
+        $included.Add("$($groupLabel[$g]) : $pname")
     }
     if ($g -eq "chaabi" -and (Test-Path (Join-Path $Stage "chaabi_samples"))) {
         $samples = Join-Path $Stage "chaabi_samples"
