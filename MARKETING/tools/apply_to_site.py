@@ -31,7 +31,7 @@ def entries():
         about = [b['tagline'], f"Bought separately these {len(members)} plugins cost ${total}. The bundle is ${b['price']}."]
         feats = [{"icon": "fa-puzzle-piece", "t": m['name'], "d": m['tagline']} for m in members]
         items.append((fb, b['price'], slugs.get(b['id'], ''), 'instrument' if b['members_group'] in ('synths', 'all') else 'effect', b['tagline'], about, feats,
-                      [{"k": "Format", "v": "VST3 64-bit (Windows)"}, {"k": "Plugins", "v": str(len(members))}], [f"{len(members)} VST3 plugins", "Windows installer", "PDF manuals", "Royalty-free license"], []))
+                      [{"k": "Format", "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"}, {"k": "Plugins", "v": str(len(members))}], [f"{len(members)} plugins", "Windows and macOS installers", "PDF manuals", "Royalty-free license"], []))
     for f, price, slug, cat, tagline, about, feats, specs, includes, genres in items:
         pid = f['id']; soon = not slug
         pr = "SOON" if soon else str(price)
@@ -42,7 +42,7 @@ def entries():
         prods[pid] = {"type": "vst", "name": f['name'], "sub": f.get('sub', ''), "tagline": tagline, "cover": f"img/products/{pid}-cover.jpg",
                       "accent": f.get('accent', '#f5b544'), "accent2": "#8a5cff", "tier": "pro", "price": pr, "code": "", "note": f.get('tagline', '')[:80],
                       "buy": slug, "demo": "", "tags": (genres or f.get('tags', []))[:6], "about": about, "features": feats,
-                      "specs": specs + [{"k": "Platform", "v": "Windows 10/11, 64-bit"}, {"k": "License", "v": "Royalty-free for your productions"}],
+                      "specs": specs + [{"k": "Platform", "v": "Windows 10/11 64-bit; macOS 11+ (Apple Silicon and Intel)"}, {"k": "License", "v": "Royalty-free for your productions"}],
                       "includes": includes}
     return vsts, prods
 

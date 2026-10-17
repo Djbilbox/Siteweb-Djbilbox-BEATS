@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 #  DJBILBOX BEATS - generation de l'installateur unique (Inno Setup 6)
 #  Entree : <Stage>\synths|loadout|orbit|chaabi\*.vst3  (+ <Stage>\chaabi_samples\)
 #  Sortie : <Out>\DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe + README.txt
@@ -18,9 +18,9 @@ $Out = (Resolve-Path $Out).Path
 
 # Expected plugins (listed as NOT INCLUDED in README.txt when missing)
 $expected = [ordered]@{
-    synths  = @("ARENA_BASS","CHINTZWAZ","CYBERPUNK_LEAD","DZPOWER","FUNKYKOPS","GOLDHAWK","HIGHROLLER_GOLD","K2000",
-                "MARABOUT","MIDNIGHT_REELS","OCCITANIE","OCTOPUS","PHANTOM_RIDER","SAN_ANDREAS_LEAD","SHAMAN",
-                "STREETLIGHT_TRAP","VOODOO","WARZONE808","ROCKPUNK")
+    synths  = @("ARENA BASS","CHINTZWAZ","CYBERPUNK LEAD","DZPOWER","FUNKYKOPS","GOLDHAWK","HIGHROLLER GOLD","K2000",
+                "MARABOUT","MIDNIGHT REELS","OCCITANIE","OCTOPUS","PHANTOM RIDER","SAN ANDREAS LEAD","SHAMAN",
+                "STREETLIGHT TRAP","VOODOO","WARZONE808","ROCKPUNK")
     loadout = @("HUMPIRE SKILLTREE","HUMPIRE CLUTCH","HUMPIRE OVERCLOCK","HUMPIRE HARDCAP","HUMPIRE RESPAWN",
                 "HUMPIRE LAG","HUMPIRE GLITCH","HUMPIRE COMBO")
     orbit   = @("HUMPIRE SOLAR","HUMPIRE SATURN","HUMPIRE TWIN","HUMPIRE NEBULA","HUMPIRE SOLAR FLARE",
@@ -47,7 +47,9 @@ foreach ($g in $expected.Keys) {
     $bundles = @()
     if (Test-Path $dir) { $bundles = @(Get-ChildItem -Path $dir -Directory -Filter "*.vst3" | Sort-Object Name) }
     $names = @($bundles | ForEach-Object { $_.Name -replace '\.vst3$', '' })
-    foreach ($e in $expected[$g]) { if ($names -notcontains $e) { $missing.Add("$($groupLabel[$g]) : $e") } }
+    # compare on letters+digits only so "ARENA_BASS" and "ARENA BASS" are the same product
+    $normNames = @($names | ForEach-Object { ($_.ToLower() -replace '[^a-z0-9]', '') })
+    foreach ($e in $expected[$g]) { if ($normNames -notcontains ($e.ToLower() -replace '[^a-z0-9]', '')) { $missing.Add("$($groupLabel[$g]) : $e") } }
     if ($bundles.Count -eq 0) { continue }
 
     $components.Add("Name: ""$g""; Description: ""$($groupLabel[$g])""; Types: full custom")

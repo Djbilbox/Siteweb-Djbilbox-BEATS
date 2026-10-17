@@ -7,7 +7,8 @@ Outputs: MARKETING/gumroad/<id>/..., MARKETING/gumroad/ALL_PRODUCTS.csv, MARKETI
 import argparse, csv, html, json, os, shutil, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 FICHES = os.path.join(ROOT, 'fiches'); OUT = os.path.join(ROOT, 'out'); KITS = os.path.join(ROOT, 'gumroad')
-SYSREQ = ["Windows 10 or 11, 64-bit", "VST3 host (designed for FL Studio; any VST3-compatible host should load it)", "4 GB RAM minimum, 8 GB recommended", "macOS is not supported by this release"]
+SYSREQ = ["Windows 10 or 11, 64-bit: VST3", "macOS 11 or later, Apple Silicon and Intel (universal): VST3 and Audio Unit. The macOS installer is not notarized by Apple: a short one-time \"Open Anyway\" step is explained in the included README",
+          "Any VST3 / Audio Unit host (designed for FL Studio; also Ableton Live, Logic Pro, Reaper, Cubase, Studio One, Bitwig...)", "4 GB RAM minimum, 8 GB recommended"]
 LICENSE_SHORT = ("Royalty-free: everything you create with this plugin is yours and can be released and sold commercially (streaming, sales, sync, beat leasing) "
                  "with no royalties and no credit required. One license covers installation on two computers you own. "
                  "Redistributing or reselling the plugin, its presets or its sounds is not allowed. Full terms are included in the download.")
@@ -69,7 +70,7 @@ def main():
         d = description_html(f, price)
         write('4_description.html', '<!doctype html><meta charset="utf-8"><title>' + esc(f['name']) + '</title><body style="font-family:Inter,Arial,sans-serif;max-width:760px;margin:24px auto">' + d + '</body>')
         write('5_tags.txt', ", ".join(f.get('tags', [])[:10]))
-        write('6_file_to_upload.txt', f"{f['id']}.zip  (from the GitHub Release: Setup.exe + README + license + manual PDF)")
+        write('6_file_to_upload.txt', f"Upload BOTH files (from the GitHub Releases): {f['id']}.zip (Windows: Setup.exe + README + license + manual PDF) and {f['id']}-macOS.zip (macOS: .pkg + README + license + manual PDF)")
         rows.append({"id": f['id'], "name": f['name'], "type": f['kind'], "price_usd": price, "title": f['gumroad_title'], "tags": ", ".join(f.get('tags', [])[:10]),
                      "file": f"{f['id']}.zip", "gumroad_slug": slugs.get(f['id'], '')})
     # bundles
@@ -85,12 +86,12 @@ def main():
         title = f"{b['name']} — {len(members)} VST3 Plugins, One Payment"
         names = [m['name'] + ' — ' + m['tagline'] for m in members]
         fb = {"tagline": b['tagline'], "about": [b['tagline'], f"Buying the {len(members)} plugins separately would cost ${total}. The bundle is ${b['price']}."],
-              "features": [], "genres": [], "includes": [f"{len(members)} VST3 plugins", "One Windows installer (choose what to install)", "PDF user manuals", "Royalty-free license"],
-              "specs": [{"k": "Format", "v": "VST3 64-bit (Windows)"}, {"k": "Plugins", "v": str(len(members))}], "faq": []}
+              "features": [], "genres": [], "includes": [f"{len(members)} VST3 plugins", "One installer for Windows and one for macOS", "PDF user manuals", "Royalty-free license"],
+              "specs": [{"k": "Format", "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"}, {"k": "Plugins", "v": str(len(members))}], "faq": []}
         write('1_title.txt', title); write('2_price_usd.txt', str(b['price'])); write('3_summary.txt', b['tagline'])
         write('4_description.html', '<!doctype html><meta charset="utf-8"><body style="font-family:Inter,Arial,sans-serif;max-width:760px;margin:24px auto">' + description_html(fb, b['price'], names) + '</body>')
         write('5_tags.txt', 'vst bundle, vst3, plugins, fl studio, producer tools')
-        write('6_file_to_upload.txt', f"{b['id']}.zip (from the GitHub Release)")
+        write('6_file_to_upload.txt', f"Upload BOTH files (from the GitHub Releases): {b['id']}.zip (Windows) and {b['id']}-macOS.zip (macOS)")
         rows.append({"id": b['id'], "name": b['name'], "type": b['kind'], "price_usd": b['price'], "title": title, "tags": 'vst bundle, vst3, plugins',
                      "file": f"{b['id']}.zip", "gumroad_slug": slugs.get(b['id'], '')})
     os.makedirs(KITS, exist_ok=True)
