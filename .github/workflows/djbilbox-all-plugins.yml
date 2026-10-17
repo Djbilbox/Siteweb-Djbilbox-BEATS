@@ -2,6 +2,10 @@ name: DJBILBOX ALL PLUGINS (Windows)
 on:
   push:
     branches: [claude/blissful-newton-cxepis]
+    paths-ignore:
+      - '.github/workflows/djbilbox-macos.yml'
+      - 'ALL_PLUGINS/make_mac_packages.sh'
+      - 'MARKETING/**'
   workflow_dispatch:
 permissions:
   contents: write

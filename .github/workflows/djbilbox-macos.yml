@@ -1,0 +1,174 @@
+name: DJBILBOX ALL PLUGINS (macOS)
+# macOS universal (arm64 + x86_64) : VST3 + Audio Unit, .pkg par produit + collection complete (.dmg).
+# Push sur ce workflow / ce script = test rapide sur un sous-ensemble. Lancement manuel = filtre libre.
+on:
+  push:
+    branches: [claude/blissful-newton-cxepis]
+    paths:
+      - '.github/workflows/djbilbox-macos.yml'
+      - 'ALL_PLUGINS/make_mac_packages.sh'
+  workflow_dispatch:
+    inputs:
+      filter:
+        description: 'Regex sur les noms de cibles CMake (.* = tout)'
+        default: '.*'
+      orbit:
+        description: 'Construire HUMPIRE ORBIT'
+        type: boolean
+        default: true
+      rockpunk:
+        description: 'Construire ROCKPUNK'
+        type: boolean
+        default: true
+permissions:
+  contents: write
+concurrency:
+  group: djbilbox-macos-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 340
+    env:
+      JUCE_DIR: ${{ github.workspace }}/_juce
+      FILTER: ${{ github.event_name == 'workflow_dispatch' && inputs.filter || 'ARENA_BASS|HumpireGlitch' }}
+      DO_ORBIT: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.orbit) || 'false' }}
+      DO_ROCKPUNK: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.rockpunk) || 'true' }}
+      CMAKE_OSX_ARCHITECTURES: "arm64;x86_64"
+      CMAKE_OSX_DEPLOYMENT_TARGET: "11.0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tools (Ninja, JUCE 8.0.4, font)
+        run: |
+          brew install ninja
+          git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git "$JUCE_DIR"
+          bash HUMPIRE_LOADOUT/scripts/fetch_fonts.sh
+
+      # Audio Unit en plus du VST3 (sans modifier les CMakeLists du depot) ; Standalone retire (inutile ici)
+      - name: Enable AU, drop Standalone
+        run: |
+          for f in ARENA_BASS CHINTZWAZ CYBERPUNK_LEAD DZPOWER FUNKYKOPS GOLDHAWK HIGHROLLER_GOLD K2000 MARABOUT MIDNIGHT_REELS OCCITANIE OCTOPUS PHANTOM_RIDER SAN_ANDREAS_LEAD SHAMAN STREETLIGHT_TRAP VOODOO WAZONE808; do
+            [ -f "$f/CMakeLists.txt" ] && sed -i.bak 's/FORMATS VST3 Standalone/FORMATS VST3 AU/' "$f/CMakeLists.txt"
+          done
+          sed -i.bak 's/set(formats VST3)/set(formats VST3 AU)/' HUMPIRE_LOADOUT/cmake/HumpirePlugin.cmake
+          sed -i.bak 's/set(FORMATS VST3)/set(FORMATS VST3 AU)/' HUMPIRE_ORBIT/CMakeLists.txt
+          sed -i.bak 's/set(ROCKPUNK_FORMATS VST3 AU Standalone)/set(ROCKPUNK_FORMATS VST3 AU)/' ROCKPUNK/CMakeLists.txt
+          git diff --stat | tail -3
+
+      # ---------------- 1) super-build : synthes + LOADOUT
+      - name: Configure (synths + LOADOUT)
+        run: cmake -S ALL_PLUGINS -B build/all -G Ninja -DCMAKE_BUILD_TYPE=Release -DFETCHCONTENT_SOURCE_DIR_JUCE="$JUCE_DIR" -DCMAKE_OSX_ARCHITECTURES="$CMAKE_OSX_ARCHITECTURES" -DCMAKE_OSX_DEPLOYMENT_TARGET="$CMAKE_OSX_DEPLOYMENT_TARGET"
+      - name: Build (synths + LOADOUT)
+        id: super
+        continue-on-error: true
+        run: |
+          targets=$(ninja -C build/all -t targets all | grep -E '^[A-Za-z0-9_]+_(VST3|AU):' | cut -d: -f1 | grep -v '^cmake_' | grep -E "$FILTER" | sort -u | tr '\n' ' ')
+          echo "Targets: $targets"
+          [ -n "$targets" ] || { echo "no target matches '$FILTER'"; exit 0; }
+          ninja -C build/all -k 0 $targets
+
+      # ---------------- 2) HUMPIRE ORBIT
+      - name: Build HUMPIRE ORBIT
+        id: orbit
+        if: env.DO_ORBIT == 'true'
+        continue-on-error: true
+        run: |
+          cmake -S HUMPIRE_ORBIT -B build/orbit -G Ninja -DCMAKE_BUILD_TYPE=Release -DFETCHCONTENT_SOURCE_DIR_JUCE="$JUCE_DIR" -DHUMPIRE_BUILD_STANDALONE=OFF -DHUMPIRE_BUILD_TESTS=OFF -DCMAKE_OSX_ARCHITECTURES="$CMAKE_OSX_ARCHITECTURES" -DCMAKE_OSX_DEPLOYMENT_TARGET="$CMAKE_OSX_DEPLOYMENT_TARGET"
+          targets=$(ninja -C build/orbit -t targets all | grep -E '^[A-Za-z0-9_]+_(VST3|AU):' | cut -d: -f1 | grep -v '^cmake_' | sort -u | tr '\n' ' ')
+          ninja -C build/orbit -k 0 $targets
+
+      # ---------------- 3) ROCKPUNK
+      - name: Build ROCKPUNK
+        id: rockpunk
+        if: env.DO_ROCKPUNK == 'true'
+        continue-on-error: true
+        run: |
+          cmake -S ROCKPUNK -B build/rockpunk -G Ninja -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR="$JUCE_DIR" -DCMAKE_OSX_ARCHITECTURES="$CMAKE_OSX_ARCHITECTURES" -DCMAKE_OSX_DEPLOYMENT_TARGET="$CMAKE_OSX_DEPLOYMENT_TARGET"
+          ninja -C build/rockpunk ROCKPUNK_VST3 ROCKPUNK_AU
+
+      # ---------------- 4) staging + ad-hoc signature
+      - name: Stage bundles
+        run: |
+          stage() {  # <build dir> <group>
+            mkdir -p "stage/$2"
+            [ -d "$1" ] || return 0
+            find "$1" -type d \( -name '*.vst3' -o -name '*.component' \) -not -path '*/_deps/*' | while IFS= read -r b; do
+              case "$(dirname "$b")" in
+                */VST3|*/AU) echo "[$2] $(basename "$b")"; cp -R "$b" "stage/$2/" ;;
+              esac
+            done
+          }
+          stage build/all/HUMPIRE_LOADOUT loadout
+          for d in build/all/*/; do
+            case "$(basename "$d")" in HUMPIRE_LOADOUT|_deps|CMakeFiles) continue ;; esac
+            stage "$d" synths
+          done
+          stage build/orbit orbit
+          stage build/rockpunk synths
+      - name: Ad-hoc codesign + architecture check
+        run: |
+          : > stage/arch_report.txt
+          find stage -type d \( -name '*.vst3' -o -name '*.component' \) | while IFS= read -r b; do
+            codesign --force --deep --sign - "$b"
+            bin=$(ls "$b/Contents/MacOS/"* | head -n 1)
+            echo "$(basename "$b") : $(lipo -archs "$bin")" | tee -a stage/arch_report.txt
+          done
+
+      - name: pluginval (VST3, informatif)
+        continue-on-error: true
+        run: |
+          curl -sSL https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_macOS.zip -o pv.zip
+          unzip -q pv.zip -d pv
+          pv="$PWD/pv/pluginval.app/Contents/MacOS/pluginval"
+          mkdir -p pvlogs
+          : > stage/pluginval_report.txt
+          find stage -maxdepth 2 -type d -name '*.vst3' | while IFS= read -r b; do
+            n=$(basename "$b" .vst3)
+            if "$pv" --strictness-level 5 --validate-in-process --skip-gui-tests --timeout-ms 180000 "$b" > "pvlogs/$n.log" 2>&1; then r="OK   "; else r="FAIL "; fi
+            echo "$r $n" | tee -a stage/pluginval_report.txt
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with: { name: pluginval-logs-macos, path: pvlogs }
+
+      # ---------------- 5) packages + release
+      - name: Docs and license
+        run: |
+          mkdir -p stage/docs/manuals
+          cp LEGAL/EULA_DJBILBOX_BEATS.txt LEGAL/THIRD_PARTY_NOTICES.txt stage/docs/
+          if [ -d MANUALS/dist ]; then
+            cp MANUALS/dist/*.pdf stage/docs/ 2>/dev/null || true
+            cp MANUALS/dist/products/*.pdf stage/docs/manuals/ 2>/dev/null || true
+          fi
+      - name: Installers (.pkg per product, zip, dmg)
+        run: bash ALL_PLUGINS/make_mac_packages.sh stage dist "1.0.${{ github.run_number }}"
+      - name: Summary
+        if: always()
+        run: |
+          echo "super: ${{ steps.super.outcome }} | orbit: ${{ steps.orbit.outcome }} | rockpunk: ${{ steps.rockpunk.outcome }}"
+          cat stage/arch_report.txt stage/pluginval_report.txt dist/packages_report.txt 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DJBILBOX_BEATS_macOS
+          path: |
+            dist/packages/*.zip
+            dist/*.dmg
+            dist/packages_report.txt
+            stage/arch_report.txt
+            stage/pluginval_report.txt
+      - name: Release GitHub (macOS)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: djbilbox-macos-v1.0.${{ github.run_number }}
+          name: DJBILBOX BEATS - macOS v1.0.${{ github.run_number }}${{ (github.event_name == 'workflow_dispatch' && inputs.filter == '.*') && ' ' || ' (partial test)' }}
+          prerelease: ${{ !(github.event_name == 'workflow_dispatch' && inputs.filter == '.*') }}
+          target_commitish: ${{ github.sha }}
+          body: "macOS universal (Apple Silicon + Intel), VST3 + Audio Unit. Unsigned / not notarized: see README inside each zip for the Gatekeeper step."
+          files: |
+            dist/packages/*.zip
+            dist/*.dmg
+            dist/packages_report.txt
+            stage/arch_report.txt
+            stage/pluginval_report.txt
