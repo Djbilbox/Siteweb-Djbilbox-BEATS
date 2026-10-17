@@ -143,7 +143,7 @@ FkPanel::FkPanel (FkProcessor& p)
     addKnob (dtime, P::dtime, "TIME");     addKnob (feedback, P::fb, "FEEDBACK");
     const char* en[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
     for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], juce::Slider::LinearVertical);
-    const char* tn[4] = { "DEPTH", "DECAY", "RESO", "VELOCITY" };
+    const char* tn[4] = { "DEPTH", "DECAY", "RESO", "VEL" };
     const int ti[4] = { P::fenv, P::fdecay, P::reso, P::velocity };
     for (int i = 0; i < 4; ++i) addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical);
     addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
@@ -343,11 +343,11 @@ void FkPanel::paint (juce::Graphics& g)
         header (g, "FILTER ENV", 1437, 490, 70, txt, 11.f);               // DEPTH + DECAY
         g.setColour (txt.withAlpha (0.3f));                               // resonance and velocity are not part of the filter envelope
         g.drawLine (1512.f * K, 512.f * K, 1512.f * K, 690.f * K, 1.f);
-        caption (g, "WAVEFORM", 771, 998, dim);
-        caption (g, "LFO SOURCE", 1003, 998, dim);
-        caption (g, "LFO DESTINATION", 1235, 998, dim);
-        caption (g, "FILTER TYPE", 1468, 998, dim);
-        caption (g, "MONO / POLY", 1701, 998, dim);
+        caption (g, "WAVEFORM", 771, 1094, dim);
+        caption (g, "LFO SOURCE", 1003, 1094, dim);
+        caption (g, "LFO DESTINATION", 1235, 1094, dim);
+        caption (g, "FILTER TYPE", 1468, 1094, dim);
+        caption (g, "MONO / POLY", 1701, 1094, dim);
         caption (g, "PITCH BEND", 268, 1412, dim, 10.5f);
         caption (g, "MOD WHEEL", 396, 1412, dim, 10.5f);
     }

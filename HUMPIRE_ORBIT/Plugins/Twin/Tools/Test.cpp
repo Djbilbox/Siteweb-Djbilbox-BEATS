@@ -371,6 +371,20 @@ int main()
             total += gAllocations.load();
         }
         CHECK (total == 0, "%ld heap allocations in 120 processBlock calls with changing parameters", total);
+
+        // the counter itself must work, otherwise the zero above proves nothing
+        gAllocations = 0;
+        gCounting = true;
+        {
+            std::vector<float> probe ((size_t) (64 + rng.nextInt (64)));
+            volatile float sink = probe[0];
+            (void) sink;
+            const juce::String text = juce::String ("probe ") + juce::String (rng.nextInt (1000));
+            volatile int len = text.length();
+            (void) len;
+        }
+        gCounting = false;
+        CHECK (gAllocations.load() > 0, "allocation counter is live (%ld allocations seen for a std::vector and a juce::String)", gAllocations.load());
     }
 
     std::printf ("== 20 factory presets render without NaN / Inf ==\n");
@@ -471,7 +485,8 @@ int main()
         double maxStep = 0.0;
         for (size_t i = s1 + 1; i < L.size(); ++i) maxStep = juce::jmax (maxStep, (double) std::abs (L[i] - L[i - 1]));
         const double expectedStep = 0.4 * juce::MathConstants<double>::twoPi * 200.0 / kSr;   // steepest slope of the input sine
-        CHECK (lo > 0.9 * hi, "5 ms RMS stays within %.2f..%.2f of the nominal level", lo / 0.2828, hi / 0.2828);
+        const double nominal = 0.4 / std::sqrt (2.0) * std::cos (juce::MathConstants<double>::pi * 0.25);   // sine RMS x centre pan gain
+        CHECK (lo > 0.9 * hi && lo > 0.9 * nominal && hi < 1.1 * nominal, "5 ms RMS stays within %.3f..%.3f of the nominal %.3f", lo, hi, nominal);
         CHECK (maxStep < 1.15 * expectedStep, "largest sample step %.4f (sine slope %.4f): no clicks", maxStep, expectedStep);
     }
 

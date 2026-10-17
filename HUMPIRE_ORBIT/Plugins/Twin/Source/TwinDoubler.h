@@ -194,7 +194,7 @@ namespace twin
         float readAt (float delaySamples) const noexcept;
         float sampleAt (int delay) const noexcept;
         float decAt (int index) const noexcept;
-        float clampTap (float delay) const noexcept { return juce::jlimit (1.0f, maxTapSamples, delay); }
+        float clampTap (float delay) const noexcept { return juce::jlimit (2.0f, maxTapSamples, delay); }
 
         void  stepVoice (Voice& v, float& sumL, float& sumR) noexcept;
         void  maybeJump (Voice& v, float eps, float centre) noexcept;
@@ -353,15 +353,19 @@ namespace twin
         }
     }
 
-    /** Linear-interpolated read `delaySamples` (>= 0) behind the most recent input sample. */
+    /** Cubic (Catmull-Rom) read `delaySamples` (>= 2) behind the most recent input sample. Linear
+        interpolation would low-pass the top octave by a varying amount as the fractional delay of a
+        detuned tap sweeps, which shows up as a roughness at ~ the detune rate. */
     inline float Doubler::readAt (float delaySamples) const noexcept
     {
         const float pos = (float) (writeIdx + bufLen - 1) - delaySamples;   // positive: delay < bufLen
         const int i0 = (int) pos;
-        const float frac = pos - (float) i0;
-        const auto a = (size_t) (i0 & mask);
-        const auto b = (size_t) ((i0 + 1) & mask);
-        return buffer[a] + (buffer[b] - buffer[a]) * frac;
+        const float x = pos - (float) i0;
+        const float y0 = buffer[(size_t) ((i0 - 1) & mask)];
+        const float y1 = buffer[(size_t) (i0 & mask)];
+        const float y2 = buffer[(size_t) ((i0 + 1) & mask)];
+        const float y3 = buffer[(size_t) ((i0 + 2) & mask)];
+        return y1 + 0.5f * x * (y2 - y0 + x * (2.0f * y0 - 5.0f * y1 + 4.0f * y2 - y3 + x * (3.0f * (y1 - y2) + y3 - y0)));
     }
 
     /** Input sample `delay` samples ago (0 = the most recent one). */

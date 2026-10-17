@@ -139,11 +139,11 @@ GhPanel::GhPanel (GhProcessor& p)
     addKnob (tone, P::t1, "TONE");       addKnob (body, P::t2, "BODY");       addKnob (bright, P::t3, "BRIGHT");
     addKnob (width, P::t4, "WIDTH");       addKnob (texture, P::t5, "TEXTURE");
     addKnob (volume, P::volume, "VOLUME"); addKnob (reverb, P::reverb, "REVERB");  addKnob (chorus, P::chorus, "CHORUS");
-    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DELAY MIX");
+    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DLY MIX");
     addKnob (dtime, P::dtime, "TIME");     addKnob (feedback, P::fb, "FEEDBACK");
     const char* en[4] = { "A", "D", "S", "R" };
     for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], juce::Slider::LinearVertical);
-    addKnob (fenvK, P::fenv, "FLT ENV"); addKnob (resoK, P::reso, "RESONANCE");
+    addKnob (fenvK, P::fenv, "FLT ENV"); addKnob (resoK, P::reso, "RESO");
     const char* tn[4] = { "A", "D/R", "S", "VEL" };   // the filter envelope uses its decay time for the release too
     const int ti[4] = { P::fatk, P::fdec, P::fsus, P::velocity };
     for (int i = 0; i < 4; ++i) addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical);
@@ -152,7 +152,7 @@ GhPanel::GhPanel (GhProcessor& p)
     bend.s.getProperties().set ("wheel", true); modw.s.getProperties().set ("wheel", true);
     all.erase (std::remove (all.begin(), all.end(), &bend), all.end()); all.erase (std::remove (all.begin(), all.end(), &modw), all.end());
     bend.s.onDragEnd = [this] { bend.s.setValue (0.0, juce::sendNotificationSync); };
-    for (auto* k : { &tone, &body, &bright, &width, &texture, &fenvK, &resoK }) k->s.getProperties().set ("small", true);
+    for (auto* k : { &tone, &body, &bright, &width, &texture, &fenvK, &resoK, &delay }) k->s.getProperties().set ("small", true);
 
     addCombo (cWave, P::wave, engineNames);  addCombo (cLfo, P::lfosrc, lfoNames);  addCombo (cDest, P::dest, destNames);
     addCombo (cFilt, P::ftype, filterNames); addCombo (cMono, P::mono, monoNames);

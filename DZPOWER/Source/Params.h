@@ -29,7 +29,8 @@ inline juce::String unitText (Unit u, float v)
         case Unit::percent:   return juce::String (juce::roundToInt (v * 100.f)) + " %";
         case Unit::cutoffHz:  return v >= 1000.f ? juce::String (v / 1000.f, 2) + " kHz" : juce::String (juce::roundToInt (v)) + " Hz";
         case Unit::rateHz:    return juce::String (v, 2) + " Hz";
-        case Unit::time:      return v < 0.01f ? juce::String (v * 1000.f, 1) + " ms"
+        case Unit::time:      return v < 0.00005f ? juce::String ("0 ms")
+                                    : v < 0.01f ? juce::String (v * 1000.f, 1) + " ms"
                                     : v < 0.9995f ? juce::String (juce::roundToInt (v * 1000.f)) + " ms"
                                     : juce::String (v, 2) + " s";
         case Unit::gainDb:    return v < 0.0005f ? juce::String ("-inf dB") : juce::String (juce::Decibels::gainToDecibels (v), 1) + " dB";
