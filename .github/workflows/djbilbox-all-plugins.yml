@@ -95,7 +95,7 @@ jobs:
           function Stage($src, $dst) {
             New-Item -ItemType Directory -Force -Path "stage/$dst" | Out-Null
             if (-not (Test-Path $src)) { return }
-            Get-ChildItem $src -Recurse -Directory -Filter *.vst3 | Where-Object { $_.Parent.Name -eq 'VST3' } | ForEach-Object {
+            Get-ChildItem $src -Recurse -Directory -Filter *.vst3 | Where-Object { $_.Parent.Name -eq 'VST3' -and (Get-ChildItem $_.FullName -Recurse -File -Filter *.vst3 | Select-Object -First 1) } | ForEach-Object {
               Write-Host "[$dst] $($_.Name)"
               Copy-Item $_.FullName "stage/$dst/$($_.Name)" -Recurse -Force
             }
