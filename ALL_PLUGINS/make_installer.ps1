@@ -122,9 +122,9 @@ DJBILBOX BEATS - ALL PLUGINS v$Version
 5. The user manuals and license are in C:\Program Files\DJBILBOX BEATS\Documentation
 6. FL Studio: Options > Manage plugins > Find installed plugins.
 
-HUMPIRE CHAABI ORCHESTRA: test samples (synthesized) are installed in
-C:\ProgramData\HUMPIRE\Chaabi Orchestra\Samples. Replace them with your own WAV
-files (same names). The installer never overwrites existing sample files.
+HUMPIRE CHAABI ORCHESTRA plays out of the box with its built-in modelled instruments.
+To use your own sample libraries instead, place SFZ folders in
+C:\ProgramData\HUMPIRE\Chaabi Orchestra\Samples (or use the SAMPLES FOLDER button).
 
 INCLUDED PLUGINS ($($included.Count)):
 $(($included | ForEach-Object { "  + $_" }) -join "`r`n")

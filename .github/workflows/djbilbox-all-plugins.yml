@@ -86,9 +86,7 @@ jobs:
           Write-Host "exit code: $LASTEXITCODE"
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
-      - name: Samples de test Chaabi
-        continue-on-error: true
-        run: python HUMPIRE_Chaabi_Orchestra/tools/make_placeholders.py --out stage/chaabi_samples
+      # Chaabi: instruments modelises integres au plugin (aucun fichier de samples a installer)
 
       # ---------------- 4) staging
       - name: Rassembler les VST3
