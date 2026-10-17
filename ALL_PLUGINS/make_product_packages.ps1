@@ -140,10 +140,11 @@ foreach ($it in $all) {
 $bundles = @(
     @{ Name = "HUMPIRE LOADOUT"; Slug = "humpire-loadout"; Group = "loadout"; Blurb = "Eight studio effects: EQ, compressor, enhancer, limiter, reverb, delay, lo-fi and performance FX." },
     @{ Name = "HUMPIRE ORBIT"; Slug = "humpire-orbit"; Group = "orbit"; Blurb = "Vocal effects bundle: pitch correction, harmonies, doubling and more." },
-    @{ Name = "DJBILBOX BEATS Synth Collection"; Slug = "djbilbox-beats-synth-collection"; Group = "synths"; Blurb = "The complete DJBILBOX BEATS synthesizer collection." }
+    @{ Name = "DJBILBOX BEATS Synth Collection"; Slug = "djbilbox-beats-synth-collection"; Group = "synths"; Blurb = "The complete DJBILBOX BEATS synthesizer collection." },
+    @{ Name = "DJBILBOX BEATS Complete Collection"; Slug = "djbilbox-beats-complete-collection"; Group = "all"; Blurb = "Every DJBILBOX BEATS and HUMPIRE plugin of this release." }
 )
 foreach ($b in $bundles) {
-    $items = @($all | Where-Object { $_.Group -eq $b.Group })
+    if ($b.Group -eq "all") { $items = @($all) } else { $items = @($all | Where-Object { $_.Group -eq $b.Group }) }
     if ($items.Count -gt 1) {
         try { New-Package -AppName $b.Name -Slug $b.Slug -Items $items -Blurb $b.Blurb }
         catch { Write-Host "FAILED $($b.Slug): $_"; $report.Add("FAILED $($b.Slug): $_") }

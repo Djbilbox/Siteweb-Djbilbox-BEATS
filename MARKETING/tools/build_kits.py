@@ -46,7 +46,7 @@ def main():
     pricing = load(os.path.join(ROOT, 'pricing.json'))
     slugs = load(os.path.join(ROOT, 'slugs.json')) if os.path.exists(os.path.join(ROOT, 'slugs.json')) else {}
     fiches = [load(os.path.join(FICHES, n)) for n in sorted(os.listdir(FICHES)) if n.endswith('.json') and not n.startswith('_')]
-    fiches = [f for f in fiches if f['id'] not in pricing.get('not_for_sale_yet', {})]   # e.g. Chaabi: no real samples yet
+    fiches = [f for f in fiches if f['id'] not in pricing.get('not_for_sale_yet', {}) and f['id'] not in pricing.get('already_in_store_do_not_create', [])]   # e.g. Chaabi: no real samples yet
     manifest = []
     rows = []
     for f in fiches:
@@ -76,7 +76,7 @@ def main():
     by_group = {}
     for f in fiches: by_group.setdefault(f['group'], []).append(f)
     for b in pricing['bundles']:
-        members = by_group.get(b['members_group'], [])
+        members = fiches if b['members_group'] == 'all' else by_group.get(b['members_group'], [])
         if a.only and b['id'] != a.only: continue
         if not members: continue
         total = sum(price_of(m, pricing) for m in members)

@@ -11,7 +11,7 @@ load = lambda p: json.load(open(p, encoding='utf-8'))
 pricing = load(os.path.join(ROOT, 'pricing.json'))
 slugs = load(os.path.join(ROOT, 'slugs.json')) if os.path.exists(os.path.join(ROOT, 'slugs.json')) else {}
 fiches = [load(os.path.join(ROOT, 'fiches', n)) for n in sorted(os.listdir(os.path.join(ROOT, 'fiches'))) if n.endswith('.json') and not n.startswith('_')]
-fiches = [f for f in fiches if f['id'] not in pricing.get('not_for_sale_yet', {})]
+fiches = [f for f in fiches if f['id'] not in pricing.get('not_for_sale_yet', {}) and f['id'] not in pricing.get('already_in_store_do_not_create', [])]
 js = lambda o: json.dumps(o, ensure_ascii=False, indent=2)
 
 def price_of(f):
@@ -24,13 +24,13 @@ def entries():
     for f in fiches: by_group.setdefault(f['group'], []).append(f)
     items = [(f, price_of(f), slugs.get(f['id'], ''), f['category'], f['tagline'], f.get('about', []), f.get('features', []), f.get('specs', []), f.get('includes', []), f.get('genres', [])) for f in fiches]
     for b in pricing['bundles']:
-        members = by_group.get(b['members_group'], [])
+        members = fiches if b['members_group'] == 'all' else by_group.get(b['members_group'], [])
         if not members: continue
         total = sum(price_of(m) for m in members)
         fb = {"id": b['id'], "name": b['name'], "kind": b['kind'], "sub": f"{len(members)} VST3 plugins, one payment", "tagline": b['tagline'], "accent": "#f5b544"}
         about = [b['tagline'], f"Bought separately these {len(members)} plugins cost ${total}. The bundle is ${b['price']}."]
         feats = [{"icon": "fa-puzzle-piece", "t": m['name'], "d": m['tagline']} for m in members]
-        items.append((fb, b['price'], slugs.get(b['id'], ''), 'instrument' if b['members_group'] == 'synths' else 'effect', b['tagline'], about, feats,
+        items.append((fb, b['price'], slugs.get(b['id'], ''), 'instrument' if b['members_group'] in ('synths', 'all') else 'effect', b['tagline'], about, feats,
                       [{"k": "Format", "v": "VST3 64-bit (Windows)"}, {"k": "Plugins", "v": str(len(members))}], [f"{len(members)} VST3 plugins", "Windows installer", "PDF manuals", "Royalty-free license"], []))
     for f, price, slug, cat, tagline, about, feats, specs, includes, genres in items:
         pid = f['id']; soon = not slug
