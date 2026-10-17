@@ -55,11 +55,25 @@ private:
 
     Fk::ParamPtrs ptrs;
     Fk::GlideState glideState;
-    juce::Synthesiser synth;
+    // juce::Synthesiser::handleController only reaches voices that are playing: remember the latest CC1 here
+    // so that every new note starts with the current mod wheel position.
+    struct FkSynth : public juce::Synthesiser
+    {
+        explicit FkSynth (Fk::GlideState& s) : shared (s) {}
+        void handleController (int channel, int controller, int value) override
+        {
+            if (controller == 1) shared.modWheel.store ((float) value / 127.f);
+            else if (controller == 121) shared.modWheel.store (0.f);   // reset all controllers
+            juce::Synthesiser::handleController (channel, controller, value);
+        }
+        Fk::GlideState& shared;
+    };
+    FkSynth synth { glideState };
     juce::dsp::Chorus<float> chorus;
     juce::Reverb reverb;
     StereoDelay dly;
     double sampleRate = 44100.0;
+    int maxBlock = 512;   // block size given to prepareToPlay
     int lastMonoNote = -1;
     juce::MidiBuffer monoMidi;
     float dcXl = 0.f, dcYl = 0.f, dcXr = 0.f, dcYr = 0.f, dcRm = 0.999f;

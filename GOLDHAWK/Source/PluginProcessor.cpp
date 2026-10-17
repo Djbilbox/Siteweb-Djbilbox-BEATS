@@ -15,6 +15,7 @@ GhProcessor::GhProcessor()
 void GhProcessor::prepareToPlay (double sr, int block)
 {
     sampleRate = sr;
+    maxBlock = juce::jmax (1, block);
     synth.setCurrentPlaybackSampleRate (sr);
     juce::dsp::ProcessSpec spec { sr, (juce::uint32) block, 2 };
     chorus.prepare (spec);
@@ -48,7 +49,7 @@ void GhProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     juce::ScopedNoDenormals nd;
     const int n = buffer.getNumSamples();
     buffer.clear();
-    if (n == 0 || buffer.getNumChannels() < 1) return;
+    if (n == 0 || buffer.getNumChannels() < 1 || dly.bl.empty()) return;   // nothing to do / not prepared yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
 
     if (ptrs (mono) > 0.5f) // mono : derniere note prioritaire, coupe la precedente
@@ -88,14 +89,19 @@ void GhProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
         }
     }
 
-    // chorus
+    // chorus: juce::dsp::Chorus owns block-sized buffers, so never feed it more than the prepared block size
     const float cho = ptrs (Gh::chorus);
-    if (cho > 0.005f)
+    if (cho > 0.005f && buffer.getNumChannels() >= 2)
     {
         chorus.setMix (cho * 0.8f);
-        juce::dsp::AudioBlock<float> blk (buffer);
-        juce::dsp::ProcessContextReplacing<float> ctx (blk);
-        chorus.process (ctx);
+        juce::dsp::AudioBlock<float> whole (buffer);
+        auto stereo = whole.getSubsetChannelBlock (0, 2);
+        for (size_t pos = 0; pos < (size_t) n; pos += (size_t) maxBlock)
+        {
+            auto part = stereo.getSubBlock (pos, juce::jmin ((size_t) maxBlock, (size_t) n - pos));
+            juce::dsp::ProcessContextReplacing<float> ctx (part);
+            chorus.process (ctx);
+        }
     }
 
     // delay ping-pong

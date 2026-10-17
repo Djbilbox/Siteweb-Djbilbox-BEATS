@@ -10,6 +10,32 @@ constexpr float K = 0.5f;   // coordonnees maquette (2000 px) -> 1000 px
 juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
 juce::Rectangle<int> C (int cx, int cy, int w, int h) { return R (cx - w / 2, cy - h / 2, w, h); }
 juce::Colour ramp (float t) { return amber.interpolatedWith (ember, juce::jlimit (0.f, 1.f, t)); }
+
+// Section header: text centred on (cx, cy) in mock-up units, thin rules running out to +/-half on both sides of the text.
+void header (juce::Graphics& g, const juce::String& text, int cx, int cy, int half, juce::Colour col, float size = 13.f, bool rules = true)
+{
+    const juce::Font font (juce::FontOptions (size, juce::Font::bold));
+    juce::GlyphArrangement ga; ga.addLineOfText (font, text, 0.f, 0.f);
+    const float tw = ga.getBoundingBox (0, -1, true).getWidth();
+    const float x = (float) cx * K, y = (float) cy * K, h = (float) half * K;
+    g.setFont (font);
+    g.setColour (col);
+    g.drawText (text, juce::Rectangle<float> (x - tw * 0.5f - 6.f, y - 10.f, tw + 12.f, 20.f), juce::Justification::centred, false);
+    if (rules && h > tw * 0.5f + 14.f)
+    {
+        g.setColour (col.withAlpha (0.45f));
+        g.drawLine (x - h, y, x - tw * 0.5f - 8.f, y, 1.f);
+        g.drawLine (x + tw * 0.5f + 8.f, y, x + h, y, 1.f);
+    }
+}
+
+// Small caption centred on (cx, cy) in mock-up units.
+void caption (juce::Graphics& g, const juce::String& text, int cx, int cy, juce::Colour col, float size = 10.f)
+{
+    g.setColour (col);
+    g.setFont (juce::FontOptions (size, juce::Font::bold));
+    g.drawText (text, juce::Rectangle<float> ((float) cx * K - 60.f, (float) cy * K - 8.f, 120.f, 16.f), juce::Justification::centred, false);
+}
 }
 
 DzLNF::DzLNF()
@@ -108,16 +134,16 @@ DzPanel::DzPanel (DzProcessor& p)
     logo = load (BinaryData::logo_png, BinaryData::logo_pngSize);
     cassette = load (BinaryData::cassette_png, BinaryData::cassette_pngSize);
 
-    addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "PITCH");
+    addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "TRANSPOSE");
     addKnob (glide, P::glide, "GLIDE");    addKnob (filter, P::filter, "CUTOFF");
     addKnob (tone, P::t1, "TONE");       addKnob (body, P::t2, "BODY");       addKnob (bright, P::t3, "BRIGHT");
     addKnob (width, P::t4, "WIDTH");       addKnob (texture, P::t5, "TEXTURE");
     addKnob (volume, P::volume, "VOLUME"); addKnob (reverb, P::reverb, "REVERB");  addKnob (chorus, P::chorus, "CHORUS");
-    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DELAY");
+    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DELAY MIX");
     addKnob (dtime, P::dtime, "TIME");     addKnob (feedback, P::fb, "FEEDBACK");
     const char* en[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
     for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], juce::Slider::LinearVertical);
-    addKnob (fenvK, P::fenv, "ENV"); addKnob (resoK, P::reso, "RESONANCE");
+    addKnob (fenvK, P::fenv, "FLT ENV"); addKnob (resoK, P::reso, "RESONANCE");
     const char* tn[5] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE", "VELOCITY" };
     const int ti[5] = { P::fatk, P::fdec, P::fsus, P::frel, P::velocity };
     for (int i = 0; i < 5; ++i) addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical);
@@ -146,8 +172,10 @@ DzPanel::DzPanel (DzProcessor& p)
     presetLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (presetLabel);
 
-    keys.setKeyWidth (31.f);
-    keys.setLowestVisibleKey (36);
+    // JUCE 8 resets the first visible key to the start of the available range when scroll buttons are hidden,
+    // so the playable range itself is restricted: MIDI 36..96 = 5 octaves (C2..C7), 36 white keys (fitted in resized()).
+    keys.setAvailableRange (36, 96);
+    keys.setOctaveForMiddleC (4);   // labels: middle C (MIDI 60) = C4, first key = C2
     keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, amber.withAlpha (0.6f));
     keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, ember.withAlpha (0.3f));
     keys.setScrollButtonsVisible (false);
@@ -209,15 +237,15 @@ void DzPanel::showPresetMenu()
     auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.dzpreset"); files.sort();
     juce::PopupMenu user;
     for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
-    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
-    menu.addItem (999, "Ouvrir un fichier .dzpreset...");
+    menu.addItem (999, "Open a .dzpreset file...");
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
         if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
         else if (r == 999)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Charger un preset", userPresetDir(), "*.dzpreset");
+            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.dzpreset");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                                   [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
         }
@@ -227,7 +255,7 @@ void DzPanel::showPresetMenu()
 
 void DzPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.dzpreset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.dzpreset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
@@ -254,7 +282,7 @@ void DzPanel::loadUserPreset (const juce::File& f)
 void DzPanel::showExpansion()
 {
     juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "EXPANSION VOL.1",
-        "Les packs d'expansion arrivent bientot.\n\nhttps://djbilboxbeats.gumroad.com/");
+        "Expansion packs are coming soon.\n\nhttps://djbilboxbeats.gumroad.com/");
 }
 
 void DzPanel::paint (juce::Graphics& g)
@@ -341,18 +369,26 @@ void DzPanel::paint (juce::Graphics& g)
         g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 9.5f : 12.f)));
         g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : 0), r.getWidth() + 50, 18, juce::Justification::centred, 1);
     }
-    g.setFont (juce::FontOptions (15.f, juce::Font::bold));
-    g.drawFittedText ("LFO", R (354, 535, 120, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("ASDR", R (1519, 488, 120, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("FILTER", R (1085, 772, 120, 40), juce::Justification::centred, 1);
-    g.setFont (juce::FontOptions (12.f));
-    g.drawFittedText ("DELAY", R (1583, 765, 120, 36), juce::Justification::centred, 1);
-    g.setFont (juce::FontOptions (11.5f));
-    g.drawFittedText ("Pitch Bend", R (221, 1378, 120, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("Modulation", R (372, 1378, 120, 40), juce::Justification::centred, 1);
-    g.setColour (juce::Colour (0xffb8b4a0));   // accolades
-    g.drawLine ((float) R (259, 0, 0, 0).getX(), (float) R (0, 562, 0, 0).getY(), (float) R (340, 0, 0, 0).getX(), (float) R (0, 562, 0, 0).getY(), 1.f);
-    g.drawLine ((float) R (490, 0, 0, 0).getX(), (float) R (0, 562, 0, 0).getY(), (float) R (572, 0, 0, 0).getX(), (float) R (0, 562, 0, 0).getY(), 1.f);
+    {   // section headers and captions
+        const juce::Colour txt (0xffe6e0cc), dim (0xffbdb8a4);
+        header (g, "LFO", 336, 556, 104, txt, 15.f);                     // RATE + AMOUNT only (PITCH is the transpose knob)
+        header (g, "AMP ENVELOPE", 415, 756, 186, txt, 12.f);
+        header (g, "FILTER ENVELOPE", 1534, 506, 140, txt, 13.f);
+        g.setColour (txt.withAlpha (0.3f));                               // velocity sensitivity is not part of the filter envelope
+        g.drawLine (1728.f * K, 548.f * K, 1728.f * K, 700.f * K, 1.f);
+        header (g, "MASTER", 1663, 318, 150, txt, 13.f);
+        header (g, "FILTER", 1145, 792, 80, txt, 15.f);
+        header (g, "EFFECTS", 1451, 765, 120, txt, 12.f);
+        header (g, "DELAY", 1707, 765, 114, txt, 12.f);
+        caption (g, "WAVEFORM", 767, 968, dim);
+        caption (g, "LFO SOURCE", 1002, 968, dim);
+        caption (g, "LFO DESTINATION", 1237, 968, dim);
+        caption (g, "FILTER TYPE", 1476, 968, dim);
+        caption (g, "MONO / POLY", 1715, 968, dim);
+        header (g, "PITCH & MOD", 358, 1103, 150, txt, 11.f);
+        caption (g, "PITCH BEND", 281, 1398, dim);
+        caption (g, "MOD WHEEL", 432, 1398, dim);
+    }
 }
 
 void DzPanel::resized()
@@ -374,5 +410,7 @@ void DzPanel::resized()
     prev.setBounds (R (705, 92, 50, 80)); next.setBounds (R (1245, 92, 55, 80));
     presetLabel.setBounds (R (770, 100, 470, 66));
     expansion.setBounds (R (205, 92, 317, 386));
-    keys.setBounds (R (583, 1110, 1232, 305));
+    const auto kb = R (583, 1110, 1232, 305);
+    keys.setKeyWidth ((float) kb.getWidth() / 36.f);   // 36 white keys between MIDI 36 and 96 fill the keyboard area exactly
+    keys.setBounds (kb);
 }

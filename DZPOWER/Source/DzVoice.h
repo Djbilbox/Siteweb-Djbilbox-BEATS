@@ -4,7 +4,11 @@
 
 namespace Dz
 {
-struct GlideState { std::atomic<float> lastFreq { 0.f }; };
+struct GlideState
+{
+    std::atomic<float> lastFreq { 0.f };
+    std::atomic<float> modWheel { 0.f };   // latest MIDI CC1 (0..1): voices started later must begin with it
+};
 
 struct SVF
 {
@@ -53,6 +57,7 @@ public:
         curFreq = (P (glide) > 0.001f && last > 0.f) ? last : targetFreq;
         glideState.lastFreq = targetFreq;
         vel = velocity;
+        midiMod = glideState.modWheel.load();   // idle voices never received CC1, so take the latest wheel position
         midiBend = (pitchWheel - 8192) / 8192.f;
         age = 0;
         for (auto& p : ph) p = rng.nextDouble();

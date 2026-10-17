@@ -113,7 +113,7 @@ protected:
                         juce::Rectangle<float> (c.x - pr, c.y - pr * 0.62f, pr * 2.0f, pr * 0.62f),
                         juce::Justification::centred, false);
             g.setFont (theme::text (pr * 0.24f));
-            g.drawText ((cents >= 0.0f ? "+" : "") + juce::String (cents, 0) + " ct",
+            g.drawText ((cents >= 0.5f ? "+" : "") + juce::String (juce::roundToInt (cents)) + " ct",
                         juce::Rectangle<float> (c.x - pr, c.y + pr * 0.10f, pr * 2.0f, pr * 0.40f),
                         juce::Justification::centred, false);
         }

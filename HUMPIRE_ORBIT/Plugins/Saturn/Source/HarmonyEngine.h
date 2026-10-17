@@ -50,8 +50,8 @@ namespace saturn
             latency = window.latencySamples();
             line.prepare ((int) std::ceil (0.1 * sr));     // far more than latency + half a grain
             homeStep = 1.0 / (0.1 * sr);
-            levelCoef = coefFor (0.02);
-            gateCoef = coefFor (0.025);
+            levelCoef = (float) coefFor (0.02);
+            gateCoef = (float) coefFor (0.025);
             reset();
         }
 

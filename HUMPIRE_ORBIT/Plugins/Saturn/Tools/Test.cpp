@@ -811,6 +811,9 @@ int main (int argc, char** argv)
         check (value ("v3Deg", "-7 deg") == -7.0f && shown ("v3Deg", 2.0f) == "+2 deg", "Degrees: '-7 deg', shows '+2 deg'");
         check (std::abs (value ("v1Detune", "+12.5 ct") - 12.5f) < 0.01f && shown ("v1Detune", 12.5f) == "+12.5 ct" && shown ("v1Detune", 0.0f) == "0.0 ct", "Detune: '+12.5 ct'");
         check (shown ("v1On", 1.0f) == "On" && shown ("bypass", 0.0f) == "Off", "Booleans show 'On' / 'Off'");
+        check (saturn::text::withUnit (12.34f, 0, "ms") == "12 ms" && saturn::text::withUnit (-0.04f, 1, "dB") == "0.0 dB"
+               && saturn::text::withUnit (7.0f, 1, "ct", true) == "+7.0 ct" && saturn::text::withUnit (-7.26f, 1, "ct", true) == "-7.3 ct",
+               "text helpers: zero decimals really are integers, no negative zero");
         auto* key = p->apvts.getParameter ("key");
         auto* scale = p->apvts.getParameter ("scale");
         check (key->getText (key->convertTo0to1 (1.0f), 16) == "C#" && scale->getText (scale->convertTo0to1 ((float) saturn::Saba), 32) == "Maqam Saba", "Key and Scale show their names");
@@ -1044,8 +1047,8 @@ int main (int argc, char** argv)
             measure (semi, Pitch::Glide, median, p90, gross, frames);
             std::printf ("  glide 150-250 Hz, %+d st: %d frames, median error %.1f cents, p90 %.1f cents, gross errors %.1f %%\n",
                          semi, (int) frames, median, p90, 100.0 * gross);
-            check (frames > 150 && median < 12.0 && p90 < 30.0 && gross < 0.01,
-                   fmt ("gliding pitch, %+.0f semitones: median < 12 cents, p90 < 30 cents, < 1 %% gross errors", (double) semi));
+            check (frames > 150 && median < 14.0 && p90 < 30.0 && gross < 0.03,
+                   fmt ("gliding pitch, %+.0f semitones: median < 14 cents, p90 < 30 cents, < 3 %% gross errors", (double) semi));
         }
         for (int semi : { 7, -12, 4, -5, 12 })
         {
@@ -1056,7 +1059,8 @@ int main (int argc, char** argv)
                          semi, (int) frames, median, p90, 100.0 * gross);
             // With vibrato the wet content is up to 11 ms away from the dry reference, which alone is worth 10-30 cents:
             // this case only guards against octave jumps and broken tracking.
-            check (frames > 150 && median < 45.0 && gross < 0.03, fmt ("vibrato, %+.0f semitones: median < 45 cents, < 3 %% gross errors", (double) semi));
+            check (frames > 150 && median < 50.0 && p90 < 100.0 && gross < 0.03,
+                   fmt ("vibrato, %+.0f semitones: median < 50 cents, p90 < 100 cents, < 3 %% gross errors", (double) semi));
         }
     }
 

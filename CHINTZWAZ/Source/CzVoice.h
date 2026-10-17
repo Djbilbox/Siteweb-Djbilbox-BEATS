@@ -4,7 +4,11 @@
 
 namespace Cz
 {
-struct GlideState { std::atomic<float> lastFreq { 0.f }; };
+struct GlideState
+{
+    std::atomic<float> lastFreq { 0.f };
+    std::atomic<float> lastMod { 0.f };   // latest mod wheel (CC1) value 0..1, kept even when no voice is playing
+};
 
 struct SVF
 {
@@ -54,6 +58,7 @@ public:
         glideState.lastFreq = targetFreq;
         vel = velocity;
         midiBend = (pitchWheel - 8192) / 8192.f;
+        midiMod = glideState.lastMod.load();   // idle voices never received CC1: start from the latest wheel position
         age = 0;
         for (auto& p : ph) p = rng.nextDouble();
         std::fill (ksBuf.begin(), ksBuf.end(), 0.f); fmFb = 0.f; holdV = 0.f; holdC = 0.f;
@@ -72,7 +77,7 @@ public:
     }
 
     void pitchWheelMoved (int v) override { midiBend = (v - 8192) / 8192.f; }
-    void controllerMoved (int cc, int v) override { if (cc == 1) midiMod = v / 127.f; }
+    void controllerMoved (int cc, int v) override { if (cc == 1) midiMod = v / 127.f; else if (cc == 121) midiMod = 0.f; }
     void aftertouchChanged (int) override {}
     void channelPressureChanged (int) override {}
 
@@ -144,7 +149,7 @@ public:
 
             L[start + i] += y * gL;
             if (R) R[start + i] += y * gR;
-            ++age;
+            if (age < 0x3fffffff) ++age;   // saturate: no signed overflow on very long held notes
             if (! adsr.isActive()) { clearCurrentNote(); break; }
         }
     }

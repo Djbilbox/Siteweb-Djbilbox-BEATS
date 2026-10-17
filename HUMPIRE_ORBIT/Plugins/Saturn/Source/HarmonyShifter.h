@@ -82,7 +82,7 @@ namespace saturn
             wLo = 0.011 * sr;
             wHi = 0.022 * sr;
             W = Wtarget = 0.5 * (wLo + wHi);
-            wSlew = 1.0 / (0.05 * sr);     // 50 ms glide of the grain length
+            wSlew = 1.0 / (0.02 * sr);     // 20 ms glide of the grain length (a slower glide lags the pitch and detunes glides)
             j = 0.0;
         }
 

@@ -12,11 +12,11 @@ juce_add_binary_data(AbAssets SOURCES Assets/camel.png Assets/logo.png Assets/ca
 juce_add_plugin(ARENA_BASS
     COMPANY_NAME "DJBILBOX BEATS"
     PLUGIN_MANUFACTURER_CODE Djbb
-    PLUGIN_CODE Abl
+    PLUGIN_CODE Abl1
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
-    PRODUCT_NAME "ARENA_BASS"
+    PRODUCT_NAME "ARENA BASS"
     VST3_CATEGORIES Instrument Synth)
 
 target_sources(ARENA_BASS PRIVATE

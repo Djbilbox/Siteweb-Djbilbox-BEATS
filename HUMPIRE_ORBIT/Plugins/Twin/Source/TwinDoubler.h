@@ -217,7 +217,7 @@ namespace twin
         std::vector<float> dec;
 
         // cross-fade / range constants, in samples
-        float fadeInc = 0.01f, maxRangeSamples = 0.0f, minMarginSamples = 0.0f, staticLimitSamples = 0.0f;
+        float fadeInc = 0.01f, maxRangeSamples = 0.0f, minSpanSamples = 0.0f, minMarginSamples = 0.0f, staticLimitSamples = 0.0f;
 
         std::array<Voice, kMaxVoices> voices;
         DoublerSettings target;
@@ -267,6 +267,7 @@ namespace twin
 
         fadeInc = (float) (1.0 / juce::jmax (16.0, 0.010 * sr));   // 10 ms cross-fade
         maxRangeSamples = (float) (0.014 * sr);                      // offsets stay within +-14 ms
+        minSpanSamples = (float) (0.016 * sr);                       // the offset range is at least 16 ms wide
         minMarginSamples = (float) (0.002 * sr);                     // a tap never gets closer than 2 ms
         staticLimitSamples = (float) (0.003 * sr);
 
@@ -460,30 +461,36 @@ namespace twin
         sumR += v.gainR * y;
     }
 
-    /** Decides whether the audible tap has drifted far enough to be handed over to a new tap. */
+    /** Decides whether the audible tap has drifted far enough to be handed over to a new tap.
+        The tap offset lives in [-lowCap, +highCap] around the voice delay. The range is at least
+        16 ms wide so that a jump can always span a whole pitch period of a low male voice; for
+        delays below ~10 ms that means the average delay of a detuned double sits near 10 ms. */
     inline void Doubler::maybeJump (Voice& v, float eps, float centre) noexcept
     {
-        const float rangeCap = juce::jmin (maxRangeSamples, centre - minMarginSamples);   // centre >= 5 ms
-
+        const float lowCap = juce::jmin (maxRangeSamples, centre - minMarginSamples);   // centre >= 5 ms
         if (std::abs (eps) < kStaticEps)
         {
-            const float limit = juce::jmin (staticLimitSamples, rangeCap);
+            const float limit = juce::jmin (staticLimitSamples, lowCap);
             if (std::abs (v.offA) > limit)
                 startJump (v, centre, -limit, limit, 0.0f, true);
             return;
         }
 
+        const float lo = -lowCap;
+        const float hi = juce::jmax (lowCap, minSpanSamples - lowCap);
+        const float width = hi - lo, mid = 0.5f * (hi + lo);
         const float sgn = eps > 0.0f ? 1.0f : -1.0f;
-        const float trigger = 0.5f * rangeCap;
-        if (sgn * v.offA >= trigger)
+        const float trigger = mid + sgn * 0.25f * width;      // the tap has travelled half-way across the range
+        const float nominal = mid - sgn * 0.25f * width;      // ... and comes back to the opposite quarter point
+
+        if (sgn * (v.offA - trigger) >= 0.0f)
         {
-            // Jump back to the other half of the range, at a delay that matches the waveform
-            const float lo = sgn > 0.0f ? -rangeCap : 0.1f * rangeCap;
-            const float hi = sgn > 0.0f ? -0.1f * rangeCap : rangeCap;
-            startJump (v, centre, lo, hi, -sgn * trigger, true);
+            const float minJump = 0.15f * width;
+            if (sgn > 0.0f) startJump (v, centre, lo, trigger - minJump, nominal, true);
+            else            startJump (v, centre, trigger + minJump, hi, nominal, true);
         }
-        else if (std::abs (v.offA) > rangeCap + 2.0f)
-            startJump (v, centre, -rangeCap, rangeCap, -sgn * trigger, false);   // out of range (delay changed fast)
+        else if (v.offA > hi + 2.0f || v.offA < lo - 2.0f)
+            startJump (v, centre, lo, hi, nominal, false);   // out of range (the delay was changed fast)
     }
 
     inline void Doubler::startJump (Voice& v, float centre, float offLo, float offHi, float offNominal, bool search) noexcept

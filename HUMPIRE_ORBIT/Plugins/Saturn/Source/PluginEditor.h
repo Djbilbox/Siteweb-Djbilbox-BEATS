@@ -19,8 +19,6 @@ private:
     void applyMode (bool semitones);
     void applySimple (bool simple);
 
-    SaturnAudioProcessor& proc;
-
     juce::TooltipWindow tooltipWindow { this, 600 };    // the tooltips below only show up with one of these
 
     HumpireTopBar topBar;

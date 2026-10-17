@@ -117,11 +117,13 @@ namespace saturn
             return kept.getFloatValue();
         }
 
-        /** "12.5 dB". Never prints a negative zero. */
+        /** "12.5 dB". Never prints a negative zero. Zero decimals really means an integer: juce::String (v, 0)
+            would fall back to the general format and may print many decimals. */
         inline juce::String withUnit (float v, int decimals, const char* unit, bool plusSign = false)
         {
             if (std::abs (v) < 0.5f * std::pow (10.0f, (float) -decimals)) v = 0.0f;
-            return juce::String ((plusSign && v > 0.0f) ? "+" : "") + juce::String (v, decimals) + " " + unit;
+            const juce::String number = decimals > 0 ? juce::String (v, decimals) : juce::String (juce::roundToInt (v));
+            return juce::String ((plusSign && v > 0.0f) ? "+" : "") + number + " " + unit;
         }
 
         inline juce::String percent (float v)   { return juce::String (juce::roundToInt (v)) + " %"; }

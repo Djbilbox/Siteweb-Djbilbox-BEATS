@@ -5,7 +5,6 @@ using namespace saturn;
 
 SaturnEditor::SaturnEditor (SaturnAudioProcessor& p)
     : HumpireEditorBase (p, 960, 600),
-      proc (p),
       topBar (p.apvts, p.presets, "SATURN - Harmony", p.inLevel, p.outLevel),
       orbit (p),
       waveform (p.waveform, theme::violet),
