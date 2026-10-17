@@ -1,0 +1,414 @@
+{
+  "_comment": "Geometry derived from rockpunk_ui_dimensions (user measurements of the real artwork), scaled design px = measured x 0.8. Adjust freely; the editor re-reads this file on load.",
+  "components": {
+    "attack": {
+      "x": 110.0,
+      "y": 412,
+      "w": 22.0,
+      "h": 133
+    },
+    "cassette": {
+      "x": 84,
+      "y": 48,
+      "w": 256,
+      "h": 212
+    },
+    "chorus": {
+      "x": 976.5,
+      "y": 358.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "decay": {
+      "x": 167.0,
+      "y": 412,
+      "w": 22.0,
+      "h": 133
+    },
+    "dest": {
+      "x": 644,
+      "y": 574,
+      "w": 102,
+      "h": 22
+    },
+    "dist": {
+      "x": 812.5,
+      "y": 458.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "fA": {
+      "x": 810.0,
+      "y": 158,
+      "w": 22.0,
+      "h": 130
+    },
+    "fD": {
+      "x": 896.0,
+      "y": 158,
+      "w": 22.0,
+      "h": 130
+    },
+    "fR": {
+      "x": 939.0,
+      "y": 158,
+      "w": 22.0,
+      "h": 130
+    },
+    "fS": {
+      "x": 853.0,
+      "y": 158,
+      "w": 22.0,
+      "h": 130
+    },
+    "fVel": {
+      "x": 991.0,
+      "y": 158,
+      "w": 22.0,
+      "h": 130
+    },
+    "fb": {
+      "x": 977.5,
+      "y": 458.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "filter": {
+      "x": 632.5,
+      "y": 458.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "filterType": {
+      "x": 810,
+      "y": 574,
+      "w": 102,
+      "h": 22
+    },
+    "glide": {
+      "x": 459.5,
+      "y": 457.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "leftGrill": {
+      "x": 384,
+      "y": 140,
+      "w": 64,
+      "h": 264
+    },
+    "lfoAmount": {
+      "x": 187.5,
+      "y": 320.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "lfoPitch": {
+      "x": 268.5,
+      "y": 320.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "lfoRate": {
+      "x": 106.5,
+      "y": 320.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "lfoSrc": {
+      "x": 510,
+      "y": 574,
+      "w": 104,
+      "h": 22
+    },
+    "modWheel": {
+      "x": 208,
+      "y": 636,
+      "w": 60,
+      "h": 124
+    },
+    "monoPoly": {
+      "x": 948,
+      "y": 574,
+      "w": 96,
+      "h": 22
+    },
+    "piano": {
+      "x": 328,
+      "y": 620,
+      "w": 740,
+      "h": 216
+    },
+    "pitchWheel": {
+      "x": 106,
+      "y": 636,
+      "w": 60,
+      "h": 124
+    },
+    "presetBar": {
+      "x": 348,
+      "y": 42,
+      "w": 420,
+      "h": 52
+    },
+    "release": {
+      "x": 278.0,
+      "y": 412,
+      "w": 22.0,
+      "h": 133
+    },
+    "reverb": {
+      "x": 894.5,
+      "y": 357.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "rightGrill": {
+      "x": 716,
+      "y": 140,
+      "w": 64,
+      "h": 264
+    },
+    "samplePicker": {
+      "x": 830,
+      "y": 100,
+      "w": 250,
+      "h": 46
+    },
+    "sustain": {
+      "x": 224.0,
+      "y": 412,
+      "w": 22.0,
+      "h": 133
+    },
+    "time": {
+      "x": 894.5,
+      "y": 458.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "vol": {
+      "x": 812.5,
+      "y": 358.5,
+      "w": 35.0,
+      "h": 35.0
+    },
+    "vuL": {
+      "x": 1084,
+      "y": 620,
+      "w": 16,
+      "h": 140
+    },
+    "vuR": {
+      "x": 1106,
+      "y": 620,
+      "w": 16,
+      "h": 140
+    },
+    "wf": {
+      "x": 372,
+      "y": 574,
+      "w": 93,
+      "h": 22
+    }
+  },
+  "sprites": {
+    "attack": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "attack",
+      "source": "rail mesure sur l'artwork"
+    },
+    "cassette": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "chorus": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 994,
+      "cy": 376,
+      "frames": 48,
+      "box": "chorus",
+      "source": "mesure sur l'artwork"
+    },
+    "decay": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "decay",
+      "source": "rail mesure sur l'artwork"
+    },
+    "dest": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "dist": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 830,
+      "cy": 476,
+      "frames": 48,
+      "box": "dist",
+      "source": "mesure sur l'artwork"
+    },
+    "fA": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "fA",
+      "source": "rail mesure sur l'artwork"
+    },
+    "fD": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "fD",
+      "source": "rail mesure sur l'artwork"
+    },
+    "fR": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "fR",
+      "source": "rail mesure sur l'artwork"
+    },
+    "fS": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "fS",
+      "source": "rail mesure sur l'artwork"
+    },
+    "fVel": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "fVel",
+      "source": "rail mesure sur l'artwork"
+    },
+    "fb": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 995,
+      "cy": 476,
+      "frames": 48,
+      "box": "fb",
+      "source": "mesure sur l'artwork"
+    },
+    "filter": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 650,
+      "cy": 476,
+      "frames": 48,
+      "box": "filter",
+      "source": "mesure sur l'artwork"
+    },
+    "filterType": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "glide": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 477,
+      "cy": 475,
+      "frames": 48,
+      "box": "glide",
+      "source": "mesure sur l'artwork"
+    },
+    "leftGrill": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "lfoAmount": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 205,
+      "cy": 338,
+      "frames": 48,
+      "box": "lfoAmount",
+      "source": "mesure sur l'artwork"
+    },
+    "lfoPitch": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 286,
+      "cy": 338,
+      "frames": 48,
+      "box": "lfoPitch",
+      "source": "mesure sur l'artwork"
+    },
+    "lfoRate": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 124,
+      "cy": 338,
+      "frames": 48,
+      "box": "lfoRate",
+      "source": "mesure sur l'artwork"
+    },
+    "lfoSrc": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "modWheel": {
+      "kind": "slider",
+      "frames": 1
+    },
+    "monoPoly": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "piano": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "pitchWheel": {
+      "kind": "slider",
+      "frames": 1
+    },
+    "release": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "release",
+      "source": "rail mesure sur l'artwork"
+    },
+    "reverb": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 912,
+      "cy": 375,
+      "frames": 48,
+      "box": "reverb",
+      "source": "mesure sur l'artwork"
+    },
+    "rightGrill": {
+      "kind": "crop",
+      "frames": 1
+    },
+    "sustain": {
+      "kind": "slider",
+      "frames": 1,
+      "box": "sustain",
+      "source": "rail mesure sur l'artwork"
+    },
+    "time": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 912,
+      "cy": 476,
+      "frames": 48,
+      "box": "time",
+      "source": "mesure sur l'artwork"
+    },
+    "vol": {
+      "kind": "knob",
+      "size": 31.0,
+      "cx": 830,
+      "cy": 376,
+      "frames": 48,
+      "box": "vol",
+      "source": "mesure sur l'artwork"
+    },
+    "wf": {
+      "kind": "crop",
+      "frames": 1
+    }
+  }
+}

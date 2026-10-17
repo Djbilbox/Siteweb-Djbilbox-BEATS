@@ -1,0 +1,80 @@
+CONTRAT DE LICENCE UTILISATEUR FINAL — ROCKPUNK GUITAR
+DJBILBOX BEATS
+Version 1.1.0 — 2026
+
+================================================================================
+
+En installant ou en utilisant ROCKPUNK, vous acceptez les conditions ci-dessous.
+
+1. LICENCE ACCORDÉE
+
+DJBILBOX BEATS vous accorde une licence personnelle, non exclusive et non
+transférable d'utilisation de ROCKPUNK.
+
+Cette licence vous autorise à :
+  - installer le logiciel sur les machines que vous possédez ou utilisez
+    personnellement ;
+  - l'utiliser pour des productions musicales personnelles et commerciales ;
+  - diffuser et vendre la musique que vous créez avec, sans redevance ni
+    mention obligatoire.
+
+ROCKPUNK est livré en une seule édition, complète et sans limitation de durée :
+il n'y a ni version d'essai, ni code d'activation, ni extension à acheter
+séparément.
+
+2. RESTRICTIONS
+
+Vous ne pouvez pas :
+  - revendre, louer, prêter ou redistribuer le logiciel lui-même ;
+  - le décompiler ou le désassembler ;
+  - en retirer les mentions de propriété ;
+  - l'intégrer dans un autre produit logiciel destiné à la distribution.
+
+Les presets d'usine et la banque de sons font partie du logiciel et ne peuvent
+pas être extraits ni redistribués en tant que sons isolés. La musique que vous
+produisez avec, en revanche, vous appartient entièrement.
+
+3. PROPRIÉTÉ
+
+ROCKPUNK, son code, son interface graphique et sa banque de sons restent la
+propriété de DJBILBOX BEATS. La présente licence constitue un droit d'usage,
+non une cession de propriété.
+
+4. GARANTIE
+
+Le logiciel est fourni « en l'état », sans garantie d'aucune sorte, expresse ou
+implicite, notamment quant à son adéquation à un usage particulier ou à son
+fonctionnement ininterrompu.
+
+5. LIMITATION DE RESPONSABILITÉ
+
+DJBILBOX BEATS ne pourra être tenu responsable d'aucun dommage direct ou
+indirect résultant de l'utilisation ou de l'impossibilité d'utiliser le
+logiciel, y compris la perte de données ou de projets musicaux.
+
+Il vous appartient de sauvegarder régulièrement vos projets.
+
+6. RÉSILIATION
+
+La licence prend fin automatiquement en cas de manquement à ces conditions. Vous
+devez alors désinstaller le logiciel et détruire toutes les copies en votre
+possession.
+
+7. DROIT APPLICABLE
+
+Le présent contrat est soumis au droit français.
+
+================================================================================
+
+MENTIONS TECHNIQUES
+
+ROCKPUNK est construit avec le framework JUCE (juce.com). VST est une marque
+déposée de Steinberg Media Technologies GmbH. Audio Units est une marque
+d'Apple Inc.
+
+================================================================================
+
+DJBILBOX BEATS
+djbilboxbeats.com — support@djbilboxbeats.com
+
+© 2026 DJBILBOX BEATS. Tous droits réservés.

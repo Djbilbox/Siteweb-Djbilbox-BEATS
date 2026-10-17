@@ -1,0 +1,17 @@
+# Sorties de compilation
+Build/
+build/
+Dist/
+
+# Sources d'echantillons : 148 Mo de WAV extraits des bibliotheques d'origine.
+# Seule la banque construite (SampleBank/ROCKPUNK.rockpunkbank) est versionnee,
+# c'est elle que le plugin embarque et que la fabrication du DMG attend.
+SampleSource/
+
+# Presets de la periode de developpement, remplaces par la banque d'usine
+Presets_dev_obsoletes/
+
+# Divers
+.DS_Store
+Thumbs.db
+*.user
