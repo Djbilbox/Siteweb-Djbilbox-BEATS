@@ -1,0 +1,14 @@
+{
+  "_note": "PROPOSED prices in USD - edit freely, then rerun tools/build_kits.py. Existing store prices for reference: BIGBASS 15, ORIENTAL INSTRUMENT 29, STATION SYNTH 25, ROBOTALK 30, PRO BUNDLE 49.",
+  "defaults": { "synth": 15, "effect": 12 },
+  "overrides": { "rockpunk": 19 },
+  "bundles": [
+    { "id": "humpire-loadout", "name": "HUMPIRE LOADOUT", "kind": "Studio Effects Bundle", "price": 49, "members_group": "loadout",
+      "tagline": "Eight studio effects in one payment: EQ, compressor, enhancer, limiter, reverb, delay, lo-fi and performance FX." },
+    { "id": "humpire-orbit", "name": "HUMPIRE ORBIT", "kind": "Vocal Effects Bundle", "price": 59, "members_group": "orbit",
+      "tagline": "Ten vocal effects in one payment: pitch correction, harmonies, doubling, saturation, de-esser and more." },
+    { "id": "djbilbox-beats-synth-collection", "name": "DJBILBOX BEATS Synth Collection", "kind": "Synthesizer Bundle", "price": 99, "members_group": "synths",
+      "tagline": "The complete DJBILBOX BEATS synthesizer collection: 19 instruments, one payment." }
+  ],
+  "not_for_sale_yet": { "humpire-chaabi-orchestra": "Ships only with synthesized test samples - needs a real sample library before it can be sold." }
+}

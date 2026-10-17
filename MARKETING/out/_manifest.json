@@ -1,0 +1,19 @@
+[
+ {
+  "id": "arena-bass",
+  "name": "ARENA BASS",
+  "kind": "Bass Synthesizer",
+  "tagline": "Stadium-size subs, slap & pluck, reese growls and horns \u2014 70 presets from 8 engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/arena-bass.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/djbilbox-emblem.png",
+  "brand": "DJBILBOX BEATS",
+  "accent": "#4fc3f7",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "72px",
+  "fsCover": "104px"
+ }
+]

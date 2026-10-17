@@ -133,9 +133,12 @@ jobs:
       - name: Documentation et licence (dans le paquet)
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path stage/docs | Out-Null
+          New-Item -ItemType Directory -Force -Path stage/docs/manuals | Out-Null
           Copy-Item LEGAL/EULA_DJBILBOX_BEATS.txt, LEGAL/THIRD_PARTY_NOTICES.txt stage/docs/
-          if (Test-Path MANUALS/dist) { Copy-Item MANUALS/dist/*.pdf stage/docs/ -ErrorAction SilentlyContinue }
+          if (Test-Path MANUALS/dist) {
+            Get-ChildItem MANUALS/dist -Filter *.pdf -File | ForEach-Object { Copy-Item $_.FullName stage/docs/ }
+            if (Test-Path MANUALS/dist/products) { Get-ChildItem MANUALS/dist/products -Filter *.pdf -File | ForEach-Object { Copy-Item $_.FullName stage/docs/manuals/ } }
+          }
 
       - name: Installateur Inno Setup
         shell: pwsh
@@ -143,6 +146,10 @@ jobs:
           choco install innosetup -y --no-progress
           ./ALL_PLUGINS/make_installer.ps1 -Stage stage -Out dist -Version "1.0.${{ github.run_number }}"
           if (Test-Path stage/pluginval_report.txt) { Copy-Item stage/pluginval_report.txt dist/ }
+      - name: Product packages (one installer + zip per product)
+        continue-on-error: true
+        shell: pwsh
+        run: ./ALL_PLUGINS/make_product_packages.ps1 -Stage stage -Out dist/products -Version "1.0.${{ github.run_number }}"
       - name: Zip
         shell: pwsh
         run: |
@@ -165,6 +172,8 @@ jobs:
           files: |
             dist/DJBILBOX_BEATS_ALL_PLUGINS.zip
             dist/DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe
+            dist/products/packages/*.zip
+            dist/products/packages_report.txt
       - name: Statut des builds
         if: always()
         shell: pwsh
