@@ -176,6 +176,33 @@ double onePolePhaseDelay (const OnePole& f, double w)
     return std::atan2 (f.a * std::sin (w), 1.0 - f.a * std::cos (w)) / w;
 }
 
+// Loop-start candidate in [from, from + range): the sample where the step, the curvature and the short-term level
+// (rms of `win` frames before vs after) are all smallest, so a periodic loop closes without a step, a kink or a
+// level jump.  y must extend to from + range + win.
+int pickQuietStart (const std::vector<float>& y, int from, int range, int win)
+{
+    const int n = (int) y.size();
+    const int lo = std::max (from, win + 2), hi = std::min (from + range, n - win - 2);
+    if (hi <= lo) return std::max (from, 2);
+    std::vector<double> cum ((std::size_t) n + 1, 0.0);
+    for (int i = 0; i < n; ++i) cum[(std::size_t) i + 1] = cum[(std::size_t) i] + (double) y[(std::size_t) i] * (double) y[(std::size_t) i];
+    double rms = 0.0;
+    for (int i = lo; i < hi; ++i) { const double d = (double) y[(std::size_t) i] - (double) y[(std::size_t) i - 1]; rms += d * d; }
+    rms = std::sqrt (rms / (double) (hi - lo)) + 1.0e-12;
+    int best = lo;
+    double bestM = 1.0e30;
+    for (int i = lo; i < hi; ++i)
+    {
+        const double d1 = (double) y[(std::size_t) i] - (double) y[(std::size_t) i - 1];
+        const double d0 = (double) y[(std::size_t) i - 1] - (double) y[(std::size_t) i - 2];
+        const double eb = cum[(std::size_t) i] - cum[(std::size_t) (i - win)], ea = cum[(std::size_t) (i + win)] - cum[(std::size_t) i];
+        const double lvl = std::fabs (10.0 * std::log10 ((eb + 1.0e-20) / (ea + 1.0e-20)));
+        const double m = std::max ({ std::fabs (d1) / rms, 0.5 * std::fabs (d1 - d0) / rms, lvl / 0.6 });
+        if (m < bestM) { bestM = m; best = i; }
+    }
+    return best;
+}
+
 // ------------------------------------------------------------------------------------------------
 //  Violin body: air mode, main wood modes, mid-range plateau, bridge hill, high-frequency roll-off.
 //  Fixed in frequency (it does not follow the note), which is what makes a violin sound like a violin.
@@ -215,7 +242,10 @@ struct BowParams
     double slopeK = 3.0;             // friction-table slope = slopeK * beta  (bow speed = 1): larger = lighter bow force
     double bridgeFc = 5000.0;        // bridge reflection low-pass (Hz): corner rounding / brightness
     double nutFc = 8000.0;           // finger / nut reflection low-pass (Hz)
+    double t60 = 1.3;                // string decay time at 196 Hz (s): the loop loss (scaled with pitch)
     double attackSec = 0.04;         // bow speed ramp
+    double forceStart = 1.0;         // friction slope factor at t = 0 (< 1: firmer bow bite at the attack), relaxes to 1
+    double forceTau = 0.07;
     double scoopCents = 0.0;         // start flat, rise to pitch (bow capture)
     double scoopSec = 0.04;
     double noiseDepth = 0.05;        // multiplicative noise on the friction slope (bow hair / rosin hiss)
@@ -249,7 +279,8 @@ std::vector<float> simulateBow (const BowParams& p, double sr, int frames)
     const double w0 = kTwoPi * p.f0 / srI;
     const double tauF = onePolePhaseDelay (fb, w0) + onePolePhaseDelay (fn, w0);
     const double base0 = srI / p.f0 * p.tune - tauF - 2.0;
-    const double gB = 0.9965, gN = 0.998;
+    const double gPeriod = std::pow (10.0, -3.0 / (std::max (0.05, p.t60 * std::pow (196.0 / p.f0, 0.4)) * p.f0));
+    const double gB = std::pow (gPeriod, 0.8), gN = std::pow (gPeriod, 0.2);
     DelayLine bl, nl;
     const int cap = (int) std::ceil (base0 * 1.1) + 16;
     bl.init (cap); nl.init (cap);
@@ -259,24 +290,25 @@ std::vector<float> simulateBow (const BowParams& p, double sr, int frames)
 
     // slow controls (pitch wander, scoop, vibrato, bow speed) are evaluated every kBlk samples and interpolated
     constexpr long long kBlk = 32;
-    auto controls = [&] (long long n, double& scale, double& speed)
+    auto controls = [&] (long long n, double& scale, double& speed, double& slopeF)
     {
         const double t = (double) n / srI;
         double cents = p.driftCents * pitchDrift.eval (t);
         if (p.scoopCents != 0.0) cents -= p.scoopCents * std::exp (-t / p.scoopSec);
         if (p.vibHz > 0.0) cents += p.vibCents * smoothstep ((t - p.vibStart) / p.vibRamp) * std::sin (kTwoPi * p.vibHz * t);
         scale = std::exp2 (-cents / 1200.0);
+        slopeF = 1.0 - (1.0 - p.forceStart) * std::exp (-t / p.forceTau);
         speed = smoothstep (t / p.attackSec) * (1.0 + p.driftAmp * speedDrift.eval (t));
     };
-    double sc0 = 1.0, sp0 = 0.0, sc1 = 1.0, sp1 = 0.0;
-    controls (0, sc0, sp0);
-    controls (kBlk, sc1, sp1);
+    double sc0 = 1.0, sp0 = 0.0, sc1 = 1.0, sp1 = 0.0, sf0 = 1.0, sf1 = 1.0;
+    controls (0, sc0, sp0, sf0);
+    controls (kBlk, sc1, sp1, sf1);
     for (long long n = 0; n < N; ++n)
     {
         const long long ph = n % kBlk;
-        if (n > 0 && ph == 0) { sc0 = sc1; sp0 = sp1; controls (n + kBlk, sc1, sp1); }
+        if (n > 0 && ph == 0) { sc0 = sc1; sp0 = sp1; sf0 = sf1; controls (n + kBlk, sc1, sp1, sf1); }
         const double u = (double) ph * (1.0 / (double) kBlk);
-        const double sc = sc0 + (sc1 - sc0) * u, vb = sp0 + (sp1 - sp0) * u;
+        const double sc = sc0 + (sc1 - sc0) * u, vb = sp0 + (sp1 - sp0) * u, sfac = sf0 + (sf1 - sf0) * u;
         const double base = base0 * sc;
         const double dB = std::max (1.0, p.beta * base), dN = std::max (1.0, (1.0 - p.beta) * base);
 
@@ -287,7 +319,7 @@ std::vector<float> simulateBow (const BowParams& p, double sr, int frames)
 
         const double d0 = vb - (bIn + nIn);
         const double noise = (double) nz[(std::size_t) ((n / os) % (long long) nz.size())];
-        const double s = slope0 * std::max (0.2, 1.0 + p.noiseDepth * noise);
+        const double s = slope0 * sfac * std::max (0.2, 1.0 + p.noiseDepth * noise);
         const double xx = std::fabs (d0 * s) + 0.75;
         const double x2 = xx * xx;
         const double rho = std::min (1.0, 1.0 / (x2 * x2));
@@ -606,111 +638,263 @@ Library buildViolon (const BuildContext& ctx)
     return lib;
 }
 
-// ---------------------------------------------------------------------------------------------
-// TEMPORARY stub for the ney (kept until the real model is written).
+// =================================================================================================
+//  NEY: end-blown reed flute.
+//  Additive tone (harmonic amplitudes depend on register and dynamics, per-harmonic onset delays so that the
+//  spectrum "opens" during the attack, flat-start pitch glide, slow pitch / loudness wander) plus breath noise:
+//  jet turbulence (band-shaped white noise) and bore-resonant breath noise (noise through a tuned comb = noise
+//  bunched around the harmonics), a chiff burst at the attack.  Tone and noise tracks are exactly periodic in
+//  the loop length, so the sustain loop needs no cross-fade and has no seam.
+// =================================================================================================
 namespace
 {
-struct SustainStyle
+enum class NeyKind { soft, hard, breathy };
+
+struct NeyProfile
 {
-    double rolloff = 1.2;          // harmonic amplitude ~ h^-rolloff
-    double formant1Hz = 600.0, formant1Gain = 2.0, formant1Width = 400.0;
-    double formant2Hz = 2500.0, formant2Gain = 1.0, formant2Width = 900.0;
-    double noiseAmount = 0.05;     // bow / breath noise relative to the tone
-    double noiseCentreHz = 3000.0;
-    double attackSec = 0.06;
-    double introSec = 0.20;        // material before the loop
-    double bodySec = 1.0;          // approximate loop length
-    double vibratoHz = 0.0;        // 0 = none
-    double vibratoDepth = 0.0;     // relative frequency deviation
-    int maxHarmonics = 18;
+    double rho = 1.5;            // harmonic roll-off exponent (amplitude ~ h^-rho)
+    double fcTone = 5500.0;      // high-frequency cut of the tone (Hz)
+    double evenGain = 1.0;
+    double noiseDb = -20.0;      // breath noise RMS relative to the tone RMS (loop)
+    double resonantShare = 0.4;  // share (power) of the bore-resonant noise in the breath noise
+    double toneDelay = 0.03;     // s, tone starts after the breath
+    double toneRise = 0.07;      // s
+    double chiffDb = 6.0;        // chiff burst relative to the loop noise level
+    double chiffTau = 0.04;
+    double glideCents = 30.0;    // flat start
+    double glideTau = 0.05;
+    double wobbleAmp = 0.025;    // breath wobble (relative loudness)
+    double wobbleCents = 2.0;    // slow pitch wander
 };
 
-struct Sustained { std::vector<float> data; int loopStart = 0, loopEnd = 0; };
-
-// Tone with exactly periodic body + separately cross-faded noise.  The loop length is a whole number of
-// fundamental periods (and of vibrato cycles), the fundamental is nudged by < 4 cents to make that possible.
-Sustained renderSustained (double f0, double sr, const SustainStyle& st, double layerGain, double layerRolloffAdd, Rng& rng)
+NeyProfile neyProfile (int note, NeyKind kind)
 {
-    const bool vib = st.vibratoHz > 0.0;
-    int L = 0;
-    double f0p = f0, fv = st.vibratoHz;
-    if (vib)
+    NeyProfile p;
+    const double d = (double) (note - 60);
+    const int reg = clampi ((note - 60) / 12, 0, 2);
+    const double u = std::fmod (d, 12.0) / 12.0;                    // position inside the register
+    const double regStart = reg >= 1 ? std::max (0.0, 1.0 - u / 0.35) : 0.0;   // overblown registers start bright
+    p.rho = 1.15 + 0.055 * d - 0.30 * regStart;
+    p.fcTone = clampd (6500.0 - 45.0 * d, 3200.0, 6500.0);
+    p.evenGain = 0.80 + 0.006 * d;
+    p.noiseDb = -24.0 + 0.36 * d;                                   // more breath noise on high notes
+    p.resonantShare = clampd (0.30 + 0.012 * d, 0.3, 0.7);
+    switch (kind)
     {
-        double bestErr = 1.0e9;
-        for (int cv = 3; cv <= 9; ++cv)
+        case NeyKind::soft:
+            p.rho += 0.45; p.fcTone *= 0.65; p.noiseDb += 4.5; p.toneRise = 0.09; p.toneDelay = 0.045; p.chiffDb = 3.0;
+            p.glideCents = 38.0; p.wobbleAmp = 0.03;
+            break;
+        case NeyKind::hard:
+            p.rho -= 0.0; p.toneRise = 0.06; p.chiffDb = 7.5; p.glideCents = 26.0; p.wobbleAmp = 0.022;
+            break;
+        case NeyKind::breathy:
+            p.rho += 0.7; p.fcTone *= 0.6; p.noiseDb = -4.0 + 0.30 * d; p.resonantShare = 0.65;
+            p.toneDelay = 0.10; p.toneRise = 0.14; p.chiffDb = 5.0; p.chiffTau = 0.07; p.glideCents = 40.0; p.glideTau = 0.08;
+            p.wobbleAmp = 0.07; p.wobbleCents = 5.0;
+            break;
+    }
+    return p;
+}
+
+// Noise track shaped by a biquad chain, exactly periodic (the chain runs twice around the circle).
+std::vector<float> shapedNoise (Rng& rng, int length, double sr, const std::vector<Biquad>& chain)
+{
+    std::vector<float> v ((std::size_t) length);
+    for (auto& s : v) s = (float) rng.gaussian();
+    std::vector<Biquad> f = chain;
+    for (int pass = 0; pass < 2; ++pass)
+        for (auto& s : v) { double x = (double) s; for (auto& b : f) x = b.process (x); s = (float) x; }
+    (void) sr;
+    double e = 0.0;
+    for (auto s : v) e += (double) s * (double) s;
+    e = std::sqrt (e / (double) length);
+    if (e > 1.0e-12) for (auto& s : v) s = (float) ((double) s / e);
+    return v;
+}
+
+// Bore-resonant noise: white noise through a tuned feedback comb (fractional delay, damped), periodic.
+std::vector<float> boreNoise (Rng& rng, int length, double sr, double f0, double gain)
+{
+    std::vector<float> in ((std::size_t) length);
+    for (auto& s : in) s = (float) rng.gaussian();
+    DelayLine line;
+    const double P = sr / f0;
+    line.init ((int) std::ceil (P) + 8);
+    OnePole damp; damp.setLowpass (3800.0, sr);
+    const double tau = onePolePhaseDelay (damp, kTwoPi * f0 / sr);
+    const double D = std::max (2.0, P - tau - 1.0);
+    std::vector<float> out ((std::size_t) length);
+    for (int pass = 0; pass < 3; ++pass)
+        for (int n = 0; n < length; ++n)
         {
-            const int l = (int) std::lround (sr * (double) cv / st.vibratoHz);
-            const double k = std::max (1.0, std::round (f0 * (double) l / sr));
-            const double adj = k * sr / (double) l;
-            const double e = std::fabs (centsBetween (adj, f0)) + 0.4 * std::fabs ((double) l / sr - st.bodySec);
-            if (e < bestErr) { bestErr = e; L = l; f0p = adj; fv = (double) cv * sr / (double) l; }
+            const double fb = damp.lowpass ((double) line.read (D)) * gain;
+            const double y = (double) in[(std::size_t) n] + fb;
+            line.push ((float) y);
+            out[(std::size_t) n] = (float) y;
         }
-    }
-    else
-    {
-        const double k = std::max (1.0, std::round (f0 * st.bodySec));
-        L = (int) std::lround (k * sr / f0);
-        f0p = k * sr / (double) L;
-    }
-
-    const int fade = std::max (64, secondsToFrames (0.012, sr));
-    Sustained out;
-    out.loopStart = std::max (secondsToFrames (st.introSec, sr), fade + 8);
-    out.loopEnd = out.loopStart + L - 1;
-    const int total = out.loopEnd + 1 + 8;
-
-    // harmonic amplitudes
-    const int nh = std::max (1, std::min (st.maxHarmonics, (int) std::floor (0.45 * sr / f0p)));
-    std::vector<double> amp ((std::size_t) nh), ph0 ((std::size_t) nh);
-    for (int h = 1; h <= nh; ++h)
-    {
-        const double fh = f0p * (double) h;
-        const double f1 = (fh - st.formant1Hz) / st.formant1Width, f2 = (fh - st.formant2Hz) / st.formant2Width;
-        amp[(std::size_t) h - 1] = std::pow ((double) h, -(st.rolloff + layerRolloffAdd)) * (1.0 + st.formant1Gain * std::exp (-f1 * f1) + st.formant2Gain * std::exp (-f2 * f2));
-        ph0[(std::size_t) h - 1] = rng.range (0.0, kTwoPi);
-    }
-
-    std::vector<float> tone ((std::size_t) total), noise ((std::size_t) total);
-    const double dPhi = kTwoPi * f0p / sr;
-    for (int n = 0; n < total; ++n)
-    {
-        const double t = (double) n / sr;
-        double vphase = 0.0, ampMod = 1.0;
-        if (vib)
-        {
-            vphase = -(f0p * st.vibratoDepth / fv) * std::cos (kTwoPi * fv * t);
-            ampMod = 1.0 + 0.08 * std::sin (kTwoPi * fv * t);
-        }
-        double s = 0.0;
-        for (int h = 1; h <= nh; ++h)
-            s += amp[(std::size_t) h - 1] * std::sin ((double) h * (dPhi * (double) n + vphase) + ph0[(std::size_t) h - 1]);
-        const double att = st.attackSec > 0.0 ? smoothstep (t / st.attackSec) : 1.0;
-        tone[(std::size_t) n] = (float) (s * att * ampMod);
-    }
-
-    // noise: band-limited around noiseCentreHz, with an onset "scratch/chiff"
-    Biquad bp = Biquad::bandpass (st.noiseCentreHz, 0.8, sr);
-    for (int n = 0; n < total; ++n)
-    {
-        const double t = (double) n / sr;
-        const double att = st.attackSec > 0.0 ? smoothstep (t / (0.7 * st.attackSec)) : 1.0;
-        const double onset = 1.0 + 2.5 * std::exp (-t / 0.05);
-        noise[(std::size_t) n] = (float) (bp.process (rng.bipolar()) * att * onset);
-    }
-    // calibrate the noise to the tone, then make the noise loop seamless (equal power, uncorrelated)
-    double te = 0.0, ne = 0.0;
-    for (int n = out.loopStart; n <= out.loopEnd; ++n) { te += (double) tone[(std::size_t) n] * (double) tone[(std::size_t) n]; ne += (double) noise[(std::size_t) n] * (double) noise[(std::size_t) n]; }
-    const double ng = st.noiseAmount * std::sqrt (te / std::max (ne, 1.0e-12));
-    for (auto& v : noise) v = (float) ((double) v * ng);
-    crossfadeLoop (noise, out.loopStart, out.loopEnd, fade, true);
-
-    out.data.resize ((std::size_t) total);
-    for (int n = 0; n < total; ++n) out.data[(std::size_t) n] = (float) ((double) tone[(std::size_t) n] + (double) noise[(std::size_t) n]) * (float) layerGain;
+    // gentle band-limit, then unit RMS
+    Biquad lp = Biquad::lowpass (5200.0, 0.7, sr);
+    for (int pass = 0; pass < 2; ++pass) for (auto& s : out) s = (float) lp.process ((double) s);
+    double e = 0.0;
+    for (auto s : out) e += (double) s * (double) s;
+    e = std::sqrt (e / (double) length);
+    if (e > 1.0e-12) for (auto& s : out) s = (float) ((double) s / e);
     return out;
 }
 
-Zone sustainZone (const BuildContext& ctx, const char* articulation, const KeySpan& sp, const VelLayer& vl, int swLast, const SustainStyle& st,
-                  double rolloffAdd, double loudnessDb, int zoneIndex, float attack, float release)
+struct NeyNote { std::vector<float> data; int loopStart = 0, loopEnd = 0; };
+
+NeyNote renderNeyNote (const BuildContext& ctx, int note, NeyKind kind, int zoneIndex)
+{
+    const double sr = ctx.sampleRate;
+    const double f0t = midiToHz ((double) note);
+    Rng rng = Rng::forZone (ctx.instrument, zoneIndex, 5);
+    const NeyProfile pr = neyProfile (note, kind);
+
+    // loop = whole number of periods; the tone is generated at exactly k * sr / L
+    const double loopSec = kind == NeyKind::breathy ? 1.6 : 1.8;
+    const int periods = std::max (8, (int) std::lround (loopSec * f0t));
+    const int L = (int) std::lround ((double) periods * sr / f0t);
+    const double f0 = (double) periods * sr / (double) L;
+    const double introSec = kind == NeyKind::breathy ? 0.55 : 0.50;
+    const int t0 = secondsToFrames (introSec, sr);
+    const int total = t0 + L + 4800 + 16;
+    const double loopLen = (double) L / sr;
+
+    // ---- tone: harmonic table
+    const int nhMax = std::min (48, (int) std::floor (0.46 * sr / f0));
+    std::vector<double> amp, theta, rise, delay, wobF, wobP, wobA;
+    for (int h = 1; h <= nhMax; ++h)
+    {
+        const double f = f0 * (double) h;
+        double a = std::pow ((double) h, -pr.rho);
+        a *= 1.0 + 0.7 * std::exp (-std::pow (std::log (f / 1050.0) / 0.55, 2.0)) + 0.4 * std::exp (-std::pow (std::log (f / 2600.0) / 0.5, 2.0));
+        a /= std::sqrt (1.0 + std::pow (f / pr.fcTone, 6.0));
+        if (h % 2 == 0) a *= pr.evenGain;
+        a *= dbToGain (rng.range (-0.8, 0.8));
+        if (a < 1.0e-4 && h > 4) { break; }
+        amp.push_back (a);
+        theta.push_back (rng.range (-0.9, 0.9));
+        delay.push_back (pr.toneDelay + std::min (0.06, 0.004 * (double) (h - 1)));
+        rise.push_back (pr.toneRise * (1.0 + 0.08 * (double) (h - 1)));
+        // slow per-harmonic shimmer on the loop lattice (whole cycles per loop)
+        const int m = rng.rangeInt (1, std::max (1, (int) std::floor (6.0 * loopLen)));
+        wobF.push_back ((double) m / loopLen);
+        wobP.push_back (rng.range (0.0, kTwoPi));
+        wobA.push_back (rng.range (0.01, 0.05));
+    }
+    const int nh = (int) amp.size();
+    // common slow wander (pitch and loudness), whole cycles per loop
+    SlowDrift pitchWander, ampWander;
+    pitchWander.init (rng, loopLen, 0.6, 3.5);
+    ampWander.init (rng, loopLen, 0.8, 6.0);
+
+    std::vector<float> tone ((std::size_t) total, 0.f);
+    {
+        constexpr int kBlk = 64;
+        std::vector<double> a0 ((std::size_t) nh), a1 ((std::size_t) nh);
+        auto levels = [&] (int n, std::vector<double>& dst, double& mod, double& cents)
+        {
+            const double t = (double) n / sr;
+            cents = pr.wobbleCents * pitchWander.eval (t) - pr.glideCents * std::exp (-t / pr.glideTau);
+            mod = 1.0 + pr.wobbleAmp * ampWander.eval (t);
+            for (int h = 0; h < nh; ++h)
+            {
+                const double e = smoothstep ((t - delay[(std::size_t) h]) / rise[(std::size_t) h]);
+                dst[(std::size_t) h] = amp[(std::size_t) h] * e * (1.0 + wobA[(std::size_t) h] * std::sin (kTwoPi * wobF[(std::size_t) h] * t + wobP[(std::size_t) h]));
+            }
+        };
+        double m0 = 1.0, m1 = 1.0, c0 = 0.0, c1 = 0.0;
+        levels (0, a0, m0, c0);
+        levels (kBlk, a1, m1, c1);
+        double phase = rng.range (0.0, kTwoPi);
+        std::vector<double> cth ((std::size_t) nh), sth ((std::size_t) nh);
+        for (int h = 0; h < nh; ++h) { cth[(std::size_t) h] = std::cos (theta[(std::size_t) h]); sth[(std::size_t) h] = std::sin (theta[(std::size_t) h]); }
+        for (int n = 0; n < total; ++n)
+        {
+            const int ph = n % kBlk;
+            if (n > 0 && ph == 0)
+            {
+                a0.swap (a1); m0 = m1; c0 = c1;
+                levels (n + kBlk, a1, m1, c1);
+            }
+            const double u = (double) ph * (1.0 / (double) kBlk);
+            const double cents = c0 + (c1 - c0) * u;
+            phase += kTwoPi * f0 * std::exp2 (cents / 1200.0) / sr;
+            if (phase > kTwoPi) phase -= kTwoPi;
+            const double cr = std::cos (phase), sr1 = std::sin (phase);
+            double zr = cr, zi = sr1, s = 0.0;
+            for (int h = 0; h < nh; ++h)
+            {
+                const double a = a0[(std::size_t) h] + (a1[(std::size_t) h] - a0[(std::size_t) h]) * u;
+                s += a * (zi * cth[(std::size_t) h] + zr * sth[(std::size_t) h]);
+                const double nr = zr * cr - zi * sr1, ni = zr * sr1 + zi * cr;
+                zr = nr; zi = ni;
+            }
+            tone[(std::size_t) n] = (float) (s * (m0 + (m1 - m0) * u));
+        }
+    }
+
+    // ---- breath noise (periodic tracks)
+    std::vector<Biquad> jetChain { Biquad::highpass (1100.0, 0.7, sr), Biquad::peaking (3300.0, 0.8, 5.0, sr), Biquad::lowpass (7200.0, 0.7, sr) };
+    const std::vector<float> jet = shapedNoise (rng, L, sr, jetChain);
+    const std::vector<float> res = boreNoise (rng, L, sr, f0, kind == NeyKind::breathy ? 0.975 : 0.965);
+
+    // tone RMS over the loop body -> noise gain
+    double te = 0.0;
+    for (int n = t0; n < t0 + L; ++n) te += (double) tone[(std::size_t) n] * (double) tone[(std::size_t) n];
+    const double toneRms = std::sqrt (te / (double) L);
+    const double noiseRms = toneRms * dbToGain (pr.noiseDb);
+    const double gRes = noiseRms * std::sqrt (pr.resonantShare), gJet = noiseRms * std::sqrt (1.0 - pr.resonantShare);
+
+    // chiff: band-limited burst at the very start (not periodic)
+    std::vector<float> chiff ((std::size_t) secondsToFrames (0.3, sr));
+    {
+        Biquad bp = Biquad::bandpass (2600.0 + 120.0 * (double) (note - 60), 0.7, sr);
+        Biquad hp = Biquad::highpass (900.0, 0.7, sr);
+        double e = 0.0;
+        for (auto& s : chiff) { s = (float) hp.process (bp.process (rng.gaussian())); e += (double) s * (double) s; }
+        e = std::sqrt (e / (double) chiff.size());
+        for (std::size_t i = 0; i < chiff.size(); ++i)
+        {
+            const double t = (double) i / sr;
+            chiff[i] = (float) ((double) chiff[i] / std::max (e, 1.0e-12) * smoothstep (t / 0.006) * std::exp (-t / pr.chiffTau));
+        }
+    }
+    const double gChiff = noiseRms * dbToGain (pr.chiffDb) * 1.4;
+
+    std::vector<float> y ((std::size_t) total);
+    for (int n = 0; n < total; ++n)
+    {
+        const double t = (double) n / sr;
+        const std::size_t li = (std::size_t) (n % L);
+        const double env = smoothstep (t / 0.035);                         // breath starts first
+        double s = (double) tone[(std::size_t) n] + env * (gJet * (double) jet[li] + gRes * (double) res[li]);
+        if ((std::size_t) n < chiff.size()) s += gChiff * (double) chiff[(std::size_t) n];
+        y[(std::size_t) n] = (float) s;
+    }
+
+    // ---- radiation / mouth cavity
+    Biquad hp = Biquad::highpass (150.0, 0.7, sr);
+    Biquad sh = Biquad::highShelf (3000.0, kind == NeyKind::soft ? -3.0 : -1.0, sr);
+    for (auto& s : y) s = (float) sh.process (hp.process ((double) s));
+    sanitize (y, false);
+    fadeIn (y, std::max (8, secondsToFrames (0.0004, sr)));
+
+    // ---- loop: exactly periodic; start where the first and second differences are small (no step at the seam)
+    const int s = pickQuietStart (y, t0, 4800, secondsToFrames (0.02, sr));
+    NeyNote r;
+    y.resize ((std::size_t) (s + L));
+    const int fade = std::max (32, secondsToFrames (0.004, sr));            // tiny safety cross-fade (filter memory)
+    crossfadeLoop (y, s, s + L - 1, fade, false);
+    r.data = std::move (y);
+    r.loopStart = s; r.loopEnd = s + L - 1;
+    return r;
+}
+
+Zone neyZone (const BuildContext& ctx, const char* articulation, const KeySpan& sp, const VelLayer& vl, int swLast, NeyKind kind,
+              double loudDb, int zoneIndex, float attack, float release, float veltrack)
 {
     Zone z;
     z.articulation = articulation;
@@ -718,45 +902,68 @@ Zone sustainZone (const BuildContext& ctx, const char* articulation, const KeySp
     z.sampleRate = ctx.sampleRate;
     z.lokey = sp.lokey; z.hikey = sp.hikey; z.keycenter = sp.center;
     z.lovel = vl.lo; z.hivel = vl.hi; z.swLast = swLast;
-    z.ampAttack = attack; z.ampRelease = release; z.ampVeltrack = 60.f;
-    Rng rng = Rng::forZone (ctx.instrument, zoneIndex);
-    Sustained s = renderSustained (midiToHz (sp.center), ctx.sampleRate, st, 1.0, rolloffAdd, rng);
-    z.data = std::move (s.data);
-    fadeIn (z.data, std::max (8, secondsToFrames (0.0004, ctx.sampleRate)));
-    finishLoop (z, s.loopStart, s.loopEnd, Loop::sustain);
-    // loudness over the loop body (the 300 ms window is inside the sustain)
-    normaliseLoudness (z.data, ctx.sampleRate, loudnessDb, kPeakCeilingDb);
+    z.ampAttack = attack; z.ampRelease = release; z.ampVeltrack = veltrack;
+    NeyNote r = renderNeyNote (ctx, sp.center, kind, zoneIndex);
+    z.data = std::move (r.data);
+    finishLoop (z, r.loopStart, r.loopEnd, Loop::sustain);
+    normaliseLoudness (z.data, ctx.sampleRate, loudDb, kPeakCeilingDb);
     return z;
 }
 
-
+// "air": unpitched breath noise loop (all keys), periodic.
+Zone neyAirZone (const BuildContext& ctx, int zoneIndex)
+{
+    const double sr = ctx.sampleRate;
+    Rng rng = Rng::forZone (ctx.instrument, zoneIndex, 9);
+    const int L = secondsToFrames (2.0, sr);
+    std::vector<Biquad> chain { Biquad::highpass (700.0, 0.7, sr), Biquad::peaking (3000.0, 0.7, 6.0, sr), Biquad::peaking (1500.0, 1.0, 3.0, sr), Biquad::lowpass (8000.0, 0.7, sr) };
+    const std::vector<float> nz = shapedNoise (rng, L, sr, chain);
+    SlowDrift wob; wob.init (rng, (double) L / sr, 0.5, 4.0);
+    const int t0 = secondsToFrames (0.25, sr);
+    std::vector<float> y ((std::size_t) (t0 + L));
+    for (int n = 0; n < t0 + L; ++n)
+    {
+        const double t = (double) n / sr;
+        y[(std::size_t) n] = (float) ((double) nz[(std::size_t) (n % L)] * smoothstep (t / 0.05) * (1.0 + 0.18 * wob.eval (t)));
+    }
+    sanitize (y, false);
+    fadeIn (y, std::max (8, secondsToFrames (0.0004, sr)));
+    crossfadeLoop (y, t0, t0 + L - 1, std::max (32, secondsToFrames (0.004, sr)), true);
+    Zone z;
+    z.articulation = "air"; z.name = "air_060";
+    z.sampleRate = sr;
+    z.lokey = ctx.spec().lo; z.hikey = ctx.spec().hi; z.keycenter = 60;
+    z.swLast = 14; z.pitchKeytrack = 0.f;
+    z.ampAttack = 0.04f; z.ampRelease = 0.3f; z.ampVeltrack = 70.f;
+    z.data = std::move (y);
+    finishLoop (z, t0, t0 + L - 1, Loop::sustain);
+    normaliseLoudness (z.data, sr, -19.0, kPeakCeilingDb);
+    return z;
+}
 } // namespace
 
 Library buildNey (const BuildContext& ctx)
 {
     const auto spans = makeKeySpans (ctx.spec().lo, ctx.spec().hi, 3);
     Library lib = startLibrary (ctx);
-    ProgressTracker pt (ctx, (int) spans.size() * 3);
+    ProgressTracker pt (ctx, (int) spans.size() * 3 + 1);
     int zi = 0;
-
-    SustainStyle clear;                       // flute-like: strong fundamental, few harmonics, breath noise
-    clear.rolloff = 2.2; clear.formant1Gain = 0.6; clear.formant2Gain = 0.0; clear.noiseAmount = 0.10; clear.noiseCentreHz = 4200.0;
-    clear.attackSec = 0.08; clear.introSec = 0.25; clear.bodySec = 1.0; clear.maxHarmonics = 10;
-    SustainStyle breathy = clear;
-    breathy.noiseAmount = 0.55; breathy.rolloff = 2.6; breathy.noiseCentreHz = 3300.0;
 
     for (const auto& sp : spans)
     {
         for (const VelLayer* vl : { &kSoft, &kHard })
         {
             if (! pt.next()) { lib.cancelled = true; return lib; }
-            lib.zones.push_back (sustainZone (ctx, "sustain", sp, *vl, 12, clear, vl == &kSoft ? 0.8 : 0.0, vl == &kSoft ? kSoftLoudnessDb : kHardLoudnessDb, zi++, 0.06f, 0.20f));
+            const bool soft = vl == &kSoft;
+            lib.zones.push_back (neyZone (ctx, "sustain", sp, *vl, 12, soft ? NeyKind::soft : NeyKind::hard,
+                                          soft ? kSoftLoudnessDb : kHardLoudnessDb, zi++, 0.02f, 0.20f, 60.f));
         }
         if (! pt.next()) { lib.cancelled = true; return lib; }
-        lib.zones.push_back (sustainZone (ctx, "breathy", sp, kAllVel, 13, breathy, 0.3, -18.0, zi++, 0.08f, 0.25f));
+        lib.zones.push_back (neyZone (ctx, "breathy", sp, kAllVel, 13, NeyKind::breathy, -18.0, zi++, 0.03f, 0.25f, 60.f));
     }
+    if (! pt.next()) { lib.cancelled = true; return lib; }
+    lib.zones.push_back (neyAirZone (ctx, zi++));
     pt.finished();
     return lib;
 }
-
 } // namespace humpire::model

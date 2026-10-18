@@ -1,34 +1,42 @@
 // ============================================================================
 //  PLUCKED FAMILY: Mandole, Banjo, Qanun  (modelled, not recorded)
 //
-//  Model (the same engine drives the three instruments, only the parameter sets differ):
+//  Model (one engine drives the three instruments, only the parameter sets differ):
 //
 //    string   Modal synthesis.  Every partial of a stiff string is one exponentially damped cosine
 //             (two-pole resonator started at a fractional sample time), with
-//               * inharmonic partial frequencies  f_n = n f0 sqrt((1 + B n^2) / (1 + B)),
-//               * partial amplitudes of an ideal plucked string  sin(n pi p) / n^gamma
-//                 (p = plucking position, i.e. the pick-position comb) times a 2nd-order low-pass
-//                 that stands for the hardness / width of the pick or plectrum,
+//               * inharmonic partial frequencies  f_n = n f0 sqrt((1 + B n^2) / (1 + B)); the fundamental is
+//                 exactly f0, so the pitch of every zone is correct without any post-correction,
+//               * partial amplitudes of an ideal plucked string  sin(n pi p) / n^gamma  (p = plucking position,
+//                 i.e. the pick-position comb) times a 2nd-order low-pass for the hardness / width of the pick,
 //               * frequency dependent damping  alpha_n = alpha_0 + hfK (f_n / kHz)^hfQ,
 //               * two polarisations per low partial (fast "vertical" + slow "horizontal" decay, slightly
-//                 detuned) which gives the two-stage decay and the slow beating of real plucked strings,
-//               * courses of 1..3 strings (mandole 2, qanun 3) with small deliberate detunings and a few
-//                 tenths of a millisecond of stagger between the strings (the pick drags over them).
-//    contact  A short band-passed noise burst (pick / plectrum scrape) and a short bi-phasic pulse that
-//             hits the body ("thump"); both depend on the velocity layer.
+//                 detuned): two-stage decay and slow beating,
+//               * courses of 1..3 strings (mandole 2, qanun 3): small detunings, slightly different stiffness
+//                 (the upper partials beat faster), the string hit first rings louder, and a short stagger between
+//                 the strings.  The detunings are ordered by hit order (first string flattest) so that the relative
+//                 phase of the fundamentals drifts towards alignment, not towards a deep early null,
+//               * a tension-modulation pitch glide of a few cents on hard plucks of steel strings.
+//    contact  A short band-passed noise burst with a weaker 20 ms tail (pick / plectrum scrape) and a short
+//             bi-phasic pulse that knocks the body; both depend on the velocity layer.
 //    body     A cascade of biquads (air resonance, plate / membrane modes, presence peak) applied to the whole
 //             sum, so the body rings on its own modes after the string transient.
-//    sympathy Qanun only: octave / twelfth partials of the neighbouring courses fade in slowly.
+//    sympathy Qanun only: octave / twelfth / double-octave partials of the neighbouring courses fade in slowly.
+//    level    A smooth look-ahead peak limiter keeps the crest factor low enough for the loudness targets.
 //
 //  Velocity layers differ in timbre, not only in level (pick low-pass corner, pick position, partial roll-off,
-//  contact noise, body knock).  Round robins differ in pick position, hardness, course detuning, stagger, string
-//  order, slow-polarisation phases and noise.
+//  contact noise, body knock, onset time, glide).  Round robins differ in pick position, hardness, course
+//  detuning, stagger, polarisation phases and noise.
 //
-//  Tremolo / roll = a ring buffer that is exactly periodic: K picks are laid on a circle of L samples
-//  (the picks are phase-coherent: the pick interval is a whole number of fundamental periods, the string is
-//  tuned so that K * m periods fit L samples exactly, picks are jittered by whole periods only).  All
-//  decaying modes wrap around the circle and the body filter runs on a 3x tiled copy, so the loop is
-//  seamless by construction (no cross-fade, no level step).
+//  Tremolo / roll = a ring buffer that is exactly periodic: K picks are laid on a circle of L samples.  The picks
+//  are phase-coherent (the pick interval is a whole number of fundamental periods; the string is tuned by a
+//  few ten-thousandths of a cent so that K * m periods fit L samples exactly; picks are jittered by whole periods
+//  only).  Every decaying mode wraps around the circle and the body filter and the limiter run circularly, so the
+//  loop is seamless by construction (no cross-fade).  The loop start is chosen where the 20 ms levels before and
+//  after the seam match best.
+//
+//  Honest summary: this is a physically motivated, hand-tuned model.  It is playable, tuned, dynamic and
+//  consistent, but it is not a recording and it does not reproduce the full complexity of the real instruments.
 //
 //  Everything is a pure function of the BuildContext: deterministic, no static state, no I/O.
 // ============================================================================
@@ -223,7 +231,7 @@ struct Model
 struct Voice
 {
     double f0 = 220.0, B = 0.0, alpha0 = 3.0, alphaMul = 1.0, pickPos = 0.15, fc = 4000.0;
-    double cents[4] = { 0, 0, 0, 0 }, sgain[4] = { 1, 1, 1, 1 };
+    double cents[4] = { 0, 0, 0, 0 }, sgain[4] = { 1, 1, 1, 1 }, bMul[4] = { 1, 1, 1, 1 };
     const Layer* layer = nullptr;
 };
 
@@ -249,9 +257,11 @@ Voice makeVoice (const Model& M, const Layer& L, double f0, double decayScale, R
         const double pos = S > 1 ? (double) s / (double) (S - 1) - 0.5 : 0.0;       // -0.5 .. +0.5
         v.cents[s] = pos * M.centsSpread * rng.range (0.65, 1.3) + (S > 1 ? rng.range (-0.25, 0.25) : 0.0);
         v.sgain[s] = rng.range (0.9, 1.0);
+        v.bMul[s] = S > 1 ? rng.range (0.9, 1.1) : 1.0;      // slightly different stiffness: the upper partials beat faster
         mean += v.cents[s] / (double) S;
     }
     for (int s = 0; s < S; ++s) v.cents[s] -= mean;                                  // the course stays in tune on average
+    std::sort (v.cents, v.cents + S);
     return v;
 }
 
@@ -286,7 +296,7 @@ void addThump (Sink& sk, double t0, double amp, Rng& rng)
 }
 
 // One pick / pluck of the whole course at time t0 (samples).
-void addPick (Sink& sk, const Model& M, const Voice& V, double t0, double gain, double fcMul, bool reversed, Rng& rng)
+void addPick (Sink& sk, const Model& M, const Voice& V, double t0, double gain, double fcMul, Rng& rng)
 {
     const double sr = sk.sr;
     const Layer& L = *V.layer;
@@ -295,12 +305,18 @@ void addPick (Sink& sk, const Model& M, const Voice& V, double t0, double gain, 
     const double fc = V.fc * fcMul;
     const double p = V.pickPos * rng.range (0.97, 1.03);
 
+    // delay between the strings of a course; limited to a fraction of the fundamental period so that the strings
+    // reinforce each other at f0 (no comb-filter notch on the fundamental)
+    const double stagger = std::min (M.staggerMs * 1.0e-3, 0.18 / V.f0);
     double tStr[4], gStr[4], tMean = 0.0, gSum = 0.0;
+    // Strings are indexed by the order in which the pick reaches them (slot 0 first).  The first-hit string is the
+    // flattest and the delayed ones are progressively sharper: the relative phase of their fundamentals then
+    // drifts towards alignment instead of towards cancellation, so the fundamental swells slightly instead of
+    // having a deep beating null early in the decay.
     for (int s = 0; s < S; ++s)
     {
-        const int slot = reversed ? S - 1 - s : s;
-        tStr[s] = t0 + (double) slot * M.staggerMs * 1.0e-3 * sr * rng.range (0.75, 1.25);
-        gStr[s] = gain * V.sgain[s] * rng.range (0.92, 1.08);
+        tStr[s] = t0 + (double) s * stagger * sr * rng.range (0.75, 1.25);
+        gStr[s] = gain * V.sgain[s] * rng.range (0.92, 1.08) * (s == 0 ? 1.0 : rng.range (0.62, 0.85));   // the string hit first rings louder
         tMean += tStr[s] / (double) S;
         gSum += gStr[s];
     }
@@ -318,12 +334,12 @@ void addPick (Sink& sk, const Model& M, const Voice& V, double t0, double gain, 
         const double gSlow = M.slowAmp * taper;
         for (int s = 0; s < nS; ++s)
         {
-            const double f = chorus ? fn * std::exp2 (V.cents[s] / 1200.0) : fn;
+            const double f = chorus ? partialHz (V.f0 * std::exp2 (V.cents[s] / 1200.0), V.B * V.bMul[s], n) : fn;
             const double t = chorus ? tStr[s] : tMean;
             const double a = a0 * (chorus ? gStr[s] : gSum);
             addMode (sk, t, f, alpha, a * (1.0 - gSlow), 0.0);
             if (gSlow > 0.0)
-                addMode (sk, t, f * (1.0 + rng.range (-1.0, 1.0) * 0.0008), alpha * M.slowRatio, a * gSlow, rng.range (-0.7, 0.7));
+                addMode (sk, t, f * (1.0 + rng.range (-1.0, 1.0) * 0.0005), alpha * M.slowRatio, a * gSlow, rng.range (-0.7, 0.7));
         }
     }
 
@@ -504,7 +520,7 @@ std::vector<float> renderPluck (const Model& M, const Layer& L, const Plan& P, d
     const double seconds = clampd (P.secBase * std::pow (P.secRefHz / f0, P.secExp), P.secMin, P.secMax);
     Sink sk (secondsToFrames (seconds, sr), sr, false);
     const Voice v = makeVoice (M, L, f0, 1.0, rng);
-    addPick (sk, M, v, 0.0, 1.0, 1.0, rng.uniform() < 0.5, rng);
+    addPick (sk, M, v, 0.0, 1.0, 1.0, rng);
     applyBody (sk, M.body);
     std::vector<float> out = toFloat (sk);
     applyGlide (out, sr, L.glideCents * rng.range (0.8, 1.2), M.glideTauMs);
@@ -535,12 +551,12 @@ bool renderTremolo (Zone& z, const Model& M, const Plan& P, double f0nom, Rng& r
         const double t0 = (double) ((long long) k * m + jit) * T0;
         const bool down = (k & 1) == 0;
         const double gain = (down ? 1.0 : P.tremUpGain) * rng.range (0.88, 1.08);
-        addPick (sk, M, v, t0, gain, P.tremFcMul * (down ? 1.0 : 0.88) * rng.range (0.93, 1.07), ! down, rng);
+        addPick (sk, M, v, t0, gain, P.tremFcMul * (down ? 1.0 : 0.88) * rng.range (0.93, 1.07), rng);
     }
     applyBody (sk, M.body);
     std::vector<float> S = toFloat (sk);
     sanitize (S, true);
-    tamePeaks (S, sr, 12.0, true);
+    tamePeaks (S, sr, L.crestDb, true);
     normaliseLoudness (S, sr, P.tremLoudDb, kPeakCeilingDb);
 
     // The sample starts on the first pick.  The loop seam is searched between 30 ms and ~2 pick intervals later for the
@@ -631,7 +647,7 @@ Model mandoleModel()
 {
     // Algerian mandole: double courses of steel strings, plectrum, wooden bowl / flat-back body.
     Model m;
-    m.strings = 2; m.centsSpread = 2.2; m.staggerMs = 0.7;
+    m.strings = 2; m.centsSpread = 2.6; m.staggerMs = 0.7;
     m.inh0 = 1.5e-4; m.inh1 = 4.0e-4;
     m.t60Ref = 1.9; m.t60RefHz = 220.0; m.t60Exp = 0.30; m.t60Min = 0.7; m.t60Max = 3.0;
     m.hfK = 2.6; m.hfQ = 1.5;
@@ -647,7 +663,7 @@ Model mandoleModel()
                { BodyStage::highShelf, 7000.0, 0.7, -3.0 } };
     m.hard = { 5500.0, 1.00, 0.135, 0.14, 3200.0, 0.9, 2.2, 0.5, 9.0, 0.25, 6.0 };
     m.soft = { 2000.0, 1.15, 0.170, 0.04, 2200.0, 0.8, 3.0, 0.3, 10.0, 0.9, 1.5 };
-    m.trem = { 3600.0, 1.05, 0.150, 0.05, 2800.0, 0.8, 2.5, 0.18, 10.0, 0.35, 0.0 };
+    m.trem = { 3600.0, 1.05, 0.150, 0.05, 2800.0, 0.8, 2.5, 0.18, 12.0, 0.35, 0.0 };
     return m;
 }
 
@@ -657,9 +673,9 @@ Model banjoModel()
     Model m;
     m.strings = 1;
     m.inh0 = 2.5e-4; m.inh1 = 6.0e-4;
-    m.t60Ref = 1.0; m.t60RefHz = 330.0; m.t60Exp = 0.30; m.t60Min = 0.35; m.t60Max = 1.4;
+    m.t60Ref = 0.85; m.t60RefHz = 330.0; m.t60Exp = 0.30; m.t60Min = 0.3; m.t60Max = 1.3;
     m.hfK = 4.5; m.hfQ = 1.5;
-    m.slowAmp = 0.30; m.slowRatio = 0.40; m.slowMaxPartial = 8;
+    m.slowAmp = 0.26; m.slowRatio = 0.45; m.slowMaxPartial = 8;
     m.glideTauMs = 50.0;
     m.body = { { BodyStage::highpass, 140.0, 0.8, 0.0 },
                { BodyStage::peak, 380.0, 5.0, 9.0 },       // head main mode
@@ -672,7 +688,7 @@ Model banjoModel()
                { BodyStage::lowpass, 10000.0, 0.7, 0.0 } };
     m.hard = { 7500.0, 0.90, 0.100, 0.22, 4200.0, 0.9, 1.6, 0.8, 9.0, 0.25, 10.0 };
     m.soft = { 3200.0, 1.05, 0.130, 0.07, 3000.0, 0.8, 2.2, 0.45, 10.0, 0.9, 2.5 };
-    m.trem = { 4800.0, 0.95, 0.110, 0.10, 3600.0, 0.8, 1.8, 0.35, 10.0, 0.35, 0.0 };
+    m.trem = { 4800.0, 0.95, 0.110, 0.10, 3600.0, 0.8, 1.8, 0.35, 12.0, 0.35, 0.0 };
     return m;
 }
 
@@ -680,7 +696,7 @@ Model qanunModel()
 {
     // Qanun: three nylon strings per course, metal plectra, fish-skin window on a large trapezoid box.
     Model m;
-    m.strings = 3; m.centsSpread = 2.6; m.staggerMs = 0.9;
+    m.strings = 3; m.centsSpread = 3.2; m.staggerMs = 0.9;
     m.inh0 = 4.0e-5; m.inh1 = 1.2e-4;
     m.t60Ref = 3.6; m.t60RefHz = 262.0; m.t60Exp = 0.50; m.t60Min = 1.0; m.t60Max = 6.5;
     m.hfK = 2.8; m.hfQ = 1.5;
@@ -696,7 +712,7 @@ Model qanunModel()
                { BodyStage::peak, 2800.0, 1.5, 4.0 } };
     m.hard = { 6500.0, 1.00, 0.170, 0.12, 3800.0, 0.9, 1.8, 0.4, 9.0, 0.25, 1.5 };
     m.soft = { 2500.0, 1.10, 0.200, 0.04, 2500.0, 0.8, 2.6, 0.25, 10.0, 0.9, 0.4 };
-    m.trem = { 4200.0, 1.05, 0.180, 0.05, 2800.0, 0.8, 2.2, 0.15, 10.0, 0.35, 0.0 };
+    m.trem = { 4200.0, 1.05, 0.180, 0.05, 2800.0, 0.8, 2.2, 0.15, 12.0, 0.35, 0.0 };
     return m;
 }
 } // namespace
