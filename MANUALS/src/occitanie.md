@@ -4,8 +4,8 @@ Folk instruments of Southern France: bagpipe, hurdy-gurdy, pipe, mandolin, guita
 
 | | |
 |---|---|
-| Type | Synthesizer (VST3 instrument) |
-| Format | VST3 64-bit (Windows) |
+| Type | Synthesizer (instrument) |
+| Format | VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS) |
 | Developer | DJBILBOX BEATS |
 | Version | 1.0 |
 | Factory presets | 70 |
@@ -13,7 +13,7 @@ Folk instruments of Southern France: bagpipe, hurdy-gurdy, pipe, mandolin, guita
 
 ## Overview
 
-OCCITANIE is a 16-voice synthesizer inspired by the traditional instruments of Occitania, the region around Toulouse. It has eight synthesis engines: Cabrette (nasal bagpipe with breath), Hurdy-Gurdy (bowed strings with the typical buzz), Galoubet Pipe (three-hole folk pipe), Mandolin (plucked string with plectrum tremolo), Guitar (plucked string with a soft attack), Accordion (three detuned reeds, musette style), Choir (ensemble with vowel formants) and Carillon (inharmonic bells). It uses no samples. Every note is generated in real time.
+OCCITANIE is a 16-voice synthesizer inspired by the traditional instruments of Occitania, the region around Toulouse. It has eight synthesis engines: Cabrette (nasal bagpipe with breath), Vielle (bowed strings with the typical buzz), Galoubet (three-hole folk pipe), Mandoline (plucked string with plectrum tremolo), Guitare (plucked string with a soft attack), Accordeon (three detuned reeds, musette style), Choeur (ensemble with vowel formants) and Carillon (inharmonic bells). It uses no samples. Every note is generated in real time.
 
 A **DRONE** control adds a soft tone one octave below each note, on any engine: the classic bagpipe and hurdy-gurdy sound. Each voice then runs through a multimode filter and a per-voice LFO. The output goes through an effects chain: distortion, chorus, stereo delay and reverb. A soft limiter at the output keeps the level under control.
 
@@ -23,7 +23,7 @@ OCCITANIE brings folk color to modern productions. Use the accordion and pipe so
 
 1. In the **Channel rack**, click **+** and choose **OCCITANIE** (manufacturer **DJBILBOX BEATS**). You can also drag it from **Plugin database > Generators**.
 2. The interface opens on **OCCITANIE - Init Patch** (Cabrette engine).
-3. Click the **Presets** button at the left of the preset display. Open a bank (for example **Accordion & Musette**) and pick a preset. You can also step through all 70 presets with the **<** and **>** buttons.
+3. Click the **Presets** button at the left of the preset display. Open a bank (for example **Accordeon & Musette**) and pick a preset. You can also step through all 70 presets with the **<** and **>** buttons.
 4. Play notes from your MIDI keyboard, or draw them in the **Piano roll**.
 5. Raise the **DRONE** slider (right) to add a low drone under every note.
 6. Move the **REED** slider to change the color of the engine: the nasal tone of the bagpipe, the vowel of the choir, the breath of the pipe.
@@ -66,7 +66,7 @@ Names in parentheses are the parameter names shown in FL Studio for automation, 
 
 | Parameter | Range | Default | Function |
 |---|---|---|---|
-| Engine menu (Waveform) | Cabrette, Hurdy-Gurdy, Galoubet Pipe, Mandolin, Guitar, Accordion, Choir, Carillon | Cabrette | Selects the synthesis engine. See the engine table below. |
+| Engine menu (Waveform) | Cabrette, Vielle, Galoubet, Mandoline, Guitare, Accordeon, Choeur, Carillon | Cabrette | Selects the synthesis engine. See the engine table below. |
 | LFO shape menu (LFO Source) | Sine, Triangle, Saw, Square, Sample&Hold | Sine | LFO waveform. Sample&Hold picks a new random value once per cycle. |
 | LFO target menu (Destination) | Pitch, Filter, Amp, Timbre | Pitch | Where the LFO goes. Pitch: up to ±1 semitone. Filter: up to ±3 octaves of cutoff. Amp: tremolo, up to 50% volume dip. Timbre: moves REED, BODY, BRIGHT, WIDTH and TEXTURE together, up to ±0.5. |
 | Filter mode menu (Filter Type) | Low Pass, High Pass, Band Pass | Low Pass | 12 dB/octave state-variable filter mode. Band Pass gets a small level boost. |
@@ -104,51 +104,51 @@ Effects order: Distortion, Chorus, Delay, Reverb, then the output soft limiter. 
 | Engine | REED | BODY | BRIGHT | WIDTH | TEXTURE |
 |---|---|---|---|---|---|
 | Cabrette: two saws with a nasal double formant and an attack puff | Formant position (nasal color) | Formant level | Brightness | Detune between the two saws | Breath noise and attack puff |
-| Hurdy-Gurdy: two saws with formants and a buzzing bridge | Formant position | Formant level | Brightness | Detune between the two saws | Buzz (bridge saturation) |
-| Galoubet Pipe: soft harmonic tone with breath | Breath amount (more air, less tone) | Breath focus (resonance of the air noise) | Upper harmonics | Second, detuned pipe layer | Chiff (attack noise) |
-| Mandolin: plucked string model with plectrum tremolo | No effect | Sustain | Brightness | No effect | Plectrum tremolo depth (14 Hz) |
-| Guitar: plucked string model with a soft attack | No effect | Sustain (long at high values) | Brightness | No effect | No effect |
-| Accordion: three detuned reeds with formants | Formant position | Formant level | Brightness | Musette detune between the reeds | Bellows noise |
-| Choir: five detuned saws with vowel formants | Vowel (formant position) | Formant level | Brightness | Ensemble detune | Breath noise |
+| Vielle: two saws with formants and a buzzing bridge | Formant position | Formant level | Brightness | Detune between the two saws | Buzz (bridge saturation) |
+| Galoubet: soft harmonic tone with breath | Breath amount (more air, less tone) | Breath focus (resonance of the air noise) | Upper harmonics | Second, detuned pipe layer | Chiff (attack noise) |
+| Mandoline: plucked string model with plectrum tremolo | No effect | Sustain | Brightness | No effect | Plectrum tremolo depth (14 Hz) |
+| Guitare: plucked string model with a soft attack | No effect | Sustain (long at high values) | Brightness | No effect | No effect |
+| Accordeon: three detuned reeds with formants | Formant position | Formant level | Brightness | Musette detune between the reeds | Bellows noise |
+| Choeur: five detuned saws with vowel formants | Vowel (formant position) | Formant level | Brightness | Ensemble detune | Breath noise |
 | Carillon: four inharmonic bell partials | No effect | Ring length | Upper partials | No effect | Strike noise |
 
 On every engine, BODY also controls the filter resonance (from flat at 0 to a gentle peak at 1).
 
 ## Factory presets
 
-OCCITANIE includes 70 factory presets in 7 banks of 10. Loading a factory preset resets every parameter before applying the preset. The pitch bend and modulation wheels are not changed. Most banks use the engine of the same name; exceptions are noted. Place names of the region (Capitole, Canal du Midi, Garonne, Albi, Carcassonne...) are kept as they are.
+OCCITANIE includes 70 factory presets in 7 banks of 10. Loading a factory preset resets every parameter before applying the preset. The pitch bend and modulation wheels are not changed. Most banks use the engine of the same name; exceptions are noted. Bank and preset names are shown exactly as they appear in the plugin (French, with place names of the region such as Capitole, Garonne, Albi and Carcassonne).
 
-**Cabrette & Bagpipes** (Cabrette engine)
-Capitole Cabrette, Canal du Midi, Garonne Drone, Pic du Midi, Village Festival, Sad Cabrette, Folk Dance Bagpipe, Corbieres, Blue Woad, Saint Sernin.
+**Cabrette & Cornemuse** (Cabrette engine)
+Capitole Cabrette, Canal du Midi, Garonne Drone, Pic du Midi, Fete Votive, Cabreta Triste, Bal Bagpipe, Corbieres, Pastel Bleu, Saint Sernin.
 
-**Hurdy-Gurdy & Bowed Strings** (Hurdy-Gurdy engine)
-Wheel of Strings, Trumpet String Buzz, Albi Drone, Minstrel, Troubadour, Cathar Chant, Rouergue, Tarn Mist, Melody String, Cordes sur Ciel.
+**Vielle & Cordes frottees** (Vielle engine)
+Roue de Cordes, Trompette Buzz, Bourdon Albigeois, Menestrel, Troubadour, Chant Cathare, Rouergue, Brume du Tarn, Chanterelle, Cordes sur Ciel.
 
-**Flutes & Galoubet** (Galoubet Pipe engine)
-Joyful Galoubet, Tabor Air, Shepherd's Flute, Camargue Fife, Pastoral, Mistral, Tramontane, Cathar Flute, Occitan Whistle, Corbieres Dawn.
+**Flutes & Galoubet** (Galoubet engine)
+Galoubet Joyeux, Tambourin Air, Flute de Berger, Fifre Camargue, Pastoral, Mistral, Tramontane, Flute Cathare, Sifflet Occitan, Aube Corbieres.
 
-**Plucked Strings** (Mandolin engine: Toulouse Mandolin, Mandolin Tremolo, Cittern, Soft Plectrum; Guitar engine: the other six)
-Toulouse Mandolin, Mandolin Tremolo, Gypsy Guitar, Medieval Lute, Cittern, Soft Nylon Guitar, Soft Plectrum, Southern Strum, Minstrel Pizz, Low Theorbo.
+**Cordes pincees** (Guitare engine; Mandoline Toulousaine, Mandoline Tremolo, Cistre, Plectre Doux uses Mandoline)
+Mandoline Toulousaine, Mandoline Tremolo, Guitare Gitane, Luth Medieval, Cistre, Guitare Nylon Soft, Plectre Doux, Strum du Midi, Pizz Menestrel, Theorbe Grave.
 
-**Accordion & Musette** (Accordion engine)
-Toulouse Musette, Musette Dance Hall, Violet Waltz, Cabaret Accordion, Southern Java, Slow Bellows, Chapel Harmonium, Barrel Organ, Gavotte, Cassoulet Musette.
+**Accordeon & Musette** (Accordeon engine)
+Musette Toulouse, Bal Musette, Valse Violette, Accordeon Cabaret, Java du Midi, Soufflet Lent, Harmonium Chapelle, Orgue de Barbarie, Gavotte, Cassoulet Musette.
 
-**Choirs & Pads** (Choir engine; Ariege Mist uses Hurdy-Gurdy)
-Cathar Choir, Montsegur, Carcassonne Pad, Medieval City, Voice of Oc, Albi Plainchant, Moon of Oc, Moissac Abbey, Ariege Mist, Saint Sernin Crypt.
+**Choeurs & Pads** (Choeur engine; Brume Ariege uses Vielle)
+Choeur Cathare, Montsegur, Carcassonne Pad, Cite Medievale, Voix d Oc, Plainchant Albi, Lune d Oc, Abbaye Moissac, Brume Ariege, Crypte Saint Sernin.
 
-**Carillons & Textures** (Carillon engine; Autan Wind uses Galoubet Pipe, Cevennes Storm uses Hurdy-Gurdy)
-Capitole Carillon, Saint Etienne Bells, Evening Angelus, Albi Bell Tower, Pink City Glockenspiel, Ariege Crystals, Garonne Dew, Autan Wind, Cevennes Storm, Stars of Oc.
+**Carillons & Textures** (Carillon engine; Vent d Autan uses Galoubet; Orage Cevenol uses Vielle)
+Carillon Capitole, Cloches Saint Etienne, Angelus du Soir, Clocher d Albi, Glockenspiel Rose, Cristaux Ariege, Rosee Garonne, Vent d Autan, Orage Cevenol, Etoiles d Oc.
 
 **User presets.** **Save** writes the current sound as a `.occpreset` file in `Documents\DJBILBOX BEATS\OCCITANIE\Presets`. Files in this folder appear in the **User** submenu of the preset menu. Use **Open a .occpreset file...** to load a preset from another folder. Your sound is also saved inside your FL Studio project.
 
 ## Production tips
 
 - **Bagpipe lines.** Start from **Canal du Midi**: Cabrette engine, Mono, short glide and DRONE at 0.5. **REED** moves the nasal formant, **TEXTURE** adds breath and a puff at each attack. The drone is part of each voice: it follows the note you play and stops with it. For a fixed drone under a moving melody, hold one long low note on a second OCCITANIE channel.
-- **Oriental and Rai melodies.** Use the Accordion engine with **WIDTH** between 0.6 and 0.85 for a wide musette detune. Switch to **Mono** and set **GLIDE** to 0.05 to 0.1 s for slides between notes. Use the pitch wheel (±2 semitones) for ornaments. For vibrato, set the LFO to **Pitch**, **RATE** to 5 or 6 Hz and push the modulation wheel only on long notes.
-- **Hurdy-gurdy buzz.** On the Hurdy-Gurdy engine, **TEXTURE** drives the buzzing bridge. **Trumpet String Buzz** pushes it to 0.85. Combine it with **DRONE** and a slow **ATTACK** (0.1 to 0.3 s) for a bowed, medieval feel.
-- **Plucked hooks for Afrotrap and Drill.** **Toulouse Mandolin** and **Southern Strum** cut through a busy beat. On the Mandolin engine, **TEXTURE** adds the fast plectrum tremolo. On both string engines, **BODY** sets how long the string rings and **BRIGHT** how bright it sounds. **Low Theorbo** gives a deep plucked bass line in Mono.
-- **Choirs and chant.** On the Choir engine, **REED** selects the vowel. **Voice of Oc** sends a slow LFO to **Timbre** so the vowel keeps moving. Add **DRONE** (0.3 to 0.4) for a plainchant effect, as in **Albi Plainchant**.
-- **Bells for intros.** On the Carillon engine, **BODY** sets the ring length and **BRIGHT** the upper partials. Set **PITCH** to -12 for large tower bells (**Saint Etienne Bells**). A dotted delay and a long reverb turn a single hit into an intro.
+- **Oriental and Rai melodies.** Use the Accordeon engine with **WIDTH** between 0.6 and 0.85 for a wide musette detune. Switch to **Mono** and set **GLIDE** to 0.05 to 0.1 s for slides between notes. Use the pitch wheel (±2 semitones) for ornaments. For vibrato, set the LFO to **Pitch**, **RATE** to 5 or 6 Hz and push the modulation wheel only on long notes.
+- **Hurdy-gurdy buzz.** On the Vielle engine, **TEXTURE** drives the buzzing bridge. **Trompette Buzz** pushes it to 0.85. Combine it with **DRONE** and a slow **ATTACK** (0.1 to 0.3 s) for a bowed, medieval feel.
+- **Plucked hooks for Afrotrap and Drill.** **Mandoline Toulousaine** and **Strum du Midi** cut through a busy beat. On the Mandoline engine, **TEXTURE** adds the fast plectrum tremolo. On both string engines, **BODY** sets how long the string rings and **BRIGHT** how bright it sounds. **Theorbe Grave** gives a deep plucked bass line in Mono.
+- **Choirs and chant.** On the Choeur engine, **REED** selects the vowel. **Voix d Oc** sends a slow LFO to **Timbre** so the vowel keeps moving. Add **DRONE** (0.3 to 0.4) for a plainchant effect, as in **Plainchant Albi**.
+- **Bells for intros.** On the Carillon engine, **BODY** sets the ring length and **BRIGHT** the upper partials. Set **PITCH** to -12 for large tower bells (**Cloches Saint Etienne**). A dotted delay and a long reverb turn a single hit into an intro.
 - **Layering in a Trap or Hip-Hop mix.** Folk sounds can fill the low mids. Choose **High Pass** in the filter mode menu and raise **FILTER** to 150 to 300 Hz to make room for the 808 and the kick. Lower **DRONE** on dense chords.
 - **Delay in time with the beat.** TIME is set in seconds. Quarter note = 60 / BPM. Eighth note = 30 / BPM. Dotted eighth = 45 / BPM. At 100 BPM, a quarter note is 0.6 s.
 
@@ -162,7 +162,7 @@ Capitole Carillon, Saint Etienne Bells, Evening Angelus, Albi Bell Tower, Pink C
 - **Sustain pedal (CC64).** Supported. Aftertouch and other MIDI CCs are ignored. Use host automation for everything else.
 - **Automation in FL Studio.** Every parameter in the table can be automated. Move a control on the OCCITANIE panel, then choose **Tools > Last tweaked > Create automation clip**. To use a hardware knob, choose **Tools > Last tweaked > Link to controller** and move the knob. Volume, pitch, bend and cutoff changes are smoothed to avoid zipper noise.
 - **Latency.** 0 samples. No delay compensation is needed. The plugin reports a 12-second tail to the host so that delay and reverb tails are not cut when you render.
-- **CPU.** OCCITANIE uses no samples and streams nothing from disk. The CPU load grows with the number of sounding notes. The five-saw Choir engine is the heaviest. Effects at zero are bypassed and use no CPU. Long release times, common on pads and bells, keep voices active longer.
+- **CPU.** OCCITANIE uses no samples and streams nothing from disk. The CPU load grows with the number of sounding notes. The five-saw Choeur engine is the heaviest. Effects at zero are bypassed and use no CPU. Long release times, common on pads and bells, keep voices active longer.
 - **Sample rates.** 44.1, 48, 88.2 and 96 kHz.
 
 ## FAQ
