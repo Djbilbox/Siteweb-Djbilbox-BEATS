@@ -1,0 +1,148 @@
+{
+  "id": "midnight-reels",
+  "name": "MIDNIGHT REELS",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Film Noir Synthesizer",
+  "tagline": "Vibes, electric piano, muted trumpet, sax, upright bass, organ and strings: 70 presets from 8 engines.",
+  "sub": "Smoky vibes, keys, brass, bass and strings",
+  "gumroad_title": "MIDNIGHT REELS - Film Noir Synthesizer VST3 + AU Plugin (70 Presets) | Lo-Fi, Hip-Hop, R&B, Film Noir",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Vibes, Reel EP, Muted Trumpet, Tenor Sax, Upright Bass, Organ, Noir Strings and Celesta) and 70 factory presets.",
+  "about": [
+    "MIDNIGHT REELS, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines (Vibes, Reel EP, Muted Trumpet, Tenor Sax, Upright Bass, Organ, Noir Strings and Celesta), shape it with five character controls (TONE, BODY, BRIGHT, WIDTH and TEXTURE), then run it through a multimode filter, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb. The character is dark and smoky, built for late-night, detective-movie atmospheres.",
+    "58 of the 70 presets load in Poly mode and 12 in Mono mode, so you can play chords or single-note lines from the first preset. Late Night Sax and Growl Sax, plus the ten Upright Bass presets, load in Mono mode for single-note lines.",
+    "Built for film-noir and jazz-flavoured Lo-Fi, Hip-Hop and R&B beats, Trip-Hop, soundtrack cues and lounge or slow-jam arrangements."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "Struck vibes, electric piano with a velocity-sensitive bark, muted trumpet, tenor sax, upright bass, drawbar-style organ, tape-flutter strings and celesta."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from vibes and electric piano to muted trumpet, upright bass and celesta."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter with its own envelope",
+      "d": "Low pass, high pass or band pass, with resonance and a dedicated attack, decay and release envelope."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "Play it right away",
+      "d": "On-screen keyboard (MIDI notes 36 to 84), pitch bend and mod wheel, up to 16 voices in Poly mode."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "70 factory presets in 7 banks"
+    },
+    {
+      "k": "Engines",
+      "v": "8"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Up to 16 voices (Poly), or Mono"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "34"
+    }
+  ],
+  "includes": [
+    "MIDNIGHT REELS plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Lo-Fi",
+    "Hip-Hop",
+    "R&B",
+    "Trip-Hop",
+    "Cinematic",
+    "Jazz"
+  ],
+  "tags": [
+    "film noir",
+    "vibraphone",
+    "electric piano",
+    "lo-fi",
+    "jazz",
+    "vst3",
+    "audio unit",
+    "hip hop",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "8 engines",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "Can I play chords with the Upright Bass presets?",
+      "a": "Yes. Switch VOICE MODE to Poly. The Upright Bass bank loads in Mono."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .mrpreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#7fc8ff",
+  "fs_thumb": "64px",
+  "fs_cover": "92px"
+}

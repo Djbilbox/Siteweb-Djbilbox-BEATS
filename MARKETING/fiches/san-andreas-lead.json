@@ -1,0 +1,148 @@
+{
+  "id": "san-andreas-lead",
+  "name": "SAN ANDREAS LEAD",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "G-Funk Lead Synthesizer",
+  "tagline": "G-funk whistles, Moog-style leads, talkbox, funk bass and West Coast keys: 70 presets from 8 engines.",
+  "sub": "G-funk whistles, leads, talkbox and keys",
+  "gumroad_title": "SAN ANDREAS LEAD - G-Funk Lead Synthesizer VST3 + AU Plugin (70 Presets) | G-Funk, West Coast, Funk",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (G-Funk, Moog, Square, Talkbox, Bass, Rhodes, Strings and Clav) and 70 factory presets.",
+  "about": [
+    "SAN ANDREAS LEAD, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines (G-Funk, Moog, Square, Talkbox, Bass, Rhodes, Strings and Clav), shape it with five character controls (TONE, BODY, BRIGHT, WIDTH and TEXTURE), then run it through a multimode filter, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb. The character is sunny and smooth, built around gliding mono leads.",
+    "22 of the 70 presets load in Poly mode and 48 in Mono mode, so you can play chords or single-note lines from the first preset.",
+    "Built for G-Funk and West Coast Hip-Hop, funk and R&B hooks, Trap leads and lowrider-style bass lines.",
+    "Moog, Rhodes and Clav are trademarks of their owners and are used only to describe a sound style."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "G-funk whistle, Moog-style lead, PWM square lead, vowel talkbox, funk bass, Rhodes-style FM piano, lowrider strings and clav."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from G-funk whistles and Moog-style leads to talkbox, funk bass, West Coast keys and lowrider strings."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter with its own envelope",
+      "d": "Low pass, high pass or band pass, with resonance and a dedicated attack, decay, sustain and release envelope."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "Play it right away",
+      "d": "On-screen keyboard (MIDI notes 48 to 96), pitch bend and mod wheel, up to 16 voices in Poly mode."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "70 factory presets in 7 banks"
+    },
+    {
+      "k": "Engines",
+      "v": "8"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Up to 16 voices (Poly), or Mono"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "35"
+    }
+  ],
+  "includes": [
+    "SAN ANDREAS LEAD plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "G-Funk",
+    "West Coast Hip-Hop",
+    "Funk",
+    "R&B",
+    "Trap"
+  ],
+  "tags": [
+    "g-funk",
+    "lead synth",
+    "talkbox",
+    "west coast",
+    "funk",
+    "vst3",
+    "audio unit",
+    "hip hop",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "8 engines",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "Can I play chords?",
+      "a": "Most lead, talkbox and bass presets load in Mono with glide. Switch VOICE MODE to Poly for chords; the West Coast Keys and Lowrider Strings banks already load in Poly."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .sapreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#ff8a3d",
+  "fs_thumb": "56px",
+  "fs_cover": "82px"
+}

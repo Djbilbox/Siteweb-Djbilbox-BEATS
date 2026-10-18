@@ -1,0 +1,125 @@
+{
+  "id": "humpire-overclock",
+  "name": "HUMPIRE OVERCLOCK",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Enhancer",
+  "tagline": "Enhancer for density, harmonics and loudness, with a Power knob and a two-band split.",
+  "sub": "Density, harmonics and perceived loudness",
+  "gumroad_title": "HUMPIRE OVERCLOCK - Enhancer VST3 + AU Plugin (12 Presets) | Density, Harmonics, Loudness",
+  "summary": "An enhancer plugin that adds density, harmonics and perceived loudness with a Power knob, curve control and a two-band split.",
+  "about": [
+    "HUMPIRE OVERCLOCK splits the signal into a low band and a high band at an adjustable frequency (80 Hz to 4 kHz) and saturates each band with 2x oversampling. The low band gets density, the high band gets generated harmonics.",
+    "POWER sets the overall drive, CURVE morphs from a soft asymmetric curve to a hard clip, DENSITY mixes the low-band saturation in and HARMONICS sets the high-band harmonics. The output is level-compensated so more power does not mean a much louder signal.",
+    "On the screen, a ring and an animated fan follow the Power setting."
+  ],
+  "features": [
+    {
+      "icon": "fa-bolt",
+      "t": "Power knob",
+      "d": "One control for the overall drive, with level compensation."
+    },
+    {
+      "icon": "fa-bezier-curve",
+      "t": "Curve",
+      "d": "From a soft, asymmetric curve to a hard clip."
+    },
+    {
+      "icon": "fa-layer-group",
+      "t": "Density and harmonics",
+      "d": "Low-band density and high-band harmonics are set separately."
+    },
+    {
+      "icon": "fa-scissors",
+      "t": "Two-band split",
+      "d": "Split frequency from 80 Hz to 4 kHz."
+    },
+    {
+      "icon": "fa-arrow-up-right-dots",
+      "t": "2x oversampling",
+      "d": "Saturation runs oversampled to limit aliasing."
+    },
+    {
+      "icon": "fa-volume-high",
+      "t": "Output trim",
+      "d": "-18 to +12 dB."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "Split",
+      "v": "80 Hz to 4 kHz"
+    },
+    {
+      "k": "Oversampling",
+      "v": "2x (latency reported to the host)"
+    },
+    {
+      "k": "Factory presets",
+      "v": "12"
+    }
+  ],
+  "includes": [
+    "HUMPIRE OVERCLOCK plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "808s",
+    "Vocals",
+    "Drum bus",
+    "Mastering"
+  ],
+  "tags": [
+    "enhancer",
+    "saturation",
+    "harmonics",
+    "loudness",
+    "mixing",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "Power knob",
+    "2x oversampling",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "Yes, the small latency of its 2x oversampling filters, which the plugin reports to your host."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#ff7a3d",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

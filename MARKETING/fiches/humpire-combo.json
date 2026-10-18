@@ -1,0 +1,126 @@
+{
+  "id": "humpire-combo",
+  "name": "HUMPIRE COMBO",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Performance FX",
+  "tagline": "Stutter, tape stop, filter sweep and reverse on two XY pads, with MIDI learn.",
+  "sub": "One-shot performance effects, XY pads and MIDI",
+  "gumroad_title": "HUMPIRE COMBO - Performance FX VST3 + AU Plugin (12 Presets) | Stutter, Tape Stop, Reverse",
+  "summary": "A performance effect plugin with stutter, tape stop, filter sweep and reverse, two XY pads and MIDI note triggering.",
+  "about": [
+    "HUMPIRE COMBO turns four one-shot effects into a game controller: STUTTER, TAPE STOP, SWEEP and REVERSE are buttons you hold, and two XY pads set their parameters.",
+    "The left pad controls the stutter rate (X) and the filter (Y). The right pad controls the tape-stop time (X) and the reverse length (Y). Two triggers add drive and set the effect mix. Stutter and reverse lengths follow the host tempo.",
+    "The effects can also be triggered from MIDI notes 36 to 39 by default, and MIDI learn lets you map each effect to another note."
+  ],
+  "features": [
+    {
+      "icon": "fa-repeat",
+      "t": "Stutter",
+      "d": "Repeats a slice of the audio from 1/32 to 1 beat."
+    },
+    {
+      "icon": "fa-record-vinyl",
+      "t": "Tape stop",
+      "d": "Slows the signal to a halt over 0.1 to 2 seconds."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter sweep",
+      "d": "A resonant low-pass sweep from 18 kHz down to a target set by the left pad (40 Hz to 18 kHz)."
+    },
+    {
+      "icon": "fa-backward",
+      "t": "Reverse",
+      "d": "Plays the last 1/16 to 2 beats backwards."
+    },
+    {
+      "icon": "fa-gamepad",
+      "t": "Two XY pads",
+      "d": "Stick-style pads with spring-back."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "MIDI trigger and learn",
+      "d": "Notes 36 to 39 by default, remappable."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "MIDI",
+      "v": "Notes 36 to 39 by default, MIDI learn"
+    },
+    {
+      "k": "Buffer",
+      "v": "4 seconds"
+    },
+    {
+      "k": "Factory presets",
+      "v": "12"
+    }
+  ],
+  "includes": [
+    "HUMPIRE COMBO plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Live performance",
+    "Hip-Hop",
+    "Electronic",
+    "Transitions"
+  ],
+  "tags": [
+    "stutter",
+    "tape stop",
+    "performance fx",
+    "glitch",
+    "reverse",
+    "midi",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "4 FX",
+    "2 XY pads",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "How do I trigger it from MIDI?",
+      "a": "Route a MIDI track or keyboard to the plugin. Notes 36 to 39 trigger the four effects. Use MIDI LEARN to remap them. The plugin needs a MIDI input, which depends on your host."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#ff7a3d",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

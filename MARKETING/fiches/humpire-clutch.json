@@ -1,0 +1,125 @@
+{
+  "id": "humpire-clutch",
+  "name": "HUMPIRE CLUTCH",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Compressor",
+  "tagline": "Compressor with Clean, Punch and Crush modes, sidechain high-pass, parallel mix and a LED life bar.",
+  "sub": "Clean, Punch and Crush with parallel mix",
+  "gumroad_title": "HUMPIRE CLUTCH - Compressor VST3 + AU Plugin (12 Presets) | Clean, Punch, Crush",
+  "summary": "A compressor plugin with three modes (Clean, Punch and Crush), soft knee, sidechain high-pass filter and a parallel mix control.",
+  "about": [
+    "HUMPIRE CLUTCH is a feed-forward compressor with a soft knee and a gain-reduction display drawn as a 32-segment life bar that drains as you compress, with a history graph below it.",
+    "Clean is a transparent compressor. Punch slows the attack and shortens the release so the transient passes through. Crush multiplies the ratio, speeds up the attack and adds saturation.",
+    "A one-pole sidechain high-pass (20 to 500 Hz) keeps low frequencies from triggering the compressor, and the Mix control blends the dry and compressed signals for parallel compression."
+  ],
+  "features": [
+    {
+      "icon": "fa-compress",
+      "t": "3 modes",
+      "d": "Clean, Punch (lets the attack through) and Crush (higher ratio, faster attack, saturation)."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Full compressor controls",
+      "d": "Threshold -40 to 0 dB, ratio 1:1 to 20:1, attack 0.1 to 100 ms, release 10 to 1000 ms, knee 0 to 24 dB."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Sidechain high-pass",
+      "d": "20 to 500 Hz, so bass does not over-trigger the detector."
+    },
+    {
+      "icon": "fa-code-merge",
+      "t": "Parallel mix",
+      "d": "Blend dry and compressed signals from 0 to 100%."
+    },
+    {
+      "icon": "fa-heart-pulse",
+      "t": "LED life bar",
+      "d": "A 32-segment bar and a history graph show the gain reduction up to 24 dB."
+    },
+    {
+      "icon": "fa-volume-high",
+      "t": "Makeup gain",
+      "d": "-12 to +24 dB."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "Ratio",
+      "v": "1:1 to 20:1"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Factory presets",
+      "v": "12"
+    }
+  ],
+  "includes": [
+    "HUMPIRE CLUTCH plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Vocals",
+    "Drums",
+    "808s",
+    "Mix bus"
+  ],
+  "tags": [
+    "compressor",
+    "dynamics",
+    "parallel compression",
+    "sidechain",
+    "mixing",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "3 modes",
+    "Parallel mix",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "What is the difference between the three modes?",
+      "a": "Clean compresses as set. Punch lengthens the attack and shortens the release to keep the transient. Crush raises the ratio, shortens the attack and adds saturation."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#f5b544",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

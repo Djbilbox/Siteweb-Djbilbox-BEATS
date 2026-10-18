@@ -1,0 +1,152 @@
+{
+  "id": "occitanie",
+  "name": "OCCITANIE",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Occitan Folk Synthesizer",
+  "tagline": "Cabrette, vielle, galoubet, mandoline, accordion, choir and bells with a built-in drone: 70 presets.",
+  "sub": "Folk instruments of Southern France, with drone",
+  "gumroad_title": "OCCITANIE - Occitan Folk Synthesizer VST3 + AU Plugin (70 Presets) | Folk, Afrotrap, Cinematic, World",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Cabrette, Vielle, Galoubet, Mandoline, Guitare, Accordeon, Choeur and Carillon) and 70 factory presets.",
+  "about": [
+    "OCCITANIE, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines (Cabrette, Vielle, Galoubet, Mandoline, Guitare, Accordeon, Choeur and Carillon), shape it with five character controls (REED, BODY, BRIGHT, WIDTH and TEXTURE), then run it through a multimode filter, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb. A DRONE control adds a soft tone one octave below each note on any engine, the classic bagpipe and hurdy-gurdy sound.",
+    "67 of the 70 presets load in Poly mode and 3 in Mono mode, so you can play chords or single-note lines from the first preset.",
+    "Built for Oriental and Rai melodies, Afrotrap and Drill plucked hooks, cinematic Trap intros, medieval and world music, folk-flavoured Hip-Hop loops and Deep House toplines."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "Cabrette (bagpipe), Vielle (hurdy-gurdy), Galoubet (pipe), Mandoline, Guitare, Accordeon, Choeur (choir) and Carillon (bells)."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "REED, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from bagpipe, hurdy-gurdy and pipes to plucked strings, musette accordion, choirs and carillons."
+    },
+    {
+      "icon": "fa-music",
+      "t": "Built-in drone",
+      "d": "A DRONE control adds a soft tone one octave below each note, on any engine."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Multimode filter",
+      "d": "Low pass, high pass or band pass, with the cutoff following the keyboard."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "70 factory presets in 7 banks"
+    },
+    {
+      "k": "Engines",
+      "v": "8"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Up to 16 voices (Poly), or Mono"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "30"
+    }
+  ],
+  "includes": [
+    "OCCITANIE plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Folk",
+    "Afrotrap",
+    "Drill",
+    "Hip-Hop",
+    "Cinematic",
+    "World Music"
+  ],
+  "tags": [
+    "folk synth",
+    "bagpipe",
+    "accordion",
+    "hurdy gurdy",
+    "world music",
+    "vst3",
+    "audio unit",
+    "afrotrap",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "8 engines",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "What does the DRONE control do?",
+      "a": "It adds a softened saw one octave below each note you play, on every engine. It follows the melody and stops with the note."
+    },
+    {
+      "q": "Is there a filter envelope?",
+      "a": "No. Shape the sound over time with the volume envelope and the LFO."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .occpreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#e8b23a",
+  "fs_thumb": "64px",
+  "fs_cover": "92px"
+}

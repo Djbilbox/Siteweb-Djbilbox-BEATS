@@ -1,0 +1,138 @@
+{
+  "id": "rockpunk",
+  "name": "ROCKPUNK",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Rock Guitar Instrument",
+  "tagline": "Rock'n'roll guitar with two modelled strings and the Urban Slayer amp: 76 presets, no samples.",
+  "sub": "Modelled rock guitar with amp, drive and delay",
+  "gumroad_title": "ROCKPUNK GUITAR - Rock Guitar Instrument VST3 + AU Plugin (76 Presets) | Rock, Punk, Crunch, Leads",
+  "summary": "A rock guitar instrument plugin (VST3 and Audio Unit) with two modelled strings per note, the Urban Slayer amp, four drive types, a tempo-syncable delay and 76 factory presets. No recordings: every note is calculated.",
+  "about": [
+    "ROCKPUNK GUITAR, sold under the HUMPIRE brand by DJBILBOX BEATS, is a rock guitar you play from MIDI. Each note runs two modelled strings (a rhythm string A and a lead string B) that you blend with a layer mix, then goes through the Urban Slayer amp, a drive stage with four flavours (soft, hard, asymmetric and fuzz), a resonant filter, chorus, a tempo-syncable delay and reverb.",
+    "It ships no recording: every note is calculated, with up to 8 voices. An optional sampled layer plays your own .wav, .aif or .flac files if you drop them in a folder. The 76 factory presets are grouped in eight families: Crunch rhythm, Leads, High gain, Clean, Bare strings, Nocturnal, Textures and Low end.",
+    "Built for rock, punk, rock-flavoured Trap and Drill guitars, riffs, power chords and lead lines."
+  ],
+  "features": [
+    {
+      "icon": "fa-guitar",
+      "t": "Two modelled strings per note",
+      "d": "A rhythm string and a lead string, blended with a layer mix, each with tone, body, sustain and pick controls."
+    },
+    {
+      "icon": "fa-bolt",
+      "t": "Urban Slayer amp",
+      "d": "Gain, distortion, tone and level, with an asymmetric saturation stage."
+    },
+    {
+      "icon": "fa-fire",
+      "t": "4 drive types",
+      "d": "Soft, hard, asymmetric and fuzz."
+    },
+    {
+      "icon": "fa-list",
+      "t": "76 factory presets",
+      "d": "Eight families: crunch rhythm, leads, high gain, clean, bare strings, nocturnal, textures and low end."
+    },
+    {
+      "icon": "fa-clock",
+      "t": "Tempo-syncable delay",
+      "d": "Free time or synced to the host tempo, with feedback and a low-pass in the loop."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter, LFO, chorus and reverb",
+      "d": "Low-pass, band-pass or high-pass filter, a four-shape LFO, chorus and reverb."
+    },
+    {
+      "icon": "fa-folder-open",
+      "t": "Your own samples (optional)",
+      "d": "Drop .wav, .aif or .flac files in a folder to play them on the keyboard. None are included."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Instrument (modelled guitar)"
+    },
+    {
+      "k": "Presets",
+      "v": "76 factory presets in 8 families"
+    },
+    {
+      "k": "Polyphony",
+      "v": "8 voices (Poly), or Mono"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "65"
+    },
+    {
+      "k": "Version",
+      "v": "1.1.0"
+    }
+  ],
+  "includes": [
+    "ROCKPUNK plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Rock",
+    "Punk",
+    "Hip-Hop",
+    "Trap",
+    "Drill"
+  ],
+  "tags": [
+    "guitar vst",
+    "rock guitar",
+    "punk",
+    "amp",
+    "vst3",
+    "audio unit",
+    "electric guitar",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "76 presets",
+    "Modelled guitar",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it contain guitar recordings?",
+      "a": "No. Every note is calculated by the two modelled strings. An optional layer plays your own audio files, and the factory presets do not need it."
+    },
+    {
+      "q": "I hear nothing.",
+      "a": "Make sure at least one of the two speaker grills on the faceplate is lit: they switch the two strings on and off."
+    },
+    {
+      "q": "Where are my presets?",
+      "a": "In Documents/DJBILBOX/ROCKPUNK/Presets as .rpk files."
+    },
+    {
+      "q": "Can I sell music made with it?",
+      "a": "Yes. The license is royalty-free with no credit required."
+    }
+  ],
+  "accent": "#ff4fa0",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

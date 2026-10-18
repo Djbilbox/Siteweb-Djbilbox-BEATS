@@ -1,0 +1,135 @@
+{
+  "id": "humpire-skilltree",
+  "name": "HUMPIRE SKILLTREE",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Parametric EQ",
+  "tagline": "Six-band EQ with Mid/Side, minimum or linear phase and a real-time FFT analyzer.",
+  "sub": "Six bands, Mid/Side, linear phase, analyzer",
+  "gumroad_title": "HUMPIRE SKILLTREE - Parametric EQ VST3 + AU Plugin (12 Presets) | Mid/Side, Linear Phase, FFT Analyzer",
+  "summary": "A six-band equalizer plugin with high-pass and low-pass filters, Stereo, Mid or Side targeting, minimum or linear phase and a real-time FFT analyzer.",
+  "about": [
+    "HUMPIRE SKILLTREE is a six-band parametric equalizer drawn as a skill tree: each band is a node you drag on a CRT-style screen. Dragging moves the frequency and the gain, the mouse wheel changes Q and a double-click switches the node on or off.",
+    "Band 1 is a low shelf, band 6 is a high shelf and bands 2 to 5 are peaking filters, each with 20 Hz to 20 kHz frequency, plus or minus 18 dB gain and a Q from 0.2 to 10. A 24 dB per octave high-pass (20 Hz to 1 kHz) and low-pass (1 kHz to 20 kHz) frame the curve.",
+    "Switch the target to Mid or Side to equalize only the center or only the stereo width, and switch the phase mode to Linear for a phase-neutral FIR (declared latency: 2048 samples)."
+  ],
+  "features": [
+    {
+      "icon": "fa-chart-line",
+      "t": "6 interactive bands",
+      "d": "Low shelf, four peaking bands and a high shelf: drag nodes, wheel for Q, double-click to bypass a band."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "24 dB/oct high-pass and low-pass",
+      "d": "High-pass from 20 Hz to 1 kHz and low-pass from 1 kHz to 20 kHz."
+    },
+    {
+      "icon": "fa-arrows-left-right",
+      "t": "Stereo, Mid or Side",
+      "d": "Equalize the whole signal, only the center or only the sides."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "Minimum or linear phase",
+      "d": "Linear phase uses a 4096-tap FIR and reports 2048 samples of latency."
+    },
+    {
+      "icon": "fa-signal",
+      "t": "FFT analyzer",
+      "d": "Real-time spectrum behind the curve, switchable."
+    },
+    {
+      "icon": "fa-volume-high",
+      "t": "Output trim",
+      "d": "Plus or minus 18 dB of output gain."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "Bands",
+      "v": "6 (low shelf, 4 peaking, high shelf)"
+    },
+    {
+      "k": "Gain range",
+      "v": "-18 to +18 dB per band"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples (minimum phase); 2048 samples (linear phase)"
+    },
+    {
+      "k": "Factory presets",
+      "v": "12"
+    }
+  ],
+  "includes": [
+    "HUMPIRE SKILLTREE plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Mixing",
+    "Mastering",
+    "Vocals",
+    "Drums",
+    "808s"
+  ],
+  "tags": [
+    "eq",
+    "equalizer",
+    "parametric eq",
+    "linear phase",
+    "mid side",
+    "mixing",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "6 bands",
+    "Linear phase",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does linear phase add latency?",
+      "a": "Yes. Linear phase mode reports 2048 samples of latency to your host. Minimum phase mode adds none."
+    },
+    {
+      "q": "Can I EQ only the stereo width?",
+      "a": "Yes. Set the target button to Side to process only the side signal, or Mid for only the center."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#f5b544",
+  "fs_thumb": "64px",
+  "fs_cover": "92px"
+}

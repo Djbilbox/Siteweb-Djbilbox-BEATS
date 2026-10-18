@@ -1,0 +1,129 @@
+{
+  "id": "humpire-glitch",
+  "name": "HUMPIRE GLITCH",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Lo-Fi Bitcrusher",
+  "tagline": "Bitcrusher from 1 to 16 bits with sample-rate reduction, speaker filter and dither.",
+  "sub": "Bitcrusher, rate reducer and speaker filter",
+  "gumroad_title": "HUMPIRE GLITCH - Lo-Fi Bitcrusher VST3 + AU Plugin (20 Presets) | Bitcrusher, Sample Rate, Speaker",
+  "summary": "A lo-fi plugin with a 1 to 16 bit crusher, sample-rate reducer, mono speaker filter and dither.",
+  "about": [
+    "HUMPIRE GLITCH is a lo-fi effect on a handheld-console body. The signal goes through a drive stage, a sample-rate reducer (500 Hz to 48 kHz), a dither stage and a bit quantizer from 1 to 16 bits with fractional values allowed.",
+    "The speaker switch sums to mono and passes the signal through a high-pass and low-pass filter with soft saturation. The Size knob changes the speaker from small to large. Dither can be Off, RPDF or TPDF.",
+    "The plugin adds no latency and ships with 20 presets."
+  ],
+  "features": [
+    {
+      "icon": "fa-microchip",
+      "t": "1 to 16 bits",
+      "d": "Fractional bit depths are allowed."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "Sample-rate reducer",
+      "d": "500 Hz to 48 kHz, with intentional aliasing."
+    },
+    {
+      "icon": "fa-tv",
+      "t": "Speaker filter",
+      "d": "Mono small-speaker simulation with a size control."
+    },
+    {
+      "icon": "fa-fire",
+      "t": "Drive",
+      "d": "Soft saturation before the crusher."
+    },
+    {
+      "icon": "fa-dice",
+      "t": "Dither",
+      "d": "Off, RPDF or TPDF."
+    },
+    {
+      "icon": "fa-code-merge",
+      "t": "Mix and output",
+      "d": "Dry/wet mix and -24 to +12 dB output."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "Bit depth",
+      "v": "1 to 16"
+    },
+    {
+      "k": "Sample rate",
+      "v": "500 Hz to 48 kHz"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Factory presets",
+      "v": "20"
+    }
+  ],
+  "includes": [
+    "HUMPIRE GLITCH plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Lo-Fi",
+    "Trap",
+    "Boom bap",
+    "Sound design"
+  ],
+  "tags": [
+    "bitcrusher",
+    "lo-fi",
+    "sample rate reducer",
+    "distortion",
+    "speaker",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "1-16 bits",
+    "20 presets",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "How many presets does it have?",
+      "a": "20 factory presets, grouped by instrument category."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#a8e04a",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

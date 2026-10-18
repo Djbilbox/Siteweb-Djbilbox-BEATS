@@ -1,0 +1,148 @@
+{
+  "id": "octopus",
+  "name": "OCTOPUS",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Abyssal Synthesizer",
+  "tagline": "Deep-sea subs, bubble plucks, coral bells, abyss pads and whale song: 70 presets from 8 engines.",
+  "sub": "Deep subs, bubbles, bells, pads and whale song",
+  "gumroad_title": "OCTOPUS - Abyssal Synthesizer VST3 + AU Plugin (70 Presets) | Dark Trap, Ambient, Cinematic",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Kraken Sub, Bubble Pluck, Coral Bells, Abyss Pad, Ink Reese, Tentacle Lead, Siren Choir and Whale Song) and 70 factory presets.",
+  "about": [
+    "OCTOPUS, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines (Kraken Sub, Bubble Pluck, Coral Bells, Abyss Pad, Ink Reese, Tentacle Lead, Siren Choir and Whale Song), shape it with five character controls (TONE, BODY, BRIGHT, WIDTH and TEXTURE), then run it through a multimode filter, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb. The character is deep, wet and underwater, with long evolving tails.",
+    "44 of the 70 presets load in Poly mode and 26 in Mono mode, so you can play chords or single-note lines from the first preset.",
+    "Built for Dark Trap and Drill sub lines, ambient and cinematic beds, Lo-Fi textures, sci-fi and underwater atmospheres."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "Kraken sub with pitch knock, bubble pluck, FM coral bells, abyss pad, ink reese, tentacle lead, vowel siren choir and slow-gliding whale song."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from kraken subs and bubble plucks to abyss pads, siren choirs and whale song."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter with its own envelope",
+      "d": "Low pass, high pass or band pass, with resonance and a dedicated attack, decay, sustain and release envelope."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "Play it right away",
+      "d": "On-screen keyboard (MIDI notes 36 to 84), pitch bend and mod wheel, up to 16 voices in Poly mode."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "70 factory presets in 7 banks"
+    },
+    {
+      "k": "Engines",
+      "v": "8"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Up to 16 voices (Poly), or Mono"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "35"
+    }
+  ],
+  "includes": [
+    "OCTOPUS plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Dark Trap",
+    "Drill",
+    "Ambient",
+    "Cinematic",
+    "Lo-Fi",
+    "Sound Design"
+  ],
+  "tags": [
+    "sub bass",
+    "ambient synth",
+    "pads",
+    "dark trap",
+    "cinematic",
+    "vst3",
+    "audio unit",
+    "drill",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "8 engines",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "Is the bass playable as chords?",
+      "a": "The sub and lead banks load in Mono for one-note lines. Switch VOICE MODE to Poly for chords (up to 16 voices)."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .ocpreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#2ec4b6",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

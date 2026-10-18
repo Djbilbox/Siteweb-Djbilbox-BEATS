@@ -1,0 +1,129 @@
+{
+  "id": "humpire-respawn",
+  "name": "HUMPIRE RESPAWN",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Reverb",
+  "tagline": "Algorithmic reverb with an 8-line FDN, pre-delay, damping, built-in EQ and ducking.",
+  "sub": "Plate, hall, hammam and cathedral spaces",
+  "gumroad_title": "HUMPIRE RESPAWN - Reverb VST3 + AU Plugin (12 Presets) | Plate, Hall, Hammam, Cathedral",
+  "summary": "An algorithmic reverb plugin with an eight-line feedback delay network, pre-delay, damping, low-cut and high-cut filters and ducking.",
+  "about": [
+    "HUMPIRE RESPAWN is an algorithmic reverb built on an eight-line feedback delay network with a Householder matrix, early reflections and a modulated tail. Decay runs from 0.2 to 20 seconds and Size from 0.5 to 2.",
+    "Pre-delay (0 to 200 ms), damping, early-reflection level, modulation, low cut (20 Hz to 1 kHz) and high cut (2 to 20 kHz) shape the space. Ducking lowers the reverb while the input is playing, so vocals stay clear.",
+    "The factory presets are grouped as Plate, Hall, Hammam and Cathedral spaces plus instrument-specific rooms."
+  ],
+  "features": [
+    {
+      "icon": "fa-cube",
+      "t": "8-line FDN",
+      "d": "Eight delay lines with a Householder feedback matrix."
+    },
+    {
+      "icon": "fa-hourglass-half",
+      "t": "Decay 0.2 to 20 s",
+      "d": "With size, pre-delay and damping controls."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Built-in EQ",
+      "d": "Low cut 20 Hz to 1 kHz and high cut 2 to 20 kHz on the reverb."
+    },
+    {
+      "icon": "fa-compress",
+      "t": "Ducking",
+      "d": "The reverb ducks while the input plays."
+    },
+    {
+      "icon": "fa-water",
+      "t": "Modulation",
+      "d": "Slow modulation of the delay lines for a smoother tail."
+    },
+    {
+      "icon": "fa-list",
+      "t": "Space presets",
+      "d": "Plate, Hall, Hammam and Cathedral categories."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "Decay",
+      "v": "0.2 to 20 s"
+    },
+    {
+      "k": "Reported tail",
+      "v": "21 seconds"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Factory presets",
+      "v": "12"
+    }
+  ],
+  "includes": [
+    "HUMPIRE RESPAWN plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Vocals",
+    "Drums",
+    "Oud and acoustic",
+    "Ambient"
+  ],
+  "tags": [
+    "reverb",
+    "algorithmic reverb",
+    "plate",
+    "hall",
+    "mixing",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "8-line FDN",
+    "Ducking",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Can I use it as a send effect?",
+      "a": "Yes. Set MIX to 100% when you use it on a send or return track."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#f5b544",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

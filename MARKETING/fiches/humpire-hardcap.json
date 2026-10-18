@@ -1,0 +1,125 @@
+{
+  "id": "humpire-hardcap",
+  "name": "HUMPIRE HARDCAP",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Master Limiter",
+  "tagline": "Look-ahead true-peak limiter with auto-release and EBU R128 LUFS meters.",
+  "sub": "True-peak limiting with LUFS metering",
+  "gumroad_title": "HUMPIRE HARDCAP - Master Limiter VST3 + AU Plugin (12 Presets) | True-Peak, LUFS, Auto-Release",
+  "summary": "A master limiter plugin with look-ahead, true-peak detection, automatic release and momentary, short-term and integrated LUFS meters.",
+  "about": [
+    "HUMPIRE HARDCAP is a look-ahead limiter for the end of your master chain. Raise the input gain by up to 24 dB, set a ceiling from -6 to 0 dBTP, and the limiter catches peaks before they happen with a look-ahead of 1 to 5 ms.",
+    "True-peak detection interpolates between samples, auto-release adapts the release time to the material, and a loudness meter shows momentary, short-term and integrated LUFS with a target you set from -24 to -6 LUFS.",
+    "When your integrated loudness stays on the target for two seconds, the screen flashes LEVEL UP."
+  ],
+  "features": [
+    {
+      "icon": "fa-shield",
+      "t": "True-peak limiting",
+      "d": "Cubic interpolation catches inter-sample peaks. Ceiling from -6 to 0 dBTP."
+    },
+    {
+      "icon": "fa-forward",
+      "t": "Look-ahead",
+      "d": "1 to 5 ms, reported to the host as latency."
+    },
+    {
+      "icon": "fa-clock",
+      "t": "Auto-release",
+      "d": "Release adapts to the material, or set it from 10 to 500 ms."
+    },
+    {
+      "icon": "fa-gauge",
+      "t": "LUFS meters",
+      "d": "Momentary, short-term and integrated loudness (BS.1770 K-weighting)."
+    },
+    {
+      "icon": "fa-bullseye",
+      "t": "Loudness target",
+      "d": "-24 to -6 LUFS with a target marker."
+    },
+    {
+      "icon": "fa-arrow-up",
+      "t": "Input gain",
+      "d": "0 to 24 dB."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "Ceiling",
+      "v": "-6 to 0 dBTP"
+    },
+    {
+      "k": "Look-ahead",
+      "v": "1 to 5 ms (reported as latency)"
+    },
+    {
+      "k": "Factory presets",
+      "v": "12"
+    }
+  ],
+  "includes": [
+    "HUMPIRE HARDCAP plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Mastering",
+    "Streaming",
+    "Mix bus"
+  ],
+  "tags": [
+    "limiter",
+    "mastering",
+    "true peak",
+    "lufs",
+    "loudness",
+    "ebu r128",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "True-peak",
+    "LUFS meters",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Is the LUFS reading certified?",
+      "a": "The meter follows the BS.1770 K-weighting method, but the integrated gating is an approximation. Use it as a guide and check final masters with your usual loudness tool."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#f5b544",
+  "fs_thumb": "64px",
+  "fs_cover": "92px"
+}

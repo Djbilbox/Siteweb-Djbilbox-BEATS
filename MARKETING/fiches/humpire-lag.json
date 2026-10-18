@@ -1,0 +1,130 @@
+{
+  "id": "humpire-lag",
+  "name": "HUMPIRE LAG",
+  "group": "loadout",
+  "category": "effect",
+  "kind": "Stereo Delay",
+  "tagline": "Stereo delay with BPM sync, filtered feedback, ducking, ping-pong and four morphing snapshots.",
+  "sub": "Synced stereo delay with A-D snapshots",
+  "gumroad_title": "HUMPIRE LAG - Stereo Delay VST3 + AU Plugin (12 Presets) | BPM Sync, Ping-Pong, Snapshots",
+  "summary": "A stereo delay plugin with BPM sync, filtered feedback, ducking, ping-pong mode and four snapshots you can morph between.",
+  "about": [
+    "HUMPIRE LAG is a stereo delay with independent left and right times (1 ms to 2 s) or tempo-synced divisions from 1/16 to 1/1 including dotted and triplet values. Feedback goes up to 95% and passes through a low-cut and a high-cut filter in the loop.",
+    "Ducking lowers the echoes while you play, ping-pong sends the repeats across the stereo field, and soft saturation in the feedback path keeps long feedback under control.",
+    "Four snapshots (A to D) store the time, feedback, filters, ducking and mix. Pick one and the delay morphs to it over 20 ms to 3 s."
+  ],
+  "features": [
+    {
+      "icon": "fa-clock",
+      "t": "Independent L/R times",
+      "d": "1 ms to 2 s, or synced to the host tempo."
+    },
+    {
+      "icon": "fa-music",
+      "t": "8 sync divisions",
+      "d": "1/16, 1/8, dotted 1/8, triplet 1/8, 1/4, dotted 1/4, 1/2 and 1/1."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filtered feedback",
+      "d": "Low cut 20 Hz to 1 kHz and high cut 1 to 20 kHz inside the loop."
+    },
+    {
+      "icon": "fa-compress",
+      "t": "Ducking",
+      "d": "Echoes duck while the input plays."
+    },
+    {
+      "icon": "fa-arrows-left-right",
+      "t": "Ping-pong",
+      "d": "Repeats bounce between left and right."
+    },
+    {
+      "icon": "fa-cube",
+      "t": "4 morphing snapshots",
+      "d": "Store and recall A to D, with a morph time of 20 ms to 3 s."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "Preset manager with A/B",
+      "d": "Factory presets grouped by category, user presets saved by name, A/B compare, undo and redo."
+    },
+    {
+      "icon": "fa-expand",
+      "t": "Resizable interface",
+      "d": "Scales from 50% to 200% with the proportions locked. Simple and Clean display modes."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Audio effect (stereo or mono)"
+    },
+    {
+      "k": "Delay time",
+      "v": "1 ms to 2 s per side"
+    },
+    {
+      "k": "Feedback",
+      "v": "0 to 95%"
+    },
+    {
+      "k": "Reported tail",
+      "v": "30 seconds"
+    },
+    {
+      "k": "Factory presets",
+      "v": "12"
+    }
+  ],
+  "includes": [
+    "HUMPIRE LAG plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Vocals",
+    "Guitars and oud",
+    "Drums",
+    "Dub"
+  ],
+  "tags": [
+    "delay",
+    "echo",
+    "stereo delay",
+    "ping pong",
+    "tempo sync",
+    "mixing",
+    "vst3",
+    "audio unit",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "BPM sync",
+    "4 snapshots",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 effect on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does the sync follow my host tempo?",
+      "a": "Yes, when SYNC is on, the delay reads the tempo from the host. Without a tempo from the host it assumes 120 BPM."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The SAVE button stores the current settings under a name you choose, and they appear in the User category of the preset menu."
+    }
+  ],
+  "accent": "#f5b544",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

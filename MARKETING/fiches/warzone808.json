@@ -1,0 +1,147 @@
+{
+  "id": "warzone808",
+  "name": "WARZONE808",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "808 Bass Synthesizer",
+  "tagline": "808 subs, reese, leads, plucks, pads and war FX: 60 factory presets plus a 10-preset expansion.",
+  "sub": "808 subs, reese, leads, pads and war FX",
+  "gumroad_title": "WARZONE808 - 808 Bass Synthesizer VST3 + AU Plugin (70 Presets) | 808, Reese, Trap, Drill",
+  "summary": "An 808 bass and multi-purpose synthesizer plugin (VST3 and Audio Unit) with five oscillator waveforms, 7-voice unison, a filter with its own envelope and 70 presets (60 factory plus a 10-preset expansion).",
+  "about": [
+    "WARZONE808, sold under the HUMPIRE brand by DJBILBOX BEATS, is a synthesizer built around the 808: it opens in Mono mode with last-note priority and glide between held notes, so slides sound right from the first preset. Pick one of five waveforms (sine, square, sawtooth, triangle or noise), stack up to seven detuned voices in unison, and shape the sound with a resonant filter, two envelopes, an LFO, distortion, chorus, delay and reverb.",
+    "34 of the 60 factory presets load in Mono mode and 26 in Poly mode (up to 16 voices). The factory presets are in six banks of ten: 808 Subs, Dirty & Reese, Leads, Plucks & Keys, Pads & Ambience and FX & Percussion. A built-in Expansion Vol.1 adds ten more presets, and the EXPANSION cassette loads additional .wz808exp packs.",
+    "Built for Trap, Drill and Hip-Hop 808s, reese and growl bass, leads, pads, risers and war-themed sound effects."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "5 oscillator waveforms",
+      "d": "Sine, square, sawtooth, triangle and noise."
+    },
+    {
+      "icon": "fa-layer-group",
+      "t": "7-voice unison",
+      "d": "Up to seven detuned copies per note, with detune up to 60 cents and stereo spread."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 presets",
+      "d": "60 factory presets in six banks of ten, plus the built-in Expansion Vol.1 with ten more."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Resonant filter with envelope",
+      "d": "Low pass, band pass or high pass, resonance up to Q 20 and a filter envelope of up to 8 octaves."
+    },
+    {
+      "icon": "fa-arrows-left-right",
+      "t": "Mono legato glide",
+      "d": "Mono mode keeps a held-note stack with last-note priority and glides between notes without retriggering."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, delay and reverb, with extra hidden controls available to automation."
+    },
+    {
+      "icon": "fa-puzzle-piece",
+      "t": "Expansion packs",
+      "d": "Load extra presets from .wz808exp files with the EXPANSION cassette."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "60 factory presets in 6 banks, plus 10 from the built-in expansion"
+    },
+    {
+      "k": "Waveforms",
+      "v": "5"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Mono (default), or Poly up to 16 voices; unison up to 7"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "38"
+    }
+  ],
+  "includes": [
+    "WARZONE808 plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Trap",
+    "Drill",
+    "Hip-Hop",
+    "Reese Bass",
+    "Sound Design"
+  ],
+  "tags": [
+    "808",
+    "808 bass",
+    "bass synth",
+    "trap",
+    "drill",
+    "vst3",
+    "audio unit",
+    "reese",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "5 waveforms",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time."
+    },
+    {
+      "q": "Does it have a pitch-drop envelope for 808 kicks?",
+      "a": "No. There is no pitch envelope. Use a filter envelope, distortion or a layered kick for the attack."
+    },
+    {
+      "q": "Can I play chords?",
+      "a": "Yes. Switch VOICE MODE to Poly for up to 16 voices. The plugin opens in Mono."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .wz808preset file, and your presets appear in the User submenu."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in milliseconds (50 to 1000 ms) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#7ddc5a",
+  "fs_thumb": "56px",
+  "fs_cover": "82px"
+}

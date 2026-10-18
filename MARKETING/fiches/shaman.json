@@ -1,0 +1,148 @@
+{
+  "id": "shaman",
+  "name": "SHAMAN",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Tribal Ritual Synthesizer",
+  "tagline": "Didgeridoo, tribal drums, jaw harp, spirit flute, chant choir and earth drones: 70 presets from 8 engines.",
+  "sub": "Didgeridoo, drums, flute, choir and drones",
+  "gumroad_title": "SHAMAN - Tribal Ritual Synthesizer VST3 + AU Plugin (70 Presets) | Tribal, Cinematic, World, Ambient",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Didgeridoo, Tribal Drum, Jaw Harp, Spirit Flute, Chant Choir, Fire Pad, Bone Chimes and Earth Drone) and 70 factory presets.",
+  "about": [
+    "SHAMAN, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines (Didgeridoo, Tribal Drum, Jaw Harp, Spirit Flute, Chant Choir, Fire Pad, Bone Chimes and Earth Drone), shape it with five character controls (TONE, BODY, BRIGHT, WIDTH and TEXTURE), then run it through a multimode filter, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb. The character is earthy and ritual, with breath, growl and slow-moving drones.",
+    "46 of the 70 presets load in Poly mode and 24 in Mono mode, so you can play chords or single-note lines from the first preset.",
+    "Built for tribal and world-music beats, cinematic and ritual scoring, Afro and Latin percussion layers, dark ambient and Trap intros."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "Growling didgeridoo, pitch-dropping tribal drum, jaw harp, breathy spirit flute, vowel chant choir, fire pad, bone chimes and earth drone."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from didgeridoo and tribal drums to jaw harp, spirit flute, chant choir, fire pads and bone chimes."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter with its own envelope",
+      "d": "Low pass, high pass or band pass, with resonance and a dedicated attack, decay, sustain and release envelope."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "Play it right away",
+      "d": "On-screen keyboard (MIDI notes 36 to 84), pitch bend and mod wheel, up to 16 voices in Poly mode."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "70 factory presets in 7 banks"
+    },
+    {
+      "k": "Engines",
+      "v": "8"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Up to 16 voices (Poly), or Mono"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "35"
+    }
+  ],
+  "includes": [
+    "SHAMAN plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Tribal",
+    "World Music",
+    "Cinematic",
+    "Ambient",
+    "Afro",
+    "Dark Trap"
+  ],
+  "tags": [
+    "didgeridoo",
+    "tribal",
+    "world music",
+    "ethnic synth",
+    "cinematic",
+    "vst3",
+    "audio unit",
+    "ritual",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "8 engines",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "Is the Tribal Drum a sampled drum?",
+      "a": "No. It is synthesized in real time: a sine with a pitch drop plus a filtered noise skin."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .shpreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#e8702a",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

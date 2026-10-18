@@ -1,0 +1,147 @@
+{
+  "id": "streetlight-trap",
+  "name": "STREETLIGHT TRAP",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Dark Trap Synthesizer",
+  "tagline": "808 subs, trap bells, dark plucks, street keys, neon pads, choir, brass and flute: 70 presets from 8 engines.",
+  "sub": "808s, bells, plucks, keys, pads and flutes",
+  "gumroad_title": "STREETLIGHT TRAP - Dark Trap Synthesizer VST3 + AU Plugin (70 Presets) | Trap, Drill, Dark Trap, Hip-Hop",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (808 Sub, Trap Bell, Dark Pluck, Street Keys, Neon Pad, Trap Choir, Brass Stab and Flute) and 70 factory presets.",
+  "about": [
+    "STREETLIGHT TRAP, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines (808 Sub, Trap Bell, Dark Pluck, Street Keys, Neon Pad, Trap Choir, Brass Stab and Flute), shape it with five character controls (TONE, BODY, BRIGHT, WIDTH and TEXTURE), then run it through a multimode filter, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb. The character is dark and nocturnal, made for night-time Trap and Drill.",
+    "52 of the 70 presets load in Poly mode and 18 in Mono mode, so you can play chords or single-note lines from the first preset.",
+    "Built for Trap and Drill 808s, bell and pluck melodies, dark pads and choirs, brass stabs and flute hooks."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "808 sub with pitch knock, FM trap bell, dark pluck, street keys, neon pad, vowel trap choir, brass stab and flute."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from 808 subs and trap bells to dark plucks, street keys, neon pads, choirs and flutes."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter with its own envelope",
+      "d": "Low pass, high pass or band pass, with resonance and a dedicated attack, decay, sustain and release envelope."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "Play it right away",
+      "d": "On-screen keyboard (MIDI notes 36 to 84), pitch bend and mod wheel, up to 16 voices in Poly mode."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "70 factory presets in 7 banks"
+    },
+    {
+      "k": "Engines",
+      "v": "8"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Up to 16 voices (Poly), or Mono"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "35"
+    }
+  ],
+  "includes": [
+    "STREETLIGHT TRAP plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Trap",
+    "Drill",
+    "Dark Trap",
+    "Hip-Hop",
+    "Cinematic"
+  ],
+  "tags": [
+    "trap",
+    "808",
+    "trap bells",
+    "dark trap",
+    "drill",
+    "vst3",
+    "audio unit",
+    "hip hop",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "8 engines",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "Can I use it as a full 808 bass?",
+      "a": "Yes. The 808 & Sub Bass bank loads in Mono with glide on the slide presets. Raise TEXTURE or DISTORTION to keep the 808 audible on small speakers."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .slpreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#b06bff",
+  "fs_thumb": "56px",
+  "fs_cover": "82px"
+}
