@@ -379,7 +379,7 @@ Library buildTar (const BuildContext& ctx)
     Params dum = P (0.9, 112.0, 0.55, 0.28);
     dum.nModes = 8; dum.dampSlope = 0.6; dum.glide = 0.08; dum.glideTau = 0.05;
     dum.clickHz = 900.0; dum.clickQ = 0.8; dum.clickTau = 0.009; dum.clickGain = 0.2;
-    dum.jingleDrive = 9.0; dum.jingleT60 = 0.55;
+    dum.jingleDrive = 3.5; dum.jingleT60 = 0.55;
     Params tek = P (0.36, 290.0, 0.17, 0.84);
     tek.nModes = 9; tek.dampSlope = 0.35; tek.tilt = 0.8;
     tek.clickHz = 2800.0; tek.clickQ = 1.1; tek.clickTau = 0.008; tek.clickGain = 0.6;

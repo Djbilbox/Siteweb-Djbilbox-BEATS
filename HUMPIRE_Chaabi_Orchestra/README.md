@@ -86,7 +86,23 @@ The exported SFZ files can be loaded by the plug-in as a regular user library.
 Gate: peak -24..-1 dBFS, |DC| < 0.002, pitch within 8 cents, no clicks (start / end / loop seam / glitches),
 loudness within +-4 dB inside each (articulation, velocity layer) group and across hard layers.
 
+## Built-in library: size and render time (44.1 kHz, one core)
+| Instrument | Zones | RAM | Render |
+|---|---|---|---|
+| Mandole | 70 | 18.3 MB | 1.0 s |
+| Banjo | 60 | 10.4 MB | 0.5 s |
+| Violin | 58 | 13.3 MB | 1.2 s |
+| Ney | 34 | 13.2 MB | 1.0 s |
+| Qanun | 60 | 21.3 MB | 1.2 s |
+| Derbouka | 82 (57 aliases) | 1.6 MB | 0.05 s |
+| Tar | 54 (27 aliases) | 2.7 MB | 0.13 s |
+| Bendir | 54 (27 aliases) | 2.3 MB | 0.10 s |
+
+Output has a soft knee above -2 dBFS so stacked voices cannot hard-clip.
+
 ## Status
-Deliverables 1-4 done. Remaining: Hub + Ed25519 licence, Inno Setup installer, image prompts, pluginval / FL
-Studio checks, products.json. The built-in instruments are currently placeholders (simple waveguide / additive /
-modal models) pending the dedicated per-instrument models.
+The 8 built-in instruments are physically-motivated models (modal strings, bowed waveguide, additive + noise
+winds, modal membranes). They pass the automated gate (pitch, level, loops, clicks) and the smoke test, but they
+have not been auditioned by ear and are not recordings: expect a good synthesizer, not a sampled instrument.
+Not yet verified: MSVC build, loading in a real DAW, pluginval. Remaining product work: Hub + Ed25519 licence,
+Inno Setup installer, image prompts, products.json.

@@ -372,6 +372,9 @@ void ChaabiProcessor::renderChunk (juce::AudioBuffer<float>& host, int start, in
         float r = (dryR[i] + revR[i] * revReturn + dR) * mg;
         if (! std::isfinite (l)) l = 0.f;                 // never hand NaN / Inf to the host
         if (! std::isfinite (r)) r = 0.f;
+        // Transparent below 0.8, smooth knee towards 1.0 above it: stacked voices never hard-clip the host.
+        auto knee = [] (float x) { const float a = std::abs (x); return a <= 0.8f ? x : std::copysign (0.8f + 0.2f * std::tanh ((a - 0.8f) * 5.f), x); };
+        l = knee (l); r = knee (r);
         outL[i] = l; outR[i] = r;
         pkL = juce::jmax (pkL, std::abs (l));
         pkR = juce::jmax (pkR, std::abs (r));
