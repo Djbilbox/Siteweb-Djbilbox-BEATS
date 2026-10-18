@@ -55,8 +55,8 @@ def main():
         shot = os.path.join(ROOT, 'screens', f['id'] + '.png')
         if not os.path.exists(shot):
             print('! no screenshot for', f['id'], '(skipped images)'); shot = None
-        brand = 'HUMPIRE' if f['group'] in ('loadout', 'orbit') else 'DJBILBOX BEATS'
-        logo = os.path.join(ROOT, 'assets', 'humpire-logo.png' if brand == 'HUMPIRE' else 'djbilbox-emblem.png')
+        brand = 'HUMPIRE'
+        logo = os.path.join(ROOT, 'assets', 'humpire-logo.png')
         if shot:
             manifest.append({"id": f['id'], "name": f['name'], "kind": f.get('kind', ''), "tagline": f['tagline'], "screenshot": shot, "logo": logo,
                              "brand": brand, "accent": f.get('accent', '#f5b544'), "badges": f.get('badges', []),

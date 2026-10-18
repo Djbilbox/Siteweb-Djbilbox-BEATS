@@ -11,6 +11,8 @@
       linear-gradient(160deg,#15151c 0%,#0b0b0f 60%); }
   .grid { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px); background-size:40px 40px; mask-image:radial-gradient(circle at 70% 40%,#000 0,transparent 75%); }
   .brand { position:absolute; display:flex; align-items:center; gap:calc(var(--u)*10); font-weight:800; letter-spacing:calc(var(--u)*3); color:var(--amber); font-size:calc(var(--u)*17); }
+  .brand .bn { display:flex; flex-direction:column; line-height:1.05; font-size:calc(var(--u)*28); letter-spacing:calc(var(--u)*5); }
+  .brand .bn small { font-size:calc(var(--u)*11); letter-spacing:calc(var(--u)*3); color:var(--dim); font-weight:700; margin-top:calc(var(--u)*3); }
   .brand img { height:calc(var(--u)*46); width:auto; border-radius:50%; }
   .shot { position:absolute; border-radius:calc(var(--u)*16); overflow:hidden; box-shadow:0 calc(var(--u)*30) calc(var(--u)*70) rgba(0,0,0,.65), 0 0 0 calc(var(--u)*2) rgba(245,181,68,.35), 0 0 calc(var(--u)*90) color-mix(in srgb, var(--accent) 35%, transparent); background:#000; }
   .shot img { display:block; width:100%; height:auto; object-fit:contain; }
@@ -48,7 +50,7 @@
 <body class="{{MODE}}">
 <div class="stage" style="--accent:{{ACCENT}}">
   <div class="grid"></div>
-  <div class="brand">{{LOGO}}<span>{{BRAND}}</span></div>
+  <div class="brand">{{LOGO}}<span class="bn">{{BRAND}}<small>DJBILBOX BEATS</small></span></div>
   <div class="kind">{{KIND}}</div>
   <h1 style="--fs:{{FS}}">{{NAME}}</h1>
   <div class="tag">{{TAGLINE}}</div>
