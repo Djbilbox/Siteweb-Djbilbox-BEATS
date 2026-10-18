@@ -195,6 +195,7 @@ struct Layer
     double thumpAmp;      // body knock level
     double crestDb;       // peak limiter: allowed peak above the loudness measure
     double onsetMs;       // soft onset (release time of the pick) of every mode
+    double glideCents;    // tension-modulation pitch rise at the very start of a pluck (falls back exponentially)
 };
 
 struct Model
@@ -211,6 +212,7 @@ struct Model
     double chorusHz = 2500.0;         // above this the strings of a course are merged into one mode set
     double maxHz = 16000.0;
     int maxPartials = 150;
+    double glideTauMs = 60.0;         // time constant of the pitch glide
     double haloDb = -200.0;           // sympathetic octave / 12th (qanun)
     double haloRiseMs = 70.0;
     std::vector<BodyStage> body;
@@ -253,18 +255,19 @@ Voice makeVoice (const Model& M, const Layer& L, double f0, double decayScale, R
     return v;
 }
 
-// Pick-noise burst: band-passed noise with a very short rise and an exponential decay.
+// Pick-noise: band-passed noise with a very short rise, a fast exponential decay (the "tick") and a weaker, longer
+// tail (the pick scraping / the string rattling against the pick) at 20 % of the level.
 void addClick (Sink& sk, double t0, double amp, const Layer& L, Rng& rng)
 {
     if (amp < 1.0e-6) return;
     const double sr = sk.sr;
     Biquad bp = Biquad::bandpass (L.clickHz * rng.range (0.85, 1.15), L.clickQ, sr);
-    const double tau = std::max (L.clickMs * 1.0e-3 * sr, 4.0), rise = std::max (0.0002 * sr, 3.0);
-    const long long len = (long long) (tau * 6.0);
+    const double tau = std::max (L.clickMs * 1.0e-3 * sr, 4.0), tau2 = tau * 9.0, rise = std::max (0.0002 * sr, 3.0);
+    const long long len = (long long) (tau2 * 5.0);
     const long long n0 = (long long) std::ceil (t0);
     for (long long k = 0; k < len; ++k)
     {
-        const double env = (1.0 - std::exp (-(double) k / rise)) * std::exp (-(double) k / tau);
+        const double env = (1.0 - std::exp (-(double) k / rise)) * (std::exp (-(double) k / tau) + 0.2 * std::exp (-(double) k / tau2));
         sk.add (n0 + k, amp * env * bp.process (rng.bipolar() * 1.7));
     }
 }
@@ -474,6 +477,28 @@ Zone baseZone (const BuildContext& ctx, const char* articulation, const std::str
     return z;
 }
 
+// Tension-modulation glide: reads the buffer at a rate 1 + delta * exp (-t / tau) (cubic interpolation), so a hard
+// pluck starts a few cents sharp and settles to the nominal pitch.  The final pitch is not changed.
+void applyGlide (std::vector<float>& x, double sr, double cents, double tauMs)
+{
+    const std::size_t N = x.size();
+    if (cents < 0.05 || N < 16) return;
+    const double delta = std::exp2 (cents / 1200.0) - 1.0;
+    const double tau = std::max (tauMs * 1.0e-3 * sr, 1.0);
+    auto at = [&x, N] (long long i) -> double { return i < 0 ? 0.0 : (std::size_t) i >= N ? 0.0 : (double) x[(std::size_t) i]; };
+    std::vector<float> y (N, 0.f);
+    double pos = 0.0;
+    for (std::size_t n = 0; n < N; ++n)
+    {
+        const long long i = (long long) pos;
+        const double f = pos - (double) i;
+        const double y0 = at (i - 1), y1 = at (i), y2 = at (i + 1), y3 = at (i + 2);
+        y[n] = (float) (y1 + 0.5 * f * (y2 - y0 + f * (2.0 * y0 - 5.0 * y1 + 4.0 * y2 - y3 + f * (3.0 * (y1 - y2) + y3 - y0))));
+        pos += 1.0 + delta * std::exp (-(double) n / tau);
+    }
+    x.swap (y);
+}
+
 std::vector<float> renderPluck (const Model& M, const Layer& L, const Plan& P, double f0, double sr, Rng& rng)
 {
     const double seconds = clampd (P.secBase * std::pow (P.secRefHz / f0, P.secExp), P.secMin, P.secMax);
@@ -482,6 +507,7 @@ std::vector<float> renderPluck (const Model& M, const Layer& L, const Plan& P, d
     addPick (sk, M, v, 0.0, 1.0, 1.0, rng.uniform() < 0.5, rng);
     applyBody (sk, M.body);
     std::vector<float> out = toFloat (sk);
+    applyGlide (out, sr, L.glideCents * rng.range (0.8, 1.2), M.glideTauMs);
     sanitize (out, true);
     fadeIn (out, std::max (8, secondsToFrames (0.0004, sr)));
     fadeOut (out, std::min ((int) out.size() / 3, secondsToFrames (P.fadeOutSec, sr)));
@@ -611,6 +637,7 @@ Model mandoleModel()
     m.hfK = 2.6; m.hfQ = 1.5;
     m.slowAmp = 0.26; m.slowRatio = 0.32; m.slowMaxPartial = 10;
     m.chorusHz = 2600.0;
+    m.glideTauMs = 80.0;
     m.body = { { BodyStage::highpass, 85.0, 0.7, 0.0 },
                { BodyStage::peak, 235.0, 7.0, 6.0 },       // air (Helmholtz) resonance
                { BodyStage::peak, 470.0, 5.0, 3.5 },       // top plate
@@ -618,9 +645,9 @@ Model mandoleModel()
                { BodyStage::peak, 1500.0, 2.0, 2.0 },
                { BodyStage::peak, 2600.0, 1.2, 4.0 },      // bridge / presence
                { BodyStage::highShelf, 7000.0, 0.7, -3.0 } };
-    m.hard = { 5500.0, 1.00, 0.135, 0.14, 3200.0, 0.9, 2.2, 0.5, 9.0, 0.25 };
-    m.soft = { 2000.0, 1.15, 0.170, 0.04, 2200.0, 0.8, 3.0, 0.3, 10.0, 0.9 };
-    m.trem = { 3600.0, 1.05, 0.150, 0.05, 2800.0, 0.8, 2.5, 0.18, 10.0, 0.35 };
+    m.hard = { 5500.0, 1.00, 0.135, 0.14, 3200.0, 0.9, 2.2, 0.5, 9.0, 0.25, 6.0 };
+    m.soft = { 2000.0, 1.15, 0.170, 0.04, 2200.0, 0.8, 3.0, 0.3, 10.0, 0.9, 1.5 };
+    m.trem = { 3600.0, 1.05, 0.150, 0.05, 2800.0, 0.8, 2.5, 0.18, 10.0, 0.35, 0.0 };
     return m;
 }
 
@@ -633,6 +660,7 @@ Model banjoModel()
     m.t60Ref = 1.0; m.t60RefHz = 330.0; m.t60Exp = 0.30; m.t60Min = 0.35; m.t60Max = 1.4;
     m.hfK = 4.5; m.hfQ = 1.5;
     m.slowAmp = 0.30; m.slowRatio = 0.40; m.slowMaxPartial = 8;
+    m.glideTauMs = 50.0;
     m.body = { { BodyStage::highpass, 140.0, 0.8, 0.0 },
                { BodyStage::peak, 380.0, 5.0, 9.0 },       // head main mode
                { BodyStage::peak, 600.0, 5.0, 5.0 },       // head mode 1.59x
@@ -642,9 +670,9 @@ Model banjoModel()
                { BodyStage::peak, 2300.0, 1.3, 5.0 },      // bridge ping
                { BodyStage::peak, 3700.0, 1.5, 3.0 },
                { BodyStage::lowpass, 10000.0, 0.7, 0.0 } };
-    m.hard = { 7500.0, 0.90, 0.100, 0.22, 4200.0, 0.9, 1.6, 0.8, 9.0, 0.25 };
-    m.soft = { 3200.0, 1.05, 0.130, 0.07, 3000.0, 0.8, 2.2, 0.45, 10.0, 0.9 };
-    m.trem = { 4800.0, 0.95, 0.110, 0.10, 3600.0, 0.8, 1.8, 0.35, 10.0, 0.35 };
+    m.hard = { 7500.0, 0.90, 0.100, 0.22, 4200.0, 0.9, 1.6, 0.8, 9.0, 0.25, 10.0 };
+    m.soft = { 3200.0, 1.05, 0.130, 0.07, 3000.0, 0.8, 2.2, 0.45, 10.0, 0.9, 2.5 };
+    m.trem = { 4800.0, 0.95, 0.110, 0.10, 3600.0, 0.8, 1.8, 0.35, 10.0, 0.35, 0.0 };
     return m;
 }
 
@@ -658,6 +686,7 @@ Model qanunModel()
     m.hfK = 2.8; m.hfQ = 1.5;
     m.slowAmp = 0.28; m.slowRatio = 0.40; m.slowMaxPartial = 12;
     m.chorusHz = 2200.0;
+    m.glideTauMs = 120.0;
     m.haloDb = -26.0; m.haloRiseMs = 70.0;
     m.body = { { BodyStage::highpass, 60.0, 0.7, 0.0 },
                { BodyStage::peak, 150.0, 5.0, 4.0 },       // air cavity
@@ -665,9 +694,9 @@ Model qanunModel()
                { BodyStage::peak, 700.0, 4.0, 3.5 },
                { BodyStage::peak, 1350.0, 2.5, 4.0 },
                { BodyStage::peak, 2800.0, 1.5, 4.0 } };
-    m.hard = { 6500.0, 1.00, 0.170, 0.12, 3800.0, 0.9, 1.8, 0.4, 9.0, 0.25 };
-    m.soft = { 2500.0, 1.10, 0.200, 0.04, 2500.0, 0.8, 2.6, 0.25, 10.0, 0.9 };
-    m.trem = { 4200.0, 1.05, 0.180, 0.05, 2800.0, 0.8, 2.2, 0.15, 10.0, 0.35 };
+    m.hard = { 6500.0, 1.00, 0.170, 0.12, 3800.0, 0.9, 1.8, 0.4, 9.0, 0.25, 1.5 };
+    m.soft = { 2500.0, 1.10, 0.200, 0.04, 2500.0, 0.8, 2.6, 0.25, 10.0, 0.9, 0.4 };
+    m.trem = { 4200.0, 1.05, 0.180, 0.05, 2800.0, 0.8, 2.2, 0.15, 10.0, 0.35, 0.0 };
     return m;
 }
 } // namespace
