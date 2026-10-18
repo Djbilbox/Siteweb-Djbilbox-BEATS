@@ -1,3 +1,42 @@
+## [1.1.0] - 2026-10-17 - Finition de lancement (tout en anglais, interface refaite, vérifications)
+
+### Anglais partout
+Interface, menus, boîtes de dialogue, info-bulles, noms de paramètres, `README.txt`
+déposé dans le dossier Samples, installeur (`ROCKPUNK.iss`, un seul langage),
+`LICENSE.txt` et `USER_GUIDE.txt` (remplace `GUIDE_UTILISATION.md`). La licence ne
+parle plus d'une « banque de sons » que le produit ne livre pas.
+
+### Interface recréée sur le modèle des synthés « camel »
+Éditeur 1000 x 746 mis à l'échelle ; potards, curseurs, molettes, clavier, grilles,
+bandeau de presets et cassette dessinés et testés à la souris dans les pixels du
+mockup (`UI/Art.h`, `UI/Panel.h`, `Tools/make_ui_assets.py`). Différence avec le
+mockup mesurée : les parties fixes sont identiques au pixel près.
+- **Bug corrigé** : l'opacité de la lueur d'un contrôle survolé restait dans l'état
+  graphique et estompait tous les sprites peints après lui (curseurs et blocs de
+  molettes qui disparaissaient quand la souris reposait sur un potard). Chaque
+  contrôle peint maintenant dans son propre état.
+
+### Moteur
+- **LFO S&H** : ne changeait jamais de valeur (le test de déclenchement lisait une
+  phase toujours déjà ramenée dans [0, 1[). Corrigé, le S&H module enfin.
+- **Delay** : ligne portée de 2 s à 12 s (les divisions « 2 bar » et « 4 bar »
+  retombaient sur 1 bar) ; le temps glisse au lieu de sauter (clic en tournant TIME) ;
+  plus d'échos fantômes en rallumant le delay ; interpolation linéaire.
+- **MIDI** : tout événement est joué (estampillé avant ou après le bloc, il était
+  perdu : un note-off perdu est une note coincée) ; CC120 coupe immédiatement, sans
+  queue de release ; CC1 et pitch bend atteignent les notes qui démarrent après eux.
+- **Bypass hôte** : les touches cliquées à l'écran pendant le bypass ne se
+  déclenchent plus toutes d'un coup à la sortie du bypass.
+- **État** : restaurer un projet affiche le nom du preset enregistré avec lui, pas
+  l'index du preset précédemment chargé.
+- **Robustesse** : une corde et le résonateur repartent d'un état propre à chaque
+  note ; si une valeur non finie apparaissait, toutes les voix sont coupées
+  (compteur `getNonFiniteEventCount()` lu par le banc, doit rester à zéro).
+
+### Banc de test
+`Tests/render_test.cpp` réécrit (voir README, section Vérification) : 
+plus de 200 contrôles (dont deux par preset), exit 0 = tout est vert.
+
 ## [1.1.0] - 2026-08-16 - Plus aucun son tiers dans le produit
 
 ### Pourquoi

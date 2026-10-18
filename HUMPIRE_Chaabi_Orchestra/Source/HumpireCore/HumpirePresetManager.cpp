@@ -28,7 +28,7 @@ void PresetManager::rescanUserPresets()
     {
         userFiles.push_back (f);
         names.push_back (f.getFileNameWithoutExtension());
-        categories.push_back ("Utilisateur");
+        categories.push_back ("User");
     }
     current = juce::jlimit (0, juce::jmax (0, getNumPresets() - 1), current);
 }
@@ -56,17 +56,17 @@ void PresetManager::prev() { loadIndex (current - 1); }
 
 void PresetManager::applyFactory (const FactoryPreset& p)
 {
-    // 1) tout remettre aux valeurs par defaut
+    // 1) reset everything to the default values
     for (auto* param : state.processor.getParameters())
         if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*> (param))
             ranged->setValueNotifyingHost (ranged->getDefaultValue());
 
-    // 2) valeurs du preset
+    // 2) preset values
     for (auto& [id, v] : p.values)
         if (auto* param = state.getParameter (id))
             param->setValueNotifyingHost (param->convertTo0to1 (v));
 
-    // 3) proprietes d'etat (chemins SFZ, etc.)
+    // 3) state properties (SFZ paths, etc.)
     for (auto& [id, v] : p.props)
         state.state.setProperty (id, v, &undo);
 }

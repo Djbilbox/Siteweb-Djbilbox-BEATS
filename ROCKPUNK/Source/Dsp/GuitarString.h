@@ -48,6 +48,11 @@ public:
         const float vel    = std::min (1.0f, std::max (0.0f, velocity));
         const float bright = std::min (1.0f, std::max (0.05f, brightness));
 
+        // A new note starts from a clean damping filter: a value left over from
+        // the previous note (or, worse, a non-finite one) must not follow it.
+        lastLow = 0.0f;
+        lastNoise = 0.0f;
+
         for (int i = 0; i < length; ++i)
         {
             float noise = rng.nextFloat() * 2.0f - 1.0f;

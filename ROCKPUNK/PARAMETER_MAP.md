@@ -76,3 +76,27 @@
 - `driveType` 0..3 : 0 Soft (tanh), 1 Hard (clip), 2 Asymmetric, 3 Fuzz.
 - `delayDiv` 0..8 : 1/16, 1/8T, 1/8, 1/4T, 1/4, 1/2, 1 bar, 2 bar, 4 bar (avec `delaySync` activé).
 - Plages DSP bornées (`clamp`/`jlimit`) → valeurs invalides impossibles.
+
+## 8. Face avant et couche échantillonnée (ajoutés pour la 1.1.0)
+
+La liste complète des **65** paramètres est dans `Source/Params.h`. En plus des
+sections ci-dessus :
+
+| ID | Nom affiché | Plage | Défaut | Contrôle |
+|---|---|---|---|---|
+| `envA` `envD` `envS` `envR` | Attack / Decay / Sustain / Release | ms, ms, %, ms | 3 / 600 / 70 / 220 | 4 curseurs de gauche |
+| `glideMs` | Glide | 0–1000 ms | 0 | GLIDE |
+| `monoMode` | Mono | off / on | off | [MONO/POLY] |
+| `revMix` `revSize` | Reverb / Reverb Size | 0–100 % | 18 / 60 | REVERB (taille : hôte) |
+| `chorAmt` | Chorus | 0–100 % | 0 | CHORUS |
+| `lfoRate` `lfoAmount` `lfoPitch` | LFO Rate / Amount / Pitch | 0,05–20 Hz, % | 5 / 0 / 0 | RATE / AMOUNT / PITCH |
+| `lfoWave` `lfoDest` | LFO Wave / Destination | Sine Triangle Square S&H ; Pitch Filter Volume Drive | 0 / 1 | [LFO SOURCE] / [DESTINATION] |
+| `fltType` `fltCutoff` `fltReso` | Filter Type / Filter / Resonance | LP BP HP Off ; 60–18000 Hz ; 0,5–8 | Off / 14000 / 0,9 | [FILTER TYPE] / FILTER (résonance : hôte) |
+| `fenvA` `fenvD` `fenvS` `fenvR` | Filter Attack / Decay / Sustain / Release | ms, ms, %, ms | 5 / 400 / 100 / 300 | 4 curseurs de droite (A S D R) |
+| `velAmt` | Velocity | 0–100 % | 60 | curseur VELOCITY |
+| `pbend` `modDepth` | Pitch Bend / Modulation | ±2 st ; 0–100 % | 0 / 0 | molettes |
+| `pickShape` | Pick Shape | Soft Round Bright Sharp | Round | [WAVEFORM] |
+| `smpOn` `smpSel` `smpRoot` `smpLevel` `smpLoop` `smpAttack` `smpRelease` | Sample … | couche échantillonnée | off | menu cassette > Your samples (le reste : hôte) |
+
+`laOn` et `lbOn` sont les deux **grilles de haut-parleur** de la façade ; le delay
+s'allume en tournant TIME ou FEEDBACK (ou depuis le menu de la cassette).

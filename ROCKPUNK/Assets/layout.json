@@ -1,414 +1,459 @@
 {
-  "_comment": "Geometry derived from rockpunk_ui_dimensions (user measurements of the real artwork), scaled design px = measured x 0.8. Adjust freely; the editor re-reads this file on load.",
-  "components": {
-    "attack": {
-      "x": 110.0,
-      "y": 412,
-      "w": 22.0,
-      "h": 133
-    },
-    "cassette": {
-      "x": 84,
-      "y": 48,
-      "w": 256,
-      "h": 212
-    },
-    "chorus": {
-      "x": 976.5,
-      "y": 358.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "decay": {
-      "x": 167.0,
-      "y": 412,
-      "w": 22.0,
-      "h": 133
-    },
-    "dest": {
-      "x": 644,
-      "y": 574,
-      "w": 102,
-      "h": 22
-    },
-    "dist": {
-      "x": 812.5,
-      "y": 458.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "fA": {
-      "x": 810.0,
-      "y": 158,
-      "w": 22.0,
-      "h": 130
-    },
-    "fD": {
-      "x": 896.0,
-      "y": 158,
-      "w": 22.0,
-      "h": 130
-    },
-    "fR": {
-      "x": 939.0,
-      "y": 158,
-      "w": 22.0,
-      "h": 130
-    },
-    "fS": {
-      "x": 853.0,
-      "y": 158,
-      "w": 22.0,
-      "h": 130
-    },
-    "fVel": {
-      "x": 991.0,
-      "y": 158,
-      "w": 22.0,
-      "h": 130
-    },
-    "fb": {
-      "x": 977.5,
-      "y": 458.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "filter": {
-      "x": 632.5,
-      "y": 458.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "filterType": {
-      "x": 810,
-      "y": 574,
-      "w": 102,
-      "h": 22
-    },
-    "glide": {
-      "x": 459.5,
-      "y": 457.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "leftGrill": {
-      "x": 384,
-      "y": 140,
-      "w": 64,
-      "h": 264
-    },
-    "lfoAmount": {
-      "x": 187.5,
-      "y": 320.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "lfoPitch": {
-      "x": 268.5,
-      "y": 320.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "lfoRate": {
-      "x": 106.5,
-      "y": 320.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "lfoSrc": {
-      "x": 510,
-      "y": 574,
-      "w": 104,
-      "h": 22
-    },
-    "modWheel": {
-      "x": 208,
-      "y": 636,
-      "w": 60,
-      "h": 124
-    },
-    "monoPoly": {
-      "x": 948,
-      "y": 574,
-      "w": 96,
-      "h": 22
-    },
-    "piano": {
-      "x": 328,
-      "y": 620,
-      "w": 740,
-      "h": 216
-    },
-    "pitchWheel": {
-      "x": 106,
-      "y": 636,
-      "w": 60,
-      "h": 124
-    },
-    "presetBar": {
-      "x": 348,
-      "y": 42,
-      "w": 420,
-      "h": 52
-    },
-    "release": {
-      "x": 278.0,
-      "y": 412,
-      "w": 22.0,
-      "h": 133
-    },
-    "reverb": {
-      "x": 894.5,
-      "y": 357.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "rightGrill": {
-      "x": 716,
-      "y": 140,
-      "w": 64,
-      "h": 264
-    },
-    "samplePicker": {
-      "x": 830,
-      "y": 100,
-      "w": 250,
-      "h": 46
-    },
-    "sustain": {
-      "x": 224.0,
-      "y": 412,
-      "w": 22.0,
-      "h": 133
-    },
-    "time": {
-      "x": 894.5,
-      "y": 458.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "vol": {
-      "x": 812.5,
-      "y": 358.5,
-      "w": 35.0,
-      "h": 35.0
-    },
-    "vuL": {
-      "x": 1084,
-      "y": 620,
-      "w": 16,
-      "h": 140
-    },
-    "vuR": {
-      "x": 1106,
-      "y": 620,
-      "w": 16,
-      "h": 140
-    },
-    "wf": {
-      "x": 372,
-      "y": 574,
-      "w": 93,
-      "h": 22
-    }
+ "imageWidth": 2400,
+ "imageHeight": 1792,
+ "designWidth": 1000,
+ "designHeight": 746,
+ "knobs": {
+  "lfoRate": {
+   "x": 267.4,
+   "y": 730.5,
+   "param": "lfoRate"
   },
-  "sprites": {
-    "attack": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "attack",
-      "source": "rail mesure sur l'artwork"
-    },
-    "cassette": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "chorus": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 994,
-      "cy": 376,
-      "frames": 48,
-      "box": "chorus",
-      "source": "mesure sur l'artwork"
-    },
-    "decay": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "decay",
-      "source": "rail mesure sur l'artwork"
-    },
-    "dest": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "dist": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 830,
-      "cy": 476,
-      "frames": 48,
-      "box": "dist",
-      "source": "mesure sur l'artwork"
-    },
-    "fA": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "fA",
-      "source": "rail mesure sur l'artwork"
-    },
-    "fD": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "fD",
-      "source": "rail mesure sur l'artwork"
-    },
-    "fR": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "fR",
-      "source": "rail mesure sur l'artwork"
-    },
-    "fS": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "fS",
-      "source": "rail mesure sur l'artwork"
-    },
-    "fVel": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "fVel",
-      "source": "rail mesure sur l'artwork"
-    },
-    "fb": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 995,
-      "cy": 476,
-      "frames": 48,
-      "box": "fb",
-      "source": "mesure sur l'artwork"
-    },
-    "filter": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 650,
-      "cy": 476,
-      "frames": 48,
-      "box": "filter",
-      "source": "mesure sur l'artwork"
-    },
-    "filterType": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "glide": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 477,
-      "cy": 475,
-      "frames": 48,
-      "box": "glide",
-      "source": "mesure sur l'artwork"
-    },
-    "leftGrill": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "lfoAmount": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 205,
-      "cy": 338,
-      "frames": 48,
-      "box": "lfoAmount",
-      "source": "mesure sur l'artwork"
-    },
-    "lfoPitch": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 286,
-      "cy": 338,
-      "frames": 48,
-      "box": "lfoPitch",
-      "source": "mesure sur l'artwork"
-    },
-    "lfoRate": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 124,
-      "cy": 338,
-      "frames": 48,
-      "box": "lfoRate",
-      "source": "mesure sur l'artwork"
-    },
-    "lfoSrc": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "modWheel": {
-      "kind": "slider",
-      "frames": 1
-    },
-    "monoPoly": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "piano": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "pitchWheel": {
-      "kind": "slider",
-      "frames": 1
-    },
-    "release": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "release",
-      "source": "rail mesure sur l'artwork"
-    },
-    "reverb": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 912,
-      "cy": 375,
-      "frames": 48,
-      "box": "reverb",
-      "source": "mesure sur l'artwork"
-    },
-    "rightGrill": {
-      "kind": "crop",
-      "frames": 1
-    },
-    "sustain": {
-      "kind": "slider",
-      "frames": 1,
-      "box": "sustain",
-      "source": "rail mesure sur l'artwork"
-    },
-    "time": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 912,
-      "cy": 476,
-      "frames": 48,
-      "box": "time",
-      "source": "mesure sur l'artwork"
-    },
-    "vol": {
-      "kind": "knob",
-      "size": 31.0,
-      "cx": 830,
-      "cy": 376,
-      "frames": 48,
-      "box": "vol",
-      "source": "mesure sur l'artwork"
-    },
-    "wf": {
-      "kind": "crop",
-      "frames": 1
-    }
+  "lfoAmount": {
+   "x": 441.0,
+   "y": 730.7,
+   "param": "lfoAmount"
+  },
+  "lfoPitch": {
+   "x": 614.2,
+   "y": 730.7,
+   "param": "lfoPitch"
+  },
+  "glide": {
+   "x": 1009.5,
+   "y": 1025.0,
+   "param": "glideMs"
+  },
+  "filter": {
+   "x": 1392.6,
+   "y": 1026.2,
+   "param": "fltCutoff"
+  },
+  "vol": {
+   "x": 1779.5,
+   "y": 811.0,
+   "param": "masterVol"
+  },
+  "reverb": {
+   "x": 1956.4,
+   "y": 810.7,
+   "param": "revMix"
+  },
+  "chorus": {
+   "x": 2133.7,
+   "y": 811.9,
+   "param": "chorAmt"
+  },
+  "dist": {
+   "x": 1779.3,
+   "y": 1026.5,
+   "param": "driveAmt"
+  },
+  "time": {
+   "x": 1956.7,
+   "y": 1026.6,
+   "param": "delayTime"
+  },
+  "fb": {
+   "x": 2133.4,
+   "y": 1025.8,
+   "param": "delayFb"
   }
+ },
+ "knobCapRadius": 46,
+ "faders": {
+  "fA": {
+   "group": "r",
+   "param": "fenvA",
+   "cx": 1760.0,
+   "slotTop": 333,
+   "slotBottom": 615,
+   "thumbMinY": 362.0,
+   "thumbMaxY": 587.0
+  },
+  "fS": {
+   "group": "r",
+   "param": "fenvS",
+   "cx": 1852.0,
+   "slotTop": 333,
+   "slotBottom": 615,
+   "thumbMinY": 362.0,
+   "thumbMaxY": 587.0
+  },
+  "fD": {
+   "group": "r",
+   "param": "fenvD",
+   "cx": 1944.0,
+   "slotTop": 333,
+   "slotBottom": 615,
+   "thumbMinY": 363.0,
+   "thumbMaxY": 586.0
+  },
+  "fR": {
+   "group": "r",
+   "param": "fenvR",
+   "cx": 2036.0,
+   "slotTop": 333,
+   "slotBottom": 615,
+   "thumbMinY": 362.5,
+   "thumbMaxY": 586.5
+  },
+  "fVel": {
+   "group": "r",
+   "param": "velAmt",
+   "cx": 2149.0,
+   "slotTop": 333,
+   "slotBottom": 615,
+   "thumbMinY": 362.5,
+   "thumbMaxY": 586.5
+  },
+  "attack": {
+   "group": "l",
+   "param": "envA",
+   "cx": 260.0,
+   "slotTop": 888,
+   "slotBottom": 1168,
+   "thumbMinY": 916.5,
+   "thumbMaxY": 1140.5
+  },
+  "decay": {
+   "group": "l",
+   "param": "envD",
+   "cx": 381.0,
+   "slotTop": 888,
+   "slotBottom": 1168,
+   "thumbMinY": 916.5,
+   "thumbMaxY": 1140.5
+  },
+  "sustain": {
+   "group": "l",
+   "param": "envS",
+   "cx": 502.0,
+   "slotTop": 888,
+   "slotBottom": 1167,
+   "thumbMinY": 916.0,
+   "thumbMaxY": 1140.0
+  },
+  "release": {
+   "group": "l",
+   "param": "envR",
+   "cx": 623.0,
+   "slotTop": 888,
+   "slotBottom": 1167,
+   "thumbMinY": 916.5,
+   "thumbMaxY": 1139.5
+  }
+ },
+ "wheels": {
+  "pitchWheel": {
+   "param": "pbend",
+   "x": 315.5,
+   "minY": 1388.5,
+   "maxY": 1598.5,
+   "x0": 277,
+   "x1": 355
+  },
+  "modWheel": {
+   "param": "modDepth",
+   "x": 500.5,
+   "minY": 1388.5,
+   "maxY": 1598.5,
+   "x0": 462,
+   "x1": 540
+  }
+ },
+ "combos": [
+  {
+   "id": "wf",
+   "param": "pickShape",
+   "x0": 773,
+   "x1": 1040,
+   "y0": 1183,
+   "y1": 1242,
+   "faceY0": 1188,
+   "faceY1": 1239
+  },
+  {
+   "id": "lfoSrc",
+   "param": "lfoWave",
+   "x0": 1067,
+   "x1": 1333,
+   "y0": 1183,
+   "y1": 1242,
+   "faceY0": 1188,
+   "faceY1": 1239
+  },
+  {
+   "id": "dest",
+   "param": "lfoDest",
+   "x0": 1359,
+   "x1": 1626,
+   "y0": 1183,
+   "y1": 1242,
+   "faceY0": 1188,
+   "faceY1": 1239
+  },
+  {
+   "id": "filterType",
+   "param": "fltType",
+   "x0": 1688,
+   "x1": 1940,
+   "y0": 1183,
+   "y1": 1242,
+   "faceY0": 1188,
+   "faceY1": 1239
+  },
+  {
+   "id": "monoPoly",
+   "param": "monoMode",
+   "x0": 1967,
+   "x1": 2215,
+   "y0": 1183,
+   "y1": 1242,
+   "faceY0": 1188,
+   "faceY1": 1239
+  }
+ ],
+ "sprites": {
+  "knobCap": {
+   "x": 2,
+   "y": 2,
+   "w": 96,
+   "h": 96,
+   "ax": 48.0,
+   "ay": 48.0
+  },
+  "thumb_r": {
+   "x": 2,
+   "y": 100,
+   "w": 110,
+   "h": 102,
+   "ax": 40.0,
+   "ay": 42.0
+  },
+  "railRow_r": {
+   "x": 2,
+   "y": 204,
+   "w": 28,
+   "h": 1,
+   "ax": 14.0,
+   "ay": 0.0
+  },
+  "railCap_r": {
+   "x": 2,
+   "y": 207,
+   "w": 28,
+   "h": 12,
+   "ax": 14.0,
+   "ay": 12.0
+  },
+  "thumb_l": {
+   "x": 2,
+   "y": 221,
+   "w": 110,
+   "h": 99,
+   "ax": 40.0,
+   "ay": 40.5
+  },
+  "railRow_l": {
+   "x": 2,
+   "y": 322,
+   "w": 28,
+   "h": 1,
+   "ax": 14.0,
+   "ay": 0.0
+  },
+  "railCap_l": {
+   "x": 2,
+   "y": 325,
+   "w": 28,
+   "h": 12,
+   "ax": 14.0,
+   "ay": 12.0
+  },
+  "block_pitchWheel": {
+   "x": 2,
+   "y": 339,
+   "w": 67,
+   "h": 63,
+   "ax": 33.5,
+   "ay": 31.5
+  },
+  "block_modWheel": {
+   "x": 2,
+   "y": 404,
+   "w": 67,
+   "h": 63,
+   "ax": 33.5,
+   "ay": 31.5
+  }
+ },
+ "grills": {
+  "a": {
+   "param": "laOn",
+   "x0": 788,
+   "y0": 285,
+   "x1": 940,
+   "y1": 847
+  },
+  "b": {
+   "param": "lbOn",
+   "x0": 1465,
+   "y0": 285,
+   "x1": 1617,
+   "y1": 847
+  }
+ },
+ "cassette": {
+  "x0": 205,
+  "y0": 180,
+  "x1": 680,
+  "y1": 530
+ },
+ "presetBar": {
+  "folder": {
+   "x0": 774,
+   "y0": 115,
+   "x1": 861,
+   "y1": 189
+  },
+  "field": {
+   "x0": 871,
+   "y0": 115,
+   "x1": 1529,
+   "y1": 187
+  },
+  "prev": {
+   "x0": 873,
+   "y0": 117,
+   "x1": 968,
+   "y1": 185
+  },
+  "next": {
+   "x0": 1432,
+   "y0": 117,
+   "x1": 1527,
+   "y1": 185
+  },
+  "save": {
+   "x0": 1542,
+   "y0": 115,
+   "x1": 1627,
+   "y1": 189
+  },
+  "text": {
+   "x0": 972,
+   "y0": 121,
+   "x1": 1428,
+   "y1": 181
+  }
+ },
+ "keyboard": {
+  "lowNote": 36,
+  "left": 681,
+  "right": 2205,
+  "top": 1328,
+  "blackBottom": 1606,
+  "whiteBottom": 1784,
+  "separators": [
+   750.5,
+   819.5,
+   888.5,
+   956.5,
+   1027.5,
+   1097.5,
+   1166.5,
+   1234.5,
+   1303.5,
+   1372.0,
+   1442.0,
+   1511.5,
+   1581.5,
+   1651.5,
+   1719.5,
+   1787.5,
+   1857.0,
+   1926.5,
+   1996.5,
+   2066.5,
+   2136.5
+  ],
+  "black": [
+   {
+    "cx": 744.5,
+    "x0": 721,
+    "x1": 768
+   },
+   {
+    "cx": 827.0,
+    "x0": 803,
+    "x1": 851
+   },
+   {
+    "cx": 948.0,
+    "x0": 924,
+    "x1": 972
+   },
+   {
+    "cx": 1028.0,
+    "x0": 1004,
+    "x1": 1052
+   },
+   {
+    "cx": 1108.0,
+    "x0": 1084,
+    "x1": 1132
+   },
+   {
+    "cx": 1228.5,
+    "x0": 1204,
+    "x1": 1253
+   },
+   {
+    "cx": 1311.0,
+    "x0": 1287,
+    "x1": 1335
+   },
+   {
+    "cx": 1432.0,
+    "x0": 1408,
+    "x1": 1456
+   },
+   {
+    "cx": 1512.5,
+    "x0": 1488,
+    "x1": 1537
+   },
+   {
+    "cx": 1592.5,
+    "x0": 1569,
+    "x1": 1616
+   },
+   {
+    "cx": 1713.0,
+    "x0": 1689,
+    "x1": 1737
+   },
+   {
+    "cx": 1796.0,
+    "x0": 1772,
+    "x1": 1820
+   },
+   {
+    "cx": 1917.0,
+    "x0": 1893,
+    "x1": 1941
+   },
+   {
+    "cx": 1998.0,
+    "x0": 1974,
+    "x1": 2022
+   },
+   {
+    "cx": 2078.0,
+    "x0": 2054,
+    "x1": 2102
+   }
+  ]
+ }
 }

@@ -5,18 +5,19 @@
 #include <functional>
 #include <memory>
 #include "SfzParser.h"
+#include "Model/ModelLibrary.h"
 
 namespace humpire
 {
-// Donnees audio partagees entre regions (un fichier = un SampleData).
+// Audio data shared between regions (one file / one rendered zone = one SampleData).
 struct SampleData
 {
-    juce::AudioBuffer<float> audio;     // 1 ou 2 canaux
+    juce::AudioBuffer<float> audio;     // 1 or 2 channels
     double sampleRate = 44100.0;
     int numFrames = 0;
 };
 
-// Une region SFZ jouable. Derive de SynthesiserSound pour etre acceptee par juce::Synthesiser::startVoice.
+// A playable SFZ-style region.  Derives from SynthesiserSound so that juce::Synthesiser::startVoice accepts it.
 class Region : public juce::SynthesiserSound
 {
 public:
@@ -25,7 +26,7 @@ public:
     bool appliesToNote (int) override { return true; }
     bool appliesToChannel (int) override { return true; }
 
-    // Selection de region : cle, velocite, aleatoire, round-robin, keyswitch, declencheur attack/release.
+    // Region selection: key, velocity, random, round robin, keyswitch, attack/release trigger.
     bool matches (int note, int vel127, float rnd, int seqIndex, int activeSwitch, bool release) const noexcept
     {
         if (def.triggerRelease != release) return false;
@@ -41,19 +42,30 @@ public:
     std::shared_ptr<SampleData> data;
 };
 
-// Banque = contenu d'un fichier SFZ charge en memoire.
+// A bank = the content of one instrument: either a loaded SFZ file or the built-in modelled library.
+// Immutable once built (may be shared by several plug-in instances).
 class Bank
 {
 public:
     juce::ReferenceCountedArray<Region> regions;
     bool hasReleaseRegions = false;
+    bool builtIn = false;               // true: synthesised by the built-in modelled library
     int swLo = -1, swHi = -1, swDefault = -1;
     juce::String name;
     double memoryMB = 0.0;
     juce::StringArray warnings;
 
-    // Charge un .sfz (thread de fond). Retourne nullptr + error en cas d'echec.
+    // Loads an .sfz (background thread).  Returns nullptr + error on failure.
     static std::shared_ptr<Bank> load (const juce::File& sfz, std::atomic<float>& progress,
                                        const std::function<bool()>& cancelled, juce::String& error);
+
+    // Renders the built-in modelled library of `instrumentIndex` (background thread, cancellable) and
+    // converts it into a bank.  Identical requests are served from a process-wide cache while some plug-in
+    // instance still holds the bank.  Returns nullptr + error on failure / cancellation.
+    static std::shared_ptr<Bank> buildFromModel (int instrumentIndex, double sampleRate, std::atomic<float>& progress,
+                                                 const std::function<bool()>& cancelled, juce::String& error);
+
+    // Converts an already rendered library (same Region / SampleData semantics as an SFZ file).
+    static std::shared_ptr<Bank> fromLibrary (const model::Library&, juce::String& error);
 };
 } // namespace humpire

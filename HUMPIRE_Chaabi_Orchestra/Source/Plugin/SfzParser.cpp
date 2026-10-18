@@ -12,7 +12,7 @@ struct Token { bool header; juce::String name, value; };
 
 bool isIdent (char c) { return std::isalnum ((unsigned char) c) || c == '_' || c == '$'; }
 
-// Retire // et /* */ et les lignes de directives (#include / #define non supportees).
+// Strips // and /* */ comments and directive lines (#include / #define are not supported).
 std::string stripComments (const std::string& s)
 {
     std::string out;
@@ -69,7 +69,7 @@ std::vector<Token> tokenize (const std::string& s)
                         while (m < n && std::isspace ((unsigned char) s[m])) ++m;
                         size_t q = m;
                         while (q < n && isIdent (s[q])) ++q;
-                        if (q > m && q < n && s[q] == '=') break; // debut de l'opcode suivant
+                        if (q > m && q < n && s[q] == '=') break; // start of the next opcode
                     }
                     ++k;
                 }
@@ -101,7 +101,7 @@ int parseNoteOrInt (const juce::String& str, int fallback)
     if (s.isEmpty()) return fallback;
     if (s.containsOnly ("-0123456789")) return s.getIntValue();
 
-    // Nom de note : c4 = 60 (convention sfizz), # et b acceptes
+    // Note name: c4 = 60 (sfizz convention), # and b accepted
     static const int base[7] = { 9, 11, 0, 2, 4, 5, 7 }; // a b c d e f g
     const auto letter = std::tolower ((unsigned char) s[0]) - 'a';
     if (letter < 0 || letter > 6) return fallback;
@@ -132,7 +132,7 @@ SfzFile parseSfz (const juce::File& file)
         auto rel = get (m, "sample").replaceCharacter ('\\', '/');
         if (rel.isEmpty() || rel.startsWithChar ('*'))
         {
-            out.warnings.add ("region ignoree (sample absent ou generateur non supporte)");
+            out.warnings.add ("region ignored (missing sample or unsupported generator)");
             region.clear();
             return;
         }
@@ -210,7 +210,7 @@ SfzFile parseSfz (const juce::File& file)
     }
     commit();
 
-    // sw_default / sw_lokey / sw_hikey peuvent etre declares dans <global>/<master>/<group> sans region : on les relit.
+    // sw_default / sw_lokey / sw_hikey may be declared in <global>/<master>/<group> without a region: read them again.
     for (auto* m : { &global, &master, &group })
     {
         if (out.swLo < 0 && has (*m, "sw_lokey")) out.swLo = getInt (*m, "sw_lokey", -1);

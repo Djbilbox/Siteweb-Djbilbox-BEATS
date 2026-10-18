@@ -12,11 +12,11 @@ juce_add_binary_data(PrAssets SOURCES Assets/camel.png Assets/logo.png Assets/ca
 juce_add_plugin(PHANTOM_RIDER
     COMPANY_NAME "DJBILBOX BEATS"
     PLUGIN_MANUFACTURER_CODE Djbb
-    PLUGIN_CODE Prl
+    PLUGIN_CODE Prl1
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
-    PRODUCT_NAME "PHANTOM_RIDER"
+    PRODUCT_NAME "PHANTOM RIDER"
     VST3_CATEGORIES Instrument Synth)
 
 target_sources(PHANTOM_RIDER PRIVATE

@@ -6,7 +6,7 @@
 
 namespace humpire
 {
-// Meter stereo horizontal (2 barres), lit des atomics ecrits par le thread audio.
+// Horizontal stereo meter (2 bars), reads atomics written by the audio thread.
 class HumpireMeter : public juce::Component, private juce::Timer
 {
 public:

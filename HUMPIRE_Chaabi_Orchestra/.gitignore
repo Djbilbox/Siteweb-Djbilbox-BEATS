@@ -4,3 +4,5 @@ Builds/
 *.flac
 *.ogg
 !Samples/**/.gitkeep
+__pycache__/
+*.pyc

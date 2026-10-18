@@ -1,6 +1,9 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "FactoryPresets.h"
+#include <cmath>
+#include <cstring>
+#include <exception>
 
 namespace humpire
 {
@@ -18,6 +21,7 @@ ChaabiProcessor::ChaabiProcessor()
     pRevDamp = raw (pid::revDamp);    pDlyTime = raw (pid::dlyTime);  pDlyFb = raw (pid::dlyFb);
     pTempo = raw (pid::tempo);        pBend = raw (pid::bendRange);   pSeqOn = raw (pid::seqOn);
     pSeqSwing = raw (pid::seqSwing);  pSeqRate = raw (pid::seqRate);
+    pBypass = raw (pid::bypass);
 
     for (int i = 0; i < kNumInstruments; ++i)
     {
@@ -36,7 +40,7 @@ ChaabiProcessor::ChaabiProcessor()
         apvts.addParameterListener (pid::inst (i, "on"), this);
     apvts.state.addListener (this);
 
-    // Etat initial : grille du sequenceur
+    // Initial state: sequencer grid
     if (! apvts.state.hasProperty (pid::seqGrid))
         apvts.state.setProperty (pid::seqGrid, defaultSeqGrid(), nullptr);
     decodeSeqGrid (apvts.state.getProperty (pid::seqGrid).toString());
@@ -57,18 +61,22 @@ ChaabiProcessor::~ChaabiProcessor()
     for (int i = 0; i < kNumInstruments; ++i)
         apvts.removeParameterListener (pid::inst (i, "on"), this);
 
-    for (auto& s : slots) s.generation++;           // annule les chargements en cours
+    for (auto& s : slots) s.generation++;           // cancels loads / renders in progress (checked between zones)
     loaderPool.removeAllJobs (true, 15000);
 }
 
 bool ChaabiProcessor::isBusesLayoutSupported (const BusesLayout& l) const
 {
-    return l.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
+    const auto out = l.getMainOutputChannelSet();
+    return (out == juce::AudioChannelSet::stereo() || out == juce::AudioChannelSet::mono()) && l.inputBuses.isEmpty();
 }
 
 // ------------------------------------------------------------------ preparation
 void ChaabiProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    if (! (sampleRate > 0.0)) sampleRate = 44100.0;
+    if (samplesPerBlock <= 0) samplesPerBlock = 512;
+
     sr = sampleRate;
     maxBlock = juce::jmax (samplesPerBlock, 4096);
 
@@ -90,9 +98,10 @@ void ChaabiProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
         s.cutoff.setCurrentAndTargetValue (s.p.filter->load());
         s.wasActive = false;
     }
-    for (auto& m : slotMidi) m.ensureSize (8192);
+    for (auto& m : slotMidi) m.ensureSize (32768);
+    chunkMidi.ensureSize (65536);
 
-    bus.setSize (5, maxBlock);
+    bus.setSize (7, maxBlock);
     reverb.setSampleRate (sampleRate);
     reverb.reset();
 
@@ -105,10 +114,13 @@ void ChaabiProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     delaySamples.setCurrentAndTargetValue ((float) (pDlyTime->load() * 0.001 * sampleRate));
     delayFb.reset (sampleRate, 0.02);
     delayFb.setCurrentAndTargetValue (pDlyFb->load());
+    bypassGain.reset (sampleRate, 0.02);
+    bypassGain.setCurrentAndTargetValue (pBypass->load() > 0.5f ? 0.f : 1.f);
+    bypassIdle = pBypass->load() > 0.5f;
 
     phrasePlayer->prepare (sampleRate);
-    setLatencySamples (0);                 // aucun look-ahead : latence nulle
-    refreshLoads();
+    setLatencySamples (0);                 // no look-ahead: zero latency
+    triggerAsyncUpdate();                  // (re)check the libraries on the message thread
 }
 
 // ------------------------------------------------------------------ audio
@@ -117,30 +129,79 @@ void ChaabiProcessor::pickupBank (Slot& s)
     if (s.pendingLock.tryEnter())
     {
         if (s.pending != nullptr && s.retired == nullptr)
-            s.retired = s.synth.swapBank (std::move (s.pending));   // l'ancienne banque est liberee cote message
+            s.retired = s.synth.swapBank (std::move (s.pending));   // the old bank is released on the message thread
         s.pendingLock.exit();
     }
 }
 
+void ChaabiProcessor::enterBypassIdle()
+{
+    for (auto& s : slots) { s.synth.allNotesOff (0, false); s.wasActive = false; }
+    phrasePlayer->reset();
+    reverb.reset();
+    delayL.reset();
+    delayR.reset();
+    bypassIdle = true;
+}
+
+// Only reached by wrappers that ignore getBypassParameter() (the VST3 wrapper never calls it):
+// silence, voices stopped.  An instrument has no input to pass through (channels < input count are left alone).
 void ChaabiProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     midi.clear();
-    buffer.clear();
-    for (auto& s : slots) { s.synth.allNotesOff (0, false); s.wasActive = false; }
-    phrasePlayer->reset();
+    for (int ch = juce::jmin (getTotalNumInputChannels(), buffer.getNumChannels()); ch < buffer.getNumChannels(); ++ch)
+        buffer.clear (ch, 0, buffer.getNumSamples());
+    if (! bypassIdle) enterBypassIdle();
 }
 
 void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     juce::ScopedNoDenormals noDenormals;
-    const int n = buffer.getNumSamples();
-    buffer.clear();
-    if (n == 0 || n > maxBlock || buffer.getNumChannels() < 2) return;
+    const int n = buffer.getNumSamples(), nch = buffer.getNumChannels();
+
+    // Output channels we own start silent (an instrument has no audio input).
+    for (int ch = juce::jmin (getTotalNumInputChannels(), nch); ch < nch; ++ch)
+        buffer.clear (ch, 0, n);
+
+    // Zero-length block, no output channel, or processBlock() called before prepareToPlay(): nothing to render.
+    if (n <= 0 || nch <= 0 || maxBlock <= 0) { midi.clear(); return; }
 
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
+
+    if (n <= maxBlock)
+        renderChunk (buffer, 0, n, midi, 0);
+    else
+    {
+        // The host exceeded the block size announced in prepareToPlay(): render in prepared-size chunks.
+        for (int start = 0; start < n; start += maxBlock)
+        {
+            const int len = juce::jmin (maxBlock, n - start);
+            chunkMidi.clear();
+            for (const auto meta : midi)
+                if (meta.samplePosition >= start && meta.samplePosition < start + len)
+                    chunkMidi.addEvent (meta.data, meta.numBytes, meta.samplePosition - start);
+            renderChunk (buffer, start, len, chunkMidi, start);
+        }
+    }
+    midi.clear();
+}
+
+void ChaabiProcessor::renderChunk (juce::AudioBuffer<float>& host, int start, int n, juce::MidiBuffer& midi, int chunkOffset)
+{
     for (auto& s : slots) pickupBank (s);
 
-    // ---- parametres globaux
+    // ---- bypass (own parameter, reported through getBypassParameter): short fade, then idle
+    const bool bypassed = pBypass->load() > 0.5f;
+    bypassGain.setTargetValue (bypassed ? 0.f : 1.f);
+    if (bypassed && ! bypassGain.isSmoothing() && bypassGain.getCurrentValue() <= 0.0001f)
+    {
+        if (! bypassIdle) enterBypassIdle();
+        meterL.store (0.f); meterR.store (0.f);
+        return;                                  // channels we own are already silent
+    }
+    bypassIdle = false;
+
+    // ---- global parameters
     const bool multi = pMulti->load() > 0.5f;
     const int selected = juce::jlimit (0, kNumInstruments - 1, (int) pSelected->load());
     const int poly = (int) pPoly->load();
@@ -157,7 +218,7 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         if (cnt == 0) activeNow[(size_t) selected] = true;
     }
 
-    // ---- transport hote
+    // ---- host transport
     double bpm = (double) pTempo->load(), ppq = 0.0;
     bool playing = false;
     if (auto* ph = getPlayHead())
@@ -167,9 +228,11 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
             playing = pos->getIsPlaying();
             if (auto p = pos->getPpqPosition()) ppq = *p;
         }
+    if (! (bpm >= 20.0 && bpm <= 999.0)) bpm = 90.0;
+    if (chunkOffset > 0) ppq += (double) chunkOffset * bpm / 60.0 / sr;
     lastBpm.store (bpm);
 
-    // ---- routage MIDI -> slots
+    // ---- MIDI routing -> slots
     for (auto& m : slotMidi) m.clear();
     for (size_t i = 0; i < slots.size(); ++i)
     {
@@ -180,8 +243,9 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
 
     for (const auto meta : midi)
     {
+        if (meta.numBytes > 3) continue;                 // SysEx etc.: unused here, and copying it into a MidiMessage would allocate
         const auto m = meta.getMessage();
-        const int t = meta.samplePosition;
+        const int t = juce::jlimit (0, n - 1, meta.samplePosition);
 
         if (m.isNoteOn())
         {
@@ -205,6 +269,12 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
             for (size_t i = 0; i < slots.size(); ++i)
                 if (activeNow[i]) slotMidi[i].addEvent (m, t);
         }
+        else if (m.isAllSoundOff())                      // CC 120 "panic": immediate silence, phrases stop too
+        {
+            for (size_t i = 0; i < slots.size(); ++i)
+                if (activeNow[i]) slots[i].synth.allNotesOff (0, false);
+            phrasePlayer->reset();
+        }
         else
         {
             for (size_t i = 0; i < slots.size(); ++i)   // pitch bend, CC (sustain), aftertouch, all notes off
@@ -212,11 +282,11 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         }
     }
 
-    // ---- phrases + sequenceur
+    // ---- phrases + sequencer
     phrasePlayer->process (slotMidi, n, bpm, playing, ppq, pSeqOn->load() > 0.5f,
                            (double) pSeqSwing->load(), pSeqRate->load() < 0.5f ? 2 : 4, activeNow);
 
-    // ---- rendu des instruments
+    // ---- instruments
     bus.clear (0, n);
     float* dryL = bus.getWritePointer (0); float* dryR = bus.getWritePointer (1);
     float* revL = bus.getWritePointer (2); float* revR = bus.getWritePointer (3);
@@ -247,7 +317,7 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         float* l = s.buf.getWritePointer (0);
         float* r = s.buf.getWritePointer (1);
 
-        // Filtre passe-bas, parametre lisse par sous-blocs de 32 echantillons
+        // Low-pass filter, parameter smoothed in sub-blocks of 32 samples
         for (int off = 0; off < n; off += 32)
         {
             const int c = juce::jmin (32, n - off);
@@ -276,7 +346,7 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         }
     }
 
-    // ---- effets globaux : reverb (la macro Authenticite ouvre la reverb), delay ping-pong
+    // ---- global effects: reverb (the Authenticity macro opens the reverb), ping-pong delay
     reverb.setParameters ({ pRevSize->load(), pRevDamp->load(), 1.0f, 0.0f, 1.0f, 0.0f });
     reverb.processStereo (revL, revR, n);
     const float revReturn = 0.7f + 0.8f * auth;
@@ -285,8 +355,8 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     delaySamples.setTargetValue (juce::jlimit (1.0f, (float) (sr * 1.5), (float) (pDlyTime->load() * 0.001 * sr)));
     delayFb.setTargetValue (pDlyFb->load());
 
-    float* outL = buffer.getWritePointer (0);
-    float* outR = buffer.getWritePointer (1);
+    float* outL = bus.getWritePointer (5);
+    float* outR = bus.getWritePointer (6);
     float pkL = 0.f, pkR = 0.f;
 
     for (int i = 0; i < n; ++i)
@@ -297,21 +367,34 @@ void ChaabiProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         delayL.pushSample (0, dlyIn[i] + dR * fb);
         delayR.pushSample (0, dL * fb);
 
-        const float mg = masterGain.getNextValue();
-        const float l = (dryL[i] + revL[i] * revReturn + dL) * mg;
-        const float r = (dryR[i] + revR[i] * revReturn + dR) * mg;
+        const float mg = masterGain.getNextValue() * bypassGain.getNextValue();
+        float l = (dryL[i] + revL[i] * revReturn + dL) * mg;
+        float r = (dryR[i] + revR[i] * revReturn + dR) * mg;
+        if (! std::isfinite (l)) l = 0.f;                 // never hand NaN / Inf to the host
+        if (! std::isfinite (r)) r = 0.f;
         outL[i] = l; outR[i] = r;
         pkL = juce::jmax (pkL, std::abs (l));
         pkR = juce::jmax (pkR, std::abs (r));
     }
 
+    // ---- to the host buffer (stereo, or mono sum)
+    if (host.getNumChannels() >= 2)
+    {
+        std::memcpy (host.getWritePointer (0, start), outL, sizeof (float) * (size_t) n);
+        std::memcpy (host.getWritePointer (1, start), outR, sizeof (float) * (size_t) n);
+    }
+    else
+    {
+        float* o = host.getWritePointer (0, start);
+        for (int i = 0; i < n; ++i) o[i] = 0.5f * (outL[i] + outR[i]);
+    }
+
     meterL.store (juce::jmax (pkL, meterL.load() * 0.8f));
     meterR.store (juce::jmax (pkR, meterR.load() * 0.8f));
     midiActivity.store (midiActivity.load() * 0.9f);
-    midi.clear();
 }
 
-// ------------------------------------------------------------------ chargement des banques
+// ------------------------------------------------------------------ banks (SFZ library or built-in modelled instrument)
 juce::File ChaabiProcessor::getLibraryRoot() const
 {
     auto prop = apvts.state.getProperty (pid::libraryRoot).toString();
@@ -325,6 +408,7 @@ juce::File ChaabiProcessor::getLibraryRoot() const
 void ChaabiProcessor::setLibraryRoot (const juce::File& f)
 {
     apvts.state.setProperty (pid::libraryRoot, f.getFullPathName(), nullptr);
+    triggerAsyncUpdate();                   // choosing the same folder again re-scans it
 }
 
 juce::File ChaabiProcessor::resolveSfz (int i) const
@@ -344,7 +428,7 @@ SlotStatus ChaabiProcessor::getSlotStatus (int slot) const
 {
     auto& s = slots[(size_t) slot];
     const juce::ScopedLock sl (s.msgLock);
-    return { s.state.load(), s.progress.load(), s.message };
+    return { s.state.load(), s.progress.load(), s.message, s.builtIn, s.warning };
 }
 
 void ChaabiProcessor::handleAsyncUpdate() { refreshLoads(); }
@@ -359,6 +443,9 @@ void ChaabiProcessor::valueTreePropertyChanged (juce::ValueTree&, const juce::Id
         triggerAsyncUpdate();
 }
 
+// A user SFZ library, when present, takes precedence; otherwise (or when it cannot be loaded) the built-in
+// modelled instrument is rendered in the background.  The key records what was decided so that nothing is
+// reloaded needlessly, and a library that appears later (SAMPLES FOLDER button) is picked up.
 void ChaabiProcessor::refreshLoads()
 {
     for (int i = 0; i < kNumInstruments; ++i)
@@ -366,57 +453,125 @@ void ChaabiProcessor::refreshLoads()
         auto& s = slots[(size_t) i];
         if (! isSlotActive (i)) continue;
         const auto sfz = resolveSfz (i);
+        const bool exists = sfz.existsAsFile();
+        const auto key = sfz.getFullPathName() + (exists ? "|sfz" : "|built-in");
         juce::String loaded;
-        { const juce::ScopedLock sl (s.msgLock); loaded = s.loadedPath; }
-        if (loaded != sfz.getFullPathName())
-            requestLoad (i, sfz);
+        { const juce::ScopedLock sl (s.msgLock); loaded = s.loadedKey; }
+        if (loaded != key)
+            requestLoad (i, sfz, exists, key);
     }
 }
 
-void ChaabiProcessor::requestLoad (int slotIndex, const juce::File& sfz)
+void ChaabiProcessor::requestLoad (int slotIndex, const juce::File& sfz, bool sfzExists, const juce::String& key)
 {
     auto& s = slots[(size_t) slotIndex];
-    const int gen = ++s.generation;
+    const int gen = ++s.generation;                       // cancels a load / render still running for this slot
 
     { const juce::SpinLock::ScopedLockType l (s.pendingLock); s.retired.reset(); s.pending.reset(); }
     {
         const juce::ScopedLock sl (s.msgLock);
-        s.loadedPath = sfz.getFullPathName();
-        s.message = sfz.existsAsFile() ? juce::String::fromUTF8 ("Chargement\xE2\x80\xA6")
-                                       : juce::String::fromUTF8 ("SFZ introuvable : ") + sfz.getFullPathName();
+        s.loadedKey = key;
+        s.builtIn = ! sfzExists;
+        s.warning = false;
+        s.message = sfzExists ? juce::String ("Loading samples...") : juce::String ("Rendering built-in modelled instrument...");
+        s.progress = 0.f;
+        s.state = 1;
     }
-    s.progress = 0.f;
-    s.state = sfz.existsAsFile() ? 1 : 3;
-    if (! sfz.existsAsFile()) return;
 
-    loaderPool.addJob ([this, slotIndex, gen, sfz]
+    loaderPool.addJob ([this, slotIndex, gen, sfz, sfzExists]
     {
         auto& slot = slots[(size_t) slotIndex];
-        juce::String err;
-        auto bank = Bank::load (sfz, slot.progress, [&] { return slot.generation.load() != gen; }, err);
-        if (slot.generation.load() != gen) return;
+        auto cancelled = [&slot, gen] { return slot.generation.load() != gen; };
+        if (cancelled()) return;
+
+        try
+        {
+        const auto bullet = juce::String::fromUTF8 (" \xE2\x80\xA2 ");
+        juce::String err, notice;
+        std::shared_ptr<Bank> bank;
+
+        if (sfzExists)
+        {
+            bank = Bank::load (sfz, slot.progress, cancelled, err);
+            if (cancelled()) return;
+            if (bank == nullptr)
+            {
+                notice = "SFZ library not usable: " + err + " - using the built-in modelled instrument.";
+                const juce::ScopedLock sl (slot.msgLock);
+                if (cancelled()) return;
+                slot.builtIn = true;
+                slot.warning = true;
+                slot.message = "Rendering built-in modelled instrument...";
+                slot.progress = 0.f;
+            }
+        }
+
+        if (bank == nullptr)
+        {
+            juce::String modelErr;
+            bank = Bank::buildFromModel (slotIndex, 44100.0, slot.progress, cancelled, modelErr);
+            if (cancelled()) return;
+            if (bank == nullptr) err = modelErr;
+        }
 
         if (bank != nullptr)
         {
-            const auto info = juce::String ((int) bank->regions.size()) + juce::String::fromUTF8 (" r\xC3\xA9gions \xE2\x80\xA2 ") + juce::String (bank->memoryMB, 1) + " Mo en RAM";
+            juce::String info;
+            bool warn = notice.isNotEmpty();
+            if (bank->builtIn)
+                info = "Built-in modelled instrument" + bullet + juce::String ((int) bank->regions.size()) + " zones" + bullet + juce::String (bank->memoryMB, 1) + " MB";
+            else
+                info = juce::String ((int) bank->regions.size()) + " regions" + bullet + juce::String (bank->memoryMB, 1) + " MB RAM";
+            if (notice.isNotEmpty()) info = notice;
+            if (bank->warnings.size() > 0)
             {
+                info << bullet << juce::String (bank->warnings.size()) << (bank->builtIn ? " library check warning(s)" : " warning(s)");
+                warn = true;
+            }
+
+            const bool isBuiltIn = bank->builtIn;
+            {
+                // Commit atomically with the generation check: a stale job must never publish its bank.
                 const juce::SpinLock::ScopedLockType l (slot.pendingLock);
+                if (cancelled()) return;
                 slot.pending = std::move (bank);
             }
             const juce::ScopedLock sl (slot.msgLock);
+            if (cancelled()) return;
             slot.message = info;
+            slot.builtIn = isBuiltIn;
+            slot.warning = warn;
             slot.state = 2;
         }
         else
         {
             const juce::ScopedLock sl (slot.msgLock);
-            slot.message = err;
+            if (cancelled()) return;
+            slot.message = err.isNotEmpty() ? err : juce::String ("Instrument could not be created");
+            slot.warning = true;
+            slot.state = 3;
+        }
+        }
+        catch (const std::exception& e)
+        {
+            const juce::ScopedLock sl (slot.msgLock);
+            if (cancelled()) return;
+            slot.message = "Instrument could not be created: " + juce::String (e.what());
+            slot.warning = true;
+            slot.state = 3;
+        }
+        catch (...)
+        {
+            const juce::ScopedLock sl (slot.msgLock);
+            if (cancelled()) return;
+            slot.message = "Instrument could not be created (unexpected error)";
+            slot.warning = true;
             slot.state = 3;
         }
     });
 }
 
-// ------------------------------------------------------------------ sequenceur (grille 2 x 5 x 16)
+// ------------------------------------------------------------------ sequencer (grid 2 x 5 x 16)
 juce::String ChaabiProcessor::defaultSeqGrid()
 {
     std::string g ((size_t) (kSeqInstruments * kSeqLanes * kSeqSteps), '0');
@@ -424,7 +579,7 @@ juce::String ChaabiProcessor::defaultSeqGrid()
     {
         for (int st : steps) g[(size_t) ((inst * kSeqLanes + lane) * kSeqSteps + st)] = v;
     };
-    // Derbouka : maqsum sur 16 pas (1/8)
+    // Derbouka: maqsum over 16 steps (1/8)
     set (0, 0, { 8 }); set (0, 0, { 0 }, '2');
     set (0, 1, { 2, 6, 12 }); set (0, 2, { 14 }); set (0, 4, { 10 });
     // Tar
@@ -457,7 +612,7 @@ void ChaabiProcessor::setSeqStep (int inst, int lane, int step, int value)
     apvts.state.setProperty (pid::seqGrid, s.replaceSection (idx, 1, juce::String::charToString ((juce::juce_wchar) ('0' + value))), &undoManager);
 }
 
-// ------------------------------------------------------------------ etat
+// ------------------------------------------------------------------ state
 void ChaabiProcessor::getStateInformation (juce::MemoryBlock& dest)
 {
     if (auto xml = apvts.copyState().createXml())

@@ -8,7 +8,7 @@
 //   SNAP_APPLY_METHOD   processor method taking an int preset index (applyPreset / setCurrentProgram ...)
 //   SNAP_DEFAULT_W/H    editor default size found in PluginEditor.{h,cpp} (fallback only)
 //
-// Usage:  Snapshot <out.png> [presetIndex] [--scale=1.5] [--size=WxH] [--settle=ms]
+// Usage:  Snapshot <out.png> [presetIndex] [--scale=1.5] [--size=WxH] [--settle=ms] [--keep-resizer]
 //   exit codes: 0 ok, 1 usage, 2 bad preset index, 3 no editor, 4 write error
 //
 // Pixel size of the PNG = editor size * scale (default 1000x746 * 1.5 = 1500x1119).
@@ -45,7 +45,7 @@ namespace
 
     int usage()
     {
-        std::fprintf (stderr, "usage: Snapshot <out.png> [presetIndex] [--scale=1.5] [--size=WxH] [--settle=ms]\n");
+        std::fprintf (stderr, "usage: Snapshot <out.png> [presetIndex] [--scale=1.5] [--size=WxH] [--settle=ms] [--keep-resizer]\n");
         return 1;
     }
 }
@@ -57,6 +57,7 @@ int main (int argc, char** argv)
     float scale = 1.5f;
     int forcedW = 0, forcedH = 0;
     int settleMs = 150;
+    bool keepResizer = false;
     int positional = 0;
 
     for (int i = 1; i < argc; ++i)
@@ -65,6 +66,7 @@ int main (int argc, char** argv)
         if (a.startsWith ("--scale="))       scale = a.fromFirstOccurrenceOf ("=", false, false).getFloatValue();
         else if (a.startsWith ("--size="))   { if (! parseSize (a.fromFirstOccurrenceOf ("=", false, false), forcedW, forcedH)) return usage(); }
         else if (a.startsWith ("--settle=")) settleMs = a.fromFirstOccurrenceOf ("=", false, false).getIntValue();
+        else if (a == "--keep-resizer")      keepResizer = true;
         else if (a.startsWith ("--"))        return usage();
         else if (positional == 0)            { outPath = a; ++positional; }
         else if (positional == 1)            { preset = a.getIntValue(); ++positional; }
@@ -107,6 +109,12 @@ int main (int argc, char** argv)
     // let async updates (preset label, attachments, deferred layout) run before we grab the pixels
     if (settleMs > 0)
         juce::MessageManager::getInstance()->runDispatchLoopUntil (settleMs);
+
+    // the host-resize grip (bottom-right corner) is editor chrome, not product UI: hide it for marketing shots
+    if (! keepResizer)
+        for (auto* child : ed->getChildren())
+            if (dynamic_cast<juce::ResizableCornerComponent*> (child) != nullptr)
+                child->setVisible (false);
 
     auto img = ed->createComponentSnapshot (ed->getLocalBounds(), true, scale);
 

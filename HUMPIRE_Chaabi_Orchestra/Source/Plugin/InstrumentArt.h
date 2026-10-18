@@ -3,12 +3,12 @@
 #include "HumpireCore/HumpireTheme.h"
 #include "Instruments.h"
 
-// Silhouettes vectorielles (juce::Path) des 8 instruments, dessinees dans une boite 100 x 100.
+// Vector silhouettes (juce::Path) of the 8 instruments, drawn in a 100 x 100 box.
 namespace humpire
 {
 struct InstrumentArt
 {
-    // Retourne { corps (rempli), details (traits) }
+    // Returns { body (filled), details (strokes) }
     static std::pair<juce::Path, juce::Path> make (int idx)
     {
         juce::Path body, detail;
@@ -16,7 +16,7 @@ struct InstrumentArt
 
         switch (idx)
         {
-            case 0: // Mandole : corps en poire, manche long, chevilles
+            case 0: // Mandole: pear-shaped body, long neck, tuning pegs
                 body.startNewSubPath (50, 40);
                 body.cubicTo (78, 40, 90, 62, 76, 82);
                 body.cubicTo (68, 96, 32, 96, 24, 82);
@@ -29,7 +29,7 @@ struct InstrumentArt
                 line (36, 84, 64, 84);
                 break;
 
-            case 1: // Banjo : peau ronde, manche
+            case 1: // Banjo: round head, neck
                 body.addEllipse (14, 44, 72, 52);
                 body.addRoundedRectangle (46.5f, 2, 7, 46, 2);
                 body.addRoundedRectangle (43, 0, 14, 9, 3);
@@ -43,7 +43,7 @@ struct InstrumentArt
                 line (50, 8, 50, 74);
                 break;
 
-            case 2: // Violon (alto) : silhouette en 8, ouies en f
+            case 2: // Violin: figure-8 silhouette, f-holes
                 body.startNewSubPath (50, 34);
                 body.cubicTo (72, 30, 82, 44, 72, 56);
                 body.cubicTo (66, 62, 66, 64, 72, 70);
@@ -60,14 +60,14 @@ struct InstrumentArt
                 line (50, 8, 50, 88);
                 break;
 
-            case 3: // Ney : roseau a noeuds + trous
+            case 3: // Ney: knotted reed + finger holes
                 body.addRoundedRectangle (44, 2, 12, 96, 5);
                 for (int i = 0; i < 6; ++i) detail.addEllipse (47, 30.f + (float) i * 11.f, 6, 6);
                 for (float y : { 18.f, 54.f, 80.f }) line (44, y, 56, y);
                 detail.addEllipse (46, 6, 8, 5);
                 break;
 
-            case 4: // Qanun : trapeze a cordes
+            case 4: // Qanun: trapezoid with strings
                 body.startNewSubPath (10, 78);
                 body.lineTo (28, 22);
                 body.lineTo (92, 22);
@@ -78,7 +78,7 @@ struct InstrumentArt
                 detail.addEllipse (62, 58, 10, 10);
                 break;
 
-            case 5: // Derbouka : calice (tete large, col fin, pied evase)
+            case 5: // Derbouka: goblet (wide head, thin neck, flared foot)
                 body.startNewSubPath (10, 16);
                 body.lineTo (90, 16);
                 body.cubicTo (90, 34, 60, 36, 59, 50);
@@ -95,7 +95,7 @@ struct InstrumentArt
                 line (41, 58, 59, 58);
                 break;
 
-            case 6: // Tar : cadre rond + cymbalettes
+            case 6: // Tar: round frame + jingles
                 body.addEllipse (6, 6, 88, 88);
                 detail.addEllipse (14, 14, 72, 72);
                 for (int i = 0; i < 4; ++i)
@@ -107,7 +107,7 @@ struct InstrumentArt
                 detail.addEllipse (30, 30, 40, 40);
                 break;
 
-            default: // Bendir : cadre + corde de timbre
+            default: // Bendir: frame + snare cord
                 body.addEllipse (6, 6, 88, 88);
                 detail.addEllipse (13, 13, 74, 74);
                 for (float y : { 42.f, 50.f, 58.f }) line (16, y, 84, y);

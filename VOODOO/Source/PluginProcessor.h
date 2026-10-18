@@ -5,6 +5,20 @@
 #include "VoodooVoice.h"
 #include "Presets.h"
 
+// Synthesiser that also remembers the latest mod wheel (CC1) value when no voice is playing,
+// so a note started later begins with the real wheel position instead of a stale/zero value.
+struct VoodooModSynth : public juce::Synthesiser
+{
+    explicit VoodooModSynth (Voodoo::GlideState& s) : shared (s) {}
+    void handleController (int ch, int num, int val) override
+    {
+        if (num == 1) shared.lastMod.store ((float) val / 127.f);
+        else if (num == 121) shared.lastMod.store (0.f);   // reset all controllers
+        juce::Synthesiser::handleController (ch, num, val);
+    }
+    Voodoo::GlideState& shared;
+};
+
 class VoodooProcessor : public juce::AudioProcessor
 {
 public:
@@ -55,11 +69,12 @@ private:
 
     Voodoo::ParamPtrs ptrs;
     Voodoo::GlideState glideState;
-    juce::Synthesiser synth;
+    VoodooModSynth synth;
     juce::dsp::Chorus<float> chorus;
     juce::Reverb reverb;
     StereoDelay dly;
     double sampleRate = 44100.0;
+    int maxBlock = 512;   // largest block given to prepareToPlay (chorus is processed in chunks of at most this size)
     int lastMonoNote = -1;
     juce::MidiBuffer monoMidi;
     float dcXl = 0.f, dcYl = 0.f, dcXr = 0.f, dcYr = 0.f, dcRm = 0.999f;

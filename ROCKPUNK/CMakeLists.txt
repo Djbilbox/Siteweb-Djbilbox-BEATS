@@ -31,13 +31,15 @@ add_compile_definitions(JUCE_MODAL_LOOPS_PERMITTED=1)
 add_subdirectory(${JUCE_DIR} juce)
 
 # ---------------------------------------------------------------------------
-# Artwork and layout are compiled into the binary.
-# The editor used to read them from the folder it was built in, which meant a
-# blank window on every machine but this one.
+# Artwork and layout are compiled into the binary, so that the editor shows on
+# any machine. They are produced from the master mockup by Tools/make_ui_assets.py
+# (faceplate with the moving parts removed, the sprites drawn back at run time,
+# and every measured position).
 # ---------------------------------------------------------------------------
 juce_add_binary_data(ROCKPUNK_Data
     SOURCES
         Assets/faceplate.jpg
+        Assets/sprites.png
         Assets/layout.json)
 
 # ---------------------------------------------------------------------------
@@ -55,6 +57,8 @@ juce_add_plugin(ROCKPUNK
     PLUGIN_CODE RPK1
     PRODUCT_NAME "ROCKPUNK"
     COMPANY_NAME "DJBILBOX BEATS"
+    COMPANY_WEBSITE "https://djbilboxbeats.com"
+    COMPANY_EMAIL "support@djbilboxbeats.com"
     BUNDLE_ID "com.djbilboxbeats.rockpunk"
     DESCRIPTION "ROCKPUNK GUITAR - hybrid rock'n'roll guitar engine"
     FORMATS ${ROCKPUNK_FORMATS}
@@ -82,7 +86,8 @@ target_compile_definitions(ROCKPUNK
     PRIVATE
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
-        JUCE_VST3_CAN_REPLACE_VST2=0)
+        JUCE_VST3_CAN_REPLACE_VST2=0
+        ROCKPUNK_VERSION_STRING="${PROJECT_VERSION}")
 
 target_link_libraries(ROCKPUNK
     PRIVATE
@@ -145,9 +150,9 @@ endif()
 
 if (NOT EXISTS "${ROCKPUNK_BANK}")
     message(STATUS
-        "Aucune banque dans SampleBank/ : le produit se construit sans son livre. "
-        "Pour en embarquer une (contenu dont vous avez la licence), la fabriquer "
-        "avec la cible ROCKPUNK_ConvertSamples puis reconfigurer.")
+        "No bank in SampleBank/: the product is built without a sound library. "
+        "To bundle one (content you hold the licence for), build it with the "
+        "ROCKPUNK_ConvertSamples target, then reconfigure.")
 endif()
 
 # ---------------------------------------------------------------------------
@@ -180,7 +185,8 @@ target_sources(ROCKPUNK_RenderTest PRIVATE
 target_include_directories(ROCKPUNK_RenderTest PRIVATE Source)
 target_compile_features(ROCKPUNK_RenderTest PRIVATE cxx_std_17)
 target_compile_definitions(ROCKPUNK_RenderTest PRIVATE
-    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1
+    ROCKPUNK_VERSION_STRING="${PROJECT_VERSION}")
 target_link_libraries(ROCKPUNK_RenderTest PRIVATE
     ROCKPUNK_Data
     juce::juce_audio_processors juce::juce_audio_formats juce::juce_audio_utils

@@ -1,80 +1,80 @@
-CONTRAT DE LICENCE UTILISATEUR FINAL — ROCKPUNK GUITAR
+END USER LICENSE AGREEMENT - ROCKPUNK GUITAR
 DJBILBOX BEATS
-Version 1.1.0 — 2026
+Version 1.1.0 - 2026
 
 ================================================================================
 
-En installant ou en utilisant ROCKPUNK, vous acceptez les conditions ci-dessous.
+By installing or using ROCKPUNK you accept the terms below.
 
-1. LICENCE ACCORDÉE
+1. LICENSE GRANTED
 
-DJBILBOX BEATS vous accorde une licence personnelle, non exclusive et non
-transférable d'utilisation de ROCKPUNK.
+DJBILBOX BEATS grants you a personal, non-exclusive, non-transferable license
+to use ROCKPUNK.
 
-Cette licence vous autorise à :
-  - installer le logiciel sur les machines que vous possédez ou utilisez
-    personnellement ;
-  - l'utiliser pour des productions musicales personnelles et commerciales ;
-  - diffuser et vendre la musique que vous créez avec, sans redevance ni
-    mention obligatoire.
+This license allows you to:
+  - install the software on the machines that you own or personally use;
+  - use it for personal and commercial music productions;
+  - distribute and sell the music you create with it, royalty-free and with no
+    mandatory credit.
 
-ROCKPUNK est livré en une seule édition, complète et sans limitation de durée :
-il n'y a ni version d'essai, ni code d'activation, ni extension à acheter
-séparément.
+ROCKPUNK is delivered as a single, complete edition with no time limit: there
+is no trial version, no activation code and no add-on to buy separately.
 
 2. RESTRICTIONS
 
-Vous ne pouvez pas :
-  - revendre, louer, prêter ou redistribuer le logiciel lui-même ;
-  - le décompiler ou le désassembler ;
-  - en retirer les mentions de propriété ;
-  - l'intégrer dans un autre produit logiciel destiné à la distribution.
+You may not:
+  - resell, rent, lend or redistribute the software itself;
+  - decompile or disassemble it;
+  - remove its ownership notices;
+  - include it in another software product intended for distribution.
 
-Les presets d'usine et la banque de sons font partie du logiciel et ne peuvent
-pas être extraits ni redistribués en tant que sons isolés. La musique que vous
-produisez avec, en revanche, vous appartient entièrement.
+The factory presets are part of the software and may not be extracted or
+redistributed as isolated sounds. The music you produce with it, on the other
+hand, belongs entirely to you.
 
-3. PROPRIÉTÉ
+ROCKPUNK does not ship any recording: every note is calculated. Any audio files
+that you place in your own Samples folder remain yours, and you are responsible
+for holding the rights to them.
 
-ROCKPUNK, son code, son interface graphique et sa banque de sons restent la
-propriété de DJBILBOX BEATS. La présente licence constitue un droit d'usage,
-non une cession de propriété.
+3. OWNERSHIP
 
-4. GARANTIE
+ROCKPUNK, its code and its graphical interface remain the property of
+DJBILBOX BEATS. This license is a right of use, not a transfer of ownership.
 
-Le logiciel est fourni « en l'état », sans garantie d'aucune sorte, expresse ou
-implicite, notamment quant à son adéquation à un usage particulier ou à son
-fonctionnement ininterrompu.
+4. WARRANTY
 
-5. LIMITATION DE RESPONSABILITÉ
+The software is provided "as is", without warranty of any kind, express or
+implied, including as to its fitness for a particular purpose or its
+uninterrupted operation.
 
-DJBILBOX BEATS ne pourra être tenu responsable d'aucun dommage direct ou
-indirect résultant de l'utilisation ou de l'impossibilité d'utiliser le
-logiciel, y compris la perte de données ou de projets musicaux.
+5. LIMITATION OF LIABILITY
 
-Il vous appartient de sauvegarder régulièrement vos projets.
+DJBILBOX BEATS shall not be liable for any direct or indirect damage resulting
+from the use of, or the inability to use, the software, including the loss of
+data or of music projects.
 
-6. RÉSILIATION
+It is your responsibility to back up your projects regularly.
 
-La licence prend fin automatiquement en cas de manquement à ces conditions. Vous
-devez alors désinstaller le logiciel et détruire toutes les copies en votre
-possession.
+6. TERMINATION
 
-7. DROIT APPLICABLE
+The license ends automatically if you breach these terms. You must then
+uninstall the software and destroy all copies in your possession.
 
-Le présent contrat est soumis au droit français.
+7. GOVERNING LAW
+
+This agreement is governed by French law.
 
 ================================================================================
 
-MENTIONS TECHNIQUES
+TECHNICAL NOTICES
 
-ROCKPUNK est construit avec le framework JUCE (juce.com). VST est une marque
-déposée de Steinberg Media Technologies GmbH. Audio Units est une marque
-d'Apple Inc.
+ROCKPUNK is built with the JUCE framework (juce.com). VST is a registered
+trademark of Steinberg Media Technologies GmbH. Audio Units is a trademark of
+Apple Inc.
 
 ================================================================================
 
 DJBILBOX BEATS
-djbilboxbeats.com — support@djbilboxbeats.com
+djbilboxbeats.com - support@djbilboxbeats.com
 
-© 2026 DJBILBOX BEATS. Tous droits réservés.
+(C) 2026 DJBILBOX BEATS. All rights reserved.

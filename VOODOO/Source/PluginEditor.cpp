@@ -8,6 +8,23 @@ namespace
 const juce::Colour red { 0xffff3b52 }, purple { 0xffb44bff }, panel { 0xffe8e2e0 }, dark { 0xff1a0f1c };
 constexpr float K = 0.5f; // mockup 2000 px -> 1000 px
 juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
+
+// On-screen keyboard shows kKeyLow..kKeyHigh (middle C = C3 in JUCE naming): 48..96 = 4 octaves + 1 key
+constexpr int kKeyLow = 48, kKeyHigh = 96;
+int countWhiteKeys (int lo, int hi) { int n = 0; for (int k = lo; k <= hi; ++k) if (! juce::MidiMessage::isMidiNoteBlack (k)) ++n; return n; }
+
+// Section header: text centred between two thin rules. x0/x1/yc are mockup coordinates (see K).
+void drawHeader (juce::Graphics& g, const juce::String& text, juce::Colour col, float size, int x0, int x1, int yc)
+{
+    const juce::Font font (juce::FontOptions (size, juce::Font::bold));
+    const float tw = juce::GlyphArrangement::getStringWidth (font, text), gap = 7.f;
+    const float px0 = (float) x0 * K, px1 = (float) x1 * K, cy = (float) yc * K, cx = (px0 + px1) * 0.5f;
+    g.setFont (font); g.setColour (col);
+    g.drawText (text, juce::Rectangle<float> (cx - tw * 0.5f - 3.f, cy - 10.f, tw + 6.f, 20.f), juce::Justification::centred, false);
+    g.setColour (col.withAlpha (0.6f));
+    if (cx - tw * 0.5f - gap > px0) g.drawLine (px0, cy, cx - tw * 0.5f - gap, cy, 1.f);
+    if (cx + tw * 0.5f + gap < px1) g.drawLine (cx + tw * 0.5f + gap, cy, px1, cy, 1.f);
+}
 }
 
 VoodooLNF::VoodooLNF()
@@ -99,16 +116,25 @@ VoodooPanel::VoodooPanel (VoodooProcessor& p)
     logo = juce::ImageFileFormat::loadFrom (BinaryData::logo_png, (size_t) BinaryData::logo_pngSize);
 
     addKnob (rate, P::rate, "RATE", false);        addKnob (amount, P::amount, "AMOUNT", true);
-    addKnob (pitch, P::pitch, "PITCH", false);     addKnob (glide, P::glide, "GLIDE", true);
-    addKnob (filter, P::filter, "FILTER", false);  addKnob (volume, P::volume, "VOLUME", true);
+    addKnob (pitch, P::pitch, "TRANSPOSE", false);     addKnob (glide, P::glide, "GLIDE", true);
+    addKnob (filter, P::filter, "CUTOFF", false);  addKnob (volume, P::volume, "VOLUME", true);
     addKnob (reverb, P::reverb, "REVERB", false);  addKnob (chorus, P::chorus, "CHORUS", true);
-    addKnob (dist, P::dist, "DISTORTION", false);  addKnob (delay, P::delay, "DELAY", true);
-    addKnob (dtime, P::dtime, "TIME", false);      addKnob (feedback, P::fb, "FEEDBACK", true);
+    addKnob (dist, P::dist, "DISTORTION", false);  addKnob (delay, P::delay, "DLY MIX", true);
+    addKnob (dtime, P::dtime, "DLY TIME", false);   addKnob (feedback, P::fb, "DLY FDBK", true);
     const char* en[4] = { "ATK", "DEC", "SUS", "REL" };
-    for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], false, juce::Slider::LinearVertical);
-    for (int i = 0; i < 5; ++i) addKnob (timb[i], P::t1 + i, juce::String (i + 1), false, juce::Slider::LinearVertical);
-    addKnob (bend, P::bend, "Pitch Bend", false, juce::Slider::LinearVertical);
-    addKnob (modw, P::modw, "Modulation", false, juce::Slider::LinearVertical);
+    for (int i = 0; i < 4; ++i)
+    {
+        addKnob (env[i], P::atk + i, en[i], false, juce::Slider::LinearVertical);
+        env[i].s.getProperties().set ("fs", 13.f); env[i].s.getProperties().set ("lw", 34);   // caption size / max width (px): neighbours are only 33 px apart
+    }
+    const char* tm[5] = { "BREATH", "BODY", "BRIGHT", "WIDTH", "TEXTURE" };   // timbre sliders: names of Params t1..t5 (the sliders are too close together for one row of captions)
+    for (int i = 0; i < 5; ++i)
+    {
+        addKnob (timb[i], P::t1 + i, tm[i], false, juce::Slider::LinearVertical);
+        timb[i].s.getProperties().set ("fs", 11.f); timb[i].s.getProperties().set ("lw", 56); timb[i].s.getProperties().set ("row", i & 1);   // alternate two caption rows
+    }
+    addKnob (bend, P::bend, "PITCH BEND", false, juce::Slider::LinearVertical);
+    addKnob (modw, P::modw, "MOD WHEEL", false, juce::Slider::LinearVertical);
     bend.s.getProperties().set ("wheel", true); modw.s.getProperties().set ("wheel", true);
     bend.s.setDoubleClickReturnValue (true, 0.0);
     bend.s.onDragEnd = [this] { bend.s.setValue (0.0, juce::sendNotificationSync); }; // retour au centre
@@ -131,11 +157,11 @@ VoodooPanel::VoodooPanel (VoodooProcessor& p)
     presetLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (presetLabel);
 
-    keys.setKeyWidth (27.9f);
-    keys.setLowestVisibleKey (48);
+    keys.setAvailableRange (kKeyLow, kKeyHigh);   // must come before sizing: with scroll buttons hidden the first visible key is the range start
     keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, red.withAlpha (0.55f));
     keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, purple.withAlpha (0.3f));
     keys.setScrollButtonsVisible (false);
+    keys.setLowestVisibleKey (kKeyLow);
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
@@ -193,15 +219,15 @@ void VoodooPanel::showPresetMenu()
     juce::PopupMenu user; auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.voodoopreset");
     files.sort();
     for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
-    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
-    menu.addItem (999, "Ouvrir un fichier .voodoopreset...");
+    menu.addItem (999, "Open a .voodoopreset file...");
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
         if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
         else if (r == 999)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Charger un preset", userPresetDir(), "*.voodoopreset");
+            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.voodoopreset");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                                   [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
         }
@@ -211,7 +237,7 @@ void VoodooPanel::showPresetMenu()
 
 void VoodooPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.voodoopreset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.voodoopreset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
@@ -245,7 +271,7 @@ void VoodooPanel::loadUserPreset (const juce::File& f)
 void VoodooPanel::showExpansion()
 {
     juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "EXPANSION VOL.1",
-        "Les packs d'expansion arrivent bientot.\n\nhttps://djbilboxbeats.gumroad.com/");
+        "Expansion packs are coming soon.\n\nhttps://djbilboxbeats.gumroad.com/");
 }
 
 void VoodooPanel::paint (juce::Graphics& g)
@@ -295,15 +321,28 @@ void VoodooPanel::paint (juce::Graphics& g)
         if (k == &bend || k == &modw) continue;
         const auto r = k->s.getBounds();
         const bool lin = k->s.getSliderStyle() == juce::Slider::LinearVertical;
-        g.drawFittedText (k->label, r.getX() - 20, r.getBottom() + (lin ? 2 : -2), r.getWidth() + 40, 20, juce::Justification::centred, 1);
+        const auto& pr = k->s.getProperties();
+        g.setFont (juce::FontOptions ((float) pr.getWithDefault ("fs", 15.f), juce::Font::bold));
+        const int lw = (int) pr.getWithDefault ("lw", r.getWidth() + 40), row = (int) pr.getWithDefault ("row", 0);
+        g.drawFittedText (k->label, r.getCentreX() - lw / 2, r.getBottom() + (lin ? 2 : -2) + row * 12, lw, 20, juce::Justification::centred, 1);
     }
-    g.setFont (juce::FontOptions (17.f, juce::Font::bold));
-    g.drawFittedText ("ADSR", R (548, 700, 240, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("TIMBRE", R (1230, 700, 250, 40), juce::Justification::centred, 1);
+    // section headers (rules + text), one per group of controls
+    const auto ink = juce::Colour (0xff1c1c1c);
+    drawHeader (g, "LFO", ink, 16.f, 190, 548, 408);
+    drawHeader (g, "EFFECTS", ink, 16.f, 1470, 1815, 408);
+    drawHeader (g, "AMP ENVELOPE", ink, 14.f, 505, 790, 718);
+    drawHeader (g, "TIMBRE", ink, 14.f, 1200, 1500, 718);
+    // captions under the five drop-down menus
+    g.setColour (ink); g.setFont (juce::FontOptions (11.f, juce::Font::bold));
+    {
+        const char* cap[5] = { "ENGINE", "LFO SHAPE", "LFO DESTINATION", "FILTER TYPE", "VOICE MODE" };
+        const int cx[5] = { 347, 667, 1000, 1335, 1655 };
+        for (int i = 0; i < 5; ++i) g.drawFittedText (cap[i], R (cx[i] - 140, 1058, 280, 28), juce::Justification::centred, 1);
+    }
     g.setColour (juce::Colour (0xffcfcfcf));
     g.setFont (juce::FontOptions (12.f, juce::Font::bold));
     g.drawFittedText ("Pitch Bend", R (240, 1385, 170, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("Modulation", R (400, 1385, 170, 40), juce::Justification::centred, 1);
+    g.drawFittedText ("Mod Wheel", R (385, 1385, 170, 40), juce::Justification::centred, 1);
 }
 
 void VoodooPanel::resized()
@@ -315,9 +354,9 @@ void VoodooPanel::resized()
     place (reverb, 1555, 520, 160); place (chorus, 1728, 520, 160);
     place (dist, 1569, 718, 140);   place (delay, 1727, 718, 140);
     place (dtime, 1569, 888, 140);  place (feedback, 1727, 888, 140);
-    const int ex[4] = { 548, 614, 680, 746 }, tx[5] = { 1255, 1305, 1354, 1403, 1452 };
-    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 25, 745, 50, 190));
-    for (int i = 0; i < 5; ++i) timb[i].s.setBounds (R (tx[i] - 22, 745, 44, 190));
+    const int ex[4] = { 548, 614, 680, 746 }, tx[5] = { 1236, 1292, 1348, 1404, 1460 };
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 25, 745, 50, 170));   // slightly shorter than the knob columns: leaves room for two caption rows above the combos
+    for (int i = 0; i < 5; ++i) timb[i].s.setBounds (R (tx[i] - 22, 745, 44, 170));
     bend.s.setBounds (R (290, 1135, 70, 250)); modw.s.setBounds (R (435, 1135, 70, 250));
     cWave.c.setBounds (R (207, 992, 280, 62)); cLfo.c.setBounds (R (527, 992, 280, 62)); cDest.c.setBounds (R (860, 992, 280, 62));
     cFilt.c.setBounds (R (1195, 992, 280, 62)); cMono.c.setBounds (R (1515, 992, 280, 62));
@@ -326,4 +365,5 @@ void VoodooPanel::resized()
     presetLabel.setBounds (R (850, 128, 300, 80));
     expansion.setBounds (R (205, 250, 370, 100));
     keys.setBounds (R (628, 1090, 1172, 380));
+    keys.setKeyWidth ((float) keys.getWidth() / (float) countWhiteKeys (kKeyLow, kKeyHigh));   // fit the whole range exactly
 }

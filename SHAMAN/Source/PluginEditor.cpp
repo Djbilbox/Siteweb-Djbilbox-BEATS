@@ -10,6 +10,53 @@ constexpr float K = 0.5f;   // coordonnees maquette (2000 px) -> 1000 px
 juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
 juce::Rectangle<int> C (int cx, int cy, int w, int h) { return R (cx - w / 2, cy - h / 2, w, h); }
 juce::Colour ramp (float t) { return amber.interpolatedWith (ember, juce::jlimit (0.f, 1.f, t)); }
+
+// On-screen keyboard shows kKeyLow..kKeyHigh (middle C = C3 in JUCE naming): 36..84 = 4 octaves + 1 key
+constexpr int kKeyLow = 36, kKeyHigh = 84;
+int countWhiteKeys (int lo, int hi) { int n = 0; for (int k = lo; k <= hi; ++k) if (! juce::MidiMessage::isMidiNoteBlack (k)) ++n; return n; }
+
+// Section header: text centred between two thin rules. x0/x1/yc are mockup coordinates (see K).
+void drawHeader (juce::Graphics& g, const juce::String& text, juce::Colour col, float size, int x0, int x1, int yc)
+{
+    const juce::Font font (juce::FontOptions (size, juce::Font::bold));
+    const float tw = juce::GlyphArrangement::getStringWidth (font, text), gap = 7.f;
+    const float px0 = (float) x0 * K, px1 = (float) x1 * K, cy = (float) yc * K, cx = (px0 + px1) * 0.5f;
+    g.setFont (font); g.setColour (col);
+    g.drawText (text, juce::Rectangle<float> (cx - tw * 0.5f - 3.f, cy - 10.f, tw + 6.f, 20.f), juce::Justification::centred, false);
+    g.setColour (col.withAlpha (0.7f));
+    if (cx - tw * 0.5f - gap > px0) g.drawLine (px0, cy, cx - tw * 0.5f - gap, cy, 1.f);
+    if (cx + tw * 0.5f + gap < px1) g.drawLine (cx + tw * 0.5f + gap, cy, px1, cy, 1.f);
+}
+
+// Captions: each one is centred at cx on a text row. Captions that would touch a neighbour on the same row shrink
+// (both of them, proportionally) until they clear each other; the others keep their natural size.
+struct Cap
+{
+    juce::String text; juce::Rectangle<int> box; juce::Colour col; float wanted = 10.f; bool bold = false; float size = 0.f;
+    float width (float sz) const { return juce::GlyphArrangement::getStringWidth (juce::Font (juce::FontOptions (sz, bold ? juce::Font::bold : juce::Font::plain)), text); }
+};
+void drawCaptions (juce::Graphics& g, std::vector<Cap>& caps)
+{
+    for (auto& c : caps) c.size = c.wanted;
+    for (int pass = 0; pass < 3; ++pass)
+        for (size_t i = 0; i < caps.size(); ++i)
+            for (size_t j = i + 1; j < caps.size(); ++j)
+            {
+                auto& a = caps[i]; auto& b = caps[j];
+                if (std::abs (a.box.getY() - b.box.getY()) >= 12) continue;
+                const float d = (float) std::abs (a.box.getCentreX() - b.box.getCentreX()), wa = a.width (a.size), wb = b.width (b.size);
+                if ((wa + wb) * 0.5f + 4.f > d && wa + wb > 0.f)
+                {
+                    const float f = juce::jmax (0.5f, 2.f * (d - 4.f) / (wa + wb));
+                    a.size = juce::jmax (7.f, a.size * f); b.size = juce::jmax (7.f, b.size * f);
+                }
+            }
+    for (auto& c : caps)
+    {
+        g.setColour (c.col); g.setFont (juce::FontOptions (c.size, c.bold ? juce::Font::bold : juce::Font::plain));
+        g.drawText (c.text, c.box, juce::Justification::centred, false);
+    }
+}
 }
 
 ShLNF::ShLNF()
@@ -108,17 +155,17 @@ ShPanel::ShPanel (ShProcessor& p)
     logo = load (BinaryData::logo_png, BinaryData::logo_pngSize);
     cassette = load (BinaryData::cassette_png, BinaryData::cassette_pngSize);
 
-    addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "PITCH");
-    addKnob (glide, P::glide, "GLIDE");    addKnob (filter, P::filter, "FILTER");
+    addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "TRANSPOSE");
+    addKnob (glide, P::glide, "GLIDE");    addKnob (filter, P::filter, "CUTOFF");
     addKnob (tone, P::t1, "TONE");       addKnob (body, P::t2, "BODY");       addKnob (bright, P::t3, "BRIGHT");
     addKnob (width, P::t4, "WIDTH");       addKnob (texture, P::t5, "TEXTURE");
     addKnob (volume, P::volume, "VOLUME"); addKnob (reverb, P::reverb, "REVERB");  addKnob (chorus, P::chorus, "CHORUS");
-    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DELAY");
-    addKnob (dtime, P::dtime, "TIME");     addKnob (feedback, P::fb, "FEEDBACK");
+    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DLY MIX");
+    addKnob (dtime, P::dtime, "DLY TIME");  addKnob (feedback, P::fb, "DLY FEEDBACK");
     const char* en[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
     for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], juce::Slider::LinearVertical);
-    addKnob (fenvK, P::fenv, "ENV"); addKnob (resoK, P::reso, "RES");
-    const char* tn[5] = { "A", "D", "S", "R", "VELOCITY" };
+    addKnob (fenvK, P::fenv, "ENV AMT"); addKnob (resoK, P::reso, "RES");
+    const char* tn[5] = { "ATK", "DEC", "SUS", "REL", "VELOCITY" };
     const int ti[5] = { P::fatk, P::fdec, P::fsus, P::frel, P::velocity };
     for (int i = 0; i < 5; ++i) addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical);
     addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
@@ -146,11 +193,11 @@ ShPanel::ShPanel (ShProcessor& p)
     presetLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (presetLabel);
 
-    keys.setKeyWidth (30.2f);
-    keys.setLowestVisibleKey (36);
+    keys.setAvailableRange (kKeyLow, kKeyHigh);   // must come before sizing: with scroll buttons hidden the first visible key is the range start
     keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, amber.withAlpha (0.6f));
     keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, ember.withAlpha (0.3f));
     keys.setScrollButtonsVisible (false);
+    keys.setLowestVisibleKey (kKeyLow);
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
@@ -209,15 +256,15 @@ void ShPanel::showPresetMenu()
     auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.shpreset"); files.sort();
     juce::PopupMenu user;
     for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
-    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
-    menu.addItem (999, "Ouvrir un fichier .shpreset...");
+    menu.addItem (999, "Open a .shpreset file...");
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
         if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
         else if (r == 999)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Charger un preset", userPresetDir(), "*.shpreset");
+            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.shpreset");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                                   [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
         }
@@ -227,7 +274,7 @@ void ShPanel::showPresetMenu()
 
 void ShPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.shpreset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.shpreset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
@@ -254,7 +301,7 @@ void ShPanel::loadUserPreset (const juce::File& f)
 void ShPanel::showExpansion()
 {
     juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "EXPANSION VOL.1",
-        "Les packs d'expansion arrivent bientot.\n\nhttps://djbilboxbeats.gumroad.com/");
+        "Expansion packs are coming soon.\n\nhttps://djbilboxbeats.gumroad.com/");
 }
 
 void ShPanel::paint (juce::Graphics& g)
@@ -328,22 +375,35 @@ void ShPanel::paint (juce::Graphics& g)
     // plaque des molettes
     g.setColour (juce::Colour (0xff17140e)); g.fillRoundedRectangle (R (218, 1125, 402, 285).toFloat(), 10.f);
     g.setColour (juce::Colour (0xff5a5a50)); g.drawRoundedRectangle (R (218, 1125, 402, 285).toFloat(), 10.f, 2.f);
-    // labels
+    // captions of the knobs and sliders (no overlapping texts: neighbours on the same row shrink to fit)
+    const auto ink = juce::Colour (0xffe8e0c8);
+    std::vector<Cap> caps;
     for (auto* k : all)
     {
+        if (k->label.isEmpty()) continue;
         const auto r = k->s.getBounds();
-        g.setColour (k->s.getProperties()["small"] ? juce::Colour (0xffffd8a0) : juce::Colour (0xffe8e0c8));
-        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 10.5f : 12.5f)));
-        g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : 0), r.getWidth() + 50, 18, juce::Justification::centred, 1);
+        const bool small = k->s.getProperties()["small"];
+        caps.push_back ({ k->label, { r.getCentreX() - 60, r.getBottom() + (k->lin ? 2 : 0), 120, 18 },
+                          small ? juce::Colour (0xffffd8a0) : ink, small ? 10.f : (k->lin ? 10.5f : 12.5f), false });
     }
-    g.setColour (juce::Colour (0xffe8e0c8)); g.setFont (juce::FontOptions (15.f));
-    g.drawFittedText ("LFO", R (466, 528, 120, 40), juce::Justification::centred, 1);
-    g.setFont (juce::FontOptions (12.f));
+    // captions of the five drop-down menus (under each menu)
+    {
+        const char* ct[5] = { "ENGINE", "LFO SHAPE", "LFO DEST", "FILTER TYPE", "VOICE MODE" };
+        Combo* cc[5] = { &cWave, &cLfo, &cDest, &cFilt, &cMono };
+        for (int i = 0; i < 5; ++i)
+        {
+            const auto b = cc[i]->c.getBounds();
+            caps.push_back ({ ct[i], { b.getCentreX() - 70, b.getBottom() + 2, 140, 15 }, juce::Colour (0xffffd8a0), 10.f, false });
+        }
+    }
+    drawCaptions (g, caps);
+    // section headers (rules + text), one per group of controls
+    drawHeader (g, "LFO", ink, 15.f, 318, 587, 548);
+    drawHeader (g, "AMP ENVELOPE", ink, 12.f, 318, 720, 735);
+    drawHeader (g, "FILTER ENVELOPE", ink, 12.f, 1250, 1550, 735);
+    g.setColour (ink); g.setFont (juce::FontOptions (12.f));
     g.drawFittedText ("Pitch Bend", R (275, 1368, 140, 40), juce::Justification::centred, 1);
     g.drawFittedText ("Modulation", R (420, 1368, 140, 40), juce::Justification::centred, 1);
-    g.setColour (amber.withAlpha (0.6f));   // accolade LFO
-    g.drawLine ((float) R (380, 0, 0, 0).getX(), (float) R (0, 548, 0, 0).getY(), (float) R (470, 0, 0, 0).getX(), (float) R (0, 548, 0, 0).getY(), 1.f);
-    g.drawLine ((float) R (585, 0, 0, 0).getX(), (float) R (0, 548, 0, 0).getY(), (float) R (672, 0, 0, 0).getX(), (float) R (0, 548, 0, 0).getY(), 1.f);
 }
 
 void ShPanel::resized()
@@ -355,9 +415,9 @@ void ShPanel::resized()
     place (glide, 903, 900, 100); place (filter, 1095, 900, 100);
     place (tone, 275, 448, 64); place (body, 385, 448, 64); place (bright, 495, 448, 64); place (width, 605, 448, 64);
     place (texture, 1300, 448, 64); place (resoK, 1410, 448, 64); place (fenvK, 1520, 448, 64); place (delay, 1630, 448, 64);
-    const int ex[4] = { 357, 465, 573, 680 }, tx[5] = { 1325, 1400, 1473, 1548, 1622 };
-    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 28, 735, 56, 212));
-    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 735, 56, 212));
+    const int ex[4] = { 357, 465, 573, 680 }, tx[5] = { 1290, 1363, 1436, 1510, 1612 };
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 28, 760, 56, 187));
+    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 760, 56, 187));
     bend.s.setBounds (C (345, 1255, 90, 245)); modw.s.setBounds (C (490, 1255, 90, 245));
     cWave.c.setBounds (R (215, 1008, 290, 50)); cLfo.c.setBounds (R (540, 1008, 290, 50)); cDest.c.setBounds (R (864, 1008, 290, 50));
     cFilt.c.setBounds (R (1190, 1008, 290, 50)); cMono.c.setBounds (R (1520, 1008, 270, 50));
@@ -366,4 +426,5 @@ void ShPanel::resized()
     presetLabel.setBounds (R (800, 140, 410, 80));
     expansion.setBounds (R (225, 100, 365, 240));
     keys.setBounds (R (652, 1135, 1148, 290));
+    keys.setKeyWidth ((float) keys.getWidth() / (float) countWhiteKeys (kKeyLow, kKeyHigh));   // fit the whole range exactly
 }

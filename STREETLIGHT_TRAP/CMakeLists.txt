@@ -12,11 +12,11 @@ juce_add_binary_data(SlAssets SOURCES Assets/camel.png Assets/logo.png Assets/ca
 juce_add_plugin(STREETLIGHT_TRAP
     COMPANY_NAME "DJBILBOX BEATS"
     PLUGIN_MANUFACTURER_CODE Djbb
-    PLUGIN_CODE Sll
+    PLUGIN_CODE Sll1
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
-    PRODUCT_NAME "STREETLIGHT_TRAP"
+    PRODUCT_NAME "STREETLIGHT TRAP"
     VST3_CATEGORIES Instrument Synth)
 
 target_sources(STREETLIGHT_TRAP PRIVATE

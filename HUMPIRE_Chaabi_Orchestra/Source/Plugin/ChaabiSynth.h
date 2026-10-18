@@ -7,13 +7,13 @@
 
 namespace humpire
 {
-// Parametres partages instrument -> voix (ecrits par le thread audio au debut de chaque bloc).
+// Parameters shared instrument -> voices (written by the audio thread at the start of each block).
 struct SynthParams
 {
     std::atomic<float> pitchSemis { 0.f }, attack { 0.f }, release { 0.f }, authenticity { 0.f }, bendRange { 2.f };
 };
 
-// Voix de sampler : interpolation Hermite, boucle, ADSR, pan, humanisation.
+// Sampler voice: Hermite interpolation, loop, ADSR, pan, humanisation.
 class ChaabiVoice : public juce::SynthesiserVoice
 {
 public:
@@ -26,10 +26,11 @@ public:
     void controllerMoved (int, int) override {}
     void aftertouchChanged (int v) override { pressureGain = 1.0f + 0.5f * (float) v / 127.0f; }
     void channelPressureChanged (int v) override { pressureGain = 1.0f + 0.5f * (float) v / 127.0f; }
+    using juce::SynthesiserVoice::renderNextBlock;
     void renderNextBlock (juce::AudioBuffer<float>&, int startSample, int numSamples) override;
     void setCurrentPlaybackSampleRate (double newRate) override;
 
-    void detach() noexcept { region = nullptr; data = nullptr; }      // avant changement de banque
+    void detach() noexcept { region = nullptr; data = nullptr; }      // before a bank change
     void quickRelease();                                              // off_by / group
     const Region* getRegion() const noexcept { return region; }
 
@@ -49,7 +50,7 @@ private:
     int delayLeft = 0;
 };
 
-// Synthetiseur : un par instrument. Selection de regions SFZ (RR, velocite, keyswitch, release triggers).
+// Synthesiser: one per instrument. SFZ region selection (RR, velocity, keyswitch, release triggers).
 class ChaabiSynth : public juce::Synthesiser
 {
 public:
@@ -58,7 +59,7 @@ public:
     void noteOn (int channel, int note, float velocity) override;
     void noteOff (int channel, int note, float velocity, bool allowTailOff) override;
 
-    // Thread audio uniquement : coupe les voix, installe la nouvelle banque, rend l'ancienne.
+    // Audio thread only: stops the voices, installs the new bank, returns the old one.
     std::shared_ptr<Bank> swapBank (std::shared_ptr<Bank> newBank);
 
     void setPolyLimit (int n) noexcept { polyLimit = juce::jlimit (1, kMaxVoices, n); }

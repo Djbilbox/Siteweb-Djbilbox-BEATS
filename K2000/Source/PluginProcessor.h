@@ -51,6 +51,7 @@ private:
     juce::Synthesiser synth;
     std::array<K2k::KVoice*, 16> voices {};
     int lastMode = -1;
+    bool prepared = false;   // set by prepareToPlay: the voices and effects need a valid sample rate before any audio is rendered
     std::array<int, 32> noteStack {}; std::array<float, 32> velStack {}; int stackSize = 0;
     juce::MidiBuffer noMidi;
 

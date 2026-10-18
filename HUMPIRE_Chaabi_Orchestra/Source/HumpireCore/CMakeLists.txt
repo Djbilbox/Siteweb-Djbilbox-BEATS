@@ -1,6 +1,6 @@
-# HumpireCore : module partage (LookAndFeel, Knob, Meter, PresetManager, theme).
-# Cible INTERFACE (pattern "SharedCode" de JUCE) : les sources sont compilees
-# dans chaque cible qui la lie (plugin, Hub), ce qui evite tout doublon de modules JUCE.
+# HumpireCore: shared module (LookAndFeel, Knob, Meter, PresetManager, theme).
+# INTERFACE target (JUCE "SharedCode" pattern): the sources are compiled into every
+# target that links it (plugin, Hub), which avoids duplicate JUCE modules.
 add_library(HumpireCore INTERFACE)
 
 target_sources(HumpireCore INTERFACE

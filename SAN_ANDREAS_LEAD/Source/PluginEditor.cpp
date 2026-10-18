@@ -10,6 +10,53 @@ constexpr float K = 0.5f;   // coordonnees maquette (2000 px) -> 1000 px
 juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
 juce::Rectangle<int> C (int cx, int cy, int w, int h) { return R (cx - w / 2, cy - h / 2, w, h); }
 juce::Colour ramp (float t) { return amber.interpolatedWith (ember, juce::jlimit (0.f, 1.f, t)); }
+
+// On-screen keyboard shows kKeyLow..kKeyHigh (middle C = C3 in JUCE naming): 48..96 = 4 octaves + 1 key
+constexpr int kKeyLow = 48, kKeyHigh = 96;
+int countWhiteKeys (int lo, int hi) { int n = 0; for (int k = lo; k <= hi; ++k) if (! juce::MidiMessage::isMidiNoteBlack (k)) ++n; return n; }
+
+// Section header: text centred between two thin rules. x0/x1/yc are mockup coordinates (see K).
+void drawHeader (juce::Graphics& g, const juce::String& text, juce::Colour col, float size, int x0, int x1, int yc)
+{
+    const juce::Font font (juce::FontOptions (size, juce::Font::bold));
+    const float tw = juce::GlyphArrangement::getStringWidth (font, text), gap = 7.f;
+    const float px0 = (float) x0 * K, px1 = (float) x1 * K, cy = (float) yc * K, cx = (px0 + px1) * 0.5f;
+    g.setFont (font); g.setColour (col);
+    g.drawText (text, juce::Rectangle<float> (cx - tw * 0.5f - 3.f, cy - 10.f, tw + 6.f, 20.f), juce::Justification::centred, false);
+    g.setColour (col.withAlpha (0.7f));
+    if (cx - tw * 0.5f - gap > px0) g.drawLine (px0, cy, cx - tw * 0.5f - gap, cy, 1.f);
+    if (cx + tw * 0.5f + gap < px1) g.drawLine (cx + tw * 0.5f + gap, cy, px1, cy, 1.f);
+}
+
+// Captions: each one is centred at cx on a text row. Captions that would touch a neighbour on the same row shrink
+// (both of them, proportionally) until they clear each other; the others keep their natural size.
+struct Cap
+{
+    juce::String text; juce::Rectangle<int> box; juce::Colour col; float wanted = 10.f; bool bold = false; float size = 0.f;
+    float width (float sz) const { return juce::GlyphArrangement::getStringWidth (juce::Font (juce::FontOptions (sz, bold ? juce::Font::bold : juce::Font::plain)), text); }
+};
+void drawCaptions (juce::Graphics& g, std::vector<Cap>& caps)
+{
+    for (auto& c : caps) c.size = c.wanted;
+    for (int pass = 0; pass < 3; ++pass)
+        for (size_t i = 0; i < caps.size(); ++i)
+            for (size_t j = i + 1; j < caps.size(); ++j)
+            {
+                auto& a = caps[i]; auto& b = caps[j];
+                if (std::abs (a.box.getY() - b.box.getY()) >= 12) continue;
+                const float d = (float) std::abs (a.box.getCentreX() - b.box.getCentreX()), wa = a.width (a.size), wb = b.width (b.size);
+                if ((wa + wb) * 0.5f + 4.f > d && wa + wb > 0.f)
+                {
+                    const float f = juce::jmax (0.5f, 2.f * (d - 4.f) / (wa + wb));
+                    a.size = juce::jmax (7.f, a.size * f); b.size = juce::jmax (7.f, b.size * f);
+                }
+            }
+    for (auto& c : caps)
+    {
+        g.setColour (c.col); g.setFont (juce::FontOptions (c.size, c.bold ? juce::Font::bold : juce::Font::plain));
+        g.drawText (c.text, c.box, juce::Justification::centred, false);
+    }
+}
 }
 
 SaLNF::SaLNF()
@@ -108,17 +155,17 @@ SaPanel::SaPanel (SaProcessor& p)
     logo = load (BinaryData::logo_png, BinaryData::logo_pngSize);
     cassette = load (BinaryData::cassette_png, BinaryData::cassette_pngSize);
 
-    addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "PITCH");
-    addKnob (glide, P::glide, "GLIDE");    addKnob (filter, P::filter, "FILTER");
+    addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "TRANSPOSE");
+    addKnob (glide, P::glide, "GLIDE");    addKnob (filter, P::filter, "CUTOFF");
     addKnob (tone, P::t1, "TONE");       addKnob (body, P::t2, "BODY");       addKnob (bright, P::t3, "BRIGHT");
     addKnob (width, P::t4, "WIDTH");       addKnob (texture, P::t5, "TEXTURE");
     addKnob (volume, P::volume, "VOLUME"); addKnob (reverb, P::reverb, "REVERB");  addKnob (chorus, P::chorus, "CHORUS");
-    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "MIX");
+    addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DELAY MIX");
     addKnob (dtime, P::dtime, "TIME");     addKnob (feedback, P::fb, "FEEDBACK");
     const char* en[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
     for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], juce::Slider::LinearVertical);
-    addKnob (fenvK, P::fenv, "ENV"); addKnob (resoK, P::reso, "RES");
-    const char* tn[5] = { "A", "D", "S", "R", "VELOCITY" };
+    addKnob (fenvK, P::fenv, "ENV AMT"); addKnob (resoK, P::reso, "RES");
+    const char* tn[5] = { "ATK", "DEC", "SUS", "REL", "VELOCITY" };
     const int ti[5] = { P::fatk, P::fdec, P::fsus, P::frel, P::velocity };
     for (int i = 0; i < 5; ++i) addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical);
     addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
@@ -146,11 +193,11 @@ SaPanel::SaPanel (SaProcessor& p)
     presetLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (presetLabel);
 
-    keys.setKeyWidth (32.3f);
-    keys.setLowestVisibleKey (36);
+    keys.setAvailableRange (kKeyLow, kKeyHigh);   // must come before sizing: with scroll buttons hidden the first visible key is the range start
     keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, amber.withAlpha (0.6f));
     keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, ember.withAlpha (0.3f));
     keys.setScrollButtonsVisible (false);
+    keys.setLowestVisibleKey (kKeyLow);
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
@@ -209,15 +256,15 @@ void SaPanel::showPresetMenu()
     auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.sapreset"); files.sort();
     juce::PopupMenu user;
     for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
-    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
-    menu.addItem (999, "Ouvrir un fichier .sapreset...");
+    menu.addItem (999, "Open a .sapreset file...");
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
         if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
         else if (r == 999)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Charger un preset", userPresetDir(), "*.sapreset");
+            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.sapreset");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                                   [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
         }
@@ -227,7 +274,7 @@ void SaPanel::showPresetMenu()
 
 void SaPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.sapreset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.sapreset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
@@ -254,7 +301,7 @@ void SaPanel::loadUserPreset (const juce::File& f)
 void SaPanel::showExpansion()
 {
     juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "EXPANSION VOL.1",
-        "Les packs d'expansion arrivent bientot.\n\nhttps://djbilboxbeats.gumroad.com/");
+        "Expansion packs are coming soon.\n\nhttps://djbilboxbeats.gumroad.com/");
 }
 
 void SaPanel::paint (juce::Graphics& g)
@@ -326,24 +373,36 @@ void SaPanel::paint (juce::Graphics& g)
     // plaque des molettes
     g.setColour (juce::Colour (0xff17171a)); g.fillRoundedRectangle (R (170, 1115, 325, 297).toFloat(), 10.f);
     g.setColour (juce::Colour (0xff4a4a4e)); g.drawRoundedRectangle (R (170, 1115, 325, 297).toFloat(), 10.f, 2.f);
-    // labels
+    // captions of the knobs and sliders (no overlapping texts: neighbours on the same row shrink to fit)
+    std::vector<Cap> caps;
     for (auto* k : all)
     {
+        if (k->label.isEmpty()) continue;
         const auto r = k->s.getBounds();
-        g.setColour (k->s.getProperties()["small"] ? juce::Colour (0xffffd8a0) : juce::Colour (0xffd8d4cc));
-        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 10.5f : 12.5f)));
-        g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : 0), r.getWidth() + 50, 18, juce::Justification::centred, 1);
+        const bool small = k->s.getProperties()["small"];
+        caps.push_back ({ k->label, { r.getCentreX() - 60, r.getBottom() + (k->lin ? 2 : 0), 120, 18 },
+                          small ? juce::Colour (0xffffd8a0) : juce::Colour (0xffd8d4cc), small ? 10.f : (k->lin ? 10.5f : 12.5f), false });
     }
-    g.setColour (juce::Colour (0xffd8d4cc)); g.setFont (juce::FontOptions (15.f));
-    g.drawFittedText ("LFO", R (310, 535, 120, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("DELAY", R (1582, 888, 120, 40), juce::Justification::centred, 1);
-    g.setFont (juce::FontOptions (11.f));
-    const char* ct[5] = { "WAVEFORM", "LFO SOURCE", "DESTINATION", "FILTER TYPE", "MONO/POLY" };
-    Combo* cc[5] = { &cWave, &cLfo, &cDest, &cFilt, &cMono };
-    for (int i = 0; i < 5; ++i) { auto b = cc[i]->c.getBounds(); g.drawFittedText (ct[i], b.getX() - 10, b.getY() - 19, b.getWidth() + 20, 16, juce::Justification::centred, 1); }
-    g.setFont (juce::FontOptions (10.f));
+    // section headers (rules + text), one per group of controls
+    const auto ink = juce::Colour (0xffd8d4cc);
+    drawHeader (g, "LFO", ink, 15.f, 182, 420, 555);
+    drawHeader (g, "AMP ENVELOPE", ink, 12.f, 180, 548, 752);
+    drawHeader (g, "FILTER ENVELOPE", ink, 12.f, 1440, 1736, 420);
+    drawHeader (g, "DELAY", ink, 12.f, 1455, 1830, 906);
+    // captions of the five drop-down menus (above each menu)
+    {
+        const char* ct[5] = { "ENGINE", "LFO SHAPE", "LFO DEST", "FILTER TYPE", "VOICE MODE" };
+        Combo* cc[5] = { &cWave, &cLfo, &cDest, &cFilt, &cMono };
+        for (int i = 0; i < 5; ++i)
+        {
+            const auto b = cc[i]->c.getBounds();
+            caps.push_back ({ ct[i], { b.getCentreX() - 70, b.getY() - 19, 140, 16 }, ink, 11.f, false });
+        }
+    }
+    drawCaptions (g, caps);
+    g.setColour (ink); g.setFont (juce::FontOptions (10.f));
     g.drawFittedText ("PITCH BEND", R (192, 1365, 140, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("MODULATION", R (327, 1365, 140, 40), juce::Justification::centred, 1);
+    g.drawFittedText ("MOD WHEEL", R (327, 1365, 140, 40), juce::Justification::centred, 1);
 }
 
 void SaPanel::resized()
@@ -351,13 +410,13 @@ void SaPanel::resized()
     auto place = [] (Knob& k, int cx, int cy, int sz) { k.s.setBounds (C (cx, cy, sz, sz)); };
     place (rate, 232, 632, 100);  place (amount, 370, 632, 100); place (pitch, 510, 632, 100);
     place (volume, 1330, 876, 100); place (reverb, 1508, 803, 100); place (chorus, 1643, 803, 100); place (dist, 1777, 803, 100);
-    place (dtime, 1508, 975, 100); place (feedback, 1643, 975, 100); place (delay, 1777, 975, 100);
+    place (dtime, 1508, 990, 100); place (feedback, 1643, 990, 100); place (delay, 1777, 990, 100);
     place (glide, 671, 876, 100); place (filter, 812, 876, 100);
     place (tone, 695, 395, 50); place (body, 695, 483, 50); place (bright, 695, 571, 50); place (width, 695, 659, 50);
     place (texture, 1305, 395, 50); place (resoK, 1305, 483, 50); place (fenvK, 1305, 571, 50);
     const int ex[4] = { 224, 319, 415, 511 }, tx[5] = { 1477, 1551, 1625, 1698, 1790 };
-    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 28, 785, 56, 235));
-    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 445, 56, 235));
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 28, 800, 56, 220));
+    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 455, 56, 225));
     bend.s.setBounds (C (262, 1255, 90, 245)); modw.s.setBounds (C (398, 1255, 90, 245));
     cWave.c.setBounds (R (607, 1007, 200, 42)); cLfo.c.setBounds (R (822, 1007, 130, 42)); cDest.c.setBounds (R (967, 1007, 150, 42));
     cFilt.c.setBounds (R (1132, 1007, 140, 42)); cMono.c.setBounds (R (1287, 1007, 120, 42));
@@ -366,4 +425,5 @@ void SaPanel::resized()
     presetLabel.setBounds (R (780, 182, 460, 66));
     expansion.setBounds (R (180, 95, 400, 330));
     keys.setBounds (R (543, 1112, 1295, 330));
+    keys.setKeyWidth ((float) keys.getWidth() / (float) countWhiteKeys (kKeyLow, kKeyHigh));   // fit the whole range exactly
 }

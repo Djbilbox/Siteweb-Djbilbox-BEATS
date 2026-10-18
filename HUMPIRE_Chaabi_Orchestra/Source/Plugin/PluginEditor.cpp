@@ -40,14 +40,14 @@ void Canvas::paint (juce::Graphics& g)
 {
     g.fillAll (bg);
     g.drawImageAt (zellige, 0, 0);
-    // bandeau superieur
+    // top band
     g.setGradientFill (juce::ColourGradient (panel, 0, 0, bg, 0, 60.0f, false));
     g.fillRect (0, 0, 1280, 60);
     g.setColour (gold.withAlpha (0.55f));
     g.fillRect (0, 59, 1280, 1);
 }
 
-// ============================================================ Carte instrument
+// ============================================================ Instrument card
 InstrumentCard::InstrumentCard (ChaabiProcessor& p, int i) : proc (p), idx (i) {}
 
 void InstrumentCard::paint (juce::Graphics& g)
@@ -76,13 +76,15 @@ void InstrumentCard::paint (juce::Graphics& g)
     g.setFont (font (15.0f, true));
     g.drawText (instrumentName (idx), text.removeFromTop (20.f).toNearestInt(), juce::Justification::centredLeft, true);
 
-    // etat de chargement + zone (multi)
+    // load state + zone (multi)
     const auto st = proc.getSlotStatus (idx);
-    juce::String sub = st.state == 2 ? U ("pr\xC3\xAAt") : st.state == 1 ? U ("chargement\xE2\x80\xA6") : st.state == 3 ? "SFZ ?" : U ("\xE2\x80\x94");
+    juce::String sub = st.state == 2 ? (st.builtIn ? U ("built-in modelled") : juce::String ("ready"))
+                     : st.state == 1 ? (st.builtIn ? U ("rendering\xE2\x80\xA6") : U ("loading\xE2\x80\xA6"))
+                     : st.state == 3 ? juce::String ("unavailable") : U ("\xE2\x80\x94");
     if (multi)
         sub = (on ? juce::String ("ON  ") : juce::String ("off ")) + juce::MidiMessage::getMidiNoteName ((int) getParam (a, pid::inst (idx, "lo")), true, true, 5)
               + "-" + juce::MidiMessage::getMidiNoteName ((int) getParam (a, pid::inst (idx, "hi")), true, true, 5);
-    g.setColour (st.state == 3 ? terracotta.brighter() : st.state == 2 ? ok : textDim);
+    g.setColour (st.state == 3 ? terracotta.brighter() : st.state == 2 ? (st.warning ? gold : ok) : textDim);
     g.setFont (font (11.5f));
     g.drawText (sub, text.toNearestInt(), juce::Justification::centredLeft, true);
 }
@@ -97,14 +99,14 @@ void InstrumentCard::mouseUp (const juce::MouseEvent& e)
         setParam (proc.apvts, pid::selected, (float) idx);
 }
 
-// ============================================================ Visuel
+// ============================================================ Artwork
 void ArtView::paint (juce::Graphics& g)
 {
     const int idx = (int) getParam (proc.apvts, pid::selected);
     auto r = getLocalBounds().toFloat();
     panelBox (g, r, 14.f);
 
-    // halo terre cuite
+    // terracotta halo
     g.setGradientFill (juce::ColourGradient (terracotta.withAlpha (0.22f), r.getCentreX(), r.getCentreY(),
                                              juce::Colours::transparentBlack, r.getCentreX(), r.getBottom(), true));
     g.fillRoundedRectangle (r, 14.f);
@@ -112,7 +114,7 @@ void ArtView::paint (juce::Graphics& g)
     InstrumentArt::draw (g, idx, r.reduced (22.f), juce::Colour (kInstruments[idx].colour), true);
 }
 
-// ============================================================ Pad de phrase
+// ============================================================ Phrase pad
 PhrasePad::PhrasePad (ChaabiProcessor& p, int instrument, int index) : proc (p), inst (instrument), idx (index) {}
 
 void PhrasePad::paint (juce::Graphics& g)
@@ -133,7 +135,7 @@ void PhrasePad::paint (juce::Graphics& g)
     g.setColour (down ? bg : textDim);
     g.drawText (ph.name, t.toNearestInt(), juce::Justification::centredLeft, true);
 
-    // poignee drag MIDI : 6 points
+    // MIDI drag handle: 6 dots
     g.setColour (down ? bg : gold);
     for (int cx = 0; cx < 2; ++cx)
         for (int cy = 0; cy < 3; ++cy)
@@ -168,7 +170,7 @@ void PhrasePad::mouseUp (const juce::MouseEvent&)
     repaint();
 }
 
-// ============================================================ Sequenceur
+// ============================================================ Sequencer
 juce::Rectangle<float> SequencerView::cell (int lane, int step) const
 {
     const float labelW = 54.f;
@@ -215,7 +217,7 @@ void SequencerView::mouseDown (const juce::MouseEvent& e)
             }
 }
 
-// ============================================================ Clavier
+// ============================================================ Keyboard
 void ZonedKeyboard::drawWhiteNote (int note, juce::Graphics& g, juce::Rectangle<float> area, bool down, bool over, juce::Colour line, juce::Colour txt)
 {
     juce::MidiKeyboardComponent::drawWhiteNote (note, g, area, down, over, line, txt);
@@ -228,7 +230,7 @@ void ZonedKeyboard::drawBlackNote (int note, juce::Graphics& g, juce::Rectangle<
     if (zoneColour) { g.setColour (zoneColour (note)); g.fillRect (area.withTrimmedBottom (area.getHeight() * 0.5f)); }
 }
 
-// ============================================================ Editeur
+// ============================================================ Editor
 HumpireKnob* ChaabiEditor::addGlobalKnob (const juce::String& label, const juce::String& paramId)
 {
     auto k = std::make_unique<HumpireKnob> (label);
@@ -250,7 +252,7 @@ ChaabiEditor::ChaabiEditor (ChaabiProcessor& p)
 
     auto add = [this] (juce::Component& c) { content.addAndMakeVisible (c); };
 
-    // ---- barre superieure
+    // ---- top bar
     logo.setText ("HUMPIRE", juce::dontSendNotification);
     logo.setFont (font (28.f, true));
     logo.setColour (juce::Label::textColourId, gold);
@@ -281,14 +283,15 @@ ChaabiEditor::ChaabiEditor (ChaabiProcessor& p)
     taglineLabel.setFont (font (13.f));
     taglineLabel.setColour (juce::Label::textColourId, textDim);
     statusLabel.setFont (font (12.f));
+    statusLabel.setJustificationType (juce::Justification::topLeft);
     statusLabel.setColour (juce::Label::textColourId, textDim);
     for (auto* l : { &titleLabel, &taglineLabel, &statusLabel }) { l->setInterceptsMouseClicks (false, false); add (*l); }
     add (loadBar); add (libraryBtn); add (multiBtn); add (activeBtn);
     libraryBtn.onClick = [this] { chooseLibrary(); };
     multiAtt = std::make_unique<ButtonAtt> (proc.apvts, pid::multi, multiBtn);
 
-    // ---- knobs de l'instrument (rattaches a l'instrument selectionne)
-    const char* labels[10] = { "Volume", "Pan", "Reverb", "Delay", "Filtre", "Pitch", "Attack", "Release", "Zone d\xC3\xA9" "but", "Zone fin" };
+    // ---- instrument knobs (attached to the selected instrument)
+    const char* labels[10] = { "Volume", "Pan", "Reverb", "Delay", "Filter", "Pitch", "Attack", "Release", "Zone Start", "Zone End" };
     for (size_t k = 0; k < instKnobs.size(); ++k)
     {
         instKnobs[k] = std::make_unique<HumpireKnob> (U (labels[k]));
@@ -296,21 +299,21 @@ ChaabiEditor::ChaabiEditor (ChaabiProcessor& p)
         add (*instKnobs[k]);
     }
 
-    // ---- knobs globaux
-    authKnob = std::make_unique<HumpireKnob> (U ("AUTHENTICIT\xC3\x89"));
+    // ---- global knobs
+    authKnob = std::make_unique<HumpireKnob> ("AUTHENTICITY");
     authKnob->onDragStart = [this] { proc.undoManager.beginNewTransaction(); };
     add (*authKnob);
     authAtt = std::make_unique<SliderAtt> (proc.apvts, pid::authent, *authKnob);
     addGlobalKnob ("Master", pid::master);
-    addGlobalKnob ("Rev Taille", pid::revSize);
-    addGlobalKnob ("Rev Amorti", pid::revDamp);
-    addGlobalKnob ("Dly Temps", pid::dlyTime);
+    addGlobalKnob ("Rev Size", pid::revSize);
+    addGlobalKnob ("Rev Damping", pid::revDamp);
+    addGlobalKnob ("Dly Time", pid::dlyTime);
     addGlobalKnob ("Dly Feedback", pid::dlyFb);
     addGlobalKnob ("Tempo", pid::tempo);
-    addGlobalKnob ("Polyphonie", pid::poly);
+    addGlobalKnob ("Polyphony", pid::poly);
     addGlobalKnob ("Bend", pid::bendRange);
 
-    // ---- onglets
+    // ---- tabs
     for (auto* b : { &tabPlay, &tabPhrases, &tabPatterns })
     {
         b->setClickingTogglesState (true);
@@ -344,8 +347,8 @@ ChaabiEditor::ChaabiEditor (ChaabiProcessor& p)
     seqRateAtt = std::make_unique<ComboAtt> (proc.apvts, pid::seqRate, seqRate);
     seqSwingAtt = std::make_unique<SliderAtt> (proc.apvts, pid::seqSwing, seqSwingKnob);
 
-    // ---- clavier
-    keyboard.setOctaveForMiddleC (5);   // convention FL Studio : C5 = 60
+    // ---- keyboard
+    keyboard.setOctaveForMiddleC (5);   // FL Studio convention: C5 = 60
     keyboard.setAvailableRange (kKeyswitchLo, 96);
     keyboard.setKeyWidth ((float) (kW - 32) / 22.0f);
     keyboard.setLowestVisibleKey (kPhraseLo);
@@ -392,7 +395,7 @@ void ChaabiEditor::resized()
     content.setTransform (juce::AffineTransform::scale ((float) getWidth() / (float) kW));
     content.setBounds (0, 0, kW, kH);
 
-    // ---- barre superieure
+    // ---- top bar
     logo.setBounds (18, 8, 190, 42);
     prevBtn.setBounds (236, 15, 30, 30);
     presetBtn.setBounds (270, 15, 330, 30);
@@ -404,18 +407,18 @@ void ChaabiEditor::resized()
     bypassBtn.setBounds (884, 15, 84, 30);
     inMeter.setBounds (990, 12, 130, 16);
     outMeter.setBounds (990, 32, 130, 16);
-    // (1130..1264 : reserve au futur bouton licence / Hub)
+    // (1130..1264: reserved for the future licence / Hub button)
 
-    // ---- colonne instruments
+    // ---- instrument column
     for (int i = 0; i < kNumInstruments; ++i)
         cards[(size_t) i]->setBounds (16, 74 + i * 56, 244, 52);
 
-    // ---- centre : visuel + infos
+    // ---- centre: artwork + info
     art.setBounds (276, 74, 290, 246);
     titleLabel.setBounds (582, 78, 330, 34);
     taglineLabel.setBounds (582, 112, 330, 20);
-    statusLabel.setBounds (582, 140, 330, 20);
-    loadBar.setBounds (582, 166, 330, 14);
+    statusLabel.setBounds (582, 136, 330, 30);          // up to two lines
+    loadBar.setBounds (582, 172, 330, 14);
     multiBtn.setBounds (582, 196, 100, 30);
     activeBtn.setBounds (690, 196, 100, 30);
     libraryBtn.setBounds (582, 236, 208, 30);
@@ -425,12 +428,12 @@ void ChaabiEditor::resized()
     instKnobs[8]->setBounds (276, 428, 76, 92);
     instKnobs[9]->setBounds (356, 428, 76, 92);
 
-    // ---- colonne droite : macro + globaux
+    // ---- right column: macro + globals
     authKnob->setBounds (944, 78, 172, 188);
     for (size_t k = 0; k < globalKnobs.size(); ++k)
         globalKnobs[k]->setBounds (922 + (int) (k % 4) * 86, 276 + (int) (k / 4) * 100, 82, 94);
 
-    // ---- bas
+    // ---- bottom
     tabPlay.setBounds (16, 530, 110, 28);
     tabPhrases.setBounds (130, 530, 110, 28);
     tabPatterns.setBounds (244, 530, 110, 28);
@@ -438,11 +441,11 @@ void ChaabiEditor::resized()
     playInfo.setBounds (4, 2, 900, 80);
     keyboard.setBounds (16, 656, kW - 32, 96);
 
-    // pads de phrases
+    // phrase pads
     for (size_t i = 0; i < pads.size(); ++i)
         pads[i]->setBounds ((int) i * 160, 6, 152, 72);
 
-    // sequenceur
+    // sequencer
     seqDerb.setBounds (0, 4, 104, 36);
     seqTar.setBounds (0, 44, 104, 36);
     seqRun.setBounds (112, 4, 92, 36);
@@ -500,8 +503,11 @@ void ChaabiEditor::timerCallback()
     const auto st = proc.getSlotStatus (sel);
     loadProgress = st.state == 1 ? (double) st.progress : (st.state == 2 ? 1.0 : 0.0);
     loadBar.setVisible (st.state == 1);
-    statusLabel.setText (st.message, juce::dontSendNotification);
-    statusLabel.setColour (juce::Label::textColourId, st.state == 3 ? terracotta.brighter (0.3f) : st.state == 2 ? ok : textDim);
+    juce::String statusText = st.message;
+    if (st.state == 1)
+        statusText = (st.builtIn ? juce::String ("Rendering ") : juce::String ("Loading ")) + juce::String (juce::roundToInt (st.progress * 100.f)) + "%";
+    statusLabel.setText (statusText, juce::dontSendNotification);
+    statusLabel.setColour (juce::Label::textColourId, st.state == 3 ? terracotta.brighter (0.3f) : st.state == 2 ? (st.warning ? gold : ok) : textDim);
 
     presetBtn.setButtonText (proc.presets->getCurrentName());
     abBtn.setButtonText (proc.presets->isB() ? "B" : "A");
@@ -514,13 +520,15 @@ void ChaabiEditor::timerCallback()
     instKnobs[8]->setVisible (multi);
     instKnobs[9]->setVisible (multi);
 
+    const auto bullet = U ("   \xE2\x80\xA2   ");
     juce::String info;
-    info << U ("Biblioth\xC3\xA8que : ") << proc.getLibraryRoot().getFullPathName() << "\n"
-         << U ("Zones clavier :  dor\xC3\xA9 = phrases (") << juce::MidiMessage::getMidiNoteName (kPhraseLo, true, true, 5) << "-"
-         << juce::MidiMessage::getMidiNoteName (kPhraseHi, true, true, 5) << U (")   \xE2\x80\xA2   bleu = keyswitch articulations (")
+    info << "Samples folder: " << proc.getLibraryRoot().getFullPathName()
+         << "  (a user SFZ library takes precedence; without one, the built-in modelled instruments are used)\n"
+         << "Keyboard zones:  gold = phrases (" << juce::MidiMessage::getMidiNoteName (kPhraseLo, true, true, 5) << "-"
+         << juce::MidiMessage::getMidiNoteName (kPhraseHi, true, true, 5) << ")" << bullet << "blue = articulation keyswitches ("
          << juce::MidiMessage::getMidiNoteName (kKeyswitchLo, true, true, 5) << "-" << juce::MidiMessage::getMidiNoteName (kKeyswitchHi, true, true, 5)
-         << U (")   \xE2\x80\xA2   couleur instrument = zone de jeu.\n")
-         << U ("Phrases : jouez une touche dor\xC3\xA9" "e (maintenue = boucle, synchronis\xC3\xA9" "e sur l'h\xC3\xB4te). Glissez la poign\xC3\xA9" "e MIDI d'un pad vers le DAW.");
+         << ")" << bullet << "instrument colour = playing range.\n"
+         << "Phrases: play a gold key (held = loop, synchronised to the host). Drag the MIDI handle of a pad into the DAW.";
     playInfo.setText (info, juce::dontSendNotification);
 
     keyboard.repaint();
@@ -543,7 +551,7 @@ void ChaabiEditor::showPresetMenu()
     juce::PopupMenu menu;
     for (auto& g : groups) menu.addSubMenu (g.first, g.second);
     menu.addSeparator();
-    menu.addItem (100000, U ("Enregistrer le preset\xE2\x80\xA6"));
+    menu.addItem (100000, U ("Save preset\xE2\x80\xA6"));
 
     juce::Component::SafePointer<ChaabiEditor> safe (this);
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&presetBtn), [safe] (int r)
@@ -556,10 +564,10 @@ void ChaabiEditor::showPresetMenu()
 
 void ChaabiEditor::askPresetName()
 {
-    auto* w = new juce::AlertWindow (U ("Enregistrer le preset"), U ("Nom du preset :"), juce::MessageBoxIconType::NoIcon);
+    auto* w = new juce::AlertWindow ("Save preset", "Preset name:", juce::MessageBoxIconType::NoIcon);
     w->addTextEditor ("n", proc.presets->getCurrentName());
     w->addButton ("OK", 1, juce::KeyPress (juce::KeyPress::returnKey));
-    w->addButton ("Annuler", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+    w->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
     w->enterModalState (true, juce::ModalCallbackFunction::create ([safe = juce::Component::SafePointer<ChaabiEditor> (this), w] (int r)
     {
         if (r == 1 && safe != nullptr) safe->proc.presets->saveUser (w->getTextEditorContents ("n"));
@@ -568,7 +576,7 @@ void ChaabiEditor::askPresetName()
 
 void ChaabiEditor::chooseLibrary()
 {
-    chooser = std::make_unique<juce::FileChooser> (U ("Dossier racine des samples HUMPIRE"), proc.getLibraryRoot());
+    chooser = std::make_unique<juce::FileChooser> ("HUMPIRE samples root folder (containing Mandole, Banjo, ... sub-folders)", proc.getLibraryRoot());
     chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
                           [this] (const juce::FileChooser& fc)
                           {

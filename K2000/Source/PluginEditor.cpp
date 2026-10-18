@@ -5,11 +5,27 @@ using namespace K2k;
 
 namespace
 {
+// On-screen keyboard shows kKeyLow..kKeyHigh (middle C = C3 in JUCE naming): 36..84 = 4 octaves + 1 key
+constexpr int kKeyLow = 36, kKeyHigh = 84;
+int countWhiteKeys (int lo, int hi) { int n = 0; for (int k = lo; k <= hi; ++k) if (! juce::MidiMessage::isMidiNoteBlack (k)) ++n; return n; }
 const juce::Colour amber { 0xff00f0ff }, ember { 0xff4ab0ff }, dark { 0xff0a1218 };
 constexpr float K = 0.5f;   // coordonnees maquette (2000 px) -> 1000 px
 juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
 juce::Rectangle<int> C (int cx, int cy, int w, int h) { return R (cx - w / 2, cy - h / 2, w, h); }
 juce::Colour ramp (float t) { return amber.interpolatedWith (ember, juce::jlimit (0.f, 1.f, t)); }
+
+// Section header: text centred between two thin rules. x0/x1/yc are mockup coordinates (see K).
+void drawHeader (juce::Graphics& g, const juce::String& text, juce::Colour col, float size, int x0, int x1, int yc)
+{
+    const juce::Font font (juce::FontOptions (size, juce::Font::bold));
+    const float tw = juce::GlyphArrangement::getStringWidth (font, text), gap = 7.f;
+    const float px0 = (float) x0 * K, px1 = (float) x1 * K, cy = (float) yc * K, cx = (px0 + px1) * 0.5f;
+    g.setFont (font); g.setColour (col);
+    g.drawText (text, juce::Rectangle<float> (cx - tw * 0.5f - 3.f, cy - 10.f, tw + 6.f, 20.f), juce::Justification::centred, false);
+    g.setColour (col.withAlpha (0.7f));
+    if (cx - tw * 0.5f - gap > px0) g.drawLine (px0, cy, cx - tw * 0.5f - gap, cy, 1.f);
+    if (cx + tw * 0.5f + gap < px1) g.drawLine (cx + tw * 0.5f + gap, cy, px1, cy, 1.f);
+}
 }
 
 K2kLNF::K2kLNF()
@@ -122,15 +138,15 @@ K2kPanel::K2kPanel (K2000AudioProcessor& p)
     logo = load (BinaryData::logo_png, BinaryData::logo_pngSize);
     cassette = load (BinaryData::cassette_png, BinaryData::cassette_pngSize);
 
-    addKnob (rate, P::lfoRate, "RATE");  addKnob (amount, P::lfoAmount, "AMOUNT");
+    addKnob (rate, P::lfoRate, "RATE");  addKnob (amount, P::lfoAmount, "AMOUNT");   // under the "LFO" header
     addKnob (volume, P::volume, "VOLUME"); addKnob (reverb, P::reverb, "REVERB"); addKnob (chorus, P::chorus, "CHORUS"); addKnob (dist, P::dist, "DISTORTION");
-    addKnob (glide, P::glide, "GLIDE"); addKnob (cutoff, P::cutoff, "FILTER"); addKnob (drive, P::drive, "DISTORTION");
-    addKnob (dmix, P::delayMix, "DELAY"); addKnob (dtime, P::delayTime, "TIME"); addKnob (dfb, P::delayFb, "FEEDBACK");
-    addKnob (res, P::res, "RES"); addKnob (fenvK, P::fenv, "ENV"); addKnob (rel, P::ampRel, "REL"); addKnob (detune, P::detune, "DETUNE");
+    addKnob (glide, P::glide, "GLIDE"); addKnob (cutoff, P::cutoff, "CUTOFF"); addKnob (drive, P::drive, "DRIVE");
+    addKnob (dmix, P::delayMix, "DLY MIX"); addKnob (dtime, P::delayTime, "DLY TIME"); addKnob (dfb, P::delayFb, "FEEDBACK");
+    addKnob (res, P::res, "RES"); addKnob (fenvK, P::fenv, "FLT ENV"); addKnob (rel, P::ampRel, "AMP REL"); addKnob (detune, P::detune, "DETUNE");
     for (auto* k : { &res, &fenvK, &rel, &detune }) k->s.getProperties().set ("small", true);
     const char* ln[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
     for (int i = 0; i < 4; ++i) addKnob (lfoEnv[i], P::lfoAtk + i, ln[i], juce::Slider::LinearVertical);
-    const char* an[5] = { "ATTACK", "DECAY", "SUSTAIN", "BANK", "ADSR" };
+    const char* an[5] = { "ATTACK", "DECAY", "SUSTAIN", "BANK", "ADSR" };   // sit under the "VELOCITY" header
     const int ai[5] = { P::ampAtk, P::ampDec, P::ampSus, P::velBank, P::velAdsr };
     for (int i = 0; i < 5; ++i) addKnob (ampEnv[i], ai[i], an[i], juce::Slider::LinearVertical);
     addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
@@ -159,11 +175,11 @@ K2kPanel::K2kPanel (K2000AudioProcessor& p)
     presetLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (presetLabel);
 
-    keys.setKeyWidth (32.4f);
-    keys.setLowestVisibleKey (36);
+    keys.setAvailableRange (kKeyLow, kKeyHigh);   // must come before sizing: with scroll buttons hidden the first visible key is the range start
     keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, amber.withAlpha (0.6f));
     keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, ember.withAlpha (0.3f));
     keys.setScrollButtonsVisible (false);
+    keys.setLowestVisibleKey (kKeyLow);
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
@@ -222,15 +238,15 @@ void K2kPanel::showPresetMenu()
     auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.k2preset"); files.sort();
     juce::PopupMenu user;
     for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
-    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
-    menu.addItem (999, "Ouvrir un fichier .k2preset...");
+    menu.addItem (999, "Open a .k2preset file...");
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
         if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
         else if (r == 999)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Charger un preset", userPresetDir(), "*.k2preset");
+            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.k2preset");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                                   [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
         }
@@ -240,7 +256,7 @@ void K2kPanel::showPresetMenu()
 
 void K2kPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.k2preset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.k2preset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
@@ -267,7 +283,7 @@ void K2kPanel::loadUserPreset (const juce::File& f)
 void K2kPanel::showExpansion()
 {
     juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "EXPANSION VOL.1",
-        "Les packs d'expansion arrivent bientot.\n\nhttps://djbilboxbeats.gumroad.com/");
+        "Expansion packs are coming soon.\n\nhttps://djbilboxbeats.gumroad.com/");
 }
 
 void K2kPanel::paint (juce::Graphics& g)
@@ -346,15 +362,23 @@ void K2kPanel::paint (juce::Graphics& g)
     for (auto* k : all)
     {
         const auto r = k->s.getBounds();
-        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 10.5f : 12.5f)));
+        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 10.f : 12.5f)));
         g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : 0), r.getWidth() + 50, 18, juce::Justification::centred, 1);
     }
-    g.setFont (juce::FontOptions (18.f));
-    g.drawFittedText ("LFO", R (450, 605, 120, 50), juce::Justification::centred, 1);
-    g.setFont (juce::FontOptions (17.f));
-    g.drawFittedText ("ADSR+VELOCITY BANK", R (1390, 262, 380, 50), juce::Justification::centred, 1);
-    g.setFont (juce::FontOptions (12.5f));
-    g.drawFittedText ("PITCH", R (320, 780, 110, 40), juce::Justification::centred, 1);
+    // section headers (rules + text), one per group of controls
+    drawHeader (g, "LFO", amber, 16.f, 215, 410, 605);
+    drawHeader (g, "LFO ENVELOPE", amber, 12.f, 430, 790, 605);
+    drawHeader (g, "AMP ENVELOPE", amber, 12.f, 1385, 1610, 295);
+    drawHeader (g, "VELOCITY", amber, 12.f, 1630, 1770, 295);
+    // captions under the five drop-down menus
+    g.setColour (juce::Colour (0xffc6d0d8).withAlpha (0.85f)); g.setFont (juce::FontOptions (10.f, juce::Font::bold));
+    {
+        const char* cap[5] = { "WAVEFORM", "LFO SHAPE", "LFO DESTINATION", "FILTER TYPE", "VOICE MODE" };
+        const int cx[5] = { 360, 680, 1000, 1320, 1640 };
+        for (int i = 0; i < 5; ++i) g.drawFittedText (cap[i], R (cx[i] - 140, 1044, 280, 30), juce::Justification::centred, 1);
+    }
+    g.setColour (juce::Colour (0xffc6d0d8)); g.setFont (juce::FontOptions (10.f));
+    g.drawFittedText ("LFO>PITCH", R (305, 782, 140, 40), juce::Justification::centred, 1);   // the toggle sends the LFO to pitch (it is not the pitch-bend wheel)
     g.setFont (juce::FontOptions (10.5f));
     g.drawFittedText ("PITCH BEND", R (245, 1368, 170, 40), juce::Justification::centred, 1);
     g.drawFittedText ("MODULATION", R (400, 1368, 170, 40), juce::Justification::centred, 1);
@@ -362,7 +386,7 @@ void K2kPanel::paint (juce::Graphics& g)
     g.drawLine ((float) R (345, 0, 0, 0).getX(), (float) R (0, 700, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 700, 0, 0).getY(), 1.f);
     g.drawLine ((float) R (378, 0, 0, 0).getX(), (float) R (0, 700, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 735, 0, 0).getY(), 1.f);
     g.drawLine ((float) R (345, 0, 0, 0).getX(), (float) R (0, 862, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 862, 0, 0).getY(), 1.f);
-    g.drawLine ((float) R (378, 0, 0, 0).getX(), (float) R (0, 862, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 780, 0, 0).getY(), 1.f);
+    g.drawLine ((float) R (378, 0, 0, 0).getX(), (float) R (0, 862, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 830, 0, 0).getY(), 1.f);   // stops under the "LFO>PITCH" caption
 }
 
 void K2kPanel::resized()
@@ -374,7 +398,7 @@ void K2kPanel::resized()
     place (glide, 908, 862, 100); place (cutoff, 1092, 862, 100); place (drive, 1289, 862, 100);
     place (dmix, 1434, 862, 100); place (dtime, 1575, 862, 100); place (dfb, 1718, 862, 100);
     place (res, 742, 385, 64); place (fenvK, 742, 490, 64); place (rel, 1257, 385, 64); place (detune, 1257, 490, 64);
-    const int lx[4] = { 475, 562, 649, 735 }, ax[5] = { 1416, 1497, 1576, 1657, 1738 };
+    const int lx[4] = { 465, 563, 661, 759 }, ax[5] = { 1416, 1497, 1576, 1657, 1738 };
     for (int i = 0; i < 4; ++i) lfoEnv[i].s.setBounds (R (lx[i] - 28, 668, 56, 232));
     for (int i = 0; i < 5; ++i) ampEnv[i].s.setBounds (R (ax[i] - 28, 338, 56, 232));
     bend.s.setBounds (C (330, 1250, 90, 260)); modw.s.setBounds (C (480, 1250, 90, 260));
@@ -385,4 +409,5 @@ void K2kPanel::resized()
     presetLabel.setBounds (R (770, 112, 460, 70));
     expansion.setBounds (R (240, 100, 340, 410));
     keys.setBounds (R (610, 1090, 1165, 325));
+    keys.setKeyWidth ((float) keys.getWidth() / (float) countWhiteKeys (kKeyLow, kKeyHigh));   // fit the whole range exactly
 }

@@ -8,11 +8,11 @@ namespace humpire
 {
 using SlotMidi = std::array<juce::MidiBuffer, kNumInstruments>;
 
-// Lecteur de phrases (touches C0..B0) + sequenceur 16 pas. Tout est pre-alloue : zero allocation en process().
+// Phrase player (keys C0..B0) + 16-step sequencer. Everything is pre-allocated: no allocation in process().
 class PhrasePlayer
 {
 public:
-    // grille[inst][lane][step] : 0 off, 1 normal, 2 accent
+    // grid[inst][lane][step]: 0 off, 1 normal, 2 accent
     using Grid = std::array<std::array<std::array<std::atomic<std::uint8_t>, kSeqSteps>, kSeqLanes>, kSeqInstruments>;
 
     explicit PhrasePlayer (const Grid& g) : grid (g) {}
@@ -20,7 +20,7 @@ public:
     void prepare (double sampleRate);
     void reset();
 
-    // key = note MIDI de la zone phrases ; sampleOffset = position dans le bloc courant.
+    // key = MIDI note of the phrase zone; sampleOffset = position inside the current block.
     void trigger (int key, const std::array<bool, kNumInstruments>& activeSlots, int sampleOffset);
     void release (int key);
 

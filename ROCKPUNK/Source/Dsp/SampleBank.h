@@ -7,22 +7,24 @@
 #include <vector>
 
 namespace rk
-
 {
 
 //==============================================================================
-// La couche echantillonnee de ROCKPUNK.
+// The sampled layer of ROCKPUNK.
 //
-// ROCKPUNK ne livre aucun enregistrement : son instrument, ce sont les deux
-// cordes modelisees. Cette couche joue les fichiers que **l'utilisateur** depose
-// dans Documents/DJBILBOX/ROCKPUNK/Samples - ses propres prises, ou une
-// bibliotheque dont il a la licence.
+// ROCKPUNK ships no recording: its instrument is the two modelled strings. This
+// layer plays the files that the **user** drops in
+// Documents/DJBILBOX/ROCKPUNK/Samples - their own takes, or a library they hold
+// the licence for.
 //
-// Le format de banque (.rockpunkbank, un index puis des blocs FLAC bout a bout)
-// reste lu s'il en existe une : c'est ce qui permet de livrer un jour une
-// banque signee sans retoucher le plugin. Le fichier est alors projete en
-// memoire plutot que lu, donc une grosse banque ne coute rien tant qu'aucun son
-// n'est demande.
+// The bank format (.rockpunkbank: an index followed by FLAC blocks end to end)
+// is still read if one is installed, which is what allows a licensed bank to be
+// shipped one day without touching the plug-in. The file is memory-mapped, so a
+// large bank costs nothing until a sound is requested.
+//
+// Thread safety: the entry list is rebuilt on the message thread (rescan) while
+// a background thread decodes files, so every access to it goes through `lock`.
+// Nothing here is ever called from the audio thread.
 //==============================================================================
 class SampleBank
 {
@@ -30,15 +32,15 @@ public:
     struct Entry
     {
         juce::String name, category;
-        float        root = 60.0f;      // fondamentale mesuree (banque) ou 0 = a mesurer
+        float        root = 60.0f;      // measured fundamental (bank), or 0 = to be measured
         juce::int64  offset = 0, size = 0;
-        juce::File   file;              // renseigne en mode dossier uniquement
+        juce::File   file;              // set in folder mode only
     };
 
     SampleBank() { formats.registerBasicFormats(); }
 
     //==========================================================================
-    // Le dossier ou l'utilisateur depose ses guitares.
+    // The folder where the user drops their guitars.
     static juce::File getUserSampleDirectory()
     {
         return juce::File::getSpecialLocation (juce::File::userDocumentsDirectory)
@@ -50,10 +52,11 @@ public:
     //==========================================================================
     int openDefault()
     {
+        const juce::ScopedLock sl (lock);
         const auto exe = juce::File::getSpecialLocation (juce::File::currentExecutableFile);
 
-        // Une banque installee l'emporte : c'est du contenu choisi, alors que le
-        // dossier utilisateur peut contenir n'importe quoi.
+        // An installed bank wins: it is chosen content, whereas the user folder
+        // can contain anything.
         const juce::File bankDirs[] =
         {
             exe.getParentDirectory().getParentDirectory()
@@ -76,11 +79,12 @@ public:
     }
 
     //==========================================================================
-    // Mode dossier : tout ce que l'utilisateur a depose, sous-dossiers compris.
-    // Le sous-dossier de premier niveau sert de categorie, ce qui laisse chacun
-    // ranger ses prises comme il veut.
+    // Folder mode: everything the user dropped, sub-folders included. The
+    // first-level sub-folder is the category, so everyone can file their takes
+    // however they like.
     int scanFolder (const juce::File& root)
     {
+        const juce::ScopedLock sl (lock);
         entries.clear();
         map.reset();
         dataStart = 0;
@@ -97,12 +101,12 @@ public:
             Entry e;
             e.name = f.getFileNameWithoutExtension();
             e.file = f;
-            e.root = 0.0f;              // mesuree au premier chargement
+            e.root = 0.0f;              // measured on first load
 
             const auto relative = f.getParentDirectory().getRelativePathFrom (root);
             e.category = relative.upToFirstOccurrenceOf (juce::File::getSeparatorString(), false, false);
             if (e.category.isEmpty() || e.category == ".")
-                e.category = "Mes samples";
+                e.category = "My samples";
 
             entries.push_back (std::move (e));
         }
@@ -120,6 +124,7 @@ public:
     //==========================================================================
     int open (const juce::File& bankFile)
     {
+        const juce::ScopedLock sl (lock);
         entries.clear();
         map.reset();
         dataStart = 0;
@@ -131,7 +136,7 @@ public:
 
         if (in.readInt() != 0x4B425052)   // 'RPBK'
             return 0;
-        if (in.readInt() != 1)            // refuse un format qu'on ne sait pas lire
+        if (in.readInt() != 1)            // refuse a format we cannot read
             return 0;
 
         const int count = in.readInt();
@@ -160,7 +165,7 @@ public:
         if (dataStart <= 0 || dataStart >= bankFile.getSize())
             return 0;
 
-        map = std::make_unique<juce::MemoryMappedFile> (bankFile, juce::MemoryMappedFile::readOnly);
+        map = std::make_shared<juce::MemoryMappedFile> (bankFile, juce::MemoryMappedFile::readOnly);
         if (map->getData() == nullptr)
         {
             map.reset();
@@ -172,20 +177,24 @@ public:
     }
 
     //==========================================================================
-    int getNumEntries() const noexcept { return (int) entries.size(); }
-    bool isEmpty() const noexcept { return entries.empty(); }
-    bool isUserFolder() const noexcept { return folderRoot != juce::File(); }
-    juce::File getFolderRoot() const { return folderRoot; }
+    int getNumEntries() const noexcept { const juce::ScopedLock sl (lock); return (int) entries.size(); }
+    bool isEmpty() const noexcept { const juce::ScopedLock sl (lock); return entries.empty(); }
+    bool isUserFolder() const noexcept { const juce::ScopedLock sl (lock); return folderRoot != juce::File(); }
+    juce::File getFolderRoot() const { const juce::ScopedLock sl (lock); return folderRoot; }
 
-    const Entry* getEntry (int index) const noexcept
+    // A copy, never a pointer: the list can be rebuilt by another thread.
+    bool getEntryInfo (int index, Entry& out) const
     {
+        const juce::ScopedLock sl (lock);
         if (index < 0 || index >= (int) entries.size())
-            return nullptr;
-        return &entries[(size_t) index];
+            return false;
+        out = entries[(size_t) index];
+        return true;
     }
 
     juce::StringArray getNames() const
     {
+        const juce::ScopedLock sl (lock);
         juce::StringArray names;
         for (const auto& e : entries)
             names.add (e.name);
@@ -193,38 +202,44 @@ public:
     }
 
     //==========================================================================
-    // Decode un echantillon en memoire. Appele hors du thread audio (depuis
-    // processBlock la premiere fois qu'une selection change), le resultat etant
-    // ensuite partage par toutes les voix via un shared_ptr.
+    // Decodes a sample into memory. Runs on the background loader thread (or on
+    // the message thread while preparing), never on the audio thread; the
+    // result is then shared by every voice through a shared_ptr.
     std::shared_ptr<juce::AudioBuffer<float>> load (int index, double& fileRate, float& rootNote)
     {
-        const auto* e = getEntry (index);
-        if (e == nullptr)
-            return nullptr;
+        Entry e;
+        std::shared_ptr<juce::MemoryMappedFile> mapped;
+        juce::int64 start = 0;
+        {
+            const juce::ScopedLock sl (lock);
+            if (! getEntryInfo (index, e))
+                return nullptr;
+            mapped = map;
+            start = dataStart;
+        }
 
         std::unique_ptr<juce::AudioFormatReader> reader;
 
-        if (e->file != juce::File())
+        if (e.file != juce::File())
         {
-            reader.reset (formats.createReaderFor (e->file));
+            reader.reset (formats.createReaderFor (e.file));
         }
-        else if (map != nullptr)
+        else if (mapped != nullptr)
         {
-            const auto* base = static_cast<const char*> (map->getData());
-            if (base == nullptr || dataStart + e->offset + e->size > (juce::int64) map->getSize())
+            const auto* base = static_cast<const char*> (mapped->getData());
+            if (base == nullptr || start + e.offset + e.size > (juce::int64) mapped->getSize())
                 return nullptr;
 
-            auto stream = std::make_unique<juce::MemoryInputStream> (base + dataStart + e->offset,
-                                                                     (size_t) e->size, false);
+            auto stream = std::make_unique<juce::MemoryInputStream> (base + start + e.offset,
+                                                                     (size_t) e.size, false);
             reader.reset (formats.createReaderFor (std::move (stream)));
         }
 
         if (reader == nullptr || reader->lengthInSamples <= 0)
             return nullptr;
 
-        // Un fichier depose par l'utilisateur peut durer n'importe quoi : on
-        // borne la lecture pour qu'une boucle de dix minutes ne remplisse pas la
-        // memoire de l'hote.
+        // A file dropped by the user can last any time: the read is capped so a
+        // ten-minute loop does not fill the host's memory.
         const int numSamples = (int) juce::jmin<juce::int64> (reader->lengthInSamples,
                                                               (juce::int64) (reader->sampleRate * 30.0));
 
@@ -234,23 +249,25 @@ public:
 
         fileRate = reader->sampleRate > 0.0 ? reader->sampleRate : 44100.0;
 
-        // La banque porte la fondamentale dans son index ; un fichier libre doit
-        // etre mesure, une seule fois, et le resultat retenu.
-        if (e->root > 0.0f)
+        // The bank carries the fundamental in its index; a loose file must be
+        // measured, once, and the result kept.
+        if (e.root > 0.0f)
         {
-            rootNote = e->root;
+            rootNote = e.root;
         }
         else
         {
             rootNote = detectRootNote (*buffer, fileRate);
-            entries[(size_t) index].root = rootNote;
+            const juce::ScopedLock sl (lock);
+            if (index < (int) entries.size() && entries[(size_t) index].name == e.name)
+                entries[(size_t) index].root = rootNote;
         }
 
         return buffer;
     }
 
     //==========================================================================
-    // Autocorrelation sur les ~250 premieres ms.
+    // Autocorrelation over the first ~250 ms.
     static float detectRootNote (const juce::AudioBuffer<float>& buf, double sampleRate)
     {
         const int winLen = juce::jmin (buf.getNumSamples(), (int) (sampleRate * 0.25));
@@ -300,9 +317,10 @@ public:
     }
 
 private:
+    mutable juce::CriticalSection lock;
     juce::AudioFormatManager formats;
     std::vector<Entry> entries;
-    std::unique_ptr<juce::MemoryMappedFile> map;
+    std::shared_ptr<juce::MemoryMappedFile> map;
     juce::int64 dataStart = 0;
     juce::File  folderRoot;
 

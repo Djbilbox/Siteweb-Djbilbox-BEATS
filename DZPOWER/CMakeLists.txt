@@ -12,7 +12,7 @@ juce_add_binary_data(DzAssets SOURCES Assets/camel.png Assets/logo.png Assets/ca
 juce_add_plugin(DZPOWER
     COMPANY_NAME "DJBILBOX BEATS"
     PLUGIN_MANUFACTURER_CODE Djbb
-    PLUGIN_CODE Dzl
+    PLUGIN_CODE Dzl1
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE

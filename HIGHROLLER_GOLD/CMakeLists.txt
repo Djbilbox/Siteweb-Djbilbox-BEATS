@@ -12,11 +12,11 @@ juce_add_binary_data(HgAssets SOURCES Assets/camel.png Assets/logo.png Assets/ca
 juce_add_plugin(HIGHROLLER_GOLD
     COMPANY_NAME "DJBILBOX BEATS"
     PLUGIN_MANUFACTURER_CODE Djbb
-    PLUGIN_CODE Hgl
+    PLUGIN_CODE Hrg1
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
-    PRODUCT_NAME "HIGHROLLER_GOLD"
+    PRODUCT_NAME "HIGHROLLER GOLD"
     VST3_CATEGORIES Instrument Synth)
 
 target_sources(HIGHROLLER_GOLD PRIVATE

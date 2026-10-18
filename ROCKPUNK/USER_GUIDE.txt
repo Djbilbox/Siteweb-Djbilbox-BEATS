@@ -1,0 +1,199 @@
+ROCKPUNK GUITAR - User Guide
+DJBILBOX BEATS - version 1.1.0
+================================================================================
+
+Rock'n'roll electric guitar: two fully modelled strings, the "Urban Slayer" amp,
+an LFO, a resonant filter, a 4-flavour drive, a tempo-syncable delay, a reverb
+and a chorus. 76 factory presets.
+
+ROCKPUNK ships no recording: every note is calculated. There is nothing extra
+to download, and an optional layer plays YOUR OWN audio files if you drop some
+in (see section 4).
+
+
+1. INSTALLATION
+--------------------------------------------------------------------------------
+
+Windows
+  1. Run ROCKPUNK_1.1.0_Installer.exe.
+  2. Accept the Windows elevation prompt: the VST3 folder is under
+     "Program Files", and the installer cannot write there without
+     administrator rights.
+  3. The plugin is installed to
+     C:\Program Files\Common Files\VST3\ROCKPUNK.vst3
+
+macOS
+  1. Copy ROCKPUNK.vst3 to /Library/Audio/Plug-Ins/VST3 and, if you use Logic,
+     ROCKPUNK.component to /Library/Audio/Plug-Ins/Components (or use the
+     installer package of your download if it comes with one).
+  2. The first time, macOS asks for confirmation because the plugin is not
+     notarised: System Settings > Privacy & Security > Open Anyway.
+
+After installing, restart your DAW and force a plugin rescan:
+  - FL Studio:    Options > Manage plugins > Find more plugins
+  - Ableton Live: Preferences > Plug-Ins > Rescan
+  - Reaper:       Preferences > VST > Re-scan
+
+
+2. WHERE ARE THE FILES
+--------------------------------------------------------------------------------
+
+  VST3 plugin (Windows)   C:\Program Files\Common Files\VST3\ROCKPUNK.vst3
+  VST3 plugin (macOS)     /Library/Audio/Plug-Ins/VST3/ROCKPUNK.vst3
+  Presets (factory+yours) Documents\DJBILBOX\ROCKPUNK\Presets
+  Your audio files        Documents\DJBILBOX\ROCKPUNK\Samples
+
+The factory presets travel inside the plugin and are copied to your Documents
+folder the first time it runs. Back up the Presets folder: uninstalling never
+touches it.
+
+
+3. THE INTERFACE
+--------------------------------------------------------------------------------
+
+Everything is drawn on one faceplate. The window can be resized: drag its
+corner and the whole panel scales.
+
+Mouse
+  - Knobs and faders: drag up or down. Hold Shift for fine control.
+  - Double-click a knob, fader or wheel to return it to its default value.
+  - Mouse wheel over a knob or fader nudges it.
+  - Hover over anything to read what it does.
+
+PRESET BAR (top centre)
+  - Folder button or preset name: opens the list of presets, sorted by family.
+  - "<" and ">": previous / next preset.
+  - Disk button: save the current sound as a preset (.rpk file).
+
+EXPANSION cassette (top left) - click it to open a menu:
+  - Init patch ................ every control back to its default value
+  - Open preset file... ....... load any .rpk file
+  - Save preset as... ......... same as the disk button
+  - Show presets folder ....... opens Documents\DJBILBOX\ROCKPUNK\Presets
+  - Delay on / Delay synced ... switch the delay, lock it to the host tempo
+  - Your samples .............. the optional sampled layer (see section 4)
+  - About
+
+LFO (left panel)
+  RATE      speed of the LFO (0.05 to 20 Hz)
+  AMOUNT    depth of the LFO on the destination chosen with DESTINATION
+  PITCH     vibrato depth, whatever the destination
+
+VOLUME ENVELOPE (left panel faders)
+  ATTACK, DECAY, SUSTAIN, RELEASE. From a dry, short rhythm sound to a pad that
+  swells in.
+
+FILTER ENVELOPE (right panel faders A S D R)
+  Shapes the filter sweep. VELOCITY, the fifth fader, sets how much your
+  playing dynamics shape each note (at zero every note attacks the same).
+
+KNOBS
+  GLIDE       time taken to slide from one note to the next
+  FILTER      filter cut-off (turning it switches the filter on if FILTER TYPE
+              is Off)
+  VOLUME      master level
+  REVERB      amount of reverb
+  CHORUS      amount of chorus (stereo widening)
+  DISTORTION  amount of drive after the amp
+  TIME        delay time (turning it switches the delay on)
+  FEEDBACK    number of delay repeats (turning it switches the delay on)
+
+SPEAKER GRILLS (centre, either side of the logo)
+  They are switches: click one to mute or restore the matching string. A lit
+  dot at the top means the string is on. If you hear nothing, check that at
+  least one grill is lit.
+
+DROP-DOWN SELECTORS (bottom)
+  WAVEFORM     how hard the pick is: Soft / Round / Bright / Sharp
+  LFO SOURCE   shape of the LFO: Sine / Triangle / Square / S&H
+  DESTINATION  what the LFO moves: Pitch / Filter / Volume / Drive
+  FILTER TYPE  Low-pass / Band-pass / High-pass / Off
+  MONO/POLY    Poly (8 notes), or Mono to play one note at a time and let GLIDE
+               join them
+
+WHEELS (bottom left)
+  PITCH BEND   plus or minus two semitones, springs back to the middle
+  MODULATION   opens the vibrato; it also follows MIDI CC1 from your keyboard
+
+KEYBOARD (bottom)
+  Three octaves, C2 to C5. Click and slide to play; it also lights up with the
+  MIDI notes it receives.
+
+More controls in your DAW
+  Some settings have no knob on the faceplate but can be automated from the
+  parameter list of your DAW: Layer Mix (crossfade between the two strings),
+  Width, Limiter, each string's Blend / Tone / Body / Sustain / Pick / Level,
+  the Amp (On, Gain, Distortion, Tone, Level), Drive Type and Tone, Delay
+  (On, Sync, Division, Feedback, Mix, LP), Reverb Size, Filter Resonance and
+  the sampled layer.
+
+
+4. YOUR OWN GUITARS (OPTIONAL)
+--------------------------------------------------------------------------------
+
+The sampled layer plays your files. Drop .wav, .aif or .flac files in
+
+    Documents\DJBILBOX\ROCKPUNK\Samples
+
+then click the cassette > Your samples and pick a file. It plays across the
+whole keyboard. ROCKPUNK measures the note of each file to tune the keyboard;
+if the measurement lands beside the note (chords and riffs are ambiguous), use
+the "Sample Root Offset" parameter from your DAW to correct it.
+
+A sub-folder becomes a category in the list:
+
+    Samples/Rhythm/palm-mute-E.wav
+    Samples/Solos/bend-A.wav
+
+The folder is empty after installation, and that is normal: the 76 factory
+presets only use the two modelled strings.
+
+
+5. THE 76 FACTORY PRESETS
+--------------------------------------------------------------------------------
+
+They are numbered and grouped by family. All of them are set to the same
+level, so moving from one to another gives no jump in volume. None of them needs
+the Samples folder.
+
+  Crunch rhythm   14   dry attack, short notes, the heart of the product
+  Leads           12   they sustain, they sing; delay and vibrato
+  High gain       10   fuzz and asymmetric saturation
+  Clean           12   the amp on a clean gain, chorus and delay
+  Bare strings     8   no distortion, the body speaks
+  Nocturnal        8   dark, closed filter, space
+  Textures         8   the LFO and the filter are the subject
+  Low end          4   power chords, deep body
+
+
+6. FREQUENTLY ASKED QUESTIONS
+--------------------------------------------------------------------------------
+
+The plugin does not appear in my DAW.
+  Check that the plugin scan includes C:\Program Files\Common Files\VST3, then
+  run a full rescan.
+
+I hear nothing.
+  Make sure at least one of the two speaker grills is lit: they switch the two
+  strings, and with both off there is nothing left to play. Also check that the
+  plugin is not bypassed and that MIDI reaches it.
+
+The "Your samples" list is empty.
+  That is the normal state of a fresh install: ROCKPUNK ships no recording.
+  Drop your files in Documents\DJBILBOX\ROCKPUNK\Samples (cassette > Your
+  samples > Open the Samples folder).
+
+Where are my presets?
+  In Documents\DJBILBOX\ROCKPUNK\Presets. Back this folder up: uninstalling does
+  not touch it.
+
+Can I sell the music I make with ROCKPUNK?
+  Yes, royalty-free and with no credit required. See LICENSE.txt.
+
+
+7. SUPPORT
+--------------------------------------------------------------------------------
+
+djbilboxbeats.com - support@djbilboxbeats.com
+
+(C) 2026 DJBILBOX BEATS

@@ -84,6 +84,7 @@ public:
     void pitchWheelMoved (int) override {}
     void controllerMoved (int, int) override {}
 
+    using juce::SynthesiserVoice::renderNextBlock;
     void renderNextBlock (juce::AudioBuffer<float>& outputBuffer, int startSample,
                           int numSamples) override
     {

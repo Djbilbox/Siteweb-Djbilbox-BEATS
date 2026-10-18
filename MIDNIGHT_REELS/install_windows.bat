@@ -1,8 +1,8 @@
 @echo off
-REM Copie MIDNIGHT_REELS.vst3 dans le dossier VST3 systeme (executer en administrateur).
-set SRC=%~dp0build\MIDNIGHT_REELS_artefacts\Release\VST3\MIDNIGHT_REELS.vst3
-set DST=%CommonProgramFiles%\VST3\MIDNIGHT_REELS.vst3
-if not exist "%SRC%" (echo Compile d abord avec build_windows.bat & pause & exit /b 1)
-xcopy /E /I /Y "%SRC%" "%DST%" || (echo Echec : lance ce fichier en administrateur. & pause & exit /b 1)
-echo Installe dans %DST%. Dans FL Studio : Options > Manage plugins > Find installed plugins.
+REM Copy MIDNIGHT REELS.vst3 to the system VST3 folder (run as administrator).
+set SRC=%~dp0build\MIDNIGHT_REELS_artefacts\Release\VST3\MIDNIGHT REELS.vst3
+set DST=%CommonProgramFiles%\VST3\MIDNIGHT REELS.vst3
+if not exist "%SRC%" (echo Build first with build_windows.bat & pause & exit /b 1)
+xcopy /E /I /Y "%SRC%" "%DST%" || (echo Failed: run this file as administrator. & pause & exit /b 1)
+echo Installed to %DST%. In FL Studio: Options ^> Manage plugins ^> Find installed plugins.
 pause

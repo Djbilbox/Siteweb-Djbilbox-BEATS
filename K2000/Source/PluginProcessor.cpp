@@ -21,6 +21,7 @@ void K2000AudioProcessor::prepareToPlay (double sr, int)
     lastMode = -1; stackSize = 0;
     for (auto* v : voices) v->kill();   // repartir d'un etat silencieux
     chorusFx.reset(); delayFx.reset(); reverbFx.reset(); limiter.reset();
+    prepared = sr > 0.0;
 }
 
 void K2000AudioProcessor::applyPreset (int index)
@@ -75,7 +76,8 @@ void K2000AudioProcessor::handleEvent (const juce::MidiMessage& m, int mode)
     else if (m.isPitchWheel()) { const float b = (m.getPitchWheelValue() - 8192) / 8192.f; for (auto* v : voices) v->setMidiBend (b); synth.handlePitchWheel (ch, m.getPitchWheelValue()); }
     else if (m.isController())
     {
-        if (m.getControllerNumber() == 1) { const float x = m.getControllerValue() / 127.f; for (auto* v : voices) v->setMidiMod (x); }
+        if (m.getControllerNumber() == 1) { const float x = m.getControllerValue() / 127.f; shared.lastMod.store (x); for (auto* v : voices) v->setMidiMod (x); }
+        else if (m.getControllerNumber() == 121) { shared.lastMod.store (0.f); for (auto* v : voices) v->setMidiMod (0.f); }   // reset all controllers
         else if (m.getControllerNumber() == 64 && ! mono) synth.handleSustainPedal (ch, m.getControllerValue() >= 64);
     }
 }
@@ -85,7 +87,7 @@ void K2000AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     juce::ScopedNoDenormals nd;
     const int n = buffer.getNumSamples();
     buffer.clear();
-    if (n == 0 || buffer.getNumChannels() < 1) return;
+    if (n == 0 || buffer.getNumChannels() < 1 || ! prepared) return;   // nothing to do / prepareToPlay not called yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
 
     const int mode = juce::jlimit (0, 3, (int) ptrs (vmode));

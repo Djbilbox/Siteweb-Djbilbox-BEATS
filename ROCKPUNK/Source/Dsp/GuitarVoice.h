@@ -133,6 +133,9 @@ public:
         const float raw = juce::jlimit (0.001f, 1.0f, velocity);
         const float vel = 1.0f - velAmount * (1.0f - raw);
 
+        resonatorA.reset();
+        resonatorB.reset();
+
         stringA.pluck (vel, juce::jlimit (0.02f, 1.0f, pickA * pickFactor));
         stringB.pluck (vel, juce::jlimit (0.02f, 1.0f, pickB * pickFactor));
 
@@ -160,6 +163,7 @@ public:
     void pitchWheelMoved (int) override {}
     void controllerMoved (int, int) override {}
 
+    using juce::SynthesiserVoice::renderNextBlock;
     void renderNextBlock (juce::AudioBuffer<float>& outputBuffer, int startSample,
                           int numSamples) override
     {

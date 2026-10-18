@@ -22,8 +22,9 @@ public:
     void reset() noexcept
     {
         phase = 0.0f;
-        heldRandom = 0.0f;
+        wrapped = false;
         rng = 0x9E3779B9u;
+        heldRandom = randUnit();
     }
 
     void setFrequency (float f) noexcept
@@ -36,8 +37,14 @@ public:
 
     float process() noexcept
     {
-        if (shape == 4 && (phase >= 1.0f || phase < 0.0f))
+        // Sample & hold: a new random value at the start of every cycle. The
+        // phase is wrapped at the end of each call, so it can never be read
+        // outside [0, 1) here - the wrap itself has to be what triggers it.
+        if (wrapped)
+        {
+            wrapped = false;
             heldRandom = randUnit();
+        }
 
         float out = 0.0f;
 
@@ -52,8 +59,16 @@ public:
         }
 
         phase += phaseInc;
-        if (phase >= 1.0f)     phase -= 1.0f;
-        else if (phase < 0.0f) phase += 1.0f;
+        if (phase >= 1.0f)
+        {
+            phase -= 1.0f;
+            wrapped = true;
+        }
+        else if (phase < 0.0f)
+        {
+            phase += 1.0f;
+            wrapped = true;
+        }
 
         return out;
     }
@@ -72,6 +87,7 @@ private:
     float  phase = 0.0f;
     float  phaseInc = 0.0f;
     float  heldRandom = 0.0f;
+    bool   wrapped = false;
     int    shape = 0;
     uint32_t rng = 0x9E3779B9u;
 };

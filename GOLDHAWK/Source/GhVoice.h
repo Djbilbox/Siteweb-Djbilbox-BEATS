@@ -77,7 +77,7 @@ public:
     }
 
     void pitchWheelMoved (int v) override { midiBend = (v - 8192) / 8192.f; }
-    void controllerMoved (int cc, int v) override { if (cc == 1) midiMod = v / 127.f; }
+    void controllerMoved (int cc, int v) override { if (cc == 1) midiMod = v / 127.f; else if (cc == 121) midiMod = 0.f; }   // CC121 = reset all controllers
     void aftertouchChanged (int) override {}
     void channelPressureChanged (int) override {}
 
@@ -149,7 +149,7 @@ public:
 
             L[start + i] += y * gL;
             if (R) R[start + i] += y * gR;
-            ++age;
+            if (age < 0x3fffffff) ++age;   // saturate: no signed overflow on very long held notes
             if (! adsr.isActive()) { clearCurrentNote(); break; }
         }
     }

@@ -7,28 +7,19 @@ namespace rk
 {
 
 //==============================================================================
-// ROCKPUNK dark UI palette. Every colour in the interface is defined here so
-// visual tuning happens in one place.
+// ROCKPUNK colours. Sampled from the artwork, so that what the editor draws
+// matches what is printed on the faceplate.
 //==============================================================================
 struct Palette
 {
-    static juce::Colour bg()          { return juce::Colour (0xFF0B0A0A); }
-    static juce::Colour panel()       { return juce::Colour (0xFF161312); }
-    static juce::Colour panelLight()  { return juce::Colour (0xFF201C1A); }
-    static juce::Colour chrome()      { return juce::Colour (0xFF3A3A38); }
-    static juce::Colour chromeHi()    { return juce::Colour (0xFF5A5550); }
-    static juce::Colour red()         { return juce::Colour (0xFFE8302A); }
-    static juce::Colour orange()      { return juce::Colour (0xFFFF7A1A); }
-    static juce::Colour text()        { return juce::Colour (0xFFFFF2D0); }
-    static juce::Colour textDim()     { return juce::Colour (0xFF8A857C); }
+    static juce::Colour pink()        { return juce::Colour (0xFFEB588E); }   // preset text, arrows
+    static juce::Colour pinkHot()     { return juce::Colour (0xFFFF4F9A); }   // highlights and glows
+    static juce::Colour label()       { return juce::Colour (0xFFD2D2D2); }   // printed labels
+    static juce::Colour labelDim()    { return juce::Colour (0xFF8E8E92); }
     static juce::Colour ink()         { return juce::Colour (0xFF0B0A0A); }
-    static juce::Colour off()         { return juce::Colour (0xFF22201E); }
 
-    // neon "note energy" colours used when a note is triggered
-    static juce::Colour neonViolet()  { return juce::Colour (0xFFA45BFF); }
-    static juce::Colour neonRose()    { return juce::Colour (0xFFFF4FD8); }
-
-    static juce::Colour whiteKey()    { return juce::Colour (0xFFE6DCC8); }
+    static juce::Colour popupBack()   { return juce::Colour (0xFF18131A); }
+    static juce::Colour popupText()   { return juce::Colour (0xFFE9DEE4); }
 };
 
 } // namespace rk

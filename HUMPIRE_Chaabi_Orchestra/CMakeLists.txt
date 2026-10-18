@@ -9,9 +9,10 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-option(HUMPIRE_COPY_PLUGIN "Copie le VST3 dans le dossier systeme apres build" ON)
-option(HUMPIRE_BUILD_TESTS "Compile le test de fumee headless" OFF)
-set(HUMPIRE_JUCE_DIR "" CACHE PATH "Chemin vers un clone local de JUCE (sinon FetchContent 8.0.4)")
+option(HUMPIRE_COPY_PLUGIN "Copy the VST3 to the system plug-in folder after building" ON)
+option(HUMPIRE_BUILD_TESTS "Build the headless smoke test" OFF)
+option(HUMPIRE_BUILD_TOOLS "Build the console tools (ChaabiRenderLibrary)" ON)
+set(HUMPIRE_JUCE_DIR "" CACHE PATH "Path to a local JUCE clone (otherwise FetchContent 8.0.4)")
 
 # --- JUCE ------------------------------------------------------------------
 if(HUMPIRE_JUCE_DIR)
@@ -25,12 +26,26 @@ else()
   FetchContent_MakeAvailable(JUCE)
 endif()
 
-# --- Modules du projet -----------------------------------------------------
+# --- Project modules --------------------------------------------------------
+add_subdirectory(Source/Plugin/Model)      # built-in modelled library (pure C++17, no JUCE)
 add_subdirectory(Source/HumpireCore)
 add_subdirectory(Source/Plugin)
-if(HUMPIRE_BUILD_TESTS)
-  add_subdirectory(Tests)
+
+# Console tool: renders the built-in library to WAV + SFZ for inspection (std only, no JUCE).
+if(HUMPIRE_BUILD_TOOLS)
+  add_executable(ChaabiRenderLibrary tools/render_library.cpp)
+  target_link_libraries(ChaabiRenderLibrary PRIVATE HumpireModel)
+  target_include_directories(ChaabiRenderLibrary PRIVATE tools)
 endif()
 
-# NOTE : "HUMPIRE Hub" (activation / mises a jour) = livrable suivant,
-#        il se branchera ici via add_subdirectory(Source/Hub) + HumpireCore.
+if(HUMPIRE_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(Tests)
+  if(HUMPIRE_BUILD_TOOLS)
+    # renders + validates the built-in library (key map, coverage, budgets) without JUCE
+    add_test(NAME model_validate COMMAND ChaabiRenderLibrary --validate-only)
+  endif()
+endif()
+
+# NOTE: "HUMPIRE Hub" (activation / updates) is the next deliverable;
+#       it will plug in here via add_subdirectory(Source/Hub) + HumpireCore.

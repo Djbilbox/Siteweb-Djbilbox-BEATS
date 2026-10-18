@@ -4,7 +4,7 @@
 
 namespace humpire
 {
-// Preset d'usine : valeurs reelles de parametres (id -> valeur) + proprietes d'etat (non-parametres).
+// Factory preset: real parameter values (id -> value) + state properties (non-parameters).
 struct FactoryPreset
 {
     juce::String name;
@@ -13,7 +13,7 @@ struct FactoryPreset
     std::vector<std::pair<juce::String, juce::String>> props;
 };
 
-// Gestionnaire de presets + A/B. Thread message uniquement.
+// Preset manager + A/B. Message thread only.
 class PresetManager
 {
 public:
@@ -33,7 +33,7 @@ public:
     bool saveUser (const juce::String& name);
     void rescanUserPresets();
 
-    // A/B : bascule entre deux etats complets.
+    // A/B: switches between two complete states.
     void toggleAB();
     bool isB() const noexcept { return currentIsB; }
 
@@ -47,7 +47,7 @@ private:
     std::vector<FactoryPreset> factoryPresets;
 
     std::vector<juce::String> names, categories;
-    std::vector<juce::File> userFiles; // index decale de factoryPresets.size()
+    std::vector<juce::File> userFiles; // index offset by factoryPresets.size()
     int current = 0;
 
     juce::ValueTree ab[2];

@@ -5,7 +5,7 @@ namespace humpire
 {
 namespace
 {
-// Interpolation Hermite 4 points
+// 4-point Hermite interpolation
 inline float hermite (const float* x, double position, int last) noexcept
 {
     const int i = (int) position;
@@ -38,7 +38,7 @@ void ChaabiVoice::startNote (int note, float velocity, juce::SynthesiserSound* s
     const double sr = getSampleRate();
     const float a = sp.authenticity.load();
 
-    // Humanisation (macro Authenticite) : velocite, accordage, micro-retard
+    // Humanisation (Authenticity macro): velocity, tuning, micro-delay
     const float velJit = 1.0f + a * 0.12f * (rng.nextFloat() * 2.0f - 1.0f);
     const float detune = a * 8.0f * (rng.nextFloat() * 2.0f - 1.0f);                 // cents
     delayLeft = (int) (a * 0.012 * sr * (double) rng.nextFloat());                    // <= 12 ms
@@ -183,7 +183,7 @@ ChaabiVoice* ChaabiSynth::pickVoice()
         if (v->isVoiceActive())
         {
             ++active;
-            // on prefere voler la plus ancienne voix dont la touche est relachee
+            // prefer stealing the oldest voice whose key is released
             if (victim == nullptr
                 || (victim->isKeyDown() && ! v->isKeyDown())
                 || (victim->isKeyDown() == v->isKeyDown() && v->wasStartedBefore (*victim)))
@@ -198,7 +198,7 @@ ChaabiVoice* ChaabiSynth::pickVoice()
 
 void ChaabiSynth::startRegion (Region* r, int channel, int note, float velocity)
 {
-    // Groupes exclusifs (off_by) : coupe les voix concernees
+    // Exclusive groups (off_by): quickly release the voices concerned
     if (r->def.group != 0)
         for (int i = 0; i < getNumVoices(); ++i)
         {
@@ -216,7 +216,7 @@ void ChaabiSynth::noteOn (int channel, int note, float velocity)
     const juce::ScopedLock sl (lock);
     if (bank == nullptr || note < 0 || note > 127) return;
 
-    // Keyswitch : change l'articulation, ne sonne pas
+    // Keyswitch: changes the articulation, does not sound
     if (bank->swLo >= 0 && note >= bank->swLo && note <= bank->swHi)
     {
         activeSwitch = note;

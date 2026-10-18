@@ -24,7 +24,7 @@ target_sources(HumpireChaabiOrchestra PRIVATE
   PhraseBank.cpp
   PhrasePlayer.cpp)
 
-target_link_libraries(HumpireChaabiOrchestra PRIVATE HumpireCore)
+target_link_libraries(HumpireChaabiOrchestra PRIVATE HumpireCore HumpireModel)
 
 target_compile_definitions(HumpireChaabiOrchestra PUBLIC
   JUCE_VST3_CAN_REPLACE_VST2=0

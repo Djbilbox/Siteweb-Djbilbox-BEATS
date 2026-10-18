@@ -9,6 +9,7 @@
 #   SNAP_INCLUDES                  include directories
 #   SNAP_DEFS                      compile definitions (NAME or NAME=VALUE)
 #   SNAP_MODULES                   JUCE modules to link (juce::juce_audio_utils ...)
+#   SNAP_JUCE_HEADER               ON when the project includes <JuceHeader.h> (juce_generate_juce_header)
 #   SNAP_BD_COUNT                  number of juce_add_binary_data() targets of the project
 #   SNAP_BD_<i>_SOURCES/_HEADER/_NAMESPACE   sources (absolute), HEADER_NAME, NAMESPACE of target i
 #
@@ -22,7 +23,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
-# one frame is rendered, so compile time matters more than speed
+# One frame is rendered, so compile time matters more than speed: -O1, and deliberately NOT
+# juce::juce_recommended_config_flags (which would force -O3 and roughly double the JUCE build).
 set(CMAKE_CXX_FLAGS_RELEASE "-O1 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELEASE   "-O1 -DNDEBUG")
 
@@ -62,5 +64,7 @@ target_include_directories(Snapshot PRIVATE ${SNAP_INCLUDES})
 target_compile_definitions(Snapshot PRIVATE ${SNAP_DEFS})
 target_link_libraries(Snapshot PRIVATE
     ${SNAP_BD_TARGETS}
-    ${SNAP_MODULES}
-    juce::juce_recommended_config_flags)
+    ${SNAP_MODULES})
+if(SNAP_JUCE_HEADER)
+    juce_generate_juce_header(Snapshot)   # some projects (WARZONE808) still #include <JuceHeader.h>
+endif()

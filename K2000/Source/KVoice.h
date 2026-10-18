@@ -51,6 +51,7 @@ struct SharedState
 {
     std::atomic<float> lastFreq { 0.f };     // portamento
     std::atomic<float> lfoChorus { 0.f };    // valeur du LFO quand la destination est Chorus
+    std::atomic<float> lastMod { 0.f };      // latest mod wheel (CC1) value 0..1, kept even when no voice is playing
 };
 
 class KSound : public juce::SynthesiserSound
@@ -87,7 +88,7 @@ public:
         if (allowTailOff) release(); else kill();
     }
     void pitchWheelMoved (int v) override { midiBend = (v - 8192) / 8192.f; }
-    void controllerMoved (int cc, int v) override { if (cc == 1) midiMod = v / 127.f; }
+    void controllerMoved (int cc, int v) override { if (cc == 1) midiMod = v / 127.f; else if (cc == 121) midiMod = 0.f; }
     void aftertouchChanged (int) override {}
     void channelPressureChanged (int) override {}
 
@@ -236,6 +237,7 @@ private:
     void begin (int midiNote, float velocity)
     {
         note = midiNote; held = true; vel = velocity;
+        midiMod = shared.lastMod.load();   // idle voices may have missed CC1: start from the latest wheel position
         targetFreq = (float) juce::MidiMessage::getMidiNoteInHertz (midiNote);
         const float last = shared.lastFreq.load();
         curFreq = (P (glide) > 0.002f && last > 0.f) ? last : targetFreq;

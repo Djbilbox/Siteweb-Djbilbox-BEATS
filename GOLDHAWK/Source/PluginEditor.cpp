@@ -141,12 +141,12 @@ GhPanel::GhPanel (GhProcessor& p)
     addKnob (volume, P::volume, "VOLUME"); addKnob (reverb, P::reverb, "REVERB");  addKnob (chorus, P::chorus, "CHORUS");
     addKnob (dist, P::dist, "DISTORTION"); addKnob (delay, P::delay, "DLY MIX");
     addKnob (dtime, P::dtime, "TIME");     addKnob (feedback, P::fb, "FEEDBACK");
-    const char* en[4] = { "A", "D", "S", "R" };
+    const char* en[4] = { "ATK", "DEC", "SUS", "REL" };
     for (int i = 0; i < 4; ++i) addKnob (env[i], P::atk + i, en[i], juce::Slider::LinearVertical);
     addKnob (fenvK, P::fenv, "FLT ENV"); addKnob (resoK, P::reso, "RESO");
-    const char* tn[4] = { "A", "D/R", "S", "VEL" };   // the filter envelope uses its decay time for the release too
+    const char* tn[4] = { "ATK", "DEC/REL", "SUS", "VEL" };   // the filter envelope uses its decay time for the release too
     const int ti[4] = { P::fatk, P::fdec, P::fsus, P::velocity };
-    for (int i = 0; i < 4; ++i) addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical);
+    for (int i = 0; i < 4; ++i) { addKnob (rsl[i], ti[i], tn[i], juce::Slider::LinearVertical); rsl[i].s.getProperties().set ("small", true); }   // tight 33 px spacing: smaller caption font
     addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
     addKnob (modw, P::modw, "", juce::Slider::LinearVertical);
     bend.s.getProperties().set ("wheel", true); modw.s.getProperties().set ("wheel", true);
@@ -376,7 +376,7 @@ void GhPanel::paint (juce::Graphics& g)
         const juce::Colour txt (0xffd8ccb0), dim (0xffa89c80);
         header (g, "LFO", 328, 606, 110, txt, 15.f);                      // RATE + AMOUNT only (PITCH is the transpose knob)
         header (g, "AMP ENVELOPE", 402, 792, 140, txt, 12.f);
-        header (g, "FILTER ENVELOPE", 1485, 372, 120, txt, 12.f);         // A, D/R, S
+        header (g, "FILTER ENVELOPE", 1485, 372, 120, txt, 12.f);         // ATK, DEC/REL, SUS
         g.setColour (txt.withAlpha (0.3f));                               // velocity sensitivity is not part of the filter envelope
         g.drawLine (1585.f * K, 410.f * K, 1585.f * K, 600.f * K, 1.f);
         header (g, "EFFECTS", 1590, 688, 190, txt, 12.f);

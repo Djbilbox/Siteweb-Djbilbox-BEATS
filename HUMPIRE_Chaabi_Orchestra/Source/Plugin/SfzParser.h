@@ -2,7 +2,7 @@
 #include <juce_core/juce_core.h>
 #include <vector>
 
-// Parseur SFZ minimal mais robuste (format ouvert, libre de droits).
+// Minimal but robust SFZ parser (open, royalty-free format).
 // Headers : <control> <global> <master> <group> <region>
 // Opcodes supportes : sample, default_path, lokey/hikey/key, pitch_keycenter, lovel/hivel,
 //   lorand/hirand, seq_length/seq_position, volume, pan, tune, transpose, pitch_keytrack,

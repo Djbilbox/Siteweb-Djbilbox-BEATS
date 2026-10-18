@@ -3,11 +3,11 @@
 
 namespace humpire
 {
-// Knob HUMPIRE :
-//  - valeur affichee au survol (dessinee par HumpireLookAndFeel)
-//  - double-clic = reset (fourni par SliderAttachment : valeur par defaut du parametre)
-//  - Shift + glisser = reglage fin
-//  - clic droit = saisie numerique
+// HUMPIRE knob:
+//  - value shown on hover (drawn by HumpireLookAndFeel)
+//  - double-click = reset (provided by SliderAttachment: the parameter's default value)
+//  - Shift + drag = fine adjustment
+//  - right click = numeric entry
 class HumpireKnob : public juce::Slider
 {
 public:
@@ -18,7 +18,7 @@ public:
         setTextBoxStyle (juce::Slider::NoTextBox, true, 0, 0);
         setRotaryParameters (juce::MathConstants<float>::pi * 1.2f, juce::MathConstants<float>::pi * 2.8f, true);
         setMouseDragSensitivity (220);
-        // Shift bascule en mode "velocite" lent = reglage fin
+        // Shift switches to a slow "velocity" mode = fine adjustment
         setVelocityBasedMode (false);
         setVelocityModeParameters (0.12, 1, 0.0, true, juce::ModifierKeys::shiftModifier);
         setScrollWheelEnabled (true);
@@ -35,11 +35,11 @@ public:
 private:
     void askValue()
     {
-        auto* w = new juce::AlertWindow (getName(), juce::String::fromUTF8 ("Saisir une valeur :"),
+        auto* w = new juce::AlertWindow (getName(), "Enter a value:",
                                          juce::MessageBoxIconType::NoIcon);
         w->addTextEditor ("v", getTextFromValue (getValue()));
         w->addButton ("OK", 1, juce::KeyPress (juce::KeyPress::returnKey));
-        w->addButton ("Annuler", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+        w->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
         w->enterModalState (true,
             juce::ModalCallbackFunction::create ([safe = juce::Component::SafePointer<HumpireKnob> (this), w] (int r)
             {

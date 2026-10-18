@@ -12,7 +12,7 @@ using SliderAtt = juce::AudioProcessorValueTreeState::SliderAttachment;
 using ButtonAtt = juce::AudioProcessorValueTreeState::ButtonAttachment;
 using ComboAtt  = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
 
-// Fond : anthracite + zellige en filigrane
+// Background: anthracite + zellige watermark
 class Canvas : public juce::Component
 {
 public:
@@ -22,7 +22,7 @@ private:
     juce::Image zellige;
 };
 
-// Carte instrument (colonne gauche)
+// Instrument card (left column)
 class InstrumentCard : public juce::Component
 {
 public:
@@ -34,7 +34,7 @@ private:
     int idx;
 };
 
-// Visuel signature de l'instrument selectionne
+// Signature artwork of the selected instrument
 class ArtView : public juce::Component
 {
 public:
@@ -44,7 +44,7 @@ private:
     ChaabiProcessor& proc;
 };
 
-// Pad de phrase : clic = declenche (maintenu = boucle), poignee = drag & drop MIDI vers le DAW
+// Phrase pad: click = trigger (held = loop), handle = drag & drop MIDI into the DAW
 class PhrasePad : public juce::Component
 {
 public:
@@ -60,7 +60,7 @@ private:
     bool down = false, exported = false;
 };
 
-// Sequenceur 16 pas (5 lignes)
+// 16-step sequencer (5 lanes)
 class SequencerView : public juce::Component
 {
 public:
@@ -74,7 +74,7 @@ private:
     int inst = 0;
 };
 
-// Clavier avec zones colorees (phrases, keyswitch, plage de chaque instrument)
+// Keyboard with coloured zones (phrases, keyswitches, range of each instrument)
 class ZonedKeyboard : public juce::MidiKeyboardComponent
 {
 public:
@@ -109,20 +109,20 @@ private:
     HumpireLookAndFeel laf;
     Canvas content;
 
-    // barre superieure
+    // top bar
     juce::Label logo;
     juce::TextButton prevBtn { "<" }, nextBtn { ">" }, presetBtn, saveBtn { "SAVE" }, abBtn { "A" }, undoBtn { "UNDO" }, redoBtn { "REDO" };
     juce::ToggleButton bypassBtn { "BYPASS" };
     HumpireMeter inMeter, outMeter;
 
-    // colonne instruments + visuel
+    // instrument column + artwork
     std::array<std::unique_ptr<InstrumentCard>, kNumInstruments> cards;
     ArtView art;
     juce::Label titleLabel, taglineLabel, statusLabel;
     double loadProgress = 0.0;
     juce::ProgressBar loadBar;
-    juce::TextButton libraryBtn { "DOSSIER SAMPLES" };
-    juce::ToggleButton multiBtn { "MULTI" }, activeBtn { "ACTIF" };
+    juce::TextButton libraryBtn { "SAMPLES FOLDER" };
+    juce::ToggleButton multiBtn { "MULTI" }, activeBtn { "ACTIVE" };
 
     // knobs
     std::array<std::unique_ptr<HumpireKnob>, 10> instKnobs;
@@ -133,8 +133,8 @@ private:
     std::unique_ptr<HumpireKnob> authKnob;
     std::unique_ptr<SliderAtt> authAtt;
 
-    // onglets du bas
-    juce::TextButton tabPlay { "JEU" }, tabPhrases { "PHRASES" }, tabPatterns { "PATTERNS" };
+    // bottom tabs
+    juce::TextButton tabPlay { "PLAY" }, tabPhrases { "PHRASES" }, tabPatterns { "PATTERNS" };
     juce::Component playPanel, phrasePanel, patternPanel;
     juce::Label playInfo;
     std::vector<std::unique_ptr<PhrasePad>> pads;

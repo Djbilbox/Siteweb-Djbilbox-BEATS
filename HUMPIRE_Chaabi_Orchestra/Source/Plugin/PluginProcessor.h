@@ -10,8 +10,11 @@
 
 namespace humpire
 {
-// Etat de chargement d'un instrument (lu par l'UI)
-struct SlotStatus { int state = 0; float progress = 0.f; juce::String message; }; // 0 vide, 1 charge, 2 pret, 3 erreur
+// Load state of one instrument (read by the UI).
+//   state: 0 empty, 1 loading / rendering, 2 ready, 3 error (nothing playable)
+//   builtIn: the slot uses (or is rendering) the built-in modelled instrument instead of an SFZ library
+//   warning: ready, but something needs the user's attention (e.g. an SFZ library could not be loaded)
+struct SlotStatus { int state = 0; float progress = 0.f; juce::String message; bool builtIn = false; bool warning = false; };
 
 class ChaabiProcessor : public juce::AudioProcessor,
                         private juce::AsyncUpdater,
@@ -22,11 +25,14 @@ public:
     ChaabiProcessor();
     ~ChaabiProcessor() override;
 
+    using juce::AudioProcessor::processBlock;
+    using juce::AudioProcessor::processBlockBypassed;
+
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout&) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-    void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;     // (VST3 never calls it: see getBypassParameter)
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
@@ -48,7 +54,7 @@ public:
 
     juce::AudioProcessorParameter* getBypassParameter() const override { return apvts.getParameter (pid::bypass); }
 
-    // ---- API pour l'UI (thread message)
+    // ---- UI API (message thread)
     SlotStatus getSlotStatus (int slot) const;
     bool isSlotActive (int slot) const;
     juce::File getLibraryRoot() const;
@@ -83,14 +89,15 @@ private:
         juce::SmoothedValue<float, juce::ValueSmoothingTypes::Multiplicative> cutoff;
         bool wasActive = false;
 
-        // transmission de banque (thread de chargement -> thread audio)
+        // bank hand-over (loader thread -> audio thread)
         juce::SpinLock pendingLock;
         std::shared_ptr<Bank> pending, retired;
         std::atomic<int> state { 0 };
         std::atomic<float> progress { 0.f };
-        std::atomic<int> generation { 0 };
-        mutable juce::CriticalSection msgLock;
-        juce::String message, loadedPath;
+        std::atomic<int> generation { 0 };           // bumped to cancel a running load / render
+        mutable juce::CriticalSection msgLock;       // guards the fields below (never taken on the audio thread)
+        juce::String message, loadedKey;
+        bool builtIn = false, warning = false;
     };
 
     void handleAsyncUpdate() override;
@@ -98,18 +105,26 @@ private:
     void parameterChanged (const juce::String&, float) override;
 
     void refreshLoads();
-    void requestLoad (int slot, const juce::File& sfz);
+    void requestLoad (int slot, const juce::File& sfz, bool sfzExists, const juce::String& key);
     void pickupBank (Slot&);
+    void renderChunk (juce::AudioBuffer<float>& host, int start, int n, juce::MidiBuffer& midi, int chunkOffset);
+    void enterBypassIdle();
     void decodeSeqGrid (const juce::String&);
     static juce::String defaultSeqGrid();
 
     std::array<Slot, kNumInstruments> slots;
-    juce::ThreadPool loaderPool { 1 };
+    // one low-priority worker: SFZ loading and built-in rendering must never compete with the audio thread
+    juce::ThreadPool loaderPool { juce::ThreadPoolOptions().withThreadName ("HUMPIRE loader")
+                                                          .withNumberOfThreads (1)
+                                                          .withDesiredThreadPriority (juce::Thread::Priority::low) };
 
     juce::Reverb reverb;
+    juce::MidiBuffer chunkMidi;             // used when the host block exceeds the prepared size
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayL { 96000 * 2 }, delayR { 96000 * 2 };
     juce::SmoothedValue<float> masterGain, delaySamples, delayFb;
-    juce::AudioBuffer<float> bus;           // 0-1 dry, 2-3 reverb, 4 delay
+    juce::AudioBuffer<float> bus;           // 0-1 dry, 2-3 reverb, 4 delay, 5-6 final stereo mix
+    juce::SmoothedValue<float> bypassGain;
+    bool bypassIdle = false;
     SlotMidi slotMidi;
     double sr = 44100.0;
     int maxBlock = 0;
@@ -117,7 +132,7 @@ private:
     std::array<bool, kNumInstruments> activeNow {};
 
     std::atomic<float> *pSelected, *pMulti, *pPoly, *pAuth, *pMaster, *pRevSize, *pRevDamp, *pDlyTime, *pDlyFb,
-                       *pTempo, *pBend, *pSeqOn, *pSeqSwing, *pSeqRate;
+                       *pTempo, *pBend, *pSeqOn, *pSeqSwing, *pSeqRate, *pBypass;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChaabiProcessor)
 };

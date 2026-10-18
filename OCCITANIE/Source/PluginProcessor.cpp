@@ -5,7 +5,8 @@ using namespace Occ;
 
 OccProcessor::OccProcessor()
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
-      apvts (*this, nullptr, "OCCITANIE", createLayout())
+      apvts (*this, nullptr, "OCCITANIE", createLayout()),
+      synth (glideState)
 {
     ptrs.bind (apvts);
     for (int i = 0; i < 16; ++i) synth.addVoice (new OccVoice (ptrs, glideState));
@@ -15,14 +16,15 @@ OccProcessor::OccProcessor()
 void OccProcessor::prepareToPlay (double sr, int block)
 {
     sampleRate = sr;
+    maxBlock = juce::jmax (1, block);
     synth.setCurrentPlaybackSampleRate (sr);
-    juce::dsp::ProcessSpec spec { sr, (juce::uint32) block, 2 };
+    juce::dsp::ProcessSpec spec { sr, (juce::uint32) maxBlock, 2 };
     chorus.prepare (spec);
     chorus.setRate (0.7f); chorus.setDepth (0.35f); chorus.setCentreDelay (9.f); chorus.setFeedback (0.1f);
     dly.prepare (sr);
     reverb.setSampleRate (sr);
     lastMonoNote = -1;
-    monoMidi.ensureSize (4096);
+    monoMidi.ensureSize (32768);
     dcRm = 1.f - juce::MathConstants<float>::twoPi * 8.f / (float) sr; dcXl = dcYl = dcXr = dcYr = 0.f;
     distSm.reset (sr, 0.02); delaySm.reset (sr, 0.02);
     distSm.setCurrentAndTargetValue (0.f); delaySm.setCurrentAndTargetValue (0.f);
@@ -48,12 +50,12 @@ void OccProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuf
     juce::ScopedNoDenormals nd;
     const int n = buffer.getNumSamples();
     buffer.clear();
-    if (n == 0 || buffer.getNumChannels() < 1) return;
+    if (n == 0 || buffer.getNumChannels() < 1 || dly.bl.empty()) return;   // nothing to do / prepareToPlay not called yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
 
     if (ptrs (mono) > 0.5f) // mono : derniere note prioritaire, coupe la precedente
     {
-        auto& out = monoMidi; out.clear();
+        auto& out = monoMidi; out.clear(); out.ensureSize (32768);   // swapWith below hands us the host buffer: keep capacity, no allocation in the loop
         for (auto m : midi)
         {
             const auto msg = m.getMessage();
@@ -93,9 +95,15 @@ void OccProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuf
     if (cho > 0.005f)
     {
         chorus.setMix (cho * 0.8f);
-        juce::dsp::AudioBlock<float> blk (buffer);
-        juce::dsp::ProcessContextReplacing<float> ctx (blk);
-        chorus.process (ctx);
+        // the chorus was prepared for maxBlock samples: process larger host blocks in chunks
+        const size_t nch = (size_t) juce::jmin (2, buffer.getNumChannels());
+        juce::dsp::AudioBlock<float> whole (buffer);
+        for (int pos = 0; pos < n; pos += maxBlock)
+        {
+            auto part = whole.getSubsetChannelBlock (0, nch).getSubBlock ((size_t) pos, (size_t) juce::jmin (maxBlock, n - pos));
+            juce::dsp::ProcessContextReplacing<float> ctx (part);
+            chorus.process (ctx);
+        }
     }
 
     // delay ping-pong

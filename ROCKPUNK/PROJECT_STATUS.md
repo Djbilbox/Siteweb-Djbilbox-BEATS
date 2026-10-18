@@ -1,6 +1,6 @@
 # ROCKPUNK GUITAR — État du projet
 
-> Dernière mise à jour : 2026-08-16 — version **1.1.0**, produit livrable.
+> Dernière mise à jour : 2026-10-17 — version **1.1.0**, produit livrable. Interface, installeur, licence et guide : **anglais uniquement**.
 
 ## 1. Ce qu'est le produit
 
@@ -67,24 +67,42 @@ Cibles hors `ALL` : `ROCKPUNK_ConvertSamples` (banque) et `ROCKPUNK_RenderTest`.
 
 ## 5. Vérification
 
-`Tests/render_test.cpp` — sans hôte ni interface :
+`Tests/render_test.cpp` — sans hôte ni fenêtre (cible `ROCKPUNK_RenderTest`) :
 
 ```
 cmake --build Build --config Release --target ROCKPUNK_RenderTest
 Build/ROCKPUNK_RenderTest_artefacts/Release/ROCKPUNK_RenderTest.exe
 ```
 
-Joue chaque corde séparément, vérifie que BODY produit bien du son (le
-résonateur naissait muet), écrit un fichier témoin dans le dossier utilisateur
-pour vérifier qu'il est lu, mesuré et joué, puis passe **les 25 presets** — en
-refusant tout preset qui exigerait un échantillon.
+Code de sortie 0 = tout est vert (210 contrôles au dernier passage). Il couvre :
+
+- les deux cordes, BODY, le filtre (passe-bas / passe-haut), les quatre formes de
+  LFO, chorus, reverb, delay : tourner un contrôle doit s'entendre ;
+- CC1, pitch bend et CC121 atteignant une note qui démarre après eux ;
+- les hôtes : process avant prepare, blocs plus grands que prévu, blocs de 0
+  échantillon, sortie mono, 6 taux x 6 tailles de bloc, événements MIDI hors bloc,
+  bypass, données d'état corrompues ;
+- les notes coincées (20 notes sur 8 voix, CC120, CC123, touches à l'écran) ;
+- 120 réglages aléatoires : jamais de NaN, limiteur respecté, pas de DC ;
+- l'aller-retour d'état de chacun des 65 paramètres, le texte des paramètres
+  (unités, décimales, relecture), les noms en anglais ;
+- les **76 presets** : fichiers lisibles, seuls paramètres existants, aucun
+  échantillon requis, ni muets ni non finis, niveaux dans 15 dB, chargement
+  indépendant de l'état précédent ;
+- l'interface : chaque potard / curseur / molette, tiré à l'endroit où il est
+  dessiné, pilote son paramètre ; les 37 touches jouent leur note ; le survol
+  ne perturbe pas le reste de la façade ; l'éditeur se rend de 500 à 2000 px.
 
 La corde est excitée par un bruit non graîné : deux passages sur la même note
 donnent des niveaux distants d'environ 3 dB. Le banc moyenne donc quatre notes
 réparties sur le manche, sans quoi caler les presets revient à courir après du
 bruit de mesure.
 
-Dernier passage : **tout est vert**, 25 presets entre 0,079 et 0,125 RMS.
+L'image `rockpunk_ui.png` est écrite à côté de l'exécutable : c'est la façade telle
+que le plugin la dessine. Écart mesuré avec le mockup : les zones fixes diffèrent
+sur moins de 0,01 % des pixels ; les centres de potards, retrouvés par ajustement
+de cercle sur l'anneau rose du mockup, sont à moins de 1,5 px de `layout.json`
+(sur 2400 px de large).
 
 ## 6. macOS
 
@@ -97,12 +115,13 @@ Dépôt privé : `github.com/Djbilbox/ROCKPUNK`.
 
 ## 7. Ce qu'un humain doit encore vérifier
 
-1. **L'alignement de l'interface** face au mockup : le modèle qui a placé les
-   contrôles ne voit pas les images, les coordonnées viennent de mesures et
-   d'une détection de cercles. Un `layout.json` déposé dans
-   `Documents\DJBILBOX\ROCKPUNK\` remplace celui compilé, sans recompiler.
-2. **L'écoute** : le banc de test prouve qu'il y a du signal, pas qu'il est beau.
+1. **L'écoute** : le banc de test prouve qu'il y a du signal, qu'il tient, qu'il
+   s'arrête et qu'il ne déborde pas, pas qu'il est beau.
+2. **Un vrai hôte** : le banc tourne sous Linux/GCC et le CI compile sous MSVC ; un
+   passage de `pluginval` sur Windows et un essai dans FL Studio / Ableton / Reaper
+   (menus, fenêtre de sauvegarde, redimensionnement, bypass) restent à faire.
 3. Le bundle macOS n'est **ni signé ni notarisé** : au premier lancement il faut
    passer par *Confidentialité et sécurité → Ouvrir quand même*.
-4. Rien à trancher côté droits : le produit ne contient plus aucun
-   enregistrement tiers.
+4. **L'icône** (éclair orange, `Assets/ROCKPUNK.ico`, bandeau de l'installeur) date de
+   l'ancienne palette : elle ne reprend ni le dromadaire ni le rose de la façade.
+5. Rien à trancher côté droits : le produit ne contient aucun enregistrement tiers.

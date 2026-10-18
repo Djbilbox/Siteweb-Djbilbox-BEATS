@@ -26,7 +26,7 @@ void PhrasePlayer::trigger (int key, const std::array<bool, kNumInstruments>& ac
         const auto& list = phrasesFor (s);
         if (list.empty()) continue;
 
-        // emplacement libre (ou recyclage de la meme touche/slot)
+        // free slot (or reuse of the same key / slot)
         Active* target = nullptr;
         for (auto& a : actives)
             if (a.on && a.key == key && a.slot == s) { target = &a; break; }
@@ -67,7 +67,7 @@ void PhrasePlayer::process (SlotMidi& out, int n, double bpm, bool hostPlaying, 
 {
     const double bps = bpm / 60.0 / sr; // beats par echantillon
 
-    // --- fins de notes programmees
+    // --- scheduled note-offs
     for (auto& o : offs)
         if (o.used && o.at < clock + n)
         {
@@ -85,7 +85,7 @@ void PhrasePlayer::process (SlotMidi& out, int n, double bpm, bool hostPlaying, 
 
         if (a.pendingSync)
         {
-            // Synchronise la phrase sur la grille de l'hote (si l'hote joue), sinon part du debut.
+            // Synchronise the phrase to the host grid (if the host is playing), otherwise start from the beginning.
             a.beat = hostPlaying ? std::fmod (hostPpq + (double) s0 * bps, len) : 0.0;
             a.pendingSync = false;
         }
@@ -103,7 +103,7 @@ void PhrasePlayer::process (SlotMidi& out, int n, double bpm, bool hostPlaying, 
         if (a.beat < 0.0) a.beat += len;
     }
 
-    // --- sequenceur 16 pas
+    // --- 16-step sequencer
     if (seqRunning)
     {
         const double stepLen = 1.0 / (double) juce::jmax (1, stepsPerBeat);

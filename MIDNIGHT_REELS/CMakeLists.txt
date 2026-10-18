@@ -12,11 +12,11 @@ juce_add_binary_data(MrAssets SOURCES Assets/camel.png Assets/logo.png Assets/ca
 juce_add_plugin(MIDNIGHT_REELS
     COMPANY_NAME "DJBILBOX BEATS"
     PLUGIN_MANUFACTURER_CODE Djbb
-    PLUGIN_CODE Mrl
+    PLUGIN_CODE Mrl1
     FORMATS VST3 Standalone
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
-    PRODUCT_NAME "MIDNIGHT_REELS"
+    PRODUCT_NAME "MIDNIGHT REELS"
     VST3_CATEGORIES Instrument Synth)
 
 target_sources(MIDNIGHT_REELS PRIVATE

@@ -27,7 +27,7 @@ inline juce::String unitText (Unit u, float v)
     switch (u)
     {
         case Unit::percent:   return juce::String (juce::roundToInt (v * 100.f)) + " %";
-        case Unit::cutoffHz:  return v >= 1000.f ? juce::String (v / 1000.f, 2) + " kHz" : juce::String (juce::roundToInt (v)) + " Hz";
+        case Unit::cutoffHz:  return v >= 999.5f ? juce::String (v / 1000.f, 2) + " kHz" : juce::String (juce::roundToInt (v)) + " Hz";
         case Unit::rateHz:    return juce::String (v, 2) + " Hz";
         case Unit::time:      return v < 0.00005f ? juce::String ("0 ms")
                                     : v < 0.01f ? juce::String (v * 1000.f, 1) + " ms"
@@ -90,16 +90,16 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createLayout()
     f (t3, "Brightness", 0.f, 1.f, 0.5f, Unit::percent);
     f (t4, "Width / Detune", 0.f, 1.f, 0.3f, Unit::percent);
     f (t5, "Texture", 0.f, 1.f, 0.2f, Unit::percent);
-    f (fenv, "Filter Env", 0.f, 1.f, 0.f, Unit::percent);
+    f (fenv, "Filter Env Amount", 0.f, 1.f, 0.f, Unit::percent);
     f (fdecay, "Filter Decay", 0.02f, 2.f, 0.3f, Unit::time, 0.4f);
     f (reso, "Resonance", 0.f, 1.f, 0.15f, Unit::percent);
-    f (velocity, "Velocity", 0.f, 1.f, 0.5f, Unit::percent);
+    f (velocity, "Velocity Sensitivity", 0.f, 1.f, 0.5f, Unit::percent);
     f (reverb, "Reverb", 0.f, 1.f, 0.25f, Unit::percent);
     f (chorus, "Chorus", 0.f, 1.f, 0.f, Unit::percent);
     f (dist, "Distortion", 0.f, 1.f, 0.f, Unit::percent);
-    f (delay, "Delay", 0.f, 1.f, 0.f, Unit::percent);
+    f (delay, "Delay Mix", 0.f, 1.f, 0.f, Unit::percent);
     f (dtime, "Delay Time", 0.05f, 1.f, 0.35f, Unit::time);
-    f (fb, "Feedback", 0.f, 0.9f, 0.35f, Unit::percent);
+    f (fb, "Delay Feedback", 0.f, 0.9f, 0.35f, Unit::percent);
     c (wave, "Waveform", engineNames);
     c (lfosrc, "LFO Source", lfoNames);
     c (dest, "Destination", destNames);

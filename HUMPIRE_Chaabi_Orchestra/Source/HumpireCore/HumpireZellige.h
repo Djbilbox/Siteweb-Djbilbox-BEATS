@@ -2,7 +2,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <cmath>
 
-// Motif zellige : etoile a 8 branches + losange de jonction, en filigrane.
+// Zellige motif: 8-pointed star + joining lozenge, as a watermark.
 namespace humpire
 {
 inline juce::Path makeEightPointStar (float cx, float cy, float rOut, float rIn)

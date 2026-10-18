@@ -5,10 +5,10 @@ cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DMARABOUT_BUILD_TESTS=OFF
 cmake --build build --config Release --target MARABOUT_VST3 MARABOUT_Standalone || goto :err
 echo.
 echo OK : build\MARABOUT_artefacts\Release\VST3\MARABOUT.vst3
-echo Lance install_windows.bat (en administrateur) pour l installer.
+echo Run install_windows.bat (as administrator) to install it.
 pause
 exit /b 0
 :err
-echo ECHEC de la compilation.
+echo Build FAILED.
 pause
 exit /b 1

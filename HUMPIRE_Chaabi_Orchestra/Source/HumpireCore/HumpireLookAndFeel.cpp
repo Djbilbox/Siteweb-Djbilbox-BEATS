@@ -51,7 +51,7 @@ void HumpireLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int 
     g.setColour (panelHi.brighter (0.15f));
     g.strokePath (track, juce::PathStrokeType (thick, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
-    // Arc de valeur (bipolaire si le range contient 0)
+    // Value arc (bipolar if the range contains 0)
     const float aVal = a0 + pos * (a1 - a0);
     float aFrom = a0;
     if (s.getMinimum() < 0.0 && s.getMaximum() > 0.0)
@@ -79,7 +79,7 @@ void HumpireLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int 
     g.setColour (terracotta.brighter (0.25f));
     g.fillPath (ptr, juce::AffineTransform::rotation (aVal).translated (cx, cy));
 
-    // Libelle : nom au repos, valeur au survol
+    // Label: name at rest, value on hover
     g.setColour (hot ? gold : textDim);
     g.setFont (font (11.5f, hot));
     g.drawText (hot ? s.getTextFromValue (s.getValue()) : s.getName(),
