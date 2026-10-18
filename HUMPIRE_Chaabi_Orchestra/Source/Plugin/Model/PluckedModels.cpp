@@ -46,6 +46,14 @@ constexpr double kLn1000 = 6.907755278982137;   // ln (10^3): T60 -> decay rate
 // ---------------------------------------------------------------------------------------------
 //  Accumulation buffer (linear, or a circle for the seamless loops) and the damped-cosine primitive
 // ---------------------------------------------------------------------------------------------
+// A mode that has been set up (first samples already written) and waits for the batched renderer.
+struct PendingMode
+{
+    double c1, c2, y1, y2;      // recursion y[n] = c1 y[n-1] + c2 y[n-2], with the two latest outputs
+    std::size_t idx;            // buffer index of the next sample
+    long long remaining;        // samples still to write
+};
+
 struct Sink
 {
     Sink (int frames, double sampleRate, bool isCircular)
@@ -59,6 +67,7 @@ struct Sink
 
     std::vector<double> buf;
     std::vector<double> ramp;
+    std::vector<PendingMode> pending;
     double sr;
     bool circular;
     int rampLen = 0;
@@ -71,10 +80,53 @@ struct Sink
         if (circular) { i %= n; if (i < 0) i += n; buf[(std::size_t) i] += v; }
         else if (i >= 0 && i < n) buf[(std::size_t) i] += v;
     }
+
+    // Renders every queued mode.  The modes are sorted by length and run four at a time (independent recursions
+    // overlap in the CPU pipeline: about 3x faster than one mode after the other).
+    void flush()
+    {
+        std::stable_sort (pending.begin(), pending.end(), [] (const PendingMode& a, const PendingMode& b) { return a.remaining > b.remaining; });
+        double* out = buf.data();
+        const std::size_t nn = buf.size();
+        std::size_t i = 0;
+        for (; i + 4 <= pending.size(); i += 4)
+        {
+            PendingMode &a = pending[i], &b = pending[i + 1], &c = pending[i + 2], &d = pending[i + 3];
+            double ya1 = a.y1, ya2 = a.y2, yb1 = b.y1, yb2 = b.y2, yc1 = c.y1, yc2 = c.y2, yd1 = d.y1, yd2 = d.y2;
+            std::size_t ia = a.idx, ib = b.idx, ic = c.idx, id = d.idx;
+            const double a1 = a.c1, a2 = a.c2, b1 = b.c1, b2 = b.c2, c1 = c.c1, c2 = c.c2, d1 = d.c1, d2 = d.c2;
+            long long k = 0;
+            for (const long long stop : { d.remaining, c.remaining, b.remaining, a.remaining })
+            {
+                // after the shortest ends, the remaining ones continue (a set of fewer chains)
+                const int alive = stop == d.remaining ? 4 : stop == c.remaining ? 3 : stop == b.remaining ? 2 : 1;
+                for (; k < stop; ++k)
+                {
+                    const double ya = a1 * ya1 + a2 * ya2; ya2 = ya1; ya1 = ya; out[ia] += ya; if (++ia == nn) ia = 0;
+                    if (alive >= 2) { const double yb = b1 * yb1 + b2 * yb2; yb2 = yb1; yb1 = yb; out[ib] += yb; if (++ib == nn) ib = 0; }
+                    if (alive >= 3) { const double yc = c1 * yc1 + c2 * yc2; yc2 = yc1; yc1 = yc; out[ic] += yc; if (++ic == nn) ic = 0; }
+                    if (alive >= 4) { const double yd = d1 * yd1 + d2 * yd2; yd2 = yd1; yd1 = yd; out[id] += yd; if (++id == nn) id = 0; }
+                }
+            }
+        }
+        for (; i < pending.size(); ++i)
+        {
+            PendingMode& a = pending[i];
+            double y1 = a.y1, y2 = a.y2;
+            std::size_t ia = a.idx;
+            for (long long k = 0; k < a.remaining; ++k)
+            {
+                const double y = a.c1 * y1 + a.c2 * y2; y2 = y1; y1 = y;
+                out[ia] += y; if (++ia == nn) ia = 0;
+            }
+        }
+        pending.clear();
+    }
 };
 
 // y(t) = amp * exp (-alpha (t - t0)) * cos (2 pi freq (t - t0) + phase)   for t >= t0   (t in samples, t0 fractional).
-// Rendered by a two-pole recursion; stops when the mode has decayed below -114 dB re 1.0.
+// Two-pole recursion; stops when the mode has decayed below -106 dB re 1.0.  The first samples (soft onset) are
+// written here, the rest is queued for Sink::flush().
 void addMode (Sink& sk, double t0, double freq, double alpha, double amp, double phase)
 {
     const double sr = sk.sr;
@@ -90,34 +142,31 @@ void addMode (Sink& sk, double t0, double freq, double alpha, double amp, double
     const double A0 = amp * std::exp (-a * tau);
     const double ph = phase + w * tau;
 
-    const double kmaxD = std::log (std::fabs (A0) / 2.0e-6) / a;
+    const double kmaxD = std::log (std::fabs (A0) / 5.0e-6) / a;
     if (kmaxD <= 0.0) return;
     long long kmax = (long long) std::min (kmaxD, sk.circular ? 2.0 * (double) N : (double) (N - n0));
     if (kmax <= 0) return;
 
-    const double c1 = 2.0 * r * std::cos (w), c2 = -r * r;
-    double y1 = A0 / r * std::cos (ph - w);                                // states at n = -1, -2
-    double y2 = A0 / (r * r) * std::cos (ph - 2.0 * w);
+    PendingMode m;
+    m.c1 = 2.0 * r * std::cos (w);
+    m.c2 = -r * r;
+    m.y1 = A0 / r * std::cos (ph - w);                                     // states at n = -1, -2
+    m.y2 = A0 / (r * r) * std::cos (ph - 2.0 * w);
 
     double* out = sk.buf.data();
     std::size_t idx = (std::size_t) (n0 % N);
     const std::size_t nn = (std::size_t) N;
     const long long rl = std::min<long long> (sk.rampLen, kmax);
-    long long k = 0;
-    for (; k < rl; ++k)
+    for (long long k = 0; k < rl; ++k)
     {
-        const double y = c1 * y1 + c2 * y2;
-        y2 = y1; y1 = y;
+        const double y = m.c1 * m.y1 + m.c2 * m.y2;
+        m.y2 = m.y1; m.y1 = y;
         out[idx] += y * sk.ramp[(std::size_t) k];
         if (++idx == nn) idx = 0;
     }
-    for (; k < kmax; ++k)
-    {
-        const double y = c1 * y1 + c2 * y2;
-        y2 = y1; y1 = y;
-        out[idx] += y;
-        if (++idx == nn) idx = 0;
-    }
+    m.idx = idx;
+    m.remaining = kmax - rl;
+    if (m.remaining > 0) sk.pending.push_back (m);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -158,7 +207,7 @@ struct Model
     double haloDb = -200.0;           // sympathetic octave / 12th (qanun)
     double haloRiseMs = 70.0;
     std::vector<BodyStage> body;
-    Layer hard, soft;
+    Layer hard, soft, trem;           // trem: light, fast re-picking (tremolo / roll)
 };
 
 // Per-zone realisation (random but deterministic details).
@@ -303,6 +352,7 @@ Biquad makeBiquad (const BodyStage& s, double sr)
 // Circular sinks are filtered on a 3x tiled copy (middle copy kept), so the result is periodic.
 void applyBody (Sink& sk, const std::vector<BodyStage>& stages)
 {
+    sk.flush();
     std::vector<Biquad> chain;
     for (const auto& s : stages) chain.push_back (makeBiquad (s, sk.sr));
     const std::size_t N = sk.buf.size();
@@ -401,7 +451,7 @@ struct Plan
     double fadeOutSec = 0.3;
     // tremolo / roll
     double tremRate = 11.5, tremLoopSec = 1.1, tremDecay = 0.6, tremJitterMs = 3.5, tremUpGain = 0.82, tremLoudDb = -17.5;
-    double tremFcMul = 0.9;
+    double tremFcMul = 1.0;
 };
 
 Zone baseZone (const BuildContext& ctx, const char* articulation, const std::string& name, const KeySpan& sp, const VelLayer& vl, int swLast)
@@ -443,7 +493,7 @@ bool renderTremolo (Zone& z, const Model& M, const Plan& P, double f0nom, Rng& r
     const int J = clampi ((int) std::lround (P.tremJitterMs * 1.0e-3 * f0), 0, m / 3);
 
     Sink sk ((int) Ls, sr, true);
-    const Layer& L = M.hard;
+    const Layer& L = M.trem;
     const Voice v = makeVoice (M, L, f0, P.tremDecay, rng);
     for (int k = 0; k < K; ++k)
     {
@@ -550,7 +600,7 @@ Model mandoleModel()
     m.strings = 2; m.centsSpread = 3.0; m.staggerMs = 0.7;
     m.inh0 = 1.5e-4; m.inh1 = 4.0e-4;
     m.t60Ref = 2.2; m.t60RefHz = 220.0; m.t60Exp = 0.30; m.t60Min = 0.7; m.t60Max = 3.2;
-    m.hfK = 5.0; m.hfQ = 1.6;
+    m.hfK = 2.6; m.hfQ = 1.5;
     m.slowAmp = 0.22; m.slowRatio = 0.35; m.slowMaxPartial = 10;
     m.chorusHz = 2600.0;
     m.body = { { BodyStage::highpass, 85.0, 0.7, 0.0 },
@@ -562,6 +612,7 @@ Model mandoleModel()
                { BodyStage::highShelf, 7000.0, 0.7, -3.0 } };
     m.hard = { 5500.0, 1.00, 0.135, 0.14, 3200.0, 0.9, 2.2, 0.5, 9.0 };
     m.soft = { 2000.0, 1.15, 0.170, 0.04, 2200.0, 0.8, 3.0, 0.3, 10.0 };
+    m.trem = { 3600.0, 1.05, 0.150, 0.05, 2800.0, 0.8, 2.5, 0.18, 10.0 };
     return m;
 }
 
@@ -572,7 +623,7 @@ Model banjoModel()
     m.strings = 1;
     m.inh0 = 2.5e-4; m.inh1 = 6.0e-4;
     m.t60Ref = 1.0; m.t60RefHz = 330.0; m.t60Exp = 0.30; m.t60Min = 0.35; m.t60Max = 1.4;
-    m.hfK = 8.0; m.hfQ = 1.5;
+    m.hfK = 4.5; m.hfQ = 1.5;
     m.slowAmp = 0.30; m.slowRatio = 0.40; m.slowMaxPartial = 8;
     m.body = { { BodyStage::highpass, 140.0, 0.8, 0.0 },
                { BodyStage::peak, 380.0, 5.0, 9.0 },       // head main mode
@@ -585,6 +636,7 @@ Model banjoModel()
                { BodyStage::lowpass, 10000.0, 0.7, 0.0 } };
     m.hard = { 7500.0, 0.90, 0.100, 0.22, 4200.0, 0.9, 1.6, 0.8, 9.0 };
     m.soft = { 3200.0, 1.05, 0.130, 0.07, 3000.0, 0.8, 2.2, 0.45, 10.0 };
+    m.trem = { 4800.0, 0.95, 0.110, 0.10, 3600.0, 0.8, 1.8, 0.35, 10.0 };
     return m;
 }
 
@@ -595,7 +647,7 @@ Model qanunModel()
     m.strings = 3; m.centsSpread = 4.0; m.staggerMs = 0.9;
     m.inh0 = 4.0e-5; m.inh1 = 1.2e-4;
     m.t60Ref = 3.6; m.t60RefHz = 262.0; m.t60Exp = 0.50; m.t60Min = 1.0; m.t60Max = 6.5;
-    m.hfK = 3.2; m.hfQ = 1.5;
+    m.hfK = 2.8; m.hfQ = 1.5;
     m.slowAmp = 0.28; m.slowRatio = 0.40; m.slowMaxPartial = 12;
     m.chorusHz = 2200.0;
     m.haloDb = -26.0; m.haloRiseMs = 70.0;
@@ -607,6 +659,7 @@ Model qanunModel()
                { BodyStage::peak, 2800.0, 1.5, 4.0 } };
     m.hard = { 6500.0, 1.00, 0.170, 0.12, 3800.0, 0.9, 1.8, 0.4, 9.0 };
     m.soft = { 2500.0, 1.10, 0.200, 0.04, 2500.0, 0.8, 2.6, 0.25, 10.0 };
+    m.trem = { 4200.0, 1.05, 0.180, 0.05, 2800.0, 0.8, 2.2, 0.15, 10.0 };
     return m;
 }
 } // namespace
@@ -619,7 +672,7 @@ Library buildMandole (const BuildContext& ctx)
     p.ampRelease = 0.30; p.ampVeltrack = 70.0; p.loopAttack = 0.02; p.loopRelease = 0.35;
     p.secBase = 1.6; p.secExp = 0.0; p.secMin = 1.6; p.secMax = 1.6;
     p.fadeOutSec = 0.30;
-    p.tremRate = 11.5; p.tremLoopSec = 1.1; p.tremDecay = 0.6; p.tremJitterMs = 3.5; p.tremUpGain = 0.82; p.tremLoudDb = -17.5;
+    p.tremRate = 11.5; p.tremLoopSec = 1.1; p.tremDecay = 0.8; p.tremJitterMs = 3.5; p.tremUpGain = 0.82; p.tremLoudDb = -17.5;
     return buildFamily (ctx, mandoleModel(), p);
 }
 
@@ -630,7 +683,7 @@ Library buildBanjo (const BuildContext& ctx)
     p.ampRelease = 0.12; p.ampVeltrack = 70.0; p.loopAttack = 0.015; p.loopRelease = 0.18;
     p.secBase = 1.0; p.secExp = 0.0; p.secMin = 1.0; p.secMax = 1.0;
     p.fadeOutSec = 0.15;
-    p.tremRate = 15.0; p.tremLoopSec = 1.0; p.tremDecay = 0.6; p.tremJitterMs = 2.5; p.tremUpGain = 0.8; p.tremLoudDb = -17.5;
+    p.tremRate = 15.0; p.tremLoopSec = 1.0; p.tremDecay = 0.75; p.tremJitterMs = 2.5; p.tremUpGain = 0.8; p.tremLoudDb = -17.5;
     return buildFamily (ctx, banjoModel(), p);
 }
 
@@ -641,7 +694,7 @@ Library buildQanun (const BuildContext& ctx)
     p.ampRelease = 0.25; p.ampVeltrack = 65.0; p.loopAttack = 0.02; p.loopRelease = 0.35;
     p.secBase = 2.9; p.secRefHz = 262.0; p.secExp = 0.35; p.secMin = 1.5; p.secMax = 3.0;
     p.fadeOutSec = 0.40;
-    p.tremRate = 10.0; p.tremLoopSec = 1.2; p.tremDecay = 0.55; p.tremJitterMs = 4.0; p.tremUpGain = 0.85; p.tremLoudDb = -17.5;
+    p.tremRate = 10.0; p.tremLoopSec = 1.2; p.tremDecay = 0.75; p.tremJitterMs = 4.0; p.tremUpGain = 0.85; p.tremLoudDb = -17.5;
     return buildFamily (ctx, qanunModel(), p);
 }
 } // namespace humpire::model
