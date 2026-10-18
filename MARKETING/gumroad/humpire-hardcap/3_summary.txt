@@ -1,0 +1,1 @@
+A master limiter plugin with look-ahead, true-peak detection, automatic release and momentary, short-term and integrated LUFS meters.

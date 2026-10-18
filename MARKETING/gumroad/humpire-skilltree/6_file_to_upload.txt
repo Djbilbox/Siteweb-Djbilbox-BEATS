@@ -1,0 +1,1 @@
+Upload BOTH files (from the GitHub Releases): humpire-skilltree.zip (Windows: Setup.exe + README + license + manual PDF) and humpire-skilltree-macOS.zip (macOS: .pkg + README + license + manual PDF)

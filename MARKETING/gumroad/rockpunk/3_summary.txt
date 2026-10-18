@@ -1,0 +1,1 @@
+A rock guitar instrument plugin (VST3 and Audio Unit) with two modelled strings per note, the Urban Slayer amp, four drive types, a tempo-syncable delay and 76 factory presets. No recordings: every note is calculated.

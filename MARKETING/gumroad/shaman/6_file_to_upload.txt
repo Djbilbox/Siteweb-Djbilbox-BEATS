@@ -1,0 +1,1 @@
+Upload BOTH files (from the GitHub Releases): shaman.zip (Windows: Setup.exe + README + license + manual PDF) and shaman-macOS.zip (macOS: .pkg + README + license + manual PDF)

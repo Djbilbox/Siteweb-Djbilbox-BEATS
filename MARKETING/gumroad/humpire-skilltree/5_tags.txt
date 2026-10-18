@@ -1,0 +1,1 @@
+eq, equalizer, parametric eq, linear phase, mid side, mixing, vst3, audio unit, fl studio, humpire

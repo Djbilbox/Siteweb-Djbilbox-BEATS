@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Didgeridoo, Tribal Drum, Jaw Harp, Spirit Flute, Chant Choir, Fire Pad, Bone Chimes and Earth Drone) and 70 factory presets.

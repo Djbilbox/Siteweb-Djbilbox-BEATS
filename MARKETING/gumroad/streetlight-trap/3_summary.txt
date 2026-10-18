@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (808 Sub, Trap Bell, Dark Pluck, Street Keys, Neon Pad, Trap Choir, Brass Stab and Flute) and 70 factory presets.

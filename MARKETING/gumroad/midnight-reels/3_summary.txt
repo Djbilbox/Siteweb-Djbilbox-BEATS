@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Vibes, Reel EP, Muted Trumpet, Tenor Sax, Upright Bass, Organ, Noir Strings and Celesta) and 70 factory presets.

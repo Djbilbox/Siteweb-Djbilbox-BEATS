@@ -1,0 +1,1 @@
+Upload BOTH files (from the GitHub Releases): octopus.zip (Windows: Setup.exe + README + license + manual PDF) and octopus-macOS.zip (macOS: .pkg + README + license + manual PDF)

@@ -1,0 +1,1 @@
+delay, echo, stereo delay, ping pong, tempo sync, mixing, vst3, audio unit, fl studio, humpire

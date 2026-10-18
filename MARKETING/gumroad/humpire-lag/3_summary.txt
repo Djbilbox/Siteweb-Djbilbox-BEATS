@@ -1,0 +1,1 @@
+A stereo delay plugin with BPM sync, filtered feedback, ducking, ping-pong mode and four snapshots you can morph between.

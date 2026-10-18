@@ -1,0 +1,1 @@
+Upload BOTH files (from the GitHub Releases): humpire-loadout.zip (Windows) and humpire-loadout-macOS.zip (macOS)

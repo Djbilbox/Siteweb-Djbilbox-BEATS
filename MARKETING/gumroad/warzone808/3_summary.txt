@@ -1,0 +1,1 @@
+An 808 bass and multi-purpose synthesizer plugin (VST3 and Audio Unit) with five oscillator waveforms, 7-voice unison, a filter with its own envelope and 70 presets (60 factory plus a 10-preset expansion).

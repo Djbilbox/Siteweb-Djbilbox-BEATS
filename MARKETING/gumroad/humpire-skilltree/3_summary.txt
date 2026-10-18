@@ -1,0 +1,1 @@
+A six-band equalizer plugin with high-pass and low-pass filters, Stereo, Mid or Side targeting, minimum or linear phase and a real-time FFT analyzer.

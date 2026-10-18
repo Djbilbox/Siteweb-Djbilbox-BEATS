@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Kraken Sub, Bubble Pluck, Coral Bells, Abyss Pad, Ink Reese, Tentacle Lead, Siren Choir and Whale Song) and 70 factory presets.

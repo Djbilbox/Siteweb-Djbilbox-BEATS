@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Flute, Pan Flute, Shakuhachi, Sitar, Oud, Kalimba, Erhu and Voodoo Choir) and 70 factory presets.

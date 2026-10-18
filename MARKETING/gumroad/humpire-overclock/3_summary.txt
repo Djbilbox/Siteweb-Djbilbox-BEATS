@@ -1,0 +1,1 @@
+An enhancer plugin that adds density, harmonics and perceived loudness with a Power knob, curve control and a two-band split.

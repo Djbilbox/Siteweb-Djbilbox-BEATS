@@ -1,0 +1,1 @@
+A lo-fi plugin with a 1 to 16 bit crusher, sample-rate reducer, mono speaker filter and dither.

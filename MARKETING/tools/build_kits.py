@@ -92,15 +92,21 @@ def main():
         write('4_description.html', '<!doctype html><meta charset="utf-8"><body style="font-family:Inter,Arial,sans-serif;max-width:760px;margin:24px auto">' + description_html(fb, b['price'], names) + '</body>')
         write('5_tags.txt', 'vst bundle, vst3, plugins, fl studio, producer tools')
         write('6_file_to_upload.txt', f"Upload BOTH files (from the GitHub Releases): {b['id']}.zip (Windows) and {b['id']}-macOS.zip (macOS)")
-        shots = [os.path.join(ROOT, 'screens', m['id'] + '.png') for m in members]
-        shots = [x for x in shots if os.path.exists(x)][:12]
+        have = lambda grp: [os.path.join(ROOT, 'screens', m['id'] + '.png') for m in members if m['group'] == grp and os.path.exists(os.path.join(ROOT, 'screens', m['id'] + '.png'))]
+        spread = lambda lst, n: [lst[round(i * (len(lst) - 1) / max(1, n - 1))] for i in range(min(n, len(lst)))] if len(lst) > n else lst
+        if b['members_group'] == 'all':   # a mix: half synthesizers, half effects (evenly spread through each list)
+            shots = spread(have('synths'), 6) + spread(have('loadout'), 6) + spread(have('orbit'), 0)
+        else:
+            shots = spread([x for g in ('synths', 'loadout', 'orbit') for x in have(g)], 12)
         if shots and not a.no_images:
             from PIL import Image
             cols = 4 if len(shots) > 6 else 3
             rws = -(-len(shots) // cols); cw, ch = 500, 373
             sheet = Image.new('RGB', (cols * cw, rws * ch), (11, 11, 15))
-            for i, x in enumerate(shots):
-                im = Image.open(x).convert('RGB').resize((cw, ch)); sheet.paste(im, ((i % cols) * cw, (i // cols) * ch))
+            for i, x in enumerate(shots):   # fit each screenshot inside its cell without distortion or cropping
+                im = Image.open(x).convert('RGB'); k = min((cw - 8) / im.width, (ch - 8) / im.height)
+                im = im.resize((max(1, int(im.width * k)), max(1, int(im.height * k))), Image.LANCZOS)
+                sheet.paste(im, ((i % cols) * cw + (cw - im.width) // 2, (i // cols) * ch + (ch - im.height) // 2))
             cp = os.path.join(ROOT, 'screens', b['id'] + '.png'); sheet.save(cp)
             manifest.append({"id": b['id'], "name": b['name'], "kind": b['kind'], "tagline": b['tagline'], "screenshot": cp,
                              "logo": os.path.join(ROOT, 'assets', 'humpire-logo.png'), "brand": 'HUMPIRE', "accent": '#f5b544',
@@ -113,7 +119,7 @@ def main():
         if w: w.writeheader(); [w.writerow(r) for r in rows]
     if manifest and not a.no_images:
         mf = os.path.join(OUT, '_manifest.json'); os.makedirs(OUT, exist_ok=True); json.dump(manifest, open(mf, 'w'), indent=1)
-        env = dict(os.environ); env['NODE_PATH'] = (env.get('NODE_PATH', '') + ':/node-tools/node_modules').strip(':')
+        env = dict(os.environ); env['NODE_PATH'] = (env.get('NODE_PATH', '') + os.pathsep + '/node-tools/node_modules').strip(os.pathsep)
         subprocess.check_call(['node', os.path.join(HERE, 'render_assets.js'), mf, OUT], env=env)
         for m in manifest:
             kit = os.path.join(KITS, m['id'])

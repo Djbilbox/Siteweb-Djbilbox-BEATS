@@ -1,0 +1,1 @@
+An algorithmic reverb plugin with an eight-line feedback delay network, pre-delay, damping, low-cut and high-cut filters and ducking.

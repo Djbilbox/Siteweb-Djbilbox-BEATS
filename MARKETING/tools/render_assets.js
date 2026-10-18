@@ -23,6 +23,21 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
       fs.writeFileSync(tmp, html);
       await page.goto('file://' + path.resolve(tmp));
       await page.waitForTimeout(250);
+      // fit the title: one line on the thumbnail, at most ~240 px of height on the cover, never wider than its box;
+      // then put the tagline under the title and keep it clear of the badges
+      await page.evaluate((m) => {
+        const h1 = document.querySelector('h1'), tag = document.querySelector('.tag'), badges = document.querySelector('.badges');
+        let fs = parseFloat(getComputedStyle(h1).fontSize);
+        const tooWide = () => h1.scrollWidth > h1.clientWidth + 1;
+        if (m === 'thumb') {
+          while (tooWide() && fs > 20) { fs -= 1; h1.style.setProperty('font-size', fs + 'px', 'important'); }
+        } else {
+          while ((tooWide() || h1.offsetHeight > 240) && fs > 34) { fs -= 2; h1.style.setProperty('font-size', fs + 'px', 'important'); }
+          tag.style.top = (h1.offsetTop + h1.offsetHeight + 22) + 'px';
+          let tf = parseFloat(getComputedStyle(tag).fontSize);
+          while (tag.getBoundingClientRect().bottom > badges.getBoundingClientRect().top - 14 && tf > 15) { tf -= 1; tag.style.fontSize = tf + 'px'; }
+        }
+      }, mode);
       await page.screenshot({ path: path.join(outDir, `${p.id}-${mode}.png`), clip: { x: 0, y: 0, width: w, height: h } });
       await page.screenshot({ path: path.join(outDir, `${p.id}-${mode}.jpg`), type: 'jpeg', quality: 90, clip: { x: 0, y: 0, width: w, height: h } });
       await page.close(); fs.unlinkSync(tmp);

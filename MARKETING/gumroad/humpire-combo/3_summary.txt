@@ -1,0 +1,1 @@
+A performance effect plugin with stutter, tape stop, filter sweep and reverse, two XY pads and MIDI note triggering.

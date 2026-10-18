@@ -1,0 +1,1 @@
+Upload BOTH files (from the GitHub Releases): voodoo.zip (Windows: Setup.exe + README + license + manual PDF) and voodoo-macOS.zip (macOS: .pkg + README + license + manual PDF)

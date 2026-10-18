@@ -1,0 +1,1 @@
+Upload BOTH files (from the GitHub Releases): humpire-combo.zip (Windows: Setup.exe + README + license + manual PDF) and humpire-combo-macOS.zip (macOS: .pkg + README + license + manual PDF)

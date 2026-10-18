@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (G-Funk, Moog, Square, Talkbox, Bass, Rhodes, Strings and Clav) and 70 factory presets.

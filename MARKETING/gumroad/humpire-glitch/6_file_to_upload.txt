@@ -1,0 +1,1 @@
+Upload BOTH files (from the GitHub Releases): humpire-glitch.zip (Windows: Setup.exe + README + license + manual PDF) and humpire-glitch-macOS.zip (macOS: .pkg + README + license + manual PDF)

@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (Theremin, Ghost Choir, Twang Guitar, Haunted Organ, Wraith Pad, Ghost Bells, Dead Bass and Whisper Wind) and 70 factory presets.
