@@ -34,7 +34,7 @@ def description_html(f, price, extra_members=None):
         h.append(f"<h3>Perfect for</h3><p>{esc(', '.join(f['genres']))}</p>")
     if f.get('includes'):
         h.append("<h3>In the download</h3><ul>" + "".join(f"<li>{esc(i)}</li>" for i in f['includes']) + "</ul>")
-    specs = list(f.get('specs', [])) + [{"k": "Validation", "v": "Checked with the pluginval plug-in validator (strictness level 5)"}]
+    specs = list(f.get('specs', [])) + [{"k": "Validation", "v": "Run through the pluginval plug-in validator (strictness level 5) as part of the build"}]
     h.append("<h3>Technical specs</h3><ul>" + "".join(f"<li><strong>{esc(s['k'])}:</strong> {esc(s['v'])}</li>" for s in specs) + "</ul>")
     h.append("<h3>System requirements</h3><ul>" + "".join(f"<li>{esc(s)}</li>" for s in SYSREQ) + "</ul>")
     h.append("<h3>License</h3><p>" + esc(LICENSE_SHORT) + "</p>")

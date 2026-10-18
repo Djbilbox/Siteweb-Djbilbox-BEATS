@@ -1,0 +1,63 @@
+name: UI snapshots (temporary)
+# Renders the headless UI screenshots of the synths that have none yet (MARKETING/screens/<id>.png).
+# Runs only on the throw-away branch "ui-snapshots" (never on the release branch), then commits the PNGs back to that branch.
+on:
+  push:
+    branches: [ui-snapshots]
+    paths: ['.github/workflows/ui-snapshots.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  snap:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { dir: OCTOPUS, id: octopus }
+          - { dir: PHANTOM_RIDER, id: phantom-rider }
+          - { dir: SAN_ANDREAS_LEAD, id: san-andreas-lead }
+          - { dir: SHAMAN, id: shaman }
+          - { dir: STREETLIGHT_TRAP, id: streetlight-trap }
+          - { dir: VOODOO, id: voodoo }
+          - { dir: OCCITANIE, id: occitanie }
+          - { dir: WAZONE808, id: warzone808 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build xvfb libasound2-dev libfreetype-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxext-dev libgl1-mesa-dev libfontconfig1-dev libcurl4-openssl-dev
+      - name: JUCE 8.0.4
+        run: |
+          sudo mkdir -p /tmp/claude-0 && sudo chown "$USER" /tmp/claude-0
+          git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git /tmp/claude-0/juce
+      - name: Render
+        run: |
+          mkdir -p out
+          SNAP_JOBS=4 SNAP_VERBOSE=1 bash MARKETING/tools/ui_snapshot/render.sh "${{ matrix.dir }}" "out/${{ matrix.id }}.png"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snap-${{ matrix.id }}
+          path: out/${{ matrix.id }}.png
+  commit:
+    needs: snap
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: snap-*
+          merge-multiple: true
+          path: MARKETING/screens
+      - name: Commit screenshots
+        run: |
+          git config user.name "ui-snapshots"
+          git config user.email "ui-snapshots@users.noreply.github.com"
+          git add MARKETING/screens
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          git commit -m "UI snapshots (headless render) [skip ci]"
+          git push
