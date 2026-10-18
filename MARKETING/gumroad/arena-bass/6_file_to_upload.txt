@@ -1,1 +1,1 @@
-arena-bass.zip  (from the GitHub Release: Setup.exe + README + license + manual PDF)
+Upload BOTH files (from the GitHub Releases): arena-bass.zip (Windows: Setup.exe + README + license + manual PDF) and arena-bass-macOS.zip (macOS: .pkg + README + license + manual PDF)

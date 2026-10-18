@@ -1,0 +1,1 @@
+A lead synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (neon supersaw, chrome PWM, glitch FM, reese bass, laser pluck, neon brass, data crush and hollow glass) and 70 factory presets.

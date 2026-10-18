@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (gold bell, velvet keys, big band brass, organ, mallets, strings, gold sub and smoky pad) and 70 factory presets.

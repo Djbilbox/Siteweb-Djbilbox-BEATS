@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight engines inspired by Algerian popular music (mandole, qanun, gasba, ghaita, raï organ, chaabi strings, derbouka and bendir sub) and 70 factory presets.

@@ -1,1 +1,1 @@
-djbilbox-beats-synth-collection.zip (from the GitHub Release)
+Upload BOTH files (from the GitHub Releases): djbilbox-beats-synth-collection.zip (Windows) and djbilbox-beats-synth-collection-macOS.zip (macOS)

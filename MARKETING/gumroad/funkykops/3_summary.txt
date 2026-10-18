@@ -1,0 +1,1 @@
+A funk, disco and G-Funk synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (clavinet, Rhodes-style electric piano, synth bass, brass, strings, lead, guitar and talkbox) and 70 factory presets.

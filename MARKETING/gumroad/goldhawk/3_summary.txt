@@ -1,0 +1,1 @@
+A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (hawk lead, brass, pad, pluck, FM bells, strings, bass and eagle cry) and 70 factory presets.

@@ -3,11 +3,11 @@
   "id": "arena-bass",
   "name": "ARENA BASS",
   "kind": "Bass Synthesizer",
-  "tagline": "Stadium-size subs, slap & pluck, reese growls and horns \u2014 70 presets from 8 engines.",
+  "tagline": "Stadium-size subs, slap & pluck, reese growls and horns: 70 presets from 8 engines.",
   "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/arena-bass.png",
-  "logo": "assets/humpire-logo.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
   "brand": "HUMPIRE",
-  "accent": "#4fc3f7",
+  "accent": "#3cc4ff",
   "badges": [
    "70 presets",
    "8 engines",
@@ -15,5 +15,175 @@
   ],
   "fsThumb": "72px",
   "fsCover": "104px"
+ },
+ {
+  "id": "chintzwaz",
+  "name": "CHINTZWAZ",
+  "kind": "Retro Floral Synthesizer",
+  "tagline": "Sitar, flower-power keys, tape strings, flutes, kalimba, pads and organ: 70 presets from 8 engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/chintzwaz.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#40f0e0",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "72px",
+  "fsCover": "104px"
+ },
+ {
+  "id": "cyberpunk-lead",
+  "name": "CYBERPUNK LEAD",
+  "kind": "Lead Synthesizer",
+  "tagline": "Neon supersaws, PWM, glitch FM, reese and bit-crushed FX: 70 presets from 8 engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/cyberpunk-lead.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#ff4df5",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "64px",
+  "fsCover": "92px"
+ },
+ {
+  "id": "dzpower",
+  "name": "DZPOWER",
+  "kind": "Ra\u00ef & Chaabi Synthesizer",
+  "tagline": "Mandole, qanun, gasba, ghaita, organ, strings and drums: 70 presets from 8 engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/dzpower.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#ff5a4a",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "72px",
+  "fsCover": "104px"
+ },
+ {
+  "id": "funkykops",
+  "name": "FUNKYKOPS",
+  "kind": "Funk & Disco Synthesizer",
+  "tagline": "Clavs, electric pianos, bass, brass, strings and talkbox: 70 presets from 8 engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/funkykops.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#ffd36a",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "72px",
+  "fsCover": "104px"
+ },
+ {
+  "id": "goldhawk",
+  "name": "GOLDHAWK",
+  "kind": "Cinematic Synthesizer",
+  "tagline": "Golden leads, brass, pads, plucks, bells and basses: 70 presets from 8 synthesis engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/goldhawk.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#ffc040",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "72px",
+  "fsCover": "104px"
+ },
+ {
+  "id": "highroller-gold",
+  "name": "HIGHROLLER GOLD",
+  "kind": "Casino Lounge Synthesizer",
+  "tagline": "Gold bells, velvet keys, brass, organ, strings and gold sub: 70 presets from 8 engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/highroller-gold.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#e8c35a",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "64px",
+  "fsCover": "92px"
+ },
+ {
+  "id": "k2000",
+  "name": "K2000",
+  "kind": "80s Synthwave Synthesizer",
+  "tagline": "80s synthwave and darksynth synth with 6 waveforms, a ladder filter and 70 presets.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/k2000.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#00f0ff",
+  "badges": [
+   "70 presets",
+   "6 waveforms",
+   "Royalty-free"
+  ],
+  "fsThumb": "96px",
+  "fsCover": "150px"
+ },
+ {
+  "id": "marabout",
+  "name": "MARABOUT",
+  "kind": "Oriental & Afro Synthesizer",
+  "tagline": "Kora, balafon, oud, ney, zurna, choir, dark pads and voodoo subs: 70 presets from 8 engines.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/marabout.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#b44bff",
+  "badges": [
+   "70 presets",
+   "8 engines",
+   "Royalty-free"
+  ],
+  "fsThumb": "72px",
+  "fsCover": "104px"
+ },
+ {
+  "id": "djbilbox-beats-synth-collection",
+  "name": "DJBILBOX BEATS Synth Collection",
+  "kind": "Synthesizer Bundle",
+  "tagline": "The complete DJBILBOX BEATS synthesizer collection: 19 instruments, one payment.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/djbilbox-beats-synth-collection.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#f5b544",
+  "badges": [
+   "9 plugins",
+   "Windows + macOS",
+   "Save 92 USD"
+  ],
+  "fsThumb": "34px",
+  "fsCover": "72px"
+ },
+ {
+  "id": "djbilbox-beats-complete-collection",
+  "name": "DJBILBOX BEATS Complete Collection",
+  "kind": "Complete Bundle",
+  "tagline": "Every DJBILBOX BEATS and HUMPIRE plugin of this release in one payment: synthesizers, studio effects and vocal effects.",
+  "screenshot": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/screens/djbilbox-beats-complete-collection.png",
+  "logo": "/home/user/Siteweb-Djbilbox-BEATS/MARKETING/assets/humpire-logo.png",
+  "brand": "HUMPIRE",
+  "accent": "#f5b544",
+  "badges": [
+   "9 plugins",
+   "Windows + macOS",
+   "Save 42 USD"
+  ],
+  "fsThumb": "34px",
+  "fsCover": "72px"
  }
 ]

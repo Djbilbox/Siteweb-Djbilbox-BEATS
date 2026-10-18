@@ -1,1 +1,1 @@
-A VST3 bass synthesizer with eight synthesis engines (sine sub, slap, analog-style mono bass, reese, FM growl, acid, horns and kick) and 70 factory presets.
+A bass synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (sine sub, slap, analog-style mono bass, reese, FM growl, acid, horns and kick) and 70 factory presets.

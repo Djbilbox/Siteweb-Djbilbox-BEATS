@@ -1,0 +1,1 @@
+A retro synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (sitar, electric piano, tape strings, flute, kalimba, pad, bass and organ) and 70 factory presets.

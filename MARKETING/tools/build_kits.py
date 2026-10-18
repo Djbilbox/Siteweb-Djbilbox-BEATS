@@ -92,6 +92,19 @@ def main():
         write('4_description.html', '<!doctype html><meta charset="utf-8"><body style="font-family:Inter,Arial,sans-serif;max-width:760px;margin:24px auto">' + description_html(fb, b['price'], names) + '</body>')
         write('5_tags.txt', 'vst bundle, vst3, plugins, fl studio, producer tools')
         write('6_file_to_upload.txt', f"Upload BOTH files (from the GitHub Releases): {b['id']}.zip (Windows) and {b['id']}-macOS.zip (macOS)")
+        shots = [os.path.join(ROOT, 'screens', m['id'] + '.png') for m in members]
+        shots = [x for x in shots if os.path.exists(x)][:12]
+        if shots and not a.no_images:
+            from PIL import Image
+            cols = 4 if len(shots) > 6 else 3
+            rws = -(-len(shots) // cols); cw, ch = 500, 373
+            sheet = Image.new('RGB', (cols * cw, rws * ch), (11, 11, 15))
+            for i, x in enumerate(shots):
+                im = Image.open(x).convert('RGB').resize((cw, ch)); sheet.paste(im, ((i % cols) * cw, (i // cols) * ch))
+            cp = os.path.join(ROOT, 'screens', b['id'] + '.png'); sheet.save(cp)
+            manifest.append({"id": b['id'], "name": b['name'], "kind": b['kind'], "tagline": b['tagline'], "screenshot": cp,
+                             "logo": os.path.join(ROOT, 'assets', 'humpire-logo.png'), "brand": 'HUMPIRE', "accent": '#f5b544',
+                             "badges": [f"{len(members)} plugins", "Windows + macOS", "Save " + str(max(0, total - b['price'])) + " USD"], "fsThumb": '34px', "fsCover": '72px'})
         rows.append({"id": b['id'], "name": b['name'], "type": b['kind'], "price_usd": b['price'], "title": title, "tags": 'vst bundle, vst3, plugins',
                      "file": f"{b['id']}.zip", "gumroad_slug": slugs.get(b['id'], '')})
     os.makedirs(KITS, exist_ok=True)
