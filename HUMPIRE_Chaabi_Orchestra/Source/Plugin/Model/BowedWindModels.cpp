@@ -256,13 +256,27 @@ std::vector<float> simulateBow (const BowParams& p, double sr, int frames)
 
     const double slope0 = p.slopeK * p.beta;
     std::vector<float> out ((std::size_t) N);
-    for (long long n = 0; n < N; ++n)
+
+    // slow controls (pitch wander, scoop, vibrato, bow speed) are evaluated every kBlk samples and interpolated
+    constexpr long long kBlk = 32;
+    auto controls = [&] (long long n, double& scale, double& speed)
     {
         const double t = (double) n / srI;
         double cents = p.driftCents * pitchDrift.eval (t);
         if (p.scoopCents != 0.0) cents -= p.scoopCents * std::exp (-t / p.scoopSec);
         if (p.vibHz > 0.0) cents += p.vibCents * smoothstep ((t - p.vibStart) / p.vibRamp) * std::sin (kTwoPi * p.vibHz * t);
-        const double sc = std::exp2 (-cents / 1200.0);
+        scale = std::exp2 (-cents / 1200.0);
+        speed = smoothstep (t / p.attackSec) * (1.0 + p.driftAmp * speedDrift.eval (t));
+    };
+    double sc0 = 1.0, sp0 = 0.0, sc1 = 1.0, sp1 = 0.0;
+    controls (0, sc0, sp0);
+    controls (kBlk, sc1, sp1);
+    for (long long n = 0; n < N; ++n)
+    {
+        const long long ph = n % kBlk;
+        if (n > 0 && ph == 0) { sc0 = sc1; sp0 = sp1; controls (n + kBlk, sc1, sp1); }
+        const double u = (double) ph * (1.0 / (double) kBlk);
+        const double sc = sc0 + (sc1 - sc0) * u, vb = sp0 + (sp1 - sp0) * u;
         const double base = base0 * sc;
         const double dB = std::max (1.0, p.beta * base), dN = std::max (1.0, (1.0 - p.beta) * base);
 
@@ -271,7 +285,6 @@ std::vector<float> simulateBow (const BowParams& p, double sr, int frames)
         const double bIn = -gB * fb.lowpass (ob);
         const double nIn = -gN * fn.lowpass (on);
 
-        const double vb = smoothstep (t / p.attackSec) * (1.0 + p.driftAmp * speedDrift.eval (t));
         const double d0 = vb - (bIn + nIn);
         const double noise = (double) nz[(std::size_t) ((n / os) % (long long) nz.size())];
         const double s = slope0 * std::max (0.2, 1.0 + p.noiseDepth * noise);
@@ -344,7 +357,6 @@ SustainResult renderBowedNote (const BuildContext& ctx, int note, const BowStyle
 {
     const double sr = ctx.sampleRate;
     const double f0 = midiToHz ((double) note);
-    Rng rng = Rng::forZone (ctx.instrument, zoneIndex, salt);
 
     // --- loop geometry: a whole number of string periods (and of vibrato cycles)
     int periods = std::max (8, (int) std::lround (st.loopSec * f0));
@@ -364,7 +376,7 @@ SustainResult renderBowedNote (const BuildContext& ctx, int note, const BowStyle
     const int L = (int) std::lround ((double) periods * sr / f0);
     const int Pint = (int) std::ceil (sr / f0);
     const int t0 = secondsToFrames (st.introSec, sr);
-    const int total = t0 + L + 2 * Pint + 8;
+    const int total = t0 + L + 3 * Pint + 16;
 
     BowParams p;
     p.f0 = f0;
@@ -372,7 +384,7 @@ SustainResult renderBowedNote (const BuildContext& ctx, int note, const BowStyle
     p.slopeK = st.slopeK;
     p.bridgeFc = st.bridgeFc;
     p.nutFc = 0.5 * (st.bridgeFc + 7000.0);
-    p.noiseDepth = st.noiseDepth;
+    p.noiseDepth = st.noiseDepth * std::min (1.0, std::pow (400.0 / f0, 0.8));
     p.attackSec = st.attack;
     p.scoopCents = st.scoop;
     p.vibHz = vibHz; p.vibCents = st.vibCents; p.vibStart = st.vibStart; p.vibRamp = st.vibRamp;
@@ -410,14 +422,23 @@ SustainResult renderBowedNote (const BuildContext& ctx, int note, const BowStyle
     sanitize (y, false);
     fadeIn (y, std::max (8, secondsToFrames (0.0004, sr)));
 
-    // --- loop end: best waveform match around start + L (the controls are periodic, so it is close already)
-    const int s = t0;
+    // --- loop start: rising zero crossing with a small step (never on a slip pulse); loop end: best waveform
+    //     match around start + L (the controls are periodic, so it is close already)
+    int s = t0;
+    {
+        double bestStep = 1.0e30;
+        for (int i = t0; i < t0 + Pint; ++i)
+        {
+            if (y[(std::size_t) i - 1] <= 0.f && y[(std::size_t) i] > 0.f)
+            {
+                const double step = (double) y[(std::size_t) i] - (double) y[(std::size_t) i - 1];
+                if (step < bestStep) { bestStep = step; s = i; }
+            }
+        }
+    }
     const int W = std::min (2 * Pint + 16, 700);
     double bestM = 1.0e30;
     int bestE = s + L - 1;
-    double eRef = 0.0;
-    for (int i = 0; i < W; ++i) eRef += (double) y[(std::size_t) (s - 1 - i)] * (double) y[(std::size_t) (s - 1 - i)];
-    eRef = std::max (eRef, 1.0e-20);
     for (int e = s + L - 1 - Pint; e <= s + L - 1 + Pint; ++e)
     {
         double d = 0.0;

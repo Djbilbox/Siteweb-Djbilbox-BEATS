@@ -59,10 +59,7 @@ struct Sink
     Sink (int frames, double sampleRate, bool isCircular)
         : buf ((std::size_t) std::max (frames, 1), 0.0), sr (sampleRate), circular (isCircular)
     {
-        rampLen = std::max (4, secondsToFrames (0.00025, sr));       // 0.25 ms soft onset of every mode
-        ramp.resize ((std::size_t) rampLen);
-        for (int k = 0; k < rampLen; ++k)
-            ramp[(std::size_t) k] = 0.5 - 0.5 * std::cos (kPi * (double) (k + 1) / (double) (rampLen + 1));
+        setRamp (0.25);
     }
 
     std::vector<double> buf;
@@ -73,6 +70,15 @@ struct Sink
     int rampLen = 0;
 
     long long size() const { return (long long) buf.size(); }
+
+    // Length of the soft onset applied to the modes added from now on.
+    void setRamp (double ms)
+    {
+        rampLen = std::max (4, secondsToFrames (ms * 1.0e-3, sr));
+        ramp.resize ((std::size_t) rampLen);
+        for (int k = 0; k < rampLen; ++k)
+            ramp[(std::size_t) k] = 0.5 - 0.5 * std::cos (kPi * (double) (k + 1) / (double) (rampLen + 1));
+    }
 
     void add (long long i, double v)
     {
@@ -188,6 +194,7 @@ struct Layer
     double clickHz, clickQ, clickMs;
     double thumpAmp;      // body knock level
     double crestDb;       // peak limiter: allowed peak above the loudness measure
+    double onsetMs;       // soft onset (release time of the pick) of every mode
 };
 
 struct Model
@@ -239,7 +246,7 @@ Voice makeVoice (const Model& M, const Layer& L, double f0, double decayScale, R
     {
         const double pos = S > 1 ? (double) s / (double) (S - 1) - 0.5 : 0.0;       // -0.5 .. +0.5
         v.cents[s] = pos * M.centsSpread * rng.range (0.65, 1.3) + (S > 1 ? rng.range (-0.25, 0.25) : 0.0);
-        v.sgain[s] = rng.range (0.85, 1.0);
+        v.sgain[s] = rng.range (0.9, 1.0);
         mean += v.cents[s] / (double) S;
     }
     for (int s = 0; s < S; ++s) v.cents[s] -= mean;                                  // the course stays in tune on average
@@ -280,6 +287,7 @@ void addPick (Sink& sk, const Model& M, const Voice& V, double t0, double gain, 
 {
     const double sr = sk.sr;
     const Layer& L = *V.layer;
+    sk.setRamp (L.onsetMs * rng.range (0.85, 1.15));
     const int S = clampi (M.strings, 1, 4);
     const double fc = V.fc * fcMul;
     const double p = V.pickPos * rng.range (0.97, 1.03);
@@ -312,7 +320,7 @@ void addPick (Sink& sk, const Model& M, const Voice& V, double t0, double gain, 
             const double a = a0 * (chorus ? gStr[s] : gSum);
             addMode (sk, t, f, alpha, a * (1.0 - gSlow), 0.0);
             if (gSlow > 0.0)
-                addMode (sk, t, f * (1.0 + rng.range (-1.0, 1.0) * 0.0006), alpha * M.slowRatio, a * gSlow, rng.range (-0.7, 0.7));
+                addMode (sk, t, f * (1.0 + rng.range (-1.0, 1.0) * 0.0008), alpha * M.slowRatio, a * gSlow, rng.range (-0.7, 0.7));
         }
     }
 
@@ -597,11 +605,11 @@ Model mandoleModel()
 {
     // Algerian mandole: double courses of steel strings, plectrum, wooden bowl / flat-back body.
     Model m;
-    m.strings = 2; m.centsSpread = 3.0; m.staggerMs = 0.7;
+    m.strings = 2; m.centsSpread = 2.2; m.staggerMs = 0.7;
     m.inh0 = 1.5e-4; m.inh1 = 4.0e-4;
-    m.t60Ref = 2.2; m.t60RefHz = 220.0; m.t60Exp = 0.30; m.t60Min = 0.7; m.t60Max = 3.2;
+    m.t60Ref = 1.9; m.t60RefHz = 220.0; m.t60Exp = 0.30; m.t60Min = 0.7; m.t60Max = 3.0;
     m.hfK = 2.6; m.hfQ = 1.5;
-    m.slowAmp = 0.22; m.slowRatio = 0.35; m.slowMaxPartial = 10;
+    m.slowAmp = 0.26; m.slowRatio = 0.32; m.slowMaxPartial = 10;
     m.chorusHz = 2600.0;
     m.body = { { BodyStage::highpass, 85.0, 0.7, 0.0 },
                { BodyStage::peak, 235.0, 7.0, 6.0 },       // air (Helmholtz) resonance
@@ -610,9 +618,9 @@ Model mandoleModel()
                { BodyStage::peak, 1500.0, 2.0, 2.0 },
                { BodyStage::peak, 2600.0, 1.2, 4.0 },      // bridge / presence
                { BodyStage::highShelf, 7000.0, 0.7, -3.0 } };
-    m.hard = { 5500.0, 1.00, 0.135, 0.14, 3200.0, 0.9, 2.2, 0.5, 9.0 };
-    m.soft = { 2000.0, 1.15, 0.170, 0.04, 2200.0, 0.8, 3.0, 0.3, 10.0 };
-    m.trem = { 3600.0, 1.05, 0.150, 0.05, 2800.0, 0.8, 2.5, 0.18, 10.0 };
+    m.hard = { 5500.0, 1.00, 0.135, 0.14, 3200.0, 0.9, 2.2, 0.5, 9.0, 0.25 };
+    m.soft = { 2000.0, 1.15, 0.170, 0.04, 2200.0, 0.8, 3.0, 0.3, 10.0, 0.9 };
+    m.trem = { 3600.0, 1.05, 0.150, 0.05, 2800.0, 0.8, 2.5, 0.18, 10.0, 0.35 };
     return m;
 }
 
@@ -634,9 +642,9 @@ Model banjoModel()
                { BodyStage::peak, 2300.0, 1.3, 5.0 },      // bridge ping
                { BodyStage::peak, 3700.0, 1.5, 3.0 },
                { BodyStage::lowpass, 10000.0, 0.7, 0.0 } };
-    m.hard = { 7500.0, 0.90, 0.100, 0.22, 4200.0, 0.9, 1.6, 0.8, 9.0 };
-    m.soft = { 3200.0, 1.05, 0.130, 0.07, 3000.0, 0.8, 2.2, 0.45, 10.0 };
-    m.trem = { 4800.0, 0.95, 0.110, 0.10, 3600.0, 0.8, 1.8, 0.35, 10.0 };
+    m.hard = { 7500.0, 0.90, 0.100, 0.22, 4200.0, 0.9, 1.6, 0.8, 9.0, 0.25 };
+    m.soft = { 3200.0, 1.05, 0.130, 0.07, 3000.0, 0.8, 2.2, 0.45, 10.0, 0.9 };
+    m.trem = { 4800.0, 0.95, 0.110, 0.10, 3600.0, 0.8, 1.8, 0.35, 10.0, 0.35 };
     return m;
 }
 
@@ -644,7 +652,7 @@ Model qanunModel()
 {
     // Qanun: three nylon strings per course, metal plectra, fish-skin window on a large trapezoid box.
     Model m;
-    m.strings = 3; m.centsSpread = 4.0; m.staggerMs = 0.9;
+    m.strings = 3; m.centsSpread = 2.6; m.staggerMs = 0.9;
     m.inh0 = 4.0e-5; m.inh1 = 1.2e-4;
     m.t60Ref = 3.6; m.t60RefHz = 262.0; m.t60Exp = 0.50; m.t60Min = 1.0; m.t60Max = 6.5;
     m.hfK = 2.8; m.hfQ = 1.5;
@@ -657,9 +665,9 @@ Model qanunModel()
                { BodyStage::peak, 700.0, 4.0, 3.5 },
                { BodyStage::peak, 1350.0, 2.5, 4.0 },
                { BodyStage::peak, 2800.0, 1.5, 4.0 } };
-    m.hard = { 6500.0, 1.00, 0.170, 0.12, 3800.0, 0.9, 1.8, 0.4, 9.0 };
-    m.soft = { 2500.0, 1.10, 0.200, 0.04, 2500.0, 0.8, 2.6, 0.25, 10.0 };
-    m.trem = { 4200.0, 1.05, 0.180, 0.05, 2800.0, 0.8, 2.2, 0.15, 10.0 };
+    m.hard = { 6500.0, 1.00, 0.170, 0.12, 3800.0, 0.9, 1.8, 0.4, 9.0, 0.25 };
+    m.soft = { 2500.0, 1.10, 0.200, 0.04, 2500.0, 0.8, 2.6, 0.25, 10.0, 0.9 };
+    m.trem = { 4200.0, 1.05, 0.180, 0.05, 2800.0, 0.8, 2.2, 0.15, 10.0, 0.35 };
     return m;
 }
 } // namespace
