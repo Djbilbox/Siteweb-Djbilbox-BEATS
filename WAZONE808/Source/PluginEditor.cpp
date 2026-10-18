@@ -5,11 +5,27 @@ using namespace Wz;
 
 namespace
 {
+// On-screen keyboard shows kKeyLow..kKeyHigh (middle C = C3 in JUCE naming): 36..84 = 4 octaves + 1 key
+constexpr int kKeyLow = 36, kKeyHigh = 84;
+int countWhiteKeys (int lo, int hi) { int n = 0; for (int k = lo; k <= hi; ++k) if (! juce::MidiMessage::isMidiNoteBlack (k)) ++n; return n; }
 const juce::Colour green { 0xff8fe04f }, red { 0xffff5a4a }, dark { 0xff101010 }, bgDark { 0xff191919 };
 constexpr float K = 0.5f;   // coordonnees maquette (2000 px) -> 1000 px
 juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
 juce::Rectangle<int> C (int cx, int cy, int w, int h) { return R (cx - w / 2, cy - h / 2, w, h); }
 juce::Colour ramp (float t) { return green.interpolatedWith (red, juce::jlimit (0.f, 1.f, t)); }
+
+// Section header: text centred between two thin rules. x0/x1/yc are mockup coordinates (see K).
+void drawHeader (juce::Graphics& g, const juce::String& text, juce::Colour col, float size, int x0, int x1, int yc)
+{
+    const juce::Font font (juce::FontOptions (size, juce::Font::bold));
+    const float tw = juce::GlyphArrangement::getStringWidth (font, text), gap = 7.f;
+    const float px0 = (float) x0 * K, px1 = (float) x1 * K, cy = (float) yc * K, cx = (px0 + px1) * 0.5f;
+    g.setFont (font); g.setColour (col);
+    g.drawText (text, juce::Rectangle<float> (cx - tw * 0.5f - 3.f, cy - 10.f, tw + 6.f, 20.f), juce::Justification::centred, false);
+    g.setColour (col.withAlpha (0.7f));
+    if (cx - tw * 0.5f - gap > px0) g.drawLine (px0, cy, cx - tw * 0.5f - gap, cy, 1.f);
+    if (cx + tw * 0.5f + gap < px1) g.drawLine (cx + tw * 0.5f + gap, cy, px1, cy, 1.f);
+}
 }
 
 WarzoneLNF::WarzoneLNF()
@@ -108,25 +124,30 @@ WarzonePanel::WarzonePanel (WarzoneProcessor& p)
     dbLogo = load (BinaryData::db_png, BinaryData::db_pngSize);
     cassette = load (BinaryData::cassette_png, BinaryData::cassette_pngSize);
 
-    addKnob (rate, P::rate, "RATE");        addKnob (amount, P::amount, "AMOUNT");   addKnob (pitch, P::pitch, "PITCH");
-    addKnob (glide, P::glide, "GLIDE");     addKnob (filter, P::filter, "FILTER");
-    addKnob (reso, P::reso, "RESO");        addKnob (envdepth, P::envdepth, "ENV");
+    addKnob (rate, P::rate, "RATE");        addKnob (amount, P::amount, "AMOUNT");   addKnob (pitch, P::pitch, "TRANSPOSE");
+    addKnob (glide, P::glide, "GLIDE");     addKnob (filter, P::filter, "CUTOFF");
+    addKnob (reso, P::reso, "RESO");        addKnob (envdepth, P::envdepth, "ENV AMT");
     addKnob (unison, P::unison, "UNISON");  addKnob (detune, P::detune, "DETUNE");   addKnob (dmix, P::dmix, "DLY MIX");
     addKnob (volume, P::volume, "VOLUME");  addKnob (reverb, P::reverb, "REVERB");   addKnob (chorus, P::chorus, "CHORUS");
-    addKnob (dist, P::dist, "DISTORTION");  addKnob (dtime, P::dtime, "TIME");        addKnob (feedback, P::feedback, "FEEDBACK");
+    addKnob (dist, P::dist, "DISTORTION");  addKnob (dtime, P::dtime, "DLY TIME");     addKnob (feedback, P::feedback, "DLY FDBK");
     const char* en[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
     const int ei[4] = { P::attack, P::decay, P::sustain, P::release };
     for (int i = 0; i < 4; ++i) addKnob (env[i], ei[i], en[i], juce::Slider::LinearVertical);
-    const char* fn[4] = { "A", "D", "S", "VELOCITY" };
+    const char* fn[4] = { "ATK", "DEC", "SUS", "VELOCITY" };
     const int fi[4] = { P::fattack, P::fdecay, P::fsustain, P::velocity };
     for (int i = 0; i < 4; ++i) addKnob (fenv[i], fi[i], fn[i], juce::Slider::LinearVertical);
-    addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
+    addKnob (bend, P::bend, "", juce::Slider::LinearVertical);   // wheels are captioned in paint()
     addKnob (modw, P::modw, "", juce::Slider::LinearVertical);
     bend.s.getProperties().set ("wheel", true); modw.s.getProperties().set ("wheel", true);
     all.erase (std::remove (all.begin(), all.end(), &bend), all.end()); all.erase (std::remove (all.begin(), all.end(), &modw), all.end());
     bend.s.onDragEnd = [this] { bend.s.setValue (0.0, juce::sendNotificationSync); };
     for (auto* k : { &unison, &detune, &dmix, &reso, &envdepth }) k->s.getProperties().set ("small", true);
     unison.s.setNumDecimalPlacesToDisplay (0);
+    // maximum label width (px) per control: keeps neighbouring captions from touching
+    for (auto& k : env) k.s.getProperties().set ("lw", 46);
+    for (int i = 0; i < 3; ++i) fenv[i].s.getProperties().set ("lw", 34);
+    fenv[3].s.getProperties().set ("lw", 60);
+    pitch.s.getProperties().set ("lw", 70);
 
     addCombo (cWave, P::waveform, waveNames); addCombo (cLfo, P::lfosrc, lfoNames); addCombo (cDest, P::dest, destNames);
     addCombo (cFilt, P::ftype, filterNames);  addCombo (cMono, P::mono, monoNames);
@@ -146,11 +167,11 @@ WarzonePanel::WarzonePanel (WarzoneProcessor& p)
     presetLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (presetLabel);
 
-    keys.setKeyWidth (27.4f);
-    keys.setLowestVisibleKey (36);
+    keys.setAvailableRange (kKeyLow, kKeyHigh);   // must come before sizing: with scroll buttons hidden the first visible key is the range start
     keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, green.withAlpha (0.6f));
     keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, red.withAlpha (0.3f));
     keys.setScrollButtonsVisible (false);
+    keys.setLowestVisibleKey (kKeyLow);
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
@@ -204,7 +225,7 @@ void WarzonePanel::showPresetMenu()
     auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.wz808preset"); files.sort();
     juce::PopupMenu user;
     for (int i = 0; i < files.size(); ++i) user.addItem (10000 + i, files[i].getFileNameWithoutExtension());
-    if (files.isEmpty()) user.addItem (-1, "(aucun preset utilisateur)", false);
+    if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
@@ -217,18 +238,18 @@ void WarzonePanel::showExpansionMenu()
 {
     juce::PopupMenu m;
     m.addSectionHeader (proc.expansionName);
-    m.addItem (1, "Charger un pack .wz808exp...");
-    m.addItem (2, "Ouvrir le dossier des packs");
+    m.addItem (1, "Load a .wz808exp pack...");
+    m.addItem (2, "Open the packs folder");
     m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&expansion), [this] (int r)
     {
         if (r == 1)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Charger un pack d'expansion", WarzoneProcessor::userDir ("Expansions"), "*.wz808exp");
+            chooser = std::make_unique<juce::FileChooser> ("Load expansion pack", WarzoneProcessor::userDir ("Expansions"), "*.wz808exp");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles, [this] (const juce::FileChooser& fc)
             {
                 if (fc.getResult().existsAsFile())
                     juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, "Expansion",
-                        proc.loadExpansionFile (fc.getResult()) ? "Pack charge : ses presets sont dans le menu Presets." : "Fichier invalide (format warzone808-expansion).");
+                        proc.loadExpansionFile (fc.getResult()) ? "Pack loaded: its presets are in the Presets menu." : "Invalid file (warzone808-expansion format).");
             });
         }
         else if (r == 2) WarzoneProcessor::userDir ("Expansions").revealToUser();
@@ -237,7 +258,7 @@ void WarzonePanel::showExpansionMenu()
 
 void WarzonePanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Sauvegarder le preset", userPresetDir(), "*.wz808preset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.wz808preset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
@@ -314,12 +335,25 @@ void WarzonePanel::paint (juce::Graphics& g)
     for (auto* k : all)
     {
         const auto r = k->s.getBounds();
-        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 11.f : (k->lin ? 12.f : 14.f)));
-        g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : -4), r.getWidth() + 50, 18, juce::Justification::centred, 1);
+        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 11.f : (k->lin ? 9.5f : 14.f)));
+        const int lw = (int) k->s.getProperties().getWithDefault ("lw", r.getWidth() + 50);
+        g.drawFittedText (k->label, r.getCentreX() - lw / 2, r.getBottom() + (k->lin ? 2 : -4), lw, 18, juce::Justification::centred, 1);
     }
-    g.setFont (juce::FontOptions (16.f));
-    g.drawFittedText ("LFO", R (300, 600, 120, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("DELAY", R (1580, 805, 120, 40), juce::Justification::centred, 1);
+    // section headers (rules + text), one per group of controls
+    const auto hdr = juce::Colour (0xffc8c8c8);
+    drawHeader (g, "LFO", hdr, 16.f, 160, 432, 625);
+    drawHeader (g, "AMP ENVELOPE", hdr, 12.f, 160, 570, 805);
+    drawHeader (g, "FILTER ENVELOPE", hdr, 12.f, 1480, 1720, 345);
+    // captions under the five drop-down menus
+    g.setColour (juce::Colour (0xffb6e58a).withAlpha (0.85f)); g.setFont (juce::FontOptions (10.f, juce::Font::bold));
+    {
+        const char* cap[5] = { "ENGINE", "LFO SHAPE", "LFO DESTINATION", "FILTER TYPE", "VOICE MODE" };
+        const int cx[5] = { 703, 939, 1194, 1460, 1717 };
+        for (int i = 0; i < 5; ++i) g.drawFittedText (cap[i], R (cx[i] - 110, 1088, 220, 28), juce::Justification::centred, 1);
+    }
+    g.setColour (juce::Colour (0xffc8c8c8)); g.setFont (juce::FontOptions (10.f));
+    g.drawFittedText ("PITCH BEND", C (246, 1420, 130, 30), juce::Justification::centred, 1);
+    g.drawFittedText ("MOD WHEEL", C (380, 1420, 130, 30), juce::Justification::centred, 1);
 }
 
 void WarzonePanel::resized()
@@ -341,4 +375,5 @@ void WarzonePanel::resized()
     presetLabel.setBounds (R (840, 85, 320, 76));
     expansion.setBounds (R (165, 110, 315, 485));
     keys.setBounds (R (515, 1120, 1317, 330));
+    keys.setKeyWidth ((float) keys.getWidth() / (float) countWhiteKeys (kKeyLow, kKeyHigh));   // fit the whole range exactly
 }

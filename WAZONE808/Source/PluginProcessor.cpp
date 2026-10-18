@@ -137,6 +137,7 @@ void WarzoneProcessor::handleMidi (const juce::MidiMessage& m)
     else if (m.isAllNotesOff() || m.isAllSoundOff()) { engine.allNotesOff(); sustainedNotes.clear(); }
     else if (m.isPitchWheel()) midiBend = (m.getPitchWheelValue() - 8192) / 8192.f;
     else if (m.isControllerOfType (1)) midiMod = m.getControllerValue() / 127.f;
+    else if (m.isControllerOfType (121)) { midiMod = 0.f; midiBend = 0.f; sustainDown = false; }   // reset all controllers
     else if (m.isControllerOfType (64))
     {
         const bool down = m.getControllerValue() >= 64;
