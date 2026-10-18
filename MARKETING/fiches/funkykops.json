@@ -1,0 +1,55 @@
+{
+  "id": "funkykops",
+  "name": "FUNKYKOPS",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Funk & Disco Synthesizer",
+  "tagline": "Clavs, electric pianos, bass, brass, strings and talkbox: 70 presets from 8 engines.",
+  "sub": "Funk, disco and G-Funk keys, bass, brass and talkbox",
+  "gumroad_title": "FUNKYKOPS - Funk & Disco Synthesizer VST3 + AU Plugin (70 Presets) | Clav, Rhodes, Talkbox",
+  "summary": "A funk, disco and G-Funk synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (clavinet, Rhodes-style electric piano, synth bass, brass, strings, lead, guitar and talkbox) and 70 factory presets.",
+  "about": [
+    "FUNKYKOPS, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines, shape it with five character knobs (VOWEL, BODY, BRIGHT, WIDTH, TEXTURE), then run it through a multimode filter with its own envelope, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb.",
+    "47 of the 70 presets load in Poly mode for chords, up to 16 voices at once; the 23 bass, lead and FX presets that suit single-note lines load in Mono mode.",
+    "Built for Funk, Disco, G-Funk, Hip-Hop and Afrobeat productions."
+  ],
+  "features": [
+    { "icon": "fa-wave-square", "t": "8 synthesis engines", "d": "Clavinet, Rhodes, synth bass, brass, strings, lead, guitar and talkbox." },
+    { "icon": "fa-sliders", "t": "5 character controls", "d": "VOWEL, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine." },
+    { "icon": "fa-list", "t": "70 factory presets", "d": "Seven banks of ten sounds, from wah clavs to string pads and talkbox leads." },
+    { "icon": "fa-filter", "t": "Filter with its own envelope", "d": "Low pass, high pass or band pass, with resonance and a dedicated envelope." },
+    { "icon": "fa-wand-magic-sparkles", "t": "Built-in effects", "d": "Distortion, chorus, ping-pong delay and reverb." },
+    { "icon": "fa-wave-square", "t": "LFO with 5 shapes", "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre." },
+    { "icon": "fa-keyboard", "t": "Play it right away", "d": "On-screen keyboard (MIDI notes 36 to 96), pitch bend and mod wheel, up to 16 voices in Poly mode." },
+    { "icon": "fa-unlock", "t": "Royalty-free", "d": "Everything you make with it is yours." }
+  ],
+  "specs": [
+    { "k": "Format", "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)" },
+    { "k": "Type", "v": "Synthesizer (instrument)" },
+    { "k": "Presets", "v": "70 factory presets in 7 banks" },
+    { "k": "Engines", "v": "8" },
+    { "k": "Polyphony", "v": "Up to 16 voices (Poly), or Mono" },
+    { "k": "Latency", "v": "0 samples" },
+    { "k": "Automatable parameters", "v": "32" }
+  ],
+  "includes": [
+    "FUNKYKOPS plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": ["Funk", "Disco", "G-Funk", "Hip-Hop", "Afrobeat"],
+  "tags": ["funk synth", "clavinet", "electric piano", "talkbox", "vst3", "audio unit", "g-funk", "disco", "fl studio", "humpire"],
+  "badges": ["70 presets", "8 engines", "Royalty-free"],
+  "faq": [
+    { "q": "Which DAWs does it work in?", "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats." },
+    { "q": "Does it use samples?", "a": "No. Every sound is generated in real time by one of eight synthesis engines." },
+    { "q": "Can I play chords?", "a": "Yes. The MONO / POLY menu allows up to 16 voices in Poly mode. 47 presets load in Poly; the Synth Bass bank and most leads load in Mono." },
+    { "q": "Can I save my own presets?", "a": "Yes. The Save button writes a .fkpreset file, and your presets appear in the User submenu of the preset menu." },
+    { "q": "Does it add latency?", "a": "No. The plugin reports 0 samples of latency." },
+    { "q": "Is the delay tempo-synced?", "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)." }
+  ],
+  "accent": "#ffd36a",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

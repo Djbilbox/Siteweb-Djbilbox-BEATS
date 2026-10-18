@@ -1,0 +1,105 @@
+{
+  "id": "goldhawk",
+  "name": "GOLDHAWK",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Cinematic Synthesizer",
+  "tagline": "Golden leads, brass, pads, plucks, bells and basses: 70 presets from 8 synthesis engines.",
+  "sub": "Hawk leads, brass, pads, bells and eagle cries",
+  "gumroad_title": "GOLDHAWK - Cinematic Synthesizer VST3 + AU Plugin (70 Presets) | Leads, Brass, Pads, Bells",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (hawk lead, brass, pad, pluck, FM bells, strings, bass and eagle cry) and 70 factory presets.",
+  "about": [
+    "GOLDHAWK, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines, shape it with five character controls (TONE, BODY, BRIGHT, WIDTH, TEXTURE), then run it through a multimode filter with its own envelope, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb.",
+    "The 70 factory presets are organized in seven banks of ten: Hawk Leads, Golden Brass, Royal Pads, Falcon Plucks, Sky Bells & Strings, Talon Bass and Eagle Cry & FX. 43 presets load in Poly mode, which plays up to 16 voices; 27 load in Mono mode for single-note leads, basses and cries.",
+    "Built for epic and cinematic beats, anthem leads, brass hits, atmospheric pads, bell and pluck motifs, string beds, bass lines and risers."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "Hawk lead, golden brass, royal pad, falcon pluck, FM sky bells, feather strings, talon bass and eagle cry."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from anthem leads to eagle cries."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter with its own envelope",
+      "d": "Low pass, high pass or band pass, with resonance and a dedicated attack, decay/release and sustain envelope."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "Play it right away",
+      "d": "On-screen keyboard (MIDI notes 36 to 96), pitch bend and mod wheel, up to 16 voices in Poly mode."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    { "k": "Format", "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)" },
+    { "k": "Type", "v": "Synthesizer (instrument)" },
+    { "k": "Presets", "v": "70 factory presets in 7 banks" },
+    { "k": "Engines", "v": "8" },
+    { "k": "Polyphony", "v": "Up to 16 voices (Poly), or Mono" },
+    { "k": "Latency", "v": "0 samples" },
+    { "k": "Automatable parameters", "v": "34" }
+  ],
+  "includes": [
+    "GOLDHAWK plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": ["Cinematic", "Trap", "Hip-Hop", "Epic", "Ambient", "Electronic"],
+  "tags": ["synthesizer", "cinematic", "lead synth", "brass", "pads", "vst3", "audio unit", "fl studio", "humpire"],
+  "badges": ["70 presets", "8 engines", "Royalty-free"],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "Can I play chords?",
+      "a": "Yes. 43 presets load in Poly mode (up to 16 voices). The Mono presets (leads, bass, cries) can be switched to Poly with the MONO/POLY menu."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .ghpreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#ffc040",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

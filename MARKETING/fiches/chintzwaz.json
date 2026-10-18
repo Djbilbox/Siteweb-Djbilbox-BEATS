@@ -1,0 +1,148 @@
+{
+  "id": "chintzwaz",
+  "name": "CHINTZWAZ",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Retro Floral Synthesizer",
+  "tagline": "Sitar, flower-power keys, tape strings, flutes, kalimba, pads and organ: 70 presets from 8 engines.",
+  "sub": "Sitar, EP, tape strings, flute and kalimba",
+  "gumroad_title": "CHINTZWAZ - Retro Synthesizer VST3 + AU Plugin (70 Presets) | Sitar, Mellotron, Kalimba, Pads",
+  "summary": "A retro synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (sitar, electric piano, tape strings, flute, kalimba, pad, bass and organ) and 70 factory presets.",
+  "about": [
+    "CHINTZWAZ, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines, shape it with five character controls (TONE, BODY, BRIGHT, WIDTH, TEXTURE), then run it through a multimode filter with its own envelope, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb.",
+    "58 of the 70 presets load in Poly mode, which plays up to 16 voices for chords and pads. The other 12 load in Mono mode for flute leads, tape violin, bass and organ lines.",
+    "Built for Lo-fi Hip-Hop and Boom Bap loops, psychedelic Soul and Funk, Oriental-flavored melodies, Afrobeats and Amapiano, and dreamy retro pads."
+  ],
+  "features": [
+    {
+      "icon": "fa-wave-square",
+      "t": "8 synthesis engines",
+      "d": "Sitar Bloom, Flower EP, Mellotron, Hippie Flute, Kalimba, Daisy Pad, Bloom Bass and Psyche Organ."
+    },
+    {
+      "icon": "fa-sliders",
+      "t": "5 character controls",
+      "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."
+    },
+    {
+      "icon": "fa-list",
+      "t": "70 factory presets",
+      "d": "Seven banks of ten sounds, from sitar plucks to psychedelic organs."
+    },
+    {
+      "icon": "fa-filter",
+      "t": "Filter with its own envelope",
+      "d": "Low pass, high pass or band pass, with resonance and a dedicated envelope."
+    },
+    {
+      "icon": "fa-wand-magic-sparkles",
+      "t": "Built-in effects",
+      "d": "Distortion, chorus, ping-pong delay and reverb."
+    },
+    {
+      "icon": "fa-wave-square",
+      "t": "LFO with 5 shapes",
+      "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."
+    },
+    {
+      "icon": "fa-keyboard",
+      "t": "Play it right away",
+      "d": "On-screen keyboard (MIDI notes 48 to 96), pitch bend and mod wheel, up to 16 voices in Poly mode."
+    },
+    {
+      "icon": "fa-unlock",
+      "t": "Royalty-free",
+      "d": "Everything you make with it is yours."
+    }
+  ],
+  "specs": [
+    {
+      "k": "Format",
+      "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"
+    },
+    {
+      "k": "Type",
+      "v": "Synthesizer (instrument)"
+    },
+    {
+      "k": "Presets",
+      "v": "70 factory presets in 7 banks"
+    },
+    {
+      "k": "Engines",
+      "v": "8"
+    },
+    {
+      "k": "Polyphony",
+      "v": "Up to 16 voices (Poly), or Mono"
+    },
+    {
+      "k": "Latency",
+      "v": "0 samples"
+    },
+    {
+      "k": "Automatable parameters",
+      "v": "34"
+    }
+  ],
+  "includes": [
+    "CHINTZWAZ plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": [
+    "Lo-fi Hip-Hop",
+    "Boom Bap",
+    "Soul",
+    "Funk",
+    "Afrobeats",
+    "Amapiano"
+  ],
+  "tags": [
+    "retro synth",
+    "sitar",
+    "mellotron style",
+    "kalimba",
+    "vst3",
+    "audio unit",
+    "lofi",
+    "afrobeat",
+    "fl studio",
+    "humpire"
+  ],
+  "badges": [
+    "70 presets",
+    "8 engines",
+    "Royalty-free"
+  ],
+  "faq": [
+    {
+      "q": "Which DAWs does it work in?",
+      "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."
+    },
+    {
+      "q": "Does it use samples?",
+      "a": "No. Every sound is generated in real time by one of eight synthesis engines."
+    },
+    {
+      "q": "Can I play chords?",
+      "a": "Yes. 58 presets load in Poly mode, which plays up to 16 voices. Switch VOICE MODE to Poly on any preset to play chords."
+    },
+    {
+      "q": "Can I save my own presets?",
+      "a": "Yes. The disk icon saves a .czpreset file, and your presets appear in the User submenu of the preset menu."
+    },
+    {
+      "q": "Does it add latency?",
+      "a": "No. The plugin reports 0 samples of latency."
+    },
+    {
+      "q": "Is the delay tempo-synced?",
+      "a": "No. Delay time is set in seconds (0.05 to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."
+    }
+  ],
+  "accent": "#40f0e0",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}

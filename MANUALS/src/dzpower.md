@@ -1,186 +1,178 @@
 # DZPOWER
 
-Algerian Raï, Chaabi and Casbah sounds from a pure synthesis engine: plucked strings, reed flutes, organ, strings and hand drums.
+Algerian Raï, Chaabi and Casbah sounds from eight synthesis engines: plucked strings, reed flutes, organ, strings and hand drums.
 
 | | |
 |---|---|
-| Type | Synthesizer (VST3 instrument) |
-| Format | VST3 64-bit (Windows) |
-| Developer | DJBILBOX BEATS |
+| Type | Synthesizer (instrument) |
+| Format | VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS) |
+| Brand / developer | HUMPIRE by DJBILBOX BEATS |
 | Version | 1.0 |
 | Factory presets | 70 |
 | Latency | 0 samples |
 
 ## Overview
 
-DZPOWER is a 16-voice synthesizer dedicated to the sounds of Algerian popular music. It has eight synthesis engines inspired by traditional instruments: Mandole (Algerian mandolin), Qanun (zither), Gasba (reed flute), Ghaita (double-reed zorna), Rai Organ, Chaabi Strings, Derbouka (goblet drum) and Bendir Sub (frame drum turned into a deep sub). It uses no samples. Every sound is generated in real time, so it reacts to the five timbre knobs, the filter and the envelopes.
+DZPOWER is a synthesizer sold under the HUMPIRE brand by DJBILBOX BEATS. It uses no samples. Every sound is generated in real time by one of eight engines inspired by the instruments of Algerian popular music: Mandole (plucked string), Qanun (zither), Gasba (reed flute), Ghaita (double-reed horn), Rai Organ, Chaabi Strings, Derbouka (hand drum) and Bendir Sub (deep sub with rattle).
 
-Each engine runs through a resonant multimode filter with its own envelope, a key-synced LFO and an effects chain: distortion, chorus, stereo ping-pong delay and reverb. A soft limiter at the output keeps the level under control.
+Five character controls (TONE, BODY, BRIGHT, WIDTH, TEXTURE) reshape each engine. The sound then goes through a resonant multimode filter with its own envelope, an amplitude envelope, an LFO and a master effects chain: distortion, chorus, ping-pong delay and reverb. Up to 16 voices play at once in Poly mode.
 
-DZPOWER is built for Raï and Raï'n'B, Chaabi, Oriental pop, Afrotrap, Hip-Hop and Trap. Use the Mandole and Qanun for melodic hooks, the Gasba and Ghaita for lead lines, the Rai Organ for classic keyboard parts, the strings for pads, the Derbouka for percussion and the Bendir Sub as an 808-style bass.
+DZPOWER targets Raï and Raï'n'B, Chaabi, Oriental pop, Afrotrap, Hip-Hop and Trap. Use the Mandole and Qanun for melodic hooks, the Gasba and Ghaita for lead lines, the Rai Organ and Chaabi Strings for chords and pads, and the Derbouka and Bendir Sub for percussion and sub bass.
 
 ## Quick start in FL Studio
 
-1. In the **Channel rack**, click **+** and choose **DZPOWER** (manufacturer **DJBILBOX BEATS**). You can also drag it from **Plugin database > Generators**.
-2. The interface opens on **DZPOWER - Init Patch**.
-3. Click the folder icon at the left of the preset display. Open a bank (for example **Mandole**) and pick a preset. You can also step through all 70 presets with the **<** and **>** arrows.
-4. Play notes from your MIDI keyboard, or draw them in the **Piano roll**.
-5. Turn **CUTOFF** to make the sound darker or brighter.
-6. Turn **BRIGHT** (in the left speaker grille) to change the brightness of the engine itself.
-7. Turn **REVERB** to place the sound in a small or large space.
-8. Click the disk icon at the right of the preset display to save your own version.
+1. In the **Channel rack**, click **+** and choose **DZPOWER** (vendor **DJBILBOX BEATS**). You can also drag it from the **Plugin database > Generators** browser.
+2. The plugin opens on **DZPOWER - Init Patch**: the Mandole engine in Poly mode.
+3. Click the **folder icon** at the left of the preset display. Pick a bank, then a preset. You can also step through all 70 presets with the **<** and **>** arrows.
+4. Play from your MIDI keyboard or draw notes in the **Piano roll**. The on-screen keyboard covers MIDI notes 36 to 96 (C2 to C7 in the labels printed on the keys; C3 to C8 in FL Studio naming, where middle C is C5).
+5. Shape the sound with three controls:
+    - **TONE**: the main character of the engine (its effect depends on the engine, see the table in the Parameters section).
+    - **CUTOFF**: the cutoff of the filter. Turn it down for a darker, rounder sound.
+    - **REVERB**: places the sound in a small or large space.
+6. Adjust **VOLUME** (in the MASTER section) to set the level, then click the **disk icon** to save your own version.
 
 ## Interface
 
-The window opens at 1000 x 746 pixels. Drag the bottom-right corner to resize it from half size to double size. The proportions stay fixed.
+The window opens at 1000 x 746 pixels. Drag the bottom-right corner to resize it from 500 x 373 up to 2000 x 1492 pixels. The proportions stay fixed.
 
-**Preset display (top center).** From left to right: the folder icon opens the preset menu, **<** loads the previous preset, the center shows the current preset name, **>** loads the next preset, and the disk icon saves a user preset. The preset menu lists the seven factory banks as submenus, a **User** submenu with your saved presets, and an **Open a .dzpreset file...** item.
+**Preset display (top center).** From left to right: the folder icon (preset menu), the **<** arrow, the current preset name, the **>** arrow and the disk icon (save). The arrows wrap around from the last preset to the first.
 
-**EXPANSION cassette (top left).** Click it to see information about upcoming expansion packs (**EXPANSION VOL.1**) and the link to the DJBILBOX BEATS store.
+**EXPANSION cassette (top left).** Clicking it opens a message saying that expansion packs are coming soon, with a link to the DJBILBOX BEATS store. No expansion content is included with version 1.0.
 
-**Logo (top right).** The DJBILBOX BEATS logo and name.
+**Logo (top right).** The DJBILBOXBEATS name.
 
-**Speaker grilles and emblem (center).** The camel emblem sits between two perforated speaker grilles that hold the small knobs. The left grille holds **TONE**, **BODY**, **BRIGHT** and **WIDTH**. These four knobs and **TEXTURE** shape the selected engine. The right grille holds **TEXTURE**, **ENV** (filter envelope depth) and **DELAY** (delay level).
+**Center.** The camel emblem and the DZPOWER title between two perforated speaker grilles that hold the small knobs. The left grille holds **TONE, BODY, BRIGHT, WIDTH**. The right grille holds **TEXTURE, FLT ENV** (filter envelope depth) and **DELAY MIX** (delay level).
 
-**VOLUME and REVERB (top right).** Level of the instrument and amount of reverb.
+**LFO section (left).** **RATE** and **AMOUNT** set the LFO speed and depth. **TRANSPOSE**, in the same row, is the global transposition (-12 to +12 semitones). It is not an LFO control.
 
-**ASDR group (right).** Five vertical sliders under the "ASDR" heading: **ATTACK**, **DECAY**, **SUSTAIN** and **RELEASE** of the filter envelope, plus **VELOCITY** (velocity sensitivity of the volume).
+**MASTER section (top right).** **VOLUME** and **REVERB**.
 
-**LFO group (left).** **RATE** and **AMOUNT** set the LFO speed and depth. **PITCH** sits in the same row but is the global transpose of the instrument.
+**AMP ENVELOPE (left, below the LFO).** Four vertical sliders: **ATTACK, DECAY, SUSTAIN, RELEASE**.
 
-**Amplitude envelope (left, below the LFO).** Four vertical sliders: **ATTACK**, **DECAY**, **SUSTAIN** and **RELEASE** of the volume envelope.
+**FILTER ENVELOPE (right).** Four vertical sliders: **ATTACK, DECAY, SUSTAIN, RELEASE**. The **VELOCITY** slider (velocity sensitivity of the level) sits just to their right, separated by a thin line, because it is not part of the filter envelope.
 
-**Center row.** **GLIDE**, then the **FILTER** group with **CUTOFF** and **RESONANCE**, then **CHORUS**, **DISTORTION**, and the **DELAY** group with **TIME** and **FEEDBACK**.
+**Center row.** From left to right: the **GLIDE** knob, the **FILTER** group (**CUTOFF** and **RESONANCE**), the **EFFECTS** group (**CHORUS** and **DISTORTION**) and the **DELAY** group (**TIME** and **FEEDBACK**).
 
-**Menu row.** Five drop-down menus. Each one shows its current value. From left to right: engine (Waveform), LFO shape (LFO Source), LFO target (Destination), filter mode (Filter Type) and voice mode (Poly / Mono).
+**Menu row.** Five drop-down menus, each with a caption below it: **WAVEFORM** (the engine), **LFO SOURCE** (LFO shape), **LFO DESTINATION**, **FILTER TYPE** and **MONO / POLY**. Each menu shows its current value.
 
-**Wheels (bottom left).** **Pitch Bend** springs back to center when you release the mouse. **Modulation** stays where you leave it.
+**PITCH & MOD (bottom left).** The **Pitch Bend** wheel springs back to the center when you release it. The **Mod Wheel** stays where you leave it.
 
-**On-screen keyboard (bottom).** Click a key to audition the sound. It also lights up incoming MIDI notes within its range. In version 1.0 the keyboard covers the lowest part of the MIDI range (keys labeled C-2 to about A0, MIDI notes 0 to 33). Use it to check bass and sub notes. Play melodies and chords from a MIDI keyboard or the Piano roll.
+**On-screen keyboard (bottom).** Click a key to play it. It also lights up incoming MIDI notes within its range. The keyboard covers MIDI notes 36 to 96: five octaves plus one key, with labels from C2 to C7 (middle C, MIDI 60, is labeled C4; in FL Studio naming the same range reads C3 to C8). It does not scroll. For notes outside this range, use a MIDI controller or the Piano roll.
 
-**Using the controls.** Drag a knob up/down or left/right. Drag a slider vertically. The mouse wheel adjusts in small steps. Double-click to return to the default value. Hold Ctrl or Alt while you drag for velocity-sensitive, finer movement. A small bubble shows the current value while you hover or drag.
+**Mouse gestures.** Drag a knob up or right to increase it. Drag sliders and wheels vertically. Double-click a knob or slider to return it to its default value. The mouse wheel also adjusts controls.
 
 ## Parameters
 
-Names in parentheses are the parameter names shown in FL Studio for automation, when they differ from the panel label. "Amp" means the amplitude (volume) envelope.
+Signal flow: engine, then filter, then amplitude envelope (per voice). The voices are summed, then processed by Distortion, Chorus, Delay and Reverb. A DC blocker and a soft limiter protect the output.
 
-| Parameter | Range | Default | Function |
+DZPOWER exposes 35 automatable parameters. The host name is shown in parentheses when it differs from the panel label.
+
+| Control | Range | Default | What it does |
 |---|---|---|---|
-| Engine menu (Waveform) | Mandole, Qanun, Gasba, Ghaita, Rai Organ, Chaabi Strings, Derbouka, Bendir Sub | Mandole | Selects the synthesis engine. See the engine table below. |
-| LFO shape menu (LFO Source) | Sine, Triangle, Saw, Square, Sample&Hold | Sine | LFO waveform. Sample&Hold picks a new random value once per cycle. |
-| LFO target menu (Destination) | Pitch, Filter, Amp, Timbre | Pitch | Where the LFO goes. Pitch: up to ±1 semitone. Filter: up to ±3 octaves of cutoff. Amp: tremolo, up to 50% volume dip. Timbre: moves all five timbre knobs together, up to ±0.5. |
-| Filter mode menu (Filter Type) | Low Pass, High Pass, Band Pass | Low Pass | 12 dB/octave state-variable filter mode. Band Pass gets a small level boost. |
-| Voice mode menu (Mono/Poly) | Poly, Mono | Poly | Poly: up to 16 notes. Mono: each new note releases the previous one. |
-| RATE (LFO Rate) | 0.05 to 20 Hz | 4 Hz | LFO speed. The LFO restarts at each new note. It is not tempo-synced. |
-| AMOUNT (LFO Amount) | 0 to 1 | 0 | LFO depth. The Modulation wheel (or MIDI CC1) adds up to 0.8 on top. |
-| PITCH (Pitch) | -12 to +12 semitones, continuous | 0 | Global transpose. Values between semitones detune the whole instrument. |
-| GLIDE (Glide) | 0 to 2 s | 0 (off) | Portamento. Above 0, each new note slides from the pitch of the previous note, in Poly and Mono. |
-| CUTOFF (Filter) | 40 Hz to 18 kHz | 9 kHz | Filter cutoff frequency. The cutoff follows the played note at 25% (key tracking). |
-| RESONANCE (Resonance) | 0 to 1 | 0.15 | Filter resonance (emphasis at the cutoff). |
-| ENV (Filter Env) | 0 to 1 | 0 | Filter envelope depth. At 1, the envelope opens the cutoff by up to 5 octaves. |
-| ASDR ATTACK (Filter Attack) | 0.002 to 3 s | 0.002 s | Filter envelope attack time. |
-| ASDR DECAY (Filter Decay) | 0.02 to 4 s | 0.3 s | Filter envelope decay time. |
-| ASDR SUSTAIN (Filter Sustain) | 0 to 1 | 0 | Filter envelope sustain level. |
-| ASDR RELEASE (Filter Release) | 0.02 to 4 s | 0.3 s | Filter envelope release time. |
-| VELOCITY (Velocity) | 0 to 1 | 0.5 | How much note velocity changes the volume. 0 = every note at full level. 1 = full velocity response. |
-| Amp ATTACK (Attack) | 0.001 to 5 s | 0.01 s | Volume envelope attack time. |
-| Amp DECAY (Decay) | 0.01 to 5 s | 0.4 s | Volume envelope decay time. |
-| Amp SUSTAIN (Sustain) | 0 to 1 | 0.7 | Volume envelope sustain level. Set to 0 for plucks and drums. |
-| Amp RELEASE (Release) | 0.02 to 8 s | 0.4 s | Volume envelope release time after note-off. |
-| TONE (Tone) | 0 to 1 | 0.5 | Engine timbre control 1. See the engine table. |
-| BODY (Body) | 0 to 1 | 0.5 | Engine timbre control 2. See the engine table. |
-| BRIGHT (Brightness) | 0 to 1 | 0.5 | Engine timbre control 3. See the engine table. |
-| WIDTH (Width) | 0 to 1 | 0.3 | Engine timbre control 4. See the engine table. |
-| TEXTURE (Texture) | 0 to 1 | 0.2 | Engine timbre control 5. See the engine table. |
-| VOLUME (Volume) | 0 to 1 | 0.7 | Instrument level, before the effects. |
-| DISTORTION (Distortion) | 0 to 1 | 0 | Soft saturation. Drive rises up to 15x; the level is compensated. |
-| CHORUS (Chorus) | 0 to 1 | 0 | Chorus mix (fixed 0.7 Hz modulation). |
-| DELAY (Delay) | 0 to 1 | 0 | Level of the stereo ping-pong delay. |
-| TIME (Delay Time) | 0.05 to 1 s | 0.35 s | Delay time in seconds. |
-| FEEDBACK (Feedback) | 0 to 0.9 | 0.35 | Delay repeats. Higher values give more echoes. |
-| REVERB (Reverb) | 0 to 1 | 0.25 | Reverb amount. The room also grows larger as you turn it up. |
-| Pitch Bend wheel (Pitch Bend) | -1 to +1 | 0 | Bends all notes by up to ±2 semitones. Adds to the MIDI pitch wheel. |
-| Modulation wheel (Mod Wheel) | 0 to 1 | 0 | Adds LFO depth (up to +0.8). The higher of this wheel and MIDI CC1 is used. |
+| WAVEFORM menu (Waveform) | Mandole, Qanun, Gasba, Ghaita, Rai Organ, Chaabi Strings, Derbouka, Bendir Sub | Mandole | Selects the synthesis engine. |
+| TONE (Tone) | 0 to 100% | 50% | Character control 1. Engine-dependent. |
+| BODY (Body) | 0 to 100% | 50% | Character control 2. Engine-dependent. |
+| BRIGHT (Brightness) | 0 to 100% | 50% | Character control 3. Engine-dependent. |
+| WIDTH (Width) | 0 to 100% | 30% | Character control 4. Engine-dependent (vibrato, detune, tremolo, drive...). It is not a stereo width control. |
+| TEXTURE (Texture) | 0 to 100% | 20% | Character control 5. Engine-dependent (noise, click, body resonance...). |
+| CUTOFF (Filter Cutoff) | 40 to 18,000 Hz | 9,000 Hz | Filter cutoff. The cutoff follows the keyboard by 25% around middle C. |
+| RESONANCE (Resonance) | 0 to 100% | 15% | Filter resonance. |
+| FILTER TYPE menu (Filter Type) | Low Pass, High Pass, Band Pass | Low Pass | Filter mode. |
+| FLT ENV (Filter Env Amount) | 0 to 100% | 0% | Filter envelope depth. At 100% the envelope opens the cutoff by up to 5 octaves. At 0% the filter envelope has no effect. |
+| Filter ATTACK (Filter Attack) | 2 ms to 3 s | 2 ms | Filter envelope attack time. |
+| Filter DECAY (Filter Decay) | 20 ms to 4 s | 300 ms | Filter envelope decay time. |
+| Filter SUSTAIN (Filter Sustain) | 0 to 100% | 0% | Filter envelope sustain level. |
+| Filter RELEASE (Filter Release) | 20 ms to 4 s | 300 ms | Filter envelope release time. |
+| VELOCITY (Velocity Sensitivity) | 0 to 100% | 50% | How much note velocity changes the level. 0%: all notes at the same level. 100%: full velocity response. |
+| Amp ATTACK (Attack) | 1 ms to 5 s | 10 ms | Amplitude envelope attack time. |
+| Amp DECAY (Decay) | 10 ms to 5 s | 400 ms | Amplitude envelope decay time. |
+| Amp SUSTAIN (Sustain) | 0 to 100% | 70% | Amplitude envelope sustain level. |
+| Amp RELEASE (Release) | 20 ms to 8 s | 400 ms | Amplitude envelope release time. |
+| VOLUME (Volume) | 0 to 1 (shown in dB, -inf to 0 dB) | 0.7 (-3.1 dB) | Output level of each voice, before the effects. |
+| GLIDE (Glide) | 0 to 2 s | 0 | Portamento. Each new note slides from the pitch of the previous note, in Mono and in Poly mode. 0 turns glide off. |
+| TRANSPOSE (Transpose) | -12 to +12 semitones | 0 | Global transposition in whole semitones. |
+| RATE (LFO Rate) | 0.05 to 20 Hz | 4 Hz | LFO speed. Not tempo-synced. |
+| AMOUNT (LFO Amount) | 0 to 100% | 0% | LFO depth. The mod wheel (on-screen or MIDI CC1) adds up to 80% to this value. |
+| LFO SOURCE menu (LFO Source) | Sine, Triangle, Saw, Square, Sample&Hold | Sine | LFO shape. The LFO restarts at every new note. Sample&Hold picks a new random value once per cycle. |
+| LFO DESTINATION menu (Destination) | Pitch, Filter, Amp, Timbre | Pitch | LFO target. Pitch: up to +/-1 semitone (vibrato). Filter: up to +/-3 octaves (wobble). Amp: up to 50% level dip (tremolo). Timbre: moves all five character controls by up to +/-0.5. |
+| MONO / POLY menu (Mono/Poly) | Poly, Mono | Poly | Poly: up to 16 notes at once. Mono: one note at a time, last-note priority. |
+| DISTORTION (Distortion) | 0 to 100% | 0% | Saturation on the summed output, with automatic level compensation. |
+| CHORUS (Chorus) | 0 to 100% | 0% | Stereo chorus mix (fixed rate). |
+| DELAY MIX (Delay Mix) | 0 to 100% | 0% | Level of the ping-pong delay. |
+| TIME (Delay Time) | 50 ms to 1 s | 350 ms | Delay time. Not tempo-synced: for a quarter note, use 60 / BPM seconds (0.5 s at 120 BPM). |
+| FEEDBACK (Delay Feedback) | 0 to 90% | 35% | Number of delay repeats. |
+| REVERB (Reverb) | 0 to 100% | 25% | Reverb amount. Higher values also enlarge the room. |
+| Pitch Bend wheel (Pitch Bend) | -2 to +2 semitones | 0 | On-screen pitch bend. Adds to MIDI pitch bend (also +/-2 semitones). |
+| Mod Wheel (Mod Wheel) | 0 to 100% | 0% | On-screen mod wheel. Adds up to 80% to the LFO AMOUNT. |
 
-Effects order: Distortion, Chorus, Delay, Reverb, then the output soft limiter. Each effect is bypassed while its knob is at zero.
-
-**What the timbre knobs do on each engine**
+**What the character controls do on each engine**
 
 | Engine | TONE | BODY | BRIGHT | WIDTH | TEXTURE |
 |---|---|---|---|---|---|
-| Mandole: plucked string with wooden body | Pick hardness and body resonance pitch | String sustain | String brightness (damping) | No effect | Wooden body resonance |
-| Qanun: bright plucked zither with a sympathetic octave | No effect | String sustain | String brightness (damping) | Level of the sympathetic octave at the attack | No effect |
-| Gasba: reed flute with breath and vibrato | Color of the breath noise | Focus of the breath noise | 2nd and 3rd harmonics | Vibrato depth (fades in during the first half second) | Breath level |
-| Ghaita: double reed with nasal resonances | Position of the nasal resonances | Strength of the nasal resonances | Brightness | Detune between the two reeds | Breath noise |
-| Rai Organ: drawbars, tremolo, key click | Sub-octave drawbar | Octave drawbar | Upper harmonic drawbars | Tremolo depth and speed | Key click |
-| Chaabi Strings: five detuned saws with delayed vibrato | Body resonance pitch | Body resonance level | Brightness | Vibrato depth (starts after 0.2 s) | Bow noise |
-| Derbouka: doum tone and tak slap | Pitch drop of the doum | Doum decay | Pitch of the slap | Level of the tak slap | Attack click |
-| Bendir Sub: deep sub with jingles | Knock (pitch punch at the attack) | 2nd harmonic | Rattle decay | Saturation | Rattle level |
+| Mandole | Pluck hardness and body resonance frequency | String sustain | String brightness (damping) | No effect | Level of the body resonance |
+| Qanun | No effect | String sustain | String brightness (damping) | Level of the octave-up sympathetic attack | No effect |
+| Gasba | Breath filter frequency | Breath filter resonance | Level of the 2nd and 3rd harmonics | Vibrato depth (about 5 Hz, fades in) | Breath noise level |
+| Ghaita | Frequency of the nasal resonances | Level of the nasal resonances | Opening of the reed low-pass | Detune between the two reeds | Noise level |
+| Rai Organ | Sub-octave drawbar level | Octave-up drawbar level | Level of the 3rd, 4th and 6th harmonic drawbars | Tremolo depth and speed | Key click |
+| Chaabi Strings | Center frequency of the body band | Level of the body band | Opening of the low-pass | Vibrato depth (starts after 0.2 s) | Noise level |
+| Derbouka | Depth of the pitch drop at the attack | Length of the doum | Frequency of the "tak" slap noise | Level of the "tak" slap | Click |
+| Bendir Sub | Pitch knock at the attack | Octave harmonic level | Length of the rattle | Saturation drive | Level of the rattle |
 
 ## Factory presets
 
-DZPOWER includes 70 factory presets in 7 banks of 10. Loading a factory preset resets every parameter before applying the preset. The Pitch Bend and Modulation wheels are not changed.
+DZPOWER includes 70 factory presets in 7 banks of 10. 55 presets load in Poly mode and 15 in Mono mode: the whole Bendir Sub & Bass bank, plus Breathy Gasba, Zorna Fete, Snake Zorna, Rai Lead Organ and Violon Alger.
 
-**Mandole**
-Algiers Mandole, Mandole Chaabi, Casbah Pick, Warm Mandole, Tremolo Pick, Low Mandole, Bright Strum, Rai Pluck, Muted Mandole, Desert Night Pluck.
+**Mandole:** Mandole Alger, Mandole Chaabi, Casbah Pick, Warm Mandole, Tremolo Pick, Low Mandole, Bright Strum, Rai Pluck, Muted Mandole, Desert Night Pluck.
 
-**Qanun & Plucks**
-Qanun Dar, Zither Rain, Harp Of Tlemcen, Bright Qanun, Soft Qanun, Oriental Arp, Low Qanun, Glass Qanun, Sahara Strings, Zellij Pluck.
+**Qanun & Plucks:** Qanun Dar, Zither Rain, Harp Of Tlemcen, Bright Qanun, Soft Qanun, Oriental Arp, Low Qanun, Glass Qanun, Sahara Strings, Zellij Pluck.
 
-**Gasba & Ghaita**
-Gasba Dream, Desert Gasba, Breathy Gasba, Sufi Gasba, High Gasba, Ghaita Call, Zorna Celebration, Nasal Reed, Mizmar Dz, Snake Zorna.
+**Gasba & Ghaita:** Gasba Reve, Desert Gasba, Breathy Gasba, Sufi Gasba, High Gasba, Ghaita Call, Zorna Fete, Nasal Reed, Mizmar Dz, Snake Zorna.
 
-**Rai Organ**
-Rai Organ, Oran Night, Full Rai, Rai Lead Organ, Accordion Dz, Vintage Rai Keys, Soft Flute Stop, Rotary Casbah, Tape Rai, Golden Swell.
+**Rai Organ:** Rai Organ, Oran Night, Full Rai, Rai Lead Organ, Accordeon Dz, Vintage Rai Keys, Soft Flute Stop, Rotary Casbah, Tape Rai, Golden Swell.
 
-**Chaabi Strings**
-Chaabi Strings, Algiers Violin, Slow Swell, Dark Cellos, High Violins, Pizzicato Dz, Andalusian Pad, Wobble Violin, Suspense Casbah, Rooftop Strings.
+**Chaabi Strings:** Chaabi Strings, Violon Alger, Slow Swell, Dark Cellos, High Violins, Pizzicato Dz, Andalous Pad, Wobble Violin, Suspense Casbah, Rooftop Strings.
 
-**Derbouka & Perc**
-Derbouka Doum, Tak Tak, Deep Doum, Slap Derbouka, Tabla Dz, Rai Percussion, Dub Doum, Hand Drum Fill, Crowd Clap, Drop Doum.
+**Derbouka & Perc:** Derbouka Doum, Tak Tak, Deep Doum, Slap Derbouka, Tabla Dz, Rai Percussion, Dub Doum, Hand Drum Fill, Crowd Clap, Drop Doum.
 
-**Bendir Sub & Bass**
-Bendir Sub, Deep Casbah, Rattle Sub, Long Slide Sub, Pitch Drop Dz, Dirty Bendir, Smooth Sub, Hard Knock Dz, Short Boom, Algiers Rumble.
+**Bendir Sub & Bass:** Bendir Sub, Deep Casbah, Rattle Sub, Long Slide Sub, Pitch Drop Dz, Dirty Bendir, Smooth Sub, Hard Knock Dz, Short Boom, Rumble Alger.
 
-**User presets.** The disk icon saves the current sound as a `.dzpreset` file in `Documents\DJBILBOX BEATS\DZPOWER\Presets`. Files in this folder appear in the **User** submenu of the preset menu. Use **Open a .dzpreset file...** to load a preset from another folder. Your sound is also saved inside your FL Studio project.
+**Loading a preset** first resets every parameter to its default value, then applies the preset. The two wheels are not changed.
+
+**User presets.** Click the disk icon to save the current sound as a `.dzpreset` file. The default folder is `DJBILBOX BEATS/DZPOWER/Presets` inside your Documents folder. Files in this folder appear in the **User** submenu of the preset menu. Use **Open a .dzpreset file...** in the same menu to load a file from another location. The preset display shows the file name.
+
+The host also sees the 70 factory presets as a program list. Your project saves the full state of the plugin, including the preset name.
 
 ## Production tips
 
-- **Raï lead vibrato.** On most presets the LFO is set to Sine, Pitch, 5 Hz with AMOUNT at 0. Push the Modulation wheel to add vibrato only where you want it. Try **Rai Lead Organ** or **Zorna Celebration**: both are in Mono with a short glide for legato phrases.
-- **Quarter-tone inflections.** DZPOWER plays equal temperament. The pitch bend range is ±2 semitones, so a quarter tone is one quarter of the upward wheel travel. For a whole passage, set **PITCH** to +0.5 or -0.5. The knob is continuous.
-- **Delay in time with the beat.** TIME is set in seconds. Quarter note = 60 / BPM. Eighth note = 30 / BPM. Dotted eighth = 45 / BPM. At 100 BPM, an eighth note is 0.30 s. At 140 BPM, it is 0.21 s.
-- **Afrotrap mandole hooks.** Start from **Casbah Pick** or **Algiers Mandole**. Raise **VELOCITY** to 0.8 or more so that your playing dynamics come through. Lower **BODY** for shorter, tighter notes that leave room for the drums.
-- **808-style slides with the Bendir Sub.** Use **Long Slide Sub** or set GLIDE between 0.1 and 0.35 in Mono. Any GLIDE above 0 makes every note slide from the previous one, so set it back to 0 for straight notes. Raise **BODY** to add a 2nd harmonic that stays audible on phone speakers. Add **DISTORTION** around 0.2 for grit.
-- **Derbouka grooves.** Each hit combines a pitched doum and a slap. Play low notes for deep doums and higher notes for tighter hits; use **Tak Tak** or **Slap Derbouka** for slap accents. **TONE** controls the pitch drop of the doum. **WIDTH** controls the slap level. Keep Poly mode so that hits overlap naturally. Vary note velocities in the Piano roll for a human feel.
-- **Chaabi string pads.** The vibrato of the Chaabi Strings engine starts 0.2 s after the note begins. Short notes stay straight, long notes bloom. Add CHORUS around 0.3 and REVERB around 0.5 for width. **Suspense Casbah** uses a slow filter envelope for intros and builds.
-- **Keep chords clean.** The output passes through a soft limiter. Dense chords at high VOLUME saturate gently. Lower **VOLUME** for big chords, and raise it on plucks and drums, which peak higher than they sound.
+- **Hooks.** Start from a Mandole or Qanun preset, add a little DELAY MIX and set TIME to an eighth note (30 / BPM seconds) for a rolling Raï-style pluck line.
+- **Lead lines.** Use a Mono preset (Breathy Gasba, Zorna Fete) and add GLIDE for slides between notes. Raise WIDTH on the Gasba for more vibrato.
+- **Pads.** On Chaabi Strings, raise ATTACK and RELEASE in the AMP ENVELOPE and add CHORUS and REVERB for a wide string bed.
+- **Percussion.** On Derbouka, TONE sets the depth of the pitch drop, BODY the length of the doum and WIDTH the level of the slap. Play different notes to tune the drum.
+- **Sub bass.** The Bendir Sub presets are Mono. Keep CUTOFF high and use TRANSPOSE (-12) to drop an octave. Add DISTORTION to make the sub audible on small speakers.
+- **Movement.** Set LFO DESTINATION to Filter and AMOUNT around 30% for a slow wobble, or to Timbre to make the character controls drift.
+- **Expression.** Raise VELOCITY to make notes you play softly quieter and harder hits louder. Map the mod wheel to add LFO depth while you play.
 
 ## MIDI, automation and performance
 
-- **Notes.** DZPOWER responds to all MIDI notes (0 to 127) on all MIDI channels, tuned to equal temperament with A4 = 440 Hz. Middle C is MIDI note 60 (C5 in FL Studio).
-- **Polyphony.** 16 voices in Poly mode. When you play more than 16 notes, the oldest note is stolen; the lowest and highest held notes are protected. In Mono mode, each new note releases the previous one (its release tail still sounds). Releasing a note does not bring back an earlier held note.
-- **Velocity.** Velocity changes the volume according to the VELOCITY slider.
-- **Pitch bend.** ±2 semitones. The MIDI pitch wheel and the on-screen wheel add together.
-- **Modulation (CC1).** Adds up to 0.8 to the LFO AMOUNT. The higher of MIDI CC1 and the on-screen wheel is used.
-- **Sustain pedal (CC64).** Supported. Aftertouch and other MIDI CCs are ignored. Use host automation for everything else.
-- **Automation in FL Studio.** Every parameter in the table can be automated. Move a control on the DZPOWER panel, then choose **Tools > Last tweaked > Create automation clip**. To use a hardware knob, choose **Tools > Last tweaked > Link to controller** and move the knob. Volume, pitch, bend and cutoff changes are smoothed to avoid zipper noise.
-- **Latency.** 0 samples. No delay compensation is needed. The plugin reports a 12-second tail to the host so that delay and reverb tails are not cut when you render.
-- **CPU.** DZPOWER uses no samples and streams nothing from disk. The CPU load grows with the number of sounding notes. The five-saw Chaabi Strings engine is the heaviest. Effects at zero are bypassed and use no CPU. Long release times keep voices active longer.
-- **Sample rates.** 44.1, 48, 88.2 and 96 kHz.
+- **Notes.** All 16 MIDI channels are accepted and play the same sound.
+- **Velocity.** Controls the level, scaled by the VELOCITY slider.
+- **Pitch bend.** MIDI pitch bend moves the pitch by +/-2 semitones, added to the on-screen Pitch Bend wheel.
+- **Mod wheel (CC1).** Adds up to 80% to the LFO AMOUNT. CC121 (reset all controllers) resets it to zero.
+- **Polyphony.** Up to 16 voices in Poly mode. Mono mode plays one note at a time with last-note priority.
+- **Automation.** All 35 parameters appear in the host's automation list with units (%, Hz, ms, dB, semitones).
+- **Latency.** 0 samples. The output is stereo.
+- **Not supported.** Aftertouch is ignored. The delay and LFO are not synced to the host tempo. There is no microtonal tuning.
 
 ## FAQ
 
-**I hear no sound.**
-Check that the DZPOWER channel is routed to a Mixer track and that the channel is not muted. Check VOLUME. With Low Pass selected, a very low CUTOFF can silence the sound. With High Pass selected, a high CUTOFF removes bass presets. Finally, remember that the on-screen keyboard plays very low notes in version 1.0: test with a MIDI keyboard or the Piano roll.
+**I hear no sound.** Check that the channel is routed to a mixer track, that VOLUME is above zero and that CUTOFF is not at its minimum. Also check the AMP ENVELOPE: with SUSTAIN at zero, notes fade out by themselves. Many plucked presets are designed that way.
 
-**DZPOWER does not appear in FL Studio.**
-DZPOWER is a 64-bit VST3 plugin. Check that `DZPOWER.vst3` is in `C:\Program Files\Common Files\VST3`. In FL Studio, open **Options > Manage plugins** and click **Find installed plugins**. Look for it under **Generators**, manufacturer **DJBILBOX BEATS**.
+**DZPOWER does not appear in FL Studio.** Run the plugin manager scan again (**Options > Manage plugins > Find installed plugins**) and check that the VST3 file is in the standard VST3 folder.
 
-**Plucks and drums sound quieter than pads.**
-Plucked and percussive presets have sharp attacks and short notes, so they sound softer at the same peak level. Raise **VOLUME** on these presets.
+**Some presets are quieter than others.** Plucks and drums are short and peak quickly, so they sound quieter than sustained pads at the same VOLUME. Raise VOLUME or balance the level in the mixer.
 
-**Can DZPOWER play maqam scales with quarter tones?**
-There is no built-in scale or microtuning. Use the pitch wheel (a quarter tone is a quarter of the upward travel) or the continuous **PITCH** knob for inflections.
+**Can I play chords on every preset?** Yes. Switch MONO / POLY to Poly. Mono presets, such as the Bendir Sub bank, are meant for single-note lines.
 
-**The sound gets quieter when I turn REVERB fully down.**
-In version 1.0, the reverb stage also lifts the dry signal by about 6 dB while it is active. At 0 the reverb is bypassed, so the overall level drops. For a dry sound at the usual level, leave REVERB at a very low value such as 0.01, or compensate with VOLUME.
+**Can DZPOWER play quarter tones?** No. The plugin has no microtonal tuning. Use a pitch bend or the GLIDE control to approach in-between pitches by ear.
+
+**Does it use samples?** No. Every sound is generated in real time by the synthesis engines.

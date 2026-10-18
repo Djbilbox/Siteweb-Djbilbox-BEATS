@@ -1,0 +1,56 @@
+{
+  "id": "dzpower",
+  "name": "DZPOWER",
+  "group": "synths",
+  "category": "instrument",
+  "kind": "Raï & Chaabi Synthesizer",
+  "tagline": "Mandole, qanun, gasba, ghaita, organ, strings and drums: 70 presets from 8 engines.",
+  "sub": "Algerian plucks, reeds, organ, strings and drums",
+  "gumroad_title": "DZPOWER - Raï & Chaabi Synthesizer VST3 + AU Plugin (70 Presets) | Oriental, Afrotrap, Trap",
+  "summary": "A synthesizer plugin (VST3 and Audio Unit) with eight engines inspired by Algerian popular music (mandole, qanun, gasba, ghaita, raï organ, chaabi strings, derbouka and bendir sub) and 70 factory presets.",
+  "about": [
+    "DZPOWER, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines, shape it with five character controls (TONE, BODY, BRIGHT, WIDTH, TEXTURE), then run it through a resonant multimode filter with its own envelope, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb.",
+    "55 of the 70 presets load in Poly mode, which plays up to 16 voices; the 15 others (all Bendir Sub & Bass presets plus a few lead sounds) load in Mono mode for single-note lines.",
+    "Built for Raï and Raï'n'B, Chaabi, Oriental pop, Afrotrap, Hip-Hop and Trap: plucked hooks, reed leads, organ and string chords, hand-drum percussion and deep subs."
+  ],
+  "features": [
+    {"icon": "fa-wave-square", "t": "8 synthesis engines", "d": "Mandole, qanun, gasba, ghaita, raï organ, chaabi strings, derbouka and bendir sub."},
+    {"icon": "fa-sliders", "t": "5 character controls", "d": "TONE, BODY, BRIGHT, WIDTH and TEXTURE reshape each engine."},
+    {"icon": "fa-list", "t": "70 factory presets", "d": "Seven banks of ten sounds, from mandole plucks to bendir subs."},
+    {"icon": "fa-filter", "t": "Filter with its own envelope", "d": "Low pass, high pass or band pass, with resonance and a dedicated ADSR."},
+    {"icon": "fa-wand-magic-sparkles", "t": "Built-in effects", "d": "Distortion, chorus, ping-pong delay and reverb."},
+    {"icon": "fa-wave-square", "t": "LFO with 5 shapes", "d": "Sine, triangle, saw, square or sample and hold, sent to pitch, filter, amplitude or timbre."},
+    {"icon": "fa-keyboard", "t": "Play it right away", "d": "On-screen keyboard (MIDI notes 36 to 96), pitch bend and mod wheel, up to 16 voices in Poly mode."},
+    {"icon": "fa-unlock", "t": "Royalty-free", "d": "Everything you make with it is yours."}
+  ],
+  "specs": [
+    {"k": "Format", "v": "VST3 64-bit (Windows); VST3 + Audio Unit, universal (macOS)"},
+    {"k": "Type", "v": "Synthesizer (instrument)"},
+    {"k": "Presets", "v": "70 factory presets in 7 banks"},
+    {"k": "Engines", "v": "8"},
+    {"k": "Polyphony", "v": "Up to 16 voices (Poly), or Mono"},
+    {"k": "Latency", "v": "0 samples"},
+    {"k": "Automatable parameters", "v": "35"}
+  ],
+  "includes": [
+    "DZPOWER plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "Windows installer",
+    "PDF user manual",
+    "Royalty-free license"
+  ],
+  "genres": ["Raï", "Chaabi", "Oriental Pop", "Afrotrap", "Hip-Hop", "Trap"],
+  "tags": ["synth", "rai", "chaabi", "oriental", "vst3", "audio unit", "afrotrap", "fl studio", "humpire"],
+  "badges": ["70 presets", "8 engines", "Royalty-free"],
+  "faq": [
+    {"q": "Which DAWs does it work in?", "a": "It is a VST3 instrument on Windows and macOS, plus Audio Unit on macOS. It is designed for FL Studio and should load in any host that supports these formats."},
+    {"q": "Does it use samples?", "a": "No. Every sound is generated in real time by one of eight synthesis engines."},
+    {"q": "Can I play chords?", "a": "Yes. Poly mode plays up to 16 voices and 55 of the 70 presets load in it. Mono presets, such as the Bendir Sub bank, are meant for single-note lines."},
+    {"q": "Can I save my own presets?", "a": "Yes. The disk icon saves a .dzpreset file, and your presets appear in the User submenu of the preset menu."},
+    {"q": "Does it add latency?", "a": "No. The plugin reports 0 samples of latency."},
+    {"q": "Is the delay tempo-synced?", "a": "No. Delay time is set in time units (50 ms to 1 s) and the LFO runs in Hz (0.05 to 20 Hz)."},
+    {"q": "Does it support quarter tones?", "a": "No. There is no microtonal tuning, but pitch bend and the GLIDE control let you approach in-between pitches by ear."}
+  ],
+  "accent": "#ff5a4a",
+  "fs_thumb": "72px",
+  "fs_cover": "104px"
+}
