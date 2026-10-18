@@ -17,7 +17,7 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
       const html = tpl.replace('{{MODE}}', mode).replace('{{ACCENT}}', p.accent || '#f5b544')
         .replace('{{LOGO}}', logo).replace('{{BRAND}}', esc(p.brand || 'DJBILBOX BEATS')).replace('{{KIND}}', esc(p.kind || '')).replace('{{FS}}', (mode === 'thumb' ? p.fsThumb : p.fsCover) || (mode === 'thumb' ? '64px' : '92px'))
         .replace('{{NAME}}', esc(p.name)).replace('{{TAGLINE}}', esc(p.tagline || '')).replace('{{SHOT}}', shot)
-        .replace('{{BADGES}}', badges).replace('{{FOOT}}', esc(p.foot || 'VST3 · 64-bit Windows · Royalty-free license'));
+        .replace('{{BADGES}}', badges).replace('{{FOOT}}', esc(p.foot || 'VST3 · AU · Windows & macOS · Royalty-free license'));
       const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
       const tmp = path.join(outDir, `.tmp-${p.id}-${mode}.html`);
       fs.writeFileSync(tmp, html);
