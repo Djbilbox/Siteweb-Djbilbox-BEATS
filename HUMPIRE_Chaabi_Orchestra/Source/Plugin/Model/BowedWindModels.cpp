@@ -8,11 +8,14 @@
 //          slow pitch / loudness drift and vibrato are control signals that are exactly periodic in the
 //          loop length, so the sustain loop is seamless.  Pizzicato = detuned pair of Karplus-Strong
 //          strings through the same body.  Bow lift = short filtered noise tick.
-//  NEY     (see below)
+//  NEY     Additive tone (register / dynamics dependent harmonics) + jet and bore-resonant breath noise + chiff,
+//          all exactly periodic in the loop length.
 //
 //  Everything is deterministic (model::Rng seeded per zone), std only, no globals.
 // ============================================================================
 #include "ModelCommon.h"
+
+#include <memory>
 
 namespace humpire::model
 {
@@ -222,8 +225,8 @@ public:
         for (const auto& m : modes) sec.push_back (Biquad::peaking (m.f, m.q, m.g, sr));
         sec.push_back (Biquad::peaking (2750.0, 1.1, 8.0 - 3.0 * dark, sr));          // bridge hill
         sec.push_back (Biquad::peaking (3650.0, 2.0, 3.0 - 1.5 * dark, sr));
-        sec.push_back (Biquad::highShelf (5200.0, -7.0 - 4.0 * dark, sr));
-        sec.push_back (Biquad::lowpass (9000.0 - 3500.0 * dark, 0.6, sr));
+        sec.push_back (Biquad::highShelf (5200.0, -4.5 - 4.5 * dark, sr));
+        sec.push_back (Biquad::lowpass (11000.0 - 4500.0 * dark, 0.6, sr));
     }
     double process (double x) { for (auto& b : sec) x = b.process (x); return x; }
     void run (std::vector<float>& v) { for (auto& s : v) s = (float) process ((double) s); }
@@ -234,6 +237,14 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 //  Bowed string waveguide
+//
+//  The bow splits the string into a bridge-side and a nut-side delay line (each holds the round trip of its
+//  segment, the reflection loss filters sit at the far ends).  Friction table: the string-vs-bow velocity
+//  difference d0 is turned into a transmitted velocity wave d0 * rho(slope * d0) (rho = 1 while the bow
+//  sticks, falling steeply while it slips).  A note is rendered in two stages: a warm-up in which the string
+//  settles into steady Helmholtz motion (discarded), then the real render from that settled state with the
+//  note controls (vibrato, drift, scoop).  The attack of the sample (bow onset, scratch, spectral opening) is
+//  then shaped explicitly.
 // ------------------------------------------------------------------------------------------------
 struct BowParams
 {
@@ -242,11 +253,8 @@ struct BowParams
     double slopeK = 3.0;             // friction-table slope = slopeK * beta  (bow speed = 1): larger = lighter bow force
     double bridgeFc = 5000.0;        // bridge reflection low-pass (Hz): corner rounding / brightness
     double nutFc = 8000.0;           // finger / nut reflection low-pass (Hz)
-    double t60 = 1.3;                // string decay time at 196 Hz (s): the loop loss (scaled with pitch)
-    double attackSec = 0.04;         // bow speed ramp
-    double forceStart = 1.0;         // friction slope factor at t = 0 (< 1: firmer bow bite at the attack), relaxes to 1
-    double forceTau = 0.07;
-    double scoopCents = 0.0;         // start flat, rise to pitch (bow capture)
+    double t60 = 0.6;                // string + body decay time at 196 Hz (s): the loop loss (scaled with pitch)
+    double scoopCents = 0.0;         // start flat, rise to pitch
     double scoopSec = 0.04;
     double noiseDepth = 0.05;        // multiplicative noise on the friction slope (bow hair / rosin hiss)
     double noiseFc = 3000.0;
@@ -259,77 +267,95 @@ struct BowParams
     std::uint64_t seed = 1;
 };
 
-// Returns the bridge-side wave (force on the bridge) at the base sample rate, `frames` long.
-std::vector<float> simulateBow (const BowParams& p, double sr, int frames)
+class BowSim
 {
-    const int os = std::max (1, p.os);
-    const double srI = sr * (double) os;
-    const long long N = (long long) frames * os;
-    Rng rng (p.seed);
-    const double periodSec = p.controlPeriod > 0 ? (double) p.controlPeriod / sr : 0.0;
-    SlowDrift pitchDrift, speedDrift;
-    pitchDrift.init (rng, periodSec, 0.7, 4.0);
-    speedDrift.init (rng, periodSec, 0.5, 3.0);
-    const int nzLen = p.controlPeriod > 0 ? p.controlPeriod : frames;
-    const std::vector<float> nz = noiseTrack (rng, nzLen, p.noiseFc, sr, p.controlPeriod > 0);
-
-    OnePole fb, fn;
-    fb.setLowpass (p.bridgeFc, srI);
-    fn.setLowpass (p.nutFc, srI);
-    const double w0 = kTwoPi * p.f0 / srI;
-    const double tauF = onePolePhaseDelay (fb, w0) + onePolePhaseDelay (fn, w0);
-    const double base0 = srI / p.f0 * p.tune - tauF - 2.0;
-    const double gPeriod = std::pow (10.0, -3.0 / (std::max (0.05, p.t60 * std::pow (196.0 / p.f0, 0.4)) * p.f0));
-    const double gB = std::pow (gPeriod, 0.8), gN = std::pow (gPeriod, 0.2);
-    DelayLine bl, nl;
-    const int cap = (int) std::ceil (base0 * 1.1) + 16;
-    bl.init (cap); nl.init (cap);
-
-    const double slope0 = p.slopeK * p.beta;
-    std::vector<float> out ((std::size_t) N);
-
-    // slow controls (pitch wander, scoop, vibrato, bow speed) are evaluated every kBlk samples and interpolated
-    constexpr long long kBlk = 32;
-    auto controls = [&] (long long n, double& scale, double& speed, double& slopeF)
+public:
+    BowSim (const BowParams& params, double sampleRate) : p (params), sr (sampleRate)
     {
-        const double t = (double) n / srI;
-        double cents = p.driftCents * pitchDrift.eval (t);
-        if (p.scoopCents != 0.0) cents -= p.scoopCents * std::exp (-t / p.scoopSec);
-        if (p.vibHz > 0.0) cents += p.vibCents * smoothstep ((t - p.vibStart) / p.vibRamp) * std::sin (kTwoPi * p.vibHz * t);
-        scale = std::exp2 (-cents / 1200.0);
-        slopeF = 1.0 - (1.0 - p.forceStart) * std::exp (-t / p.forceTau);
-        speed = smoothstep (t / p.attackSec) * (1.0 + p.driftAmp * speedDrift.eval (t));
-    };
-    double sc0 = 1.0, sp0 = 0.0, sc1 = 1.0, sp1 = 0.0, sf0 = 1.0, sf1 = 1.0;
-    controls (0, sc0, sp0, sf0);
-    controls (kBlk, sc1, sp1, sf1);
-    for (long long n = 0; n < N; ++n)
-    {
-        const long long ph = n % kBlk;
-        if (n > 0 && ph == 0) { sc0 = sc1; sp0 = sp1; sf0 = sf1; controls (n + kBlk, sc1, sp1, sf1); }
-        const double u = (double) ph * (1.0 / (double) kBlk);
-        const double sc = sc0 + (sc1 - sc0) * u, vb = sp0 + (sp1 - sp0) * u, sfac = sf0 + (sf1 - sf0) * u;
-        const double base = base0 * sc;
-        const double dB = std::max (1.0, p.beta * base), dN = std::max (1.0, (1.0 - p.beta) * base);
-
-        const double ob = (double) bl.read (dB);
-        const double on = (double) nl.read (dN);
-        const double bIn = -gB * fb.lowpass (ob);
-        const double nIn = -gN * fn.lowpass (on);
-
-        const double d0 = vb - (bIn + nIn);
-        const double noise = (double) nz[(std::size_t) ((n / os) % (long long) nz.size())];
-        const double s = slope0 * sfac * std::max (0.2, 1.0 + p.noiseDepth * noise);
-        const double xx = std::fabs (d0 * s) + 0.75;
-        const double x2 = xx * xx;
-        const double rho = std::min (1.0, 1.0 / (x2 * x2));
-        const double vf = d0 * rho;
-        bl.push ((float) (nIn + vf));
-        nl.push ((float) (bIn + vf));
-        out[(std::size_t) n] = (float) ob;
+        os = std::max (1, p.os);
+        srI = sr * (double) os;
+        Rng rng (p.seed);
+        const double periodSec = p.controlPeriod > 0 ? (double) p.controlPeriod / sr : 0.0;
+        pitchDrift.init (rng, periodSec, 0.7, 4.0);
+        speedDrift.init (rng, periodSec, 0.5, 3.0);
+        const int nzLen = p.controlPeriod > 0 ? p.controlPeriod : secondsToFrames (3.0, sr);
+        nz = noiseTrack (rng, nzLen, p.noiseFc, sr, p.controlPeriod > 0);
+        fb.setLowpass (p.bridgeFc, srI);
+        fn.setLowpass (p.nutFc, srI);
+        const double w0 = kTwoPi * p.f0 / srI;
+        tauF = onePolePhaseDelay (fb, w0) + onePolePhaseDelay (fn, w0);
+        const double gPeriod = std::pow (10.0, -3.0 / (std::max (0.05, p.t60 * std::pow (196.0 / p.f0, 0.4)) * p.f0));
+        gB = std::pow (gPeriod, 0.8); gN = std::pow (gPeriod, 0.2);
+        const int cap = (int) std::ceil (srI / p.f0 * 1.3) + 24;
+        bl.init (cap); nl.init (cap);
+        slope0 = p.slopeK * p.beta;
+        setTune (p.tune);
     }
-    return decimateBy (out, os, (std::size_t) frames);
-}
+
+    void setTune (double t) { tune = t; base0 = srI / p.f0 * tune - tauF - 2.0; }
+    double tuneScale() const { return tune; }
+
+    // Renders `baseFrames` frames (internal rate os x) and appends them to `out`.  controls == false: steady bow,
+    // no vibrato / drift / scoop (warm-up and calibration); the first call with controls == true restarts the
+    // control clock at 0.
+    void run (long long baseFrames, bool controls, std::vector<float>& out)
+    {
+        if (controls && ! controlsStarted) { controlsStarted = true; clock = 0; }
+        const long long N = baseFrames * os;
+        const std::size_t first = out.size();
+        out.resize (first + (std::size_t) N);
+        constexpr long long kBlk = 32;
+        double sc0 = 1.0, sp0 = 1.0, sc1 = 1.0, sp1 = 1.0;
+        auto ctl = [&] (long long n, double& scale, double& speed)
+        {
+            if (! controls) { scale = 1.0; speed = 1.0; return; }
+            const double t = (double) n / srI;
+            double cents = p.driftCents * pitchDrift.eval (t);
+            if (p.scoopCents != 0.0) cents -= p.scoopCents * std::exp (-t / p.scoopSec);
+            if (p.vibHz > 0.0) cents += p.vibCents * smoothstep ((t - p.vibStart) / p.vibRamp) * std::sin (kTwoPi * p.vibHz * t);
+            scale = std::exp2 (-cents / 1200.0);
+            speed = 1.0 + p.driftAmp * speedDrift.eval (t);
+        };
+        ctl (clock, sc0, sp0);
+        ctl (clock + kBlk, sc1, sp1);
+        for (long long i = 0; i < N; ++i, ++clock)
+        {
+            const long long ph = clock % kBlk;
+            if (i > 0 && ph == 0) { sc0 = sc1; sp0 = sp1; ctl (clock + kBlk, sc1, sp1); }
+            const double u = (double) ph * (1.0 / (double) kBlk);
+            const double sc = sc0 + (sc1 - sc0) * u, vb = sp0 + (sp1 - sp0) * u;
+            const double base = base0 * sc;
+            const double dB = std::max (1.0, p.beta * base), dN = std::max (1.0, (1.0 - p.beta) * base);
+
+            const double ob = (double) bl.read (dB);
+            const double on = (double) nl.read (dN);
+            const double bIn = -gB * fb.lowpass (ob);
+            const double nIn = -gN * fn.lowpass (on);
+
+            const double d0 = vb - (bIn + nIn);
+            const double noise = (double) nz[(std::size_t) ((clock / os) % (long long) nz.size())];
+            const double s = slope0 * std::max (0.2, 1.0 + p.noiseDepth * noise);
+            const double xx = std::fabs (d0 * s) + 0.75;
+            const double x2 = xx * xx;
+            const double rho = std::min (1.0, 1.0 / (x2 * x2));
+            const double vf = d0 * rho;
+            bl.push ((float) (nIn + vf));
+            nl.push ((float) (bIn + vf));
+            out[first + (std::size_t) i] = (float) ob;
+        }
+    }
+
+private:
+    BowParams p;
+    double sr, srI = 0.0, tauF = 0.0, gB = 0.99, gN = 0.99, slope0 = 0.3, tune = 1.0, base0 = 100.0;
+    int os = 1;
+    long long clock = 0;
+    bool controlsStarted = false;
+    SlowDrift pitchDrift, speedDrift;
+    std::vector<float> nz;
+    OnePole fb, fn;
+    DelayLine bl, nl;
+};
 
 int oversampleFor (double f0, double sr)
 {
@@ -338,24 +364,24 @@ int oversampleFor (double f0, double sr)
 }
 
 // Is the (pre-body) buffer a clean Helmholtz-like oscillation near f0?  fMeasured: mean frequency.
-bool helmholtzOk (const std::vector<float>& x, double sr, double f0, double& fMeasured)
+bool helmholtzOk (const float* x, std::size_t n, double sr, double f0, double& fMeasured)
 {
-    const std::size_t a = (std::size_t) secondsToFrames (0.16, sr);
-    if (x.size() < a + 2048) return false;
+    if (n < 2048) return false;
     double share = 0.0;
-    fMeasured = measureF0Hz (x.data() + a, x.size() - a, sr, f0, &share);
+    fMeasured = measureF0Hz (x, n, sr, f0, &share);
     if (fMeasured <= 0.0) return false;
     if (std::fabs (centsBetween (fMeasured, f0)) > 80.0) return false;
     if (share < 0.28) return false;
     // periodicity: normalised autocorrelation at one period
     const double P = sr / fMeasured;
     const int lag = (int) std::lround (P);
-    const std::size_t n = x.size() - a - (std::size_t) lag - 2;
+    if (n < (std::size_t) lag + 64) return false;
+    const std::size_t m = n - (std::size_t) lag - 2;
     double best = 0.0;
     for (int l = lag - 1; l <= lag + 1; ++l)
     {
         double c = 0.0, e0 = 0.0, e1 = 0.0;
-        for (std::size_t i = 0; i < n; ++i) { const double u = x[a + i], v = x[a + i + (std::size_t) l]; c += u * v; e0 += u * u; e1 += v * v; }
+        for (std::size_t i = 0; i < m; ++i) { const double u = x[i], v = x[i + (std::size_t) l]; c += u * v; e0 += u * u; e1 += v * v; }
         best = std::max (best, c / std::sqrt (std::max (e0 * e1, 1.0e-30)));
     }
     return best > 0.97;
@@ -366,8 +392,11 @@ struct BowStyle
     double dAbs = 0.022;             // bow-bridge distance (metres)
     double slopeK = 2.6;
     double bridgeFc = 6500.0;
+    double t60 = 0.6;
     double noiseDepth = 0.05;
-    double attack = 0.035;
+    double attack = 0.035;           // bow onset (s)
+    double scratchDb = -20.0;        // bow-capture scratch relative to the tone
+    double openFc = 2500.0;          // spectral opening at the onset: starting cut-off (Hz)
     double scoop = 6.0;
     double vibHz = 0.0, vibCents = 0.0, vibStart = 0.22, vibRamp = 0.28;
     double bodyDark = 0.0;
@@ -383,12 +412,13 @@ double violinBeta (int note, double dAbs)
     return clampd (dAbs / len, 0.07, 0.22);
 }
 
-struct SustainResult { std::vector<float> data; int loopStart = 0, loopEnd = 0; double centsError = 0.0; };
+struct SustainResult { std::vector<float> data; int loopStart = 0, loopEnd = 0; };
 
 SustainResult renderBowedNote (const BuildContext& ctx, int note, const BowStyle& st, int zoneIndex, int salt)
 {
     const double sr = ctx.sampleRate;
     const double f0 = midiToHz ((double) note);
+    Rng rng = Rng::forZone (ctx.instrument, zoneIndex, 31 + salt);
 
     // --- loop geometry: a whole number of string periods (and of vibrato cycles)
     int periods = std::max (8, (int) std::lround (st.loopSec * f0));
@@ -415,38 +445,69 @@ SustainResult renderBowedNote (const BuildContext& ctx, int note, const BowStyle
     p.beta = violinBeta (note, st.dAbs);
     p.slopeK = st.slopeK;
     p.bridgeFc = st.bridgeFc;
-    p.nutFc = 0.5 * (st.bridgeFc + 7000.0);
+    p.nutFc = 0.5 * (st.bridgeFc + 9000.0);
+    p.t60 = st.t60;
     p.noiseDepth = st.noiseDepth * std::min (1.0, std::pow (400.0 / f0, 0.8));
-    p.attackSec = st.attack;
     p.scoopCents = st.scoop;
     p.vibHz = vibHz; p.vibCents = st.vibCents; p.vibStart = st.vibStart; p.vibRamp = st.vibRamp;
     p.os = oversampleFor (f0, sr);
+    p.controlPeriod = L;
     p.seed = Rng::mix64 ((std::uint64_t) (zoneIndex + 1) * 7919u + (std::uint64_t) salt * 104729u + 11u);
 
-    // --- find a clean Helmholtz regime and calibrate the pitch (delay scale)
-    const double kForce[] = { 1.0, 0.82, 1.22, 0.66, 1.5, 0.5 };
-    bool ok = false;
+    // --- warm-up: find a clean Helmholtz regime (retry with other bow forces) and calibrate the pitch
+    const double kForce[] = { 1.0, 0.82, 1.22, 0.66, 1.5, 0.5, 1.9 };
+    const int warm = secondsToFrames (0.55, sr), settle = secondsToFrames (0.16, sr);
+    std::unique_ptr<BowSim> sim;
+    std::vector<float> scratch;
     for (double kf : kForce)
     {
         BowParams c = p;
         c.slopeK = st.slopeK * kf;
-        c.vibHz = 0.0; c.driftCents = 0.0; c.driftAmp = 0.0; c.controlPeriod = 0;
-        const int calFrames = secondsToFrames (0.40, sr);
+        auto cand = std::make_unique<BowSim> (c, sr);
+        scratch.clear();
+        cand->run (warm, false, scratch);
+        std::vector<float> win = decimateBy (scratch, c.os, (std::size_t) warm);
         double fm = 0.0;
-        auto x = simulateBow (c, sr, calFrames);
-        if (! helmholtzOk (x, sr, f0, fm)) continue;
-        c.tune *= fm / f0;                                   // longer delay -> lower pitch
-        x = simulateBow (c, sr, calFrames);
-        if (! helmholtzOk (x, sr, f0, fm)) continue;
-        c.tune *= fm / f0;
-        p.slopeK = c.slopeK; p.tune = c.tune;
-        ok = true;
+        const std::size_t a = (std::size_t) secondsToFrames (0.30, sr);
+        if (! helmholtzOk (win.data() + a, win.size() - a, sr, f0, fm)) continue;
+        cand->setTune (cand->tuneScale() * fm / f0);                    // longer delay -> lower pitch
+        scratch.clear();
+        cand->run (settle, false, scratch);
+        win = decimateBy (scratch, c.os, (std::size_t) settle);
+        if (helmholtzOk (win.data() + win.size() / 3, win.size() - win.size() / 3, sr, f0, fm))
+            cand->setTune (cand->tuneScale() * fm / f0);
+        sim = std::move (cand);
+        p.slopeK = c.slopeK;
         break;
     }
-    (void) ok;
+    if (! sim) { sim = std::make_unique<BowSim> (p, sr);                 // never happens in practice: plain render
+    }
 
-    p.controlPeriod = L;
-    std::vector<float> y = simulateBow (p, sr, total);
+    std::vector<float> raw;
+    sim->run (total, true, raw);
+    std::vector<float> y = decimateBy (raw, p.os, (std::size_t) total);
+
+    // --- bow onset: amplitude ramp, spectral opening, capture scratch
+    {
+        double e = 0.0;
+        for (int n = t0; n < t0 + L; ++n) e += (double) y[(std::size_t) n] * (double) y[(std::size_t) n];
+        const double rms = std::sqrt (e / (double) L);
+        Biquad sbp = Biquad::bandpass (3000.0, 0.7, sr);
+        double lp = 0.0;
+        const double gS = rms * dbToGain (st.scratchDb);
+        const double fcLo = std::max (st.openFc, 3.0 * f0);
+        for (int n = 0; n < total && n < secondsToFrames (0.5, sr); ++n)
+        {
+            const double t = (double) n / sr;
+            const double open = smoothstep (t / (1.7 * st.attack));
+            const double fc = fcLo * std::pow (16000.0 / fcLo, open);
+            const double a = 1.0 - std::exp (-kTwoPi * fc / sr);
+            lp += a * ((double) y[(std::size_t) n] - lp);
+            const double amp = std::pow (smoothstep (t / st.attack), 1.2);
+            const double scr = gS * sbp.process (rng.gaussian()) * smoothstep (t / 0.004) * std::exp (-t / (0.35 * st.attack + 0.012));
+            y[(std::size_t) n] = (float) (lp * amp + scr);
+        }
+    }
 
     // --- body, DC, start
     ViolinBody body (sr, st.bodyDark);
@@ -516,17 +577,33 @@ std::vector<float> renderPizz (int note, double sr, Rng& rng)
     a.init (f0 * std::pow (2.0, 0.5 * det / 1200.0), sr, t60, 0.62);
     b.init (f0 * std::pow (2.0, -0.5 * det / 1200.0), sr, t60 * 0.6, 0.5);
     const int N = std::max (a.loopDelay(), b.loopDelay());
-    // plucked shape: triangular displacement peaking at the pluck point, softened by the finger
+    // Plucked string at rest: the velocity waves that carry a triangular displacement (pluck at pickPos of the
+    // length) form a zero-mean four-step pulse around the loop; the finger width rounds the steps (circular smoothing).
     const double pickPos = rng.range (0.12, 0.2);
     std::vector<float> e ((std::size_t) N + 8, 0.f);
-    const int pk = std::max (2, (int) std::lround (pickPos * (double) N));
-    for (int i = 0; i < N; ++i)
-        e[(std::size_t) i] = (float) (i < pk ? (double) i / (double) pk : (double) (N - i) / (double) (N - pk));
     {
-        double mean = 0.0;
-        for (int i = 0; i < N; ++i) mean += e[(size_t) i];
-        mean /= (double) N;
-        for (int i = 0; i < N; ++i) e[(size_t) i] -= (float) mean;
+        const double a1 = 1.0 / pickPos, a2 = 1.0 / (1.0 - pickPos);
+        std::vector<double> raw ((std::size_t) N);
+        for (int i = 0; i < N; ++i)
+        {
+            const double tau = (double) i / (double) N;                    // 0..1 around the loop
+            double v;
+            if (tau < 0.5 * pickPos) v = -a1;
+            else if (tau < 0.5) v = a2;
+            else if (tau < 0.5 + 0.5 * (1.0 - pickPos)) v = -a2;
+            else v = a1;
+            raw[(std::size_t) i] = v;
+        }
+        const int w = std::max (3, N / 10) | 1;
+        std::vector<double> k ((std::size_t) w);
+        double ksum = 0.0;
+        for (int j = 0; j < w; ++j) { k[(std::size_t) j] = 0.5 - 0.5 * std::cos (kTwoPi * ((double) j + 0.5) / (double) w); ksum += k[(std::size_t) j]; }
+        for (int i = 0; i < N; ++i)
+        {
+            double acc = 0.0;
+            for (int j = 0; j < w; ++j) acc += k[(std::size_t) j] * raw[(std::size_t) (((i + j - w / 2) % N + N) % N)];
+            e[(std::size_t) i] = (float) (acc / ksum);
+        }
     }
     // finger release snap: broadband noise burst in the first few ms
     std::vector<float> snap ((std::size_t) secondsToFrames (0.012, sr));
@@ -577,17 +654,18 @@ Library buildViolon (const BuildContext& ctx)
 {
     const auto spans = makeKeySpans (ctx.spec().lo, ctx.spec().hi, 3);
     Library lib = startLibrary (ctx);
-    ProgressTracker pt (ctx, (int) spans.size() * 4 + 1);
+    ProgressTracker pt (ctx, (int) spans.size() * 3 + 1);
     int zi = 0;
 
     BowStyle hard;                                    // forte: close to the bridge, firm bow, bright
-    hard.dAbs = 0.022; hard.slopeK = 2.4; hard.bridgeFc = 6800.0; hard.noiseDepth = 0.05; hard.attack = 0.032; hard.scoop = 5.0;
+    hard.dAbs = 0.022; hard.slopeK = 2.4; hard.bridgeFc = 9500.0; hard.noiseDepth = 0.065; hard.attack = 0.035; hard.scoop = 5.0;
+    hard.scratchDb = -19.0; hard.openFc = 3000.0; hard.t60 = 0.6;
     hard.bodyDark = 0.0; hard.introSec = 0.30;
     BowStyle soft = hard;                             // piano: further from the bridge, lighter bow, darker
-    soft.dAbs = 0.034; soft.slopeK = 3.4; soft.bridgeFc = 3600.0; soft.noiseDepth = 0.08; soft.attack = 0.065; soft.scoop = 9.0;
-    soft.bodyDark = 0.9; soft.introSec = 0.36;
+    soft.dAbs = 0.034; soft.slopeK = 3.4; soft.bridgeFc = 4800.0; soft.noiseDepth = 0.10; soft.attack = 0.065; soft.scoop = 9.0;
+    soft.bodyDark = 0.9; soft.introSec = 0.38; soft.scratchDb = -25.0; soft.openFc = 1400.0; soft.t60 = 0.7;
     BowStyle vib = hard;                              // mezzo-forte with vibrato
-    vib.dAbs = 0.027; vib.slopeK = 2.9; vib.bridgeFc = 5200.0; vib.noiseDepth = 0.06; vib.attack = 0.05; vib.scoop = 8.0;
+    vib.dAbs = 0.027; vib.slopeK = 2.9; vib.bridgeFc = 7000.0; vib.noiseDepth = 0.075; vib.attack = 0.06; vib.scoop = 8.0; vib.scratchDb = -23.0; vib.openFc = 2000.0; vib.t60 = 0.65;
     vib.vibHz = 5.5; vib.vibCents = 20.0; vib.vibStart = 0.18; vib.vibRamp = 0.30; vib.bodyDark = 0.4; vib.introSec = 0.62; vib.loopSec = 1.15;
 
     for (const auto& sp : spans)
@@ -663,8 +741,9 @@ struct NeyProfile
     double chiffTau = 0.04;
     double glideCents = 30.0;    // flat start
     double glideTau = 0.05;
-    double wobbleAmp = 0.025;    // breath wobble (relative loudness)
-    double wobbleCents = 2.0;    // slow pitch wander
+    double wobbleAmp = 0.03;     // breath wobble (relative loudness)
+    double wobbleCents = 3.0;    // slow pitch wander
+    double gustDepth = 0.30;     // turbulent gusts: random amplitude modulation of the jet noise
 };
 
 NeyProfile neyProfile (int note, NeyKind kind)
@@ -674,8 +753,8 @@ NeyProfile neyProfile (int note, NeyKind kind)
     const int reg = clampi ((note - 60) / 12, 0, 2);
     const double u = std::fmod (d, 12.0) / 12.0;                    // position inside the register
     const double regStart = reg >= 1 ? std::max (0.0, 1.0 - u / 0.35) : 0.0;   // overblown registers start bright
-    p.rho = 1.15 + 0.055 * d - 0.30 * regStart;
-    p.fcTone = clampd (6500.0 - 45.0 * d, 3200.0, 6500.0);
+    p.rho = 1.15 + 0.045 * d - 0.30 * regStart;
+    p.fcTone = clampd (6500.0 - 30.0 * d, 3800.0, 6500.0);
     p.evenGain = 0.80 + 0.006 * d;
     p.noiseDb = -24.0 + 0.36 * d;                                   // more breath noise on high notes
     p.resonantShare = clampd (0.30 + 0.012 * d, 0.3, 0.7);
@@ -683,15 +762,15 @@ NeyProfile neyProfile (int note, NeyKind kind)
     {
         case NeyKind::soft:
             p.rho += 0.45; p.fcTone *= 0.65; p.noiseDb += 4.5; p.toneRise = 0.09; p.toneDelay = 0.045; p.chiffDb = 3.0;
-            p.glideCents = 38.0; p.wobbleAmp = 0.03;
+            p.glideCents = 38.0; p.wobbleAmp = 0.04; p.gustDepth = 0.35;
             break;
         case NeyKind::hard:
-            p.rho -= 0.0; p.toneRise = 0.06; p.chiffDb = 7.5; p.glideCents = 26.0; p.wobbleAmp = 0.022;
+            p.rho -= 0.0; p.toneRise = 0.06; p.chiffDb = 7.5; p.glideCents = 26.0; p.wobbleAmp = 0.03;
             break;
         case NeyKind::breathy:
             p.rho += 0.7; p.fcTone *= 0.6; p.noiseDb = -4.0 + 0.30 * d; p.resonantShare = 0.65;
             p.toneDelay = 0.10; p.toneRise = 0.14; p.chiffDb = 5.0; p.chiffTau = 0.07; p.glideCents = 40.0; p.glideTau = 0.08;
-            p.wobbleAmp = 0.07; p.wobbleCents = 5.0;
+            p.wobbleAmp = 0.07; p.wobbleCents = 5.0; p.gustDepth = 0.45;
             break;
     }
     return p;
@@ -864,13 +943,20 @@ NeyNote renderNeyNote (const BuildContext& ctx, int note, NeyKind kind, int zone
     }
     const double gChiff = noiseRms * dbToGain (pr.chiffDb) * 1.4;
 
+    // jet noise is pulsed by the tone (turbulence is strongest when the jet swings across the edge) and gusts randomly
+    const std::vector<float> gust = noiseTrack (rng, L, 28.0, sr, true);
+    double tonePeak = 1.0e-9;
+    for (int n = t0; n < t0 + L; ++n) tonePeak = std::max (tonePeak, (double) std::fabs (tone[(std::size_t) n]));
+
     std::vector<float> y ((std::size_t) total);
     for (int n = 0; n < total; ++n)
     {
         const double t = (double) n / sr;
         const std::size_t li = (std::size_t) (n % L);
         const double env = smoothstep (t / 0.035);                         // breath starts first
-        double s = (double) tone[(std::size_t) n] + env * (gJet * (double) jet[li] + gRes * (double) res[li]);
+        const double pulse = 1.0 + 0.5 * (double) tone[(std::size_t) n] / tonePeak;
+        const double g = std::max (0.3, 1.0 + pr.gustDepth * (double) gust[li]);
+        double s = (double) tone[(std::size_t) n] + env * (gJet * (double) jet[li] * pulse * g + gRes * (double) res[li] * (0.8 + 0.2 * g));
         if ((std::size_t) n < chiff.size()) s += gChiff * (double) chiff[(std::size_t) n];
         y[(std::size_t) n] = (float) s;
     }

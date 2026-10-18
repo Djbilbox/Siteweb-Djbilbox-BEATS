@@ -1,12 +1,22 @@
 // ============================================================================
-//  PERCUSSION FAMILY: Derbouka, Tar, Bendir.
+//  PERCUSSION FAMILY: Derbouka, Tar, Bendir  (modelled, not recorded).
 //
-//  *** STUB IMPLEMENTATION ***  (architect's placeholder: pitch-swept sine + resonators + shaped noise
-//  bursts, correct lane map / layers / round robins / choke groups / mirror so that the whole chain
-//  loads, plays and passes tests.)  The instrument authors replace the bodies of buildDerbouka /
-//  buildTar / buildBendir with real models (modal membrane + air cavity, rim/finger excitation,
-//  jingle (zil) bank, snare buzz ...).  Keep the key map, lanes, layers, groups and budgets described
-//  in ModelLibrary.h ("INSTRUMENT SPECIFICATIONS").  Only edit this file (+ your own helper header).
+//  Model (all strokes):
+//   * Circular-membrane modal synthesis.  Twelve (m,n) modes with the Bessel-zero frequency ratios
+//     (1, 1.59, 2.14, 2.30, 2.65 ...).  A stroke at normalised radius r and angle theta excites mode (m,n)
+//     with weight |J_m(j_mn r) cos(m theta)|, so centre strokes ring "round" and edge strokes are thin.
+//     Each mode has its own decay (higher modes die faster) and a small tension glide after a hard hit.
+//     For the derbouka goblet the ratios are blended towards a harmonic series (the open throat couples
+//     the head to the air column, which is why a derbouka DUM has a clear pitch).
+//   * Air cavity (Helmholtz style boom) as one extra decaying low mode.
+//   * Strike transient: band-passed noise burst (finger / palm) plus short ringing rim/shell partials.
+//   * Velocity changes timbre: soft hits have weaker upper modes, less noise, less glide.
+//   * Tar: bank of jingle (zil) resonators, inharmonic partials 3-13 kHz, driven by the head's
+//     acceleration (strokes) or by a random impact process (ZIL shake).
+//   * Bendir: gut snare = high-passed noise gated by the head's amplitude envelope, with a release that
+//     outlasts the head; finger roll = a train of small strokes with a sustained buzz.
+//  Round robins vary radius, angle, pitch, damping, noise colour and seed.  Everything is seeded and
+//  deterministic.  No dependencies other than ModelCommon.h.
 // ============================================================================
 #include "ModelCommon.h"
 
@@ -14,104 +24,265 @@ namespace humpire::model
 {
 namespace
 {
-struct HitRecipe
+struct ModeDef { int m; double zero; };
+constexpr ModeDef kModes[12] = {
+    { 0, 2.4048 }, { 1, 3.8317 }, { 2, 5.1356 }, { 0, 5.5201 }, { 3, 6.3802 }, { 1, 7.0156 },
+    { 4, 7.5883 }, { 2, 8.4172 }, { 0, 8.6537 }, { 5, 8.7715 }, { 3, 9.7610 }, { 1, 10.1735 } };
+
+double besselJ (int m, double x)
 {
-    double length = 0.3;                                  // seconds
-    // membrane pitch drop (bass strokes)
-    double sweepHz0 = 0.0, sweepHz1 = 0.0, sweepTau = 0.04, sweepT60 = 0.5, sweepGain = 0.0;
-    // transient noise burst
-    double noiseHz = 2500.0, noiseQ = 1.2, noiseTau = 0.012, noiseGain = 0.0;
-    // ringing partials
-    double modeHz[3] = { 0.0, 0.0, 0.0 };
-    double modeT60 = 0.12, modeGain = 0.0;
-    // snare / jingle buzz (high noise tail)
-    double buzzGain = 0.0, buzzTau = 0.08;
-    // jingle bank (zil)
-    double zilGain = 0.0, zilT60 = 0.7;
-    // finger roll amplitude modulation
-    double rollRate = 0.0;
+    double term = std::pow (x * 0.5, m);
+    for (int i = 2; i <= m; ++i) term /= (double) i;
+    double sum = term;
+    for (int k = 1; k < 50; ++k)
+    {
+        term *= -(x * x * 0.25) / ((double) k * (double) (k + m));
+        sum += term;
+    }
+    return sum;
+}
+
+struct Params
+{
+    double length = 0.3;
+    // membrane
+    double f0 = 150.0, t60 = 0.3, dampSlope = 0.6, radius = 0.4, harm = 0.0, glide = 0.0, glideTau = 0.04;
+    double tilt = 0.6, gain = 1.0;                        // tilt: how strongly softness removes upper modes
+    int nModes = 8;
+    // strike transient
+    double clickHz = 2500.0, clickQ = 1.0, clickTau = 0.01, clickGain = 0.3;
+    // rim / shell ring partials
+    double ringHz[3] = { 0.0, 0.0, 0.0 };
+    double ringT60 = 0.1, ringGain = 0.0;
+    // air cavity
+    double cavHz = 0.0, cavT60 = 0.3, cavGain = 0.0;
+    // jingles (tar): coupling from the head, T60 scale
+    double jingleDrive = 0.0, jingleT60 = 1.0;
+    double shake = 0.0, shakeTau = 0.45;                  // ZIL shake gain / amplitude decay
+    // snare buzz (bendir)
+    double buzz = 0.0, buzzSens = 2.0, buzzRelease = 0.07, buzzHz = 4200.0;
+    // finger roll (bendir)
+    double rollRate = 0.0, rollDur = 0.7;
 };
 
 struct Lane
 {
     const char* name;
     int lokey, hikey;
-    bool twoLayers;          // soft+hard, otherwise a single 1..127 layer
+    bool twoLayers;
     int roundRobins;
     int group, offBy;
-    double singleLoudnessDb; // loudness target for single-layer lanes
-    HitRecipe recipe;
+    double singleLoudnessDb;
+    Params p;
 };
 
-std::vector<float> renderHit (const HitRecipe& r, double sr, double hardness, Rng& rng)
+// Adds one membrane stroke (modes + cavity + transient + rim rings) into m at offset off.
+void addStroke (std::vector<double>& m, int off, const Params& p, double h, double sr, Rng& rng, double amp)
 {
-    const int n = secondsToFrames (r.length, sr);
-    std::vector<float> out ((std::size_t) n, 0.f);
-    const double tune = 1.0 + 0.012 * rng.bipolar();      // round-robin variation
-    const double bright = 0.75 + 0.5 * hardness;
+    const int n = (int) m.size();
+    const double f0 = p.f0 * (1.0 + 0.02 * rng.bipolar()) * (0.97 + 0.05 * h);
+    const double radius = clampd (p.radius + 0.06 * rng.bipolar(), 0.0, 0.93);
+    const double theta = rng.range (0.0, kTwoPi);
+    const int nm = std::min (p.nModes, 12);
+    const double z0 = kModes[0].zero;
 
-    // pitch-swept membrane tone
-    if (r.sweepGain > 0.0)
+    for (int k = 0; k < nm; ++k)
     {
-        double ph = rng.range (0.0, 0.5);
-        for (int i = 0; i < n; ++i)
+        const double memRatio = kModes[k].zero / z0;
+        const double ratio = lerp (memRatio, (double) (k + 1) * 1.0, p.harm);
+        double w = besselJ (kModes[k].m, kModes[k].zero * radius);
+        if (kModes[k].m > 0) w *= std::cos ((double) kModes[k].m * theta);
+        double a = std::fabs (w) * std::pow (h, p.tilt * (ratio - 1.0)) / std::pow (ratio, 0.6);
+        if (k == 0) a *= 1.3;
+        if (a < 2.0e-3) continue;
+        const double fk = f0 * ratio * (1.0 + 0.004 * rng.bipolar());
+        const double t60k = p.t60 / (1.0 + p.dampSlope * (ratio - 1.0)) * rng.range (0.92, 1.08);
+        const int len = std::min (n - off, (int) (t60k * 1.3 * sr));
+        const double dec = std::pow (10.0, -3.0 / (t60k * sr));
+        const double gdec = std::exp (-1.0 / (p.glideTau * sr));
+        double env = amp * a, g = p.glide * h, ph = 0.0;
+        for (int i = 0; i < len; ++i)
         {
-            const double t = (double) i / sr;
-            const double f = (r.sweepHz1 + (r.sweepHz0 - r.sweepHz1) * std::exp (-t / r.sweepTau)) * tune;
-            ph += kTwoPi * f / sr;
-            out[(std::size_t) i] += (float) (r.sweepGain * std::sin (ph) * std::exp (-6.9 * t / r.sweepT60));
+            ph += kTwoPi * fk * (1.0 + g) / sr;
+            m[(std::size_t) (off + i)] += env * std::sin (ph);
+            env *= dec;
+            g *= gdec;
         }
     }
 
-    // ringing partials: impulse-excited two-pole resonators
-    if (r.modeGain > 0.0)
-        for (double hz : r.modeHz)
+    // air cavity boom
+    if (p.cavGain > 0.0 && p.cavHz > 0.0)
+    {
+        const double fc = p.cavHz * (1.0 + 0.01 * rng.bipolar());
+        const int len = std::min (n - off, (int) (p.cavT60 * 1.3 * sr));
+        const double dec = std::pow (10.0, -3.0 / (p.cavT60 * sr));
+        double env = amp * p.cavGain * (0.3 + 0.7 * h), ph = 0.0;
+        for (int i = 0; i < len; ++i)
+        {
+            ph += kTwoPi * fc / sr;
+            m[(std::size_t) (off + i)] += env * std::sin (ph);
+            env *= dec;
+        }
+    }
+
+    // rim / shell rings
+    if (p.ringGain > 0.0)
+        for (double hz : p.ringHz)
         {
             if (hz <= 0.0) continue;
-            Resonator res;
-            res.set (hz * tune * rng.range (0.99, 1.01), r.modeT60 * rng.range (0.9, 1.1), sr);
-            const double g = r.modeGain * (0.5 + 0.5 * hardness);
-            for (int i = 0; i < n; ++i) out[(std::size_t) i] += (float) (g * res.process (i == 0 ? 1.0 : 0.0));
+            const double fk = hz * rng.range (0.97, 1.03);
+            const double t = p.ringT60 * rng.range (0.8, 1.2);
+            const int len = std::min (n - off, (int) (t * 1.3 * sr));
+            const double dec = std::pow (10.0, -3.0 / (t * sr));
+            double env = amp * p.ringGain * (0.2 + 0.8 * h) * rng.range (0.7, 1.0), ph = rng.range (0.0, 1.0);
+            for (int i = 0; i < len; ++i)
+            {
+                ph += kTwoPi * fk / sr;
+                m[(std::size_t) (off + i)] += env * std::sin (ph);
+                env *= dec;
+            }
         }
 
-    // transient noise burst
-    if (r.noiseGain > 0.0)
+    // finger / palm noise burst
+    if (p.clickGain > 0.0)
     {
-        Biquad bp = Biquad::bandpass (r.noiseHz * bright, r.noiseQ, sr);
+        Biquad bp = Biquad::bandpass (clampd (p.clickHz * rng.range (0.9, 1.1) * (0.8 + 0.4 * h), 100.0, sr * 0.45), p.clickQ, sr);
+        const double dec = std::exp (-1.0 / (p.clickTau * (0.7 + 0.3 * h) * sr));
+        const int len = std::min (n - off, (int) (p.clickTau * 9.0 * sr));
+        double env = amp * p.clickGain * (0.15 + 0.85 * h);
+        for (int i = 0; i < len; ++i)
+        {
+            m[(std::size_t) (off + i)] += env * bp.process (rng.bipolar());
+            env *= dec;
+        }
+    }
+}
+
+// Jingle bank: fixed layout per instrument (always the same metal), 12 jingles x 2 partials.
+struct JingleBank
+{
+    static constexpr int kN = 24;
+    Resonator r[kN];
+    double weight[kN];
+    JingleBank (double sr, double t60Scale, Rng& var)
+    {
+        Rng fixed (0x7A5Cull);
+        for (int j = 0; j < kN / 2; ++j)
+        {
+            const double f = 3000.0 * std::pow (2.9, fixed.uniform());          // 3.0 .. 8.7 kHz
+            const double t = (0.35 + 0.65 * fixed.uniform()) * t60Scale;
+            const double f2 = f * fixed.range (2.35, 3.1);
+            r[2 * j].set (f * var.range (0.995, 1.005), t * var.range (0.9, 1.1), sr);
+            r[2 * j + 1].set (f2 * var.range (0.995, 1.005), t * 0.55 * var.range (0.9, 1.1), sr);
+            weight[2 * j] = 0.5 + 0.5 * fixed.uniform();
+            weight[2 * j + 1] = 0.35 * weight[2 * j];
+        }
+    }
+};
+
+std::vector<float> renderHit (const Params& p, double sr, double h, Rng& rng)
+{
+    const int n = secondsToFrames (p.length, sr);
+    std::vector<double> m ((std::size_t) n, 0.0);
+
+    if (p.rollRate > 0.0)
+    {
+        // finger roll: train of small strokes
+        Params s = p;
+        s.t60 = 0.07; s.clickGain *= 0.6; s.glide = 0.0; s.cavGain = 0.0; s.ringGain *= 0.4;
+        double t = 0.0;
+        while (t < p.rollDur)
+        {
+            const double u = t / p.rollDur;
+            const double envA = 0.45 + 0.55 * std::sin (kPi * std::pow (u, 0.7));
+            addStroke (m, (int) (t * sr), s, h * rng.range (0.55, 0.9), sr, rng, envA * rng.range (0.6, 1.0));
+            t += (1.0 / p.rollRate) * (1.0 + 0.2 * rng.bipolar());
+        }
+    }
+    else
+        addStroke (m, 0, p, h, sr, rng, p.gain);
+
+    // jingles driven by the head (tar strokes)
+    if (p.jingleDrive > 0.0 || p.shake > 0.0)
+    {
+        JingleBank jb (sr, p.jingleT60, rng);
+        double prev = 0.0;
+        double ev[JingleBank::kN];
+        const double pk = 1.0;
+        std::vector<double> jo ((std::size_t) n, 0.0);
         for (int i = 0; i < n; ++i)
         {
             const double t = (double) i / sr;
-            out[(std::size_t) i] += (float) (r.noiseGain * (0.4 + 0.6 * hardness) * bp.process (rng.bipolar()) * std::exp (-t / r.noiseTau));
+            const double d = (m[(std::size_t) i] - prev) * p.jingleDrive * pk;
+            prev = m[(std::size_t) i];
+            for (double& e : ev) e = 0.0;
+            bool any = false;
+            if (p.shake > 0.0)
+            {
+                const double env = (1.0 - std::exp (-t / 0.012)) * std::exp (-t / p.shakeTau)
+                                   * (0.7 + 0.3 * std::cos (kTwoPi * 11.0 * t + 0.5));
+                if (rng.uniform() < 150.0 * env / sr + 0.0)
+                {
+                    const double a = p.shake * env * (0.3 + rng.uniform());
+                    for (double& e : ev) e = a * (0.2 + 0.8 * rng.uniform());
+                    any = true;
+                }
+            }
+            double s = 0.0;
+            for (int j = 0; j < JingleBank::kN; ++j)
+                s += jb.weight[j] * jb.r[j].process (d + (any ? ev[j] : 0.0));
+            jo[(std::size_t) i] = s;
         }
+        for (int i = 0; i < n; ++i) m[(std::size_t) i] += jo[(std::size_t) i] * (0.4 + 0.6 * h);
     }
 
-    // buzz tail (snare wires / jingles rattling)
-    if (r.buzzGain > 0.0)
+    // snare buzz gated by the head's amplitude
+    if (p.buzz > 0.0)
     {
-        Biquad hp = Biquad::highpass (3500.0, 0.7, sr);
+        Biquad hp = Biquad::highpass (1800.0, 0.7, sr);
+        Biquad bp = Biquad::bandpass (p.buzzHz * rng.range (0.95, 1.05), 0.7, sr);
+        const double atk = std::exp (-1.0 / (0.003 * sr)), rel = std::exp (-1.0 / (p.buzzRelease * sr));
+        double e = 0.0;
         for (int i = 0; i < n; ++i)
         {
-            const double t = (double) i / sr;
-            double mod = 1.0;
-            if (r.rollRate > 0.0) mod = 0.55 + 0.45 * std::sin (kPi * r.rollRate * t) * std::sin (kPi * r.rollRate * t);
-            out[(std::size_t) i] += (float) (r.buzzGain * (0.3 + 0.7 * hardness) * hp.process (rng.bipolar()) * std::exp (-t / r.buzzTau) * mod);
+            const double a = std::fabs (m[(std::size_t) i]);
+            e = a > e ? a + (e - a) * atk : e * rel;
+            double g = e * p.buzzSens;
+            g = g / (1.0 + g);
+            const double x = rng.bipolar();
+            m[(std::size_t) i] += p.buzz * (0.35 + 0.65 * h) * g * (0.55 * hp.process (x) + 0.9 * bp.process (x));
         }
     }
 
-    // jingle bank: inharmonic high partials excited by a short burst
-    if (r.zilGain > 0.0)
-    {
-        for (int k = 0; k < 10; ++k)
-        {
-            Resonator res;
-            res.set (rng.range (3800.0, 9500.0), r.zilT60 * rng.range (0.5, 1.2), sr);
-            const double g = r.zilGain * (0.4 + 0.6 * hardness) / 10.0;
-            const int burst = secondsToFrames (0.012, sr);
-            for (int i = 0; i < n; ++i)
-                out[(std::size_t) i] += (float) (g * res.process (i < burst ? rng.bipolar() * (1.0 - (double) i / (double) burst) : 0.0));
-        }
-    }
+    std::vector<float> out ((std::size_t) n);
+    for (int i = 0; i < n; ++i) out[(std::size_t) i] = (float) m[(std::size_t) i];
     return out;
+}
+
+// Gentle saturation above 'knee' towards 'ceiling' (keeps spiky hand-drum transients from limiting loudness).
+void softLimit (std::vector<float>& v, double knee, double ceiling)
+{
+    for (auto& s : v)
+    {
+        const double a = std::fabs ((double) s);
+        if (a > knee) s = (float) (std::copysign (knee + (ceiling - knee) * std::tanh ((a - knee) / (ceiling - knee)), (double) s));
+    }
+}
+
+void finalise (std::vector<float>& v, double sr, double targetDb)
+{
+    const double ceiling = dbToGain (-2.9), knee = dbToGain (-9.0);
+    for (int pass = 0; pass < 4; ++pass)
+    {
+        normaliseLoudness (v, sr, targetDb, 40.0);     // effectively no ceiling here
+        softLimit (v, knee, ceiling);
+    }
+    // the asymmetric soft limiter can leave a little DC: remove it and re-fade the ends
+    DcBlocker dc (18.0, sr);
+    for (auto& s : v) s = (float) dc.process ((double) s);
+    sanitize (v, true);
+    fadeIn (v, std::max (8, secondsToFrames (0.0004, sr)));
+    fadeOut (v, std::max (16, secondsToFrames (0.012, sr)));
 }
 
 Library buildLanes (const BuildContext& ctx, const std::vector<Lane>& lanes)
@@ -127,7 +298,7 @@ Library buildLanes (const BuildContext& ctx, const std::vector<Lane>& lanes)
         for (int li = 0; li < (lane.twoLayers ? 2 : 1); ++li)
         {
             const VelLayer& vl = lane.twoLayers ? (li == 0 ? kSoft : kHard) : kAllVel;
-            const double hardness = lane.twoLayers ? (li == 0 ? 0.35 : 1.0) : 0.3;
+            const double hardness = lane.twoLayers ? (li == 0 ? 0.38 : 1.0) : 0.4;
             for (int rr = 1; rr <= lane.roundRobins; ++rr)
             {
                 if (! pt.next()) { lib.cancelled = true; return lib; }
@@ -142,37 +313,57 @@ Library buildLanes (const BuildContext& ctx, const std::vector<Lane>& lanes)
                 z.loop = Loop::oneShot; z.pitchKeytrack = 0.f;
                 z.ampRelease = 0.08f; z.ampVeltrack = 55.f;
                 z.group = lane.group; z.offBy = lane.offBy;
-                z.data = renderHit (lane.recipe, sr, hardness, rng);
+                z.data = renderHit (lane.p, sr, hardness * rng.range (0.97, 1.03), rng);
                 finishOneShot (z.data, sr);
-                normaliseLoudness (z.data, sr, lane.twoLayers ? (li == 0 ? kSoftLoudnessDb : kHardLoudnessDb) : lane.singleLoudnessDb, kPeakCeilingDb);
+                finalise (z.data, sr, lane.twoLayers ? (li == 0 ? kSoftLoudnessDb : kHardLoudnessDb) : lane.singleLoudnessDb);
                 lib.zones.push_back (std::move (z));
             }
         }
     pt.finished();
     return lib;
 }
+
+Params P (double length, double f0, double t60, double radius)
+{
+    Params p; p.length = length; p.f0 = f0; p.t60 = t60; p.radius = radius; return p;
+}
 } // namespace
 
 // ---------------------------------------------------------------------------------------------
 Library buildDerbouka (const BuildContext& ctx)
 {
-    HitRecipe dum;  dum.length = 0.75; dum.sweepHz0 = 190; dum.sweepHz1 = 88; dum.sweepTau = 0.035; dum.sweepT60 = 0.55; dum.sweepGain = 1.0;
-    dum.noiseHz = 700; dum.noiseQ = 0.8; dum.noiseTau = 0.008; dum.noiseGain = 0.25; dum.modeHz[0] = 176; dum.modeT60 = 0.25; dum.modeGain = 0.15;
-    HitRecipe tek;  tek.length = 0.28; tek.noiseHz = 3000; tek.noiseQ = 1.4; tek.noiseTau = 0.014; tek.noiseGain = 1.0;
-    tek.modeHz[0] = 1750; tek.modeHz[1] = 2650; tek.modeHz[2] = 3900; tek.modeT60 = 0.14; tek.modeGain = 0.6;
-    HitRecipe ka;   ka.length = 0.20; ka.noiseHz = 4200; ka.noiseQ = 1.6; ka.noiseTau = 0.009; ka.noiseGain = 1.0;
-    ka.modeHz[0] = 2300; ka.modeHz[1] = 3400; ka.modeT60 = 0.08; ka.modeGain = 0.5;
-    HitRecipe slap; slap.length = 0.45; slap.noiseHz = 1800; slap.noiseQ = 0.7; slap.noiseTau = 0.04; slap.noiseGain = 1.0;
-    slap.modeHz[0] = 1150; slap.modeHz[1] = 1900; slap.modeHz[2] = 3100; slap.modeT60 = 0.22; slap.modeGain = 0.7;
-    HitRecipe ghost; ghost.length = 0.14; ghost.noiseHz = 2400; ghost.noiseQ = 1.0; ghost.noiseTau = 0.012; ghost.noiseGain = 1.0;
-    ghost.modeHz[0] = 1500; ghost.modeT60 = 0.06; ghost.modeGain = 0.3;
+    // DUM: centre stroke, open head; clear pitch (membrane blended towards harmonic) + cavity boom.
+    Params dum = P (0.75, 142.0, 0.50, 0.30);
+    dum.harm = 0.55; dum.nModes = 6; dum.dampSlope = 0.35; dum.glide = 0.09; dum.glideTau = 0.05;
+    dum.cavHz = 92.0; dum.cavT60 = 0.38; dum.cavGain = 0.45;
+    dum.clickHz = 800.0; dum.clickQ = 0.8; dum.clickTau = 0.007; dum.clickGain = 0.22;
+    // TEK: rim stroke, thin and bright, metallic ring of the rim/shell.
+    Params tek = P (0.28, 520.0, 0.13, 0.86);
+    tek.nModes = 9; tek.dampSlope = 0.2; tek.harm = 0.0; tek.tilt = 0.8;
+    tek.clickHz = 3200.0; tek.clickQ = 1.2; tek.clickTau = 0.006; tek.clickGain = 0.7;
+    tek.ringHz[0] = 1900.0; tek.ringHz[1] = 2750.0; tek.ringHz[2] = 4100.0; tek.ringT60 = 0.11; tek.ringGain = 0.22;
+    // KA: left-hand edge stroke, dry and short.
+    Params ka = P (0.18, 640.0, 0.07, 0.91);
+    ka.nModes = 8; ka.dampSlope = 0.3; ka.tilt = 0.8;
+    ka.clickHz = 4300.0; ka.clickQ = 1.4; ka.clickTau = 0.005; ka.clickGain = 0.7;
+    ka.ringHz[0] = 2400.0; ka.ringHz[1] = 3500.0; ka.ringT60 = 0.06; ka.ringGain = 0.18;
+    // SLAP: fingers splayed, cracking broadband stroke with a short head ring.
+    Params slap = P (0.42, 330.0, 0.22, 0.74);
+    slap.nModes = 9; slap.dampSlope = 0.4; slap.tilt = 0.7; slap.harm = 0.2;
+    slap.clickHz = 1900.0; slap.clickQ = 0.55; slap.clickTau = 0.02; slap.clickGain = 0.9;
+    slap.ringHz[0] = 1250.0; slap.ringHz[1] = 2050.0; slap.ringHz[2] = 3400.0; slap.ringT60 = 0.16; slap.ringGain = 0.2;
+    slap.cavHz = 105.0; slap.cavT60 = 0.12; slap.cavGain = 0.15;
+    // GHOST: finger tap, heavily damped.
+    Params ghost = P (0.14, 410.0, 0.045, 0.62);
+    ghost.nModes = 7; ghost.dampSlope = 0.5; ghost.tilt = 0.9;
+    ghost.clickHz = 2300.0; ghost.clickQ = 0.9; ghost.clickTau = 0.009; ghost.clickGain = 0.5;
 
     Library lib = buildLanes (ctx, {
         { "dum",   36, 37, true,  3, 1, 1, 0.0,   dum },
         { "tek",   38, 39, true,  3, 2, 2, 0.0,   tek },
         { "ka",    40, 40, true,  3, 2, 2, 0.0,   ka },
         { "slap",  41, 42, true,  2, 2, 2, 0.0,   slap },
-        { "ghost", 43, 44, false, 3, 2, 2, -24.0, ghost },
+        { "ghost", 43, 44, false, 3, 2, 2, -20.0, ghost },
     });
     if (lib.cancelled) return lib;
     addKeyAliases (lib, 38, 38, 45);      // 45 plays TEK
@@ -184,23 +375,34 @@ Library buildDerbouka (const BuildContext& ctx)
 
 Library buildTar (const BuildContext& ctx)
 {
-    HitRecipe dum;  dum.length = 0.9; dum.sweepHz0 = 230; dum.sweepHz1 = 105; dum.sweepTau = 0.03; dum.sweepT60 = 0.6; dum.sweepGain = 1.0;
-    dum.noiseHz = 900; dum.noiseQ = 0.8; dum.noiseTau = 0.01; dum.noiseGain = 0.2; dum.modeHz[0] = 210; dum.modeT60 = 0.3; dum.modeGain = 0.15;
-    dum.zilGain = 0.18; dum.zilT60 = 0.45;
-    HitRecipe tek;  tek.length = 0.35; tek.noiseHz = 2800; tek.noiseQ = 1.3; tek.noiseTau = 0.014; tek.noiseGain = 1.0;
-    tek.modeHz[0] = 1500; tek.modeHz[1] = 2300; tek.modeT60 = 0.16; tek.modeGain = 0.5; tek.zilGain = 0.25; tek.zilT60 = 0.4;
-    HitRecipe ka;   ka.length = 0.28; ka.noiseHz = 3600; ka.noiseQ = 1.5; ka.noiseTau = 0.01; ka.noiseGain = 1.0;
-    ka.modeHz[0] = 1900; ka.modeT60 = 0.1; ka.modeGain = 0.4; ka.zilGain = 0.15; ka.zilT60 = 0.3;
-    HitRecipe zil;  zil.length = 1.0; zil.noiseHz = 6500; zil.noiseQ = 0.8; zil.noiseTau = 0.03; zil.noiseGain = 0.5; zil.zilGain = 1.2; zil.zilT60 = 0.8;
-    HitRecipe ghost; ghost.length = 0.2; ghost.noiseHz = 2200; ghost.noiseQ = 1.0; ghost.noiseTau = 0.012; ghost.noiseGain = 1.0;
-    ghost.modeHz[0] = 1400; ghost.modeT60 = 0.07; ghost.modeGain = 0.3; ghost.zilGain = 0.2; ghost.zilT60 = 0.25;
+    // Frame drum: thumpy, inharmonic membrane modes, jingles rattle with every stroke.
+    Params dum = P (0.9, 112.0, 0.55, 0.28);
+    dum.nModes = 8; dum.dampSlope = 0.6; dum.glide = 0.08; dum.glideTau = 0.05;
+    dum.clickHz = 900.0; dum.clickQ = 0.8; dum.clickTau = 0.009; dum.clickGain = 0.2;
+    dum.jingleDrive = 9.0; dum.jingleT60 = 0.55;
+    Params tek = P (0.36, 290.0, 0.17, 0.84);
+    tek.nModes = 9; tek.dampSlope = 0.35; tek.tilt = 0.8;
+    tek.clickHz = 2800.0; tek.clickQ = 1.1; tek.clickTau = 0.008; tek.clickGain = 0.6;
+    tek.ringHz[0] = 1250.0; tek.ringT60 = 0.09; tek.ringGain = 0.15;
+    tek.jingleDrive = 7.0; tek.jingleT60 = 0.45;
+    Params ka = P (0.28, 370.0, 0.10, 0.9);
+    ka.nModes = 8; ka.dampSlope = 0.4; ka.tilt = 0.8;
+    ka.clickHz = 3500.0; ka.clickQ = 1.3; ka.clickTau = 0.006; ka.clickGain = 0.6;
+    ka.jingleDrive = 5.0; ka.jingleT60 = 0.35;
+    Params zil = P (1.0, 150.0, 0.12, 0.5);        // jingle shake: a little frame thump plus the shaken jingles
+    zil.nModes = 4; zil.clickHz = 6000.0; zil.clickQ = 0.7; zil.clickTau = 0.02; zil.clickGain = 0.12;
+    zil.shake = 0.35; zil.shakeTau = 0.42; zil.jingleT60 = 0.9; zil.jingleDrive = 3.0; zil.gain = 0.5;
+    Params ghost = P (0.2, 320.0, 0.07, 0.6);
+    ghost.nModes = 7; ghost.dampSlope = 0.5; ghost.tilt = 0.9;
+    ghost.clickHz = 2300.0; ghost.clickQ = 0.9; ghost.clickTau = 0.01; ghost.clickGain = 0.4;
+    ghost.jingleDrive = 4.0; ghost.jingleT60 = 0.28;
 
     Library lib = buildLanes (ctx, {
         { "dum",   36, 37, true,  3, 1, 1, 0.0,   dum },
         { "tek",   38, 39, true,  3, 1, 1, 0.0,   tek },
         { "ka",    40, 41, true,  3, 1, 1, 0.0,   ka },
         { "zil",   42, 44, true,  3, 3, 3, 0.0,   zil },
-        { "ghost", 45, 47, false, 3, 1, 1, -24.0, ghost },
+        { "ghost", 45, 47, false, 3, 1, 1, -20.0, ghost },
     });
     if (lib.cancelled) return lib;
     addKeyAliases (lib, 36, 47, 48);      // mirror 48..59
@@ -209,27 +411,40 @@ Library buildTar (const BuildContext& ctx)
 
 Library buildBendir (const BuildContext& ctx)
 {
-    HitRecipe dum;  dum.length = 0.85; dum.sweepHz0 = 165; dum.sweepHz1 = 92; dum.sweepTau = 0.04; dum.sweepT60 = 0.5; dum.sweepGain = 1.0;
-    dum.noiseHz = 800; dum.noiseQ = 0.8; dum.noiseTau = 0.01; dum.noiseGain = 0.2; dum.modeHz[0] = 185; dum.modeT60 = 0.25; dum.modeGain = 0.15;
-    dum.buzzGain = 0.18; dum.buzzTau = 0.16;
-    HitRecipe tek;  tek.length = 0.35; tek.noiseHz = 2600; tek.noiseQ = 1.2; tek.noiseTau = 0.016; tek.noiseGain = 1.0;
-    tek.modeHz[0] = 1350; tek.modeHz[1] = 2100; tek.modeT60 = 0.15; tek.modeGain = 0.5; tek.buzzGain = 0.22; tek.buzzTau = 0.12;
-    HitRecipe ka;   ka.length = 0.26; ka.noiseHz = 3300; ka.noiseQ = 1.4; ka.noiseTau = 0.01; ka.noiseGain = 1.0;
-    ka.modeHz[0] = 1800; ka.modeT60 = 0.09; ka.modeGain = 0.4; ka.buzzGain = 0.15; ka.buzzTau = 0.08;
-    HitRecipe slap; slap.length = 0.55; slap.noiseHz = 1700; slap.noiseQ = 0.7; slap.noiseTau = 0.045; slap.noiseGain = 1.0;
-    slap.modeHz[0] = 1000; slap.modeHz[1] = 1700; slap.modeT60 = 0.2; slap.modeGain = 0.6; slap.buzzGain = 0.45; slap.buzzTau = 0.25;
-    HitRecipe ghost; ghost.length = 0.2; ghost.noiseHz = 2200; ghost.noiseQ = 1.0; ghost.noiseTau = 0.012; ghost.noiseGain = 1.0;
-    ghost.modeHz[0] = 1300; ghost.modeT60 = 0.06; ghost.modeGain = 0.3; ghost.buzzGain = 0.15; ghost.buzzTau = 0.07;
-    HitRecipe roll; roll.length = 0.9; roll.noiseHz = 2400; roll.noiseQ = 0.8; roll.noiseTau = 0.30; roll.noiseGain = 0.5;
-    roll.buzzGain = 0.6; roll.buzzTau = 0.35; roll.rollRate = 26.0; roll.modeHz[0] = 1250; roll.modeT60 = 0.3; roll.modeGain = 0.15;
+    // Large frame drum with a gut snare under the skin: deep thump plus a buzz that follows the head.
+    Params dum = P (0.85, 82.0, 0.50, 0.28);
+    dum.nModes = 8; dum.dampSlope = 0.6; dum.glide = 0.07; dum.glideTau = 0.05;
+    dum.clickHz = 700.0; dum.clickQ = 0.8; dum.clickTau = 0.01; dum.clickGain = 0.18;
+    dum.buzz = 0.12; dum.buzzSens = 1.5; dum.buzzRelease = 0.11;
+    Params tek = P (0.36, 230.0, 0.15, 0.84);
+    tek.nModes = 9; tek.dampSlope = 0.4; tek.tilt = 0.8;
+    tek.clickHz = 2500.0; tek.clickQ = 1.1; tek.clickTau = 0.009; tek.clickGain = 0.5;
+    tek.buzz = 0.2; tek.buzzSens = 1.2; tek.buzzRelease = 0.09;
+    Params ka = P (0.26, 300.0, 0.09, 0.9);
+    ka.nModes = 8; ka.dampSlope = 0.4; ka.tilt = 0.8;
+    ka.clickHz = 3200.0; ka.clickQ = 1.2; ka.clickTau = 0.007; ka.clickGain = 0.5;
+    ka.buzz = 0.15; ka.buzzSens = 1.0; ka.buzzRelease = 0.07;
+    Params slap = P (0.55, 200.0, 0.2, 0.72);
+    slap.nModes = 9; slap.dampSlope = 0.5; slap.tilt = 0.7;
+    slap.clickHz = 1700.0; slap.clickQ = 0.55; slap.clickTau = 0.03; slap.clickGain = 0.7;
+    slap.buzz = 0.4; slap.buzzSens = 1.5; slap.buzzRelease = 0.17;
+    Params ghost = P (0.2, 250.0, 0.06, 0.6);
+    ghost.nModes = 7; ghost.dampSlope = 0.5; ghost.tilt = 0.9;
+    ghost.clickHz = 2200.0; ghost.clickQ = 0.9; ghost.clickTau = 0.01; ghost.clickGain = 0.35;
+    ghost.buzz = 0.15; ghost.buzzSens = 1.0; ghost.buzzRelease = 0.06;
+    Params roll = P (0.9, 240.0, 0.06, 0.8);
+    roll.nModes = 8; roll.dampSlope = 0.5; roll.tilt = 0.8;
+    roll.clickHz = 2400.0; roll.clickQ = 0.8; roll.clickTau = 0.012; roll.clickGain = 0.6;
+    roll.buzz = 0.5; roll.buzzSens = 2.5; roll.buzzRelease = 0.05;
+    roll.rollRate = 23.0; roll.rollDur = 0.72;
 
     Library lib = buildLanes (ctx, {
         { "dum",   36, 37, true,  3, 1, 1, 0.0,   dum },
         { "tek",   38, 39, true,  3, 1, 1, 0.0,   tek },
         { "ka",    40, 41, true,  3, 1, 1, 0.0,   ka },
         { "slap",  42, 43, true,  2, 1, 1, 0.0,   slap },
-        { "ghost", 44, 45, false, 3, 1, 1, -24.0, ghost },
-        { "roll",  46, 47, false, 2, 2, 1, -18.0, roll },
+        { "ghost", 44, 45, false, 3, 1, 1, -20.0, ghost },
+        { "roll",  46, 47, false, 2, 2, 1, -19.0, roll },
     });
     if (lib.cancelled) return lib;
     addKeyAliases (lib, 36, 47, 48);      // mirror 48..59
