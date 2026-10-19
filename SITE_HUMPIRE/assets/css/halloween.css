@@ -1,0 +1,142 @@
+﻿/* ============================================================
+   HUMPIRE — HALLOWEEN 2026 · "Dark Aether" theme
+   Violet crystals, toxic-green zombie glow, pumpkins, ghost train.
+   Loaded AFTER theme.css / modern-effects.css: overrides the design tokens
+   and adds animated atmosphere layers (all decorative, pointer-events:none).
+   Remove the two <link>/<script> tags in index.html to go back to normal.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&display=swap');
+
+:root{
+  --bg:#06020d; --surface:#0e0720; --surface-2:#150a2b; --surface-3:#1e1040;
+  --accent:#a64dff; --accent-h:#c27bff; --accent-glow:rgba(166,77,255,.38);
+  --accent-bright:#c27bff; --accent-plat:#ff8a1f; --accent-chrome:#8b6bd1;
+  --green:#7dff3a; --text:#f1e9ff; --text-2:#c9b8ee; --text-3:#9d89c8; --text-4:#73629a;
+  --border:rgba(166,77,255,.28); --border-subtle:rgba(166,77,255,.14);
+  --hw-pumpkin:#ff7a00; --hw-toxic:#7dff3a; --hw-violet:#a64dff;
+}
+html{background:#06020d}
+body{
+  background:
+    radial-gradient(1200px 700px at 12% -10%,rgba(120,40,220,.28),transparent 60%),
+    radial-gradient(900px 600px at 100% 20%,rgba(60,255,120,.07),transparent 60%),
+    radial-gradient(1000px 800px at 50% 110%,rgba(255,122,0,.10),transparent 60%),
+    #06020d !important;
+  color:var(--text);
+}
+/* generic light-theme leftovers -> dark */
+.section,.card,.vst-card,.product-card,.panel,.box,[class*="-card"],[class*="card-"]{background-color:var(--surface);color:var(--text);border-color:var(--border)}
+.topbar,.top-nav,.top-drawer,.footer,.stat-band{background:rgba(10,4,24,.92) !important;color:var(--text);border-color:var(--border) !important;backdrop-filter:blur(8px)}
+a{color:var(--accent-h)}
+h1,h2,h3,.hero2 h1,.section-title,.section h2{color:#fff;text-shadow:0 0 18px rgba(166,77,255,.55)}
+.hero2 h1{font-family:'Creepster','Rajdhani',cursive;letter-spacing:.04em;font-size:clamp(2.6rem,6vw,5rem);line-height:1.02;text-shadow:0 0 22px rgba(166,77,255,.75),0 0 60px rgba(125,255,58,.25),3px 3px 0 #1a0a33}
+.hero2 h1 span,.hero2 h1 em{color:var(--hw-pumpkin);text-shadow:0 0 22px rgba(255,122,0,.8)}
+button,.btn,[class*="btn"]{transition:transform .15s,box-shadow .2s,filter .2s}
+.btn-primary,.btn.primary,a.btn.accent,.btn-accent{background:linear-gradient(135deg,#7d2bff,#c040ff) !important;color:#fff !important;border-color:#c27bff !important;box-shadow:0 0 22px rgba(166,77,255,.55)}
+.btn-primary:hover,.btn.primary:hover{filter:brightness(1.2);transform:translateY(-1px) scale(1.02)}
+img{ }
+.card:hover,.vst-card:hover,.product-card:hover{box-shadow:0 0 0 1px var(--accent),0 0 28px rgba(166,77,255,.45);transform:translateY(-3px)}
+input,select,textarea{background:var(--surface-2);color:var(--text);border-color:var(--border)}
+
+/* ---------- atmosphere layers ---------- */
+.hw-layer{position:fixed;inset:0;pointer-events:none;z-index:2}
+.hw-fog{z-index:1;opacity:.55;background:
+  radial-gradient(60% 30% at 20% 85%,rgba(150,90,255,.35),transparent 70%),
+  radial-gradient(50% 25% at 75% 90%,rgba(120,255,160,.16),transparent 70%),
+  radial-gradient(70% 30% at 50% 100%,rgba(180,110,255,.28),transparent 70%);
+  animation:hwFog 22s ease-in-out infinite alternate}
+@keyframes hwFog{from{transform:translateX(-4%) scale(1.05)}to{transform:translateX(4%) scale(1.15)}}
+.hw-flash{background:radial-gradient(circle at 70% 10%,rgba(200,170,255,.55),transparent 55%);opacity:0;animation:hwFlash 11s infinite}
+@keyframes hwFlash{0%,92%,100%{opacity:0}93%{opacity:.9}94%{opacity:.1}95%{opacity:.7}97%{opacity:0}}
+
+/* crystals */
+.hw-crystal{position:fixed;bottom:-10px;width:70px;height:190px;pointer-events:none;z-index:3;
+  background:linear-gradient(160deg,#e6c8ff 0%,#a64dff 38%,#4a12a8 70%,#1a0540 100%);
+  clip-path:polygon(50% 0%,100% 28%,86% 100%,14% 100%,0% 28%);
+  filter:drop-shadow(0 0 14px rgba(166,77,255,.95)) drop-shadow(0 0 40px rgba(130,40,255,.6));
+  animation:hwPulse 4s ease-in-out infinite}
+.hw-crystal.c1{left:1.2vw;height:240px;width:84px}
+.hw-crystal.c2{left:5.2vw;height:150px;width:56px;animation-delay:-1.3s;opacity:.85}
+.hw-crystal.c3{right:1.2vw;height:260px;width:90px;animation-delay:-.6s}
+.hw-crystal.c4{right:6vw;height:140px;width:52px;animation-delay:-2.1s;opacity:.85}
+.hw-crystal.c5{left:11vw;height:90px;width:36px;animation-delay:-2.7s;opacity:.7}
+.hw-crystal.c6{right:12vw;height:100px;width:40px;animation-delay:-3.2s;opacity:.7}
+@keyframes hwPulse{0%,100%{filter:drop-shadow(0 0 10px rgba(166,77,255,.8)) drop-shadow(0 0 30px rgba(130,40,255,.45));transform:translateY(0)}50%{filter:drop-shadow(0 0 22px rgba(210,150,255,1)) drop-shadow(0 0 60px rgba(150,60,255,.8));transform:translateY(-6px)}}
+
+/* floating embers / spores */
+.hw-spore{position:fixed;bottom:-20px;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:3;
+  background:var(--hw-toxic);box-shadow:0 0 10px var(--hw-toxic);opacity:0;animation:hwRise linear infinite}
+.hw-spore.o{background:var(--hw-pumpkin);box-shadow:0 0 10px var(--hw-pumpkin)}
+.hw-spore.v{background:#c27bff;box-shadow:0 0 10px #c27bff}
+@keyframes hwRise{0%{transform:translateY(0) translateX(0);opacity:0}10%{opacity:.9}100%{transform:translateY(-105vh) translateX(40px);opacity:0}}
+
+/* pumpkins */
+.hw-pumpkin{position:fixed;bottom:6px;width:74px;height:66px;z-index:4;pointer-events:none;filter:drop-shadow(0 0 14px rgba(255,122,0,.8))}
+.hw-pumpkin.p1{left:9vw}.hw-pumpkin.p2{right:9vw;width:96px;height:86px}.hw-pumpkin.p3{left:48vw;width:54px;height:48px;opacity:.9}
+.hw-pumpkin .glow{animation:hwFlick 3.2s infinite}
+@keyframes hwFlick{0%,100%{opacity:1}8%{opacity:.55}12%{opacity:1}40%{opacity:.8}44%{opacity:1}70%{opacity:.6}73%{opacity:1}}
+
+/* ghost train — crosses the viewport above the sticky promo bar */
+.hw-train{position:fixed;bottom:44px;left:0;width:1180px;height:150px;z-index:2;pointer-events:none;opacity:.26;
+  transform:translateX(-1300px);animation:hwTrain 38s linear infinite;filter:drop-shadow(0 0 18px rgba(150,255,200,.55))}
+@keyframes hwTrain{0%{transform:translateX(-1300px)}100%{transform:translateX(calc(100vw + 200px))}}
+.hw-train .win{animation:hwWin 2.4s infinite alternate}
+@keyframes hwWin{from{opacity:.35}to{opacity:1}}
+.hw-smoke{position:absolute;left:96px;top:-26px;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(210,255,230,.55),transparent 70%);animation:hwSmoke 3s ease-out infinite}
+.hw-smoke.s2{animation-delay:-1s;left:120px}.hw-smoke.s3{animation-delay:-2s;left:80px}
+@keyframes hwSmoke{from{transform:translateY(0) scale(.4);opacity:.8}to{transform:translateY(-70px) translateX(-60px) scale(1.7);opacity:0}}
+
+/* zombie silhouettes in the footer */
+.hw-zombies{position:absolute;left:0;right:0;bottom:100%;height:120px;pointer-events:none;display:flex;justify-content:space-around;align-items:flex-end;overflow:hidden;opacity:.9}
+.hw-zombies svg{height:110px;filter:drop-shadow(0 0 8px rgba(125,255,58,.45));animation:hwSway 5s ease-in-out infinite alternate}
+.hw-zombies svg:nth-child(2n){animation-delay:-1.8s;height:90px}.hw-zombies svg:nth-child(3n){animation-delay:-3s;height:124px}
+@keyframes hwSway{from{transform:rotate(-2.5deg) translateY(3px)}to{transform:rotate(2.5deg) translateY(0)}}
+.footer{position:relative}
+
+/* ---------- HALLOWEEN PROMO BANNER ---------- */
+.hw-banner{position:relative;z-index:5;margin:0;padding:34px 20px 40px;text-align:center;overflow:hidden;
+  background:
+    radial-gradient(600px 260px at 50% 0%,rgba(166,77,255,.55),transparent 70%),
+    linear-gradient(180deg,#14072b,#0a0418);
+  border-bottom:2px solid var(--accent);box-shadow:0 10px 60px rgba(120,40,220,.45)}
+.hw-banner::before,.hw-banner::after{content:"";position:absolute;top:0;bottom:0;width:40%;pointer-events:none;
+  background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(166,77,255,.10) 22px 24px)}
+.hw-banner::before{left:0}.hw-banner::after{right:0;transform:scaleX(-1)}
+.hw-kicker{font-family:'Special Elite',monospace;letter-spacing:.35em;font-size:.8rem;color:var(--hw-toxic);text-shadow:0 0 12px rgba(125,255,58,.7);text-transform:uppercase}
+.hw-title{font-family:'Creepster','Rajdhani',cursive;font-size:clamp(2.6rem,8vw,6.2rem);line-height:1;letter-spacing:.05em;margin:8px 0 4px;color:#fff;
+  text-shadow:0 0 18px rgba(166,77,255,.9),0 0 55px rgba(166,77,255,.6),4px 4px 0 #2a0d57}
+.hw-title b{color:var(--hw-pumpkin);text-shadow:0 0 20px rgba(255,122,0,.95),0 0 50px rgba(255,122,0,.5),4px 4px 0 #3a1500}
+.hw-sub{color:var(--text-2);font-size:1.05rem;max-width:760px;margin:6px auto 18px}
+.hw-sub strong{color:#fff}
+.hw-count{display:inline-flex;gap:10px;margin:6px 0 20px}
+.hw-count div{min-width:74px;padding:10px 8px;border:1px solid var(--accent);border-radius:10px;background:rgba(20,8,40,.8);box-shadow:0 0 18px rgba(166,77,255,.35) inset}
+.hw-count span{display:block;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.9rem;color:var(--hw-toxic);text-shadow:0 0 12px rgba(125,255,58,.7)}
+.hw-count small{font-size:.62rem;letter-spacing:.22em;color:var(--text-3);text-transform:uppercase}
+.hw-cta{display:inline-block;padding:14px 30px;border-radius:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff !important;text-decoration:none;
+  background:linear-gradient(135deg,#ff7a00,#ff3d00);box-shadow:0 0 28px rgba(255,122,0,.6);animation:hwBeat 1.8s ease-in-out infinite}
+.hw-cta.alt{background:linear-gradient(135deg,#7d2bff,#c040ff);box-shadow:0 0 28px rgba(166,77,255,.6);margin-left:10px}
+@keyframes hwBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.hw-code{display:inline-block;margin-top:16px;padding:6px 14px;border:1px dashed var(--hw-toxic);color:var(--hw-toxic);font-family:'Special Elite',monospace;letter-spacing:.2em;border-radius:6px;text-shadow:0 0 10px rgba(125,255,58,.6)}
+.hw-pumpkin-inline{display:inline-block;width:1.1em;height:1em;vertical-align:-.12em}
+
+/* sticky promo bar tweaks */
+[class*="promo"][class*="bar"],.sticky-promo,#promoBar{background:linear-gradient(90deg,#1a0a33,#3b0f6b,#1a0a33) !important;color:#fff !important;border-top:1px solid var(--accent) !important;box-shadow:0 -6px 30px rgba(166,77,255,.45)}
+[class*="promo"] a.btn,[class*="promo"] .btn{background:linear-gradient(135deg,#ff7a00,#ff3d00) !important}
+
+@media (max-width:760px){
+  .hw-crystal.c2,.hw-crystal.c4,.hw-crystal.c5,.hw-crystal.c6,.hw-pumpkin.p3{display:none}
+  .hw-train{opacity:.35;transform-origin:left;scale:.6}
+  .hw-cta.alt{margin:10px 0 0}
+  .hw-count div{min-width:60px}
+}
+@media (prefers-reduced-motion:reduce){
+  .hw-layer,.hw-crystal,.hw-spore,.hw-train,.hw-smoke,.hw-zombies svg,.hw-cta,.hw-pumpkin .glow{animation:none !important}
+  .hw-train{display:none}
+}
+
+
+.flagship{background:radial-gradient(800px 420px at 80% 30%,rgba(166,77,255,.28),transparent 65%),linear-gradient(180deg,#0e0620,#08030f) !important}
+.flagship-grid img{border-radius:14px;box-shadow:0 0 40px rgba(166,77,255,.45)}
+.stat-band{background:rgba(14,6,32,.9) !important}
+.section[style*='background:var(--surface)']{background:#0e0720 !important}
+.neon80{filter:saturate(1.1)}
