@@ -1,0 +1,15 @@
+{
+  "name": "gfunk-2027-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GFUNK 2027 Free - mobile synth (Android APK via Capacitor, iPhone via PWA)",
+  "scripts": {
+    "serve": "npx http-server www -p 8765",
+    "android": "cap add android && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  }
+}

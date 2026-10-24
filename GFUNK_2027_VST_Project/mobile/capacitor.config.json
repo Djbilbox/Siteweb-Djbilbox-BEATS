@@ -1,0 +1,8 @@
+{
+  "appId": "com.humpire.gfunk2027free",
+  "appName": "GFUNK 2027 Free",
+  "webDir": "www",
+  "backgroundColor": "#140d06",
+  "android": { "allowMixedContent": false },
+  "server": { "androidScheme": "https" }
+}

@@ -1,0 +1,9 @@
+build/
+Builds/
+*.zip
+*.exe
+tools/__pycache__/
+tools/volume_trim.json.bak
+Resources/hero_user.jpg
+mobile/node_modules/
+mobile/android/

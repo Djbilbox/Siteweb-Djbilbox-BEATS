@@ -1,0 +1,106 @@
+name: Build GFUNK 2027
+
+# Run manually: GitHub > Actions > "Build GFUNK 2027" > Run workflow.
+# Artifacts: GFUNK_2027_Mac / GFUNK_2027_Free_Mac (macOS pkg), GFUNK_2027_Free_Android_APK, and the iPhone web app on GitHub Pages.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [ pro, free ]
+    env:
+      PRODUCT: ${{ matrix.edition == 'free' && 'GFUNK 2027 Free' || 'GFUNK 2027' }}
+      SLUG: ${{ matrix.edition == 'free' && 'GFUNK_2027_Free_Mac' || 'GFUNK_2027_Mac' }}
+      FREE: ${{ matrix.edition == 'free' && 'ON' || 'OFF' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (universal arm64 + x86_64)
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DGFUNK_FREE=$FREE -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
+
+      - name: Build VST3, AU, Standalone and the render test
+        run: cmake --build build --config Release --parallel 4 --target GFUNK2027_VST3 GFUNK2027_AU GFUNK2027_Standalone GFunkRenderTest
+
+      - name: Render test (every preset, no NaN / silence / clipping)
+        run: |
+          ./build/GFunkRenderTest_artefacts/Release/GFunkRenderTest
+          ./build/GFunkRenderTest_artefacts/Release/GFunkRenderTest hot
+
+      - name: Ad-hoc sign and build the installer package
+        run: |
+          set -e
+          A=build/GFUNK2027_artefacts/Release
+          for b in "$A/VST3/$PRODUCT.vst3" "$A/AU/$PRODUCT.component" "$A/Standalone/$PRODUCT.app"; do
+            codesign --force --deep -s - "$b"
+          done
+          mkdir -p pkgroot/Library/Audio/Plug-Ins/VST3 pkgroot/Library/Audio/Plug-Ins/Components pkgroot/Applications
+          cp -R "$A/VST3/$PRODUCT.vst3" pkgroot/Library/Audio/Plug-Ins/VST3/
+          cp -R "$A/AU/$PRODUCT.component" pkgroot/Library/Audio/Plug-Ins/Components/
+          cp -R "$A/Standalone/$PRODUCT.app" pkgroot/Applications/
+          mkdir -p dist/$SLUG
+          pkgbuild --root pkgroot --identifier com.humpire.$(echo $SLUG | tr -d '_' | tr 'A-Z' 'a-z') --version 2.1.1 --install-location / dist/$SLUG/$SLUG.pkg
+          sed "s/GFUNK 2027/$PRODUCT/g; s/GFUNK_2027_Mac/$SLUG/g" mac/README_FIRST_MAC.txt > dist/$SLUG/README_FIRST.txt
+          cp LICENSE.md dist/$SLUG/LICENSE.txt
+          cd dist && ditto -c -k --keepParent $SLUG ${SLUG}_unsigned.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.SLUG }}
+          path: |
+            dist/${{ env.SLUG }}_unsigned.zip
+            build/GFUNK2027_artefacts/Release/VST3
+            build/GFUNK2027_artefacts/Release/AU
+
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install Capacitor and create the Android project
+        run: |
+          npm install
+          npx cap add android
+          npx cap sync android
+      - name: Build debug APK (installable, signed with the debug key)
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk GFUNK_2027_Free.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GFUNK_2027_Free_Android_APK
+          path: mobile/GFUNK_2027_Free.apk
+
+  # iPhone: same app as a web app (PWA). Open the Pages URL in Safari > Share > Add to Home Screen.
+  # Needs Settings > Pages > Source = "GitHub Actions" once.
+  iphone-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: mobile/www
+      - id: deploy
+        uses: actions/deploy-pages@v4
