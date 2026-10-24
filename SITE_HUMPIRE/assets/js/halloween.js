@@ -59,7 +59,7 @@
       '<div class="hw-kicker">Dark Aether · Ghost Train · Halloween 2026</div>' +
       '<div class="hw-title">HALLOWEEN <b>SALE</b></div>' +
       '<p class="hw-sub"><strong>' + pct + '% OFF</strong> on plugins, guitar pedals, bundles and sample packs. ' +
-      'Applied automatically at checkout on every eligible product — <strong>offer ends October 24</strong>.</p>' +
+      'Applied automatically at checkout on every eligible product — <strong>offer ends October 31</strong>.</p>' +
       '<div class="hw-count" id="hwCount"><div><span id="hwD">--</span><small>days</small></div><div><span id="hwH">--</span><small>hours</small></div><div><span id="hwM">--</span><small>min</small></div><div><span id="hwS">--</span><small>sec</small></div></div><br>' +
       '<a class="hw-cta" href="#homeVstGrid">🎃 Shop the sale</a><a class="hw-cta alt" href="#homeVstGrid">💀 New plugins</a><br>' +
       '<span class="hw-code">CODE ' + code + ' · AUTO-APPLIED</span>';

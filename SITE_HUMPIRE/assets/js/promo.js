@@ -2,8 +2,8 @@
    PROMO −30 % — vrai code Gumroad HUMPIRE30
    ------------------------------------------------------------
    Créé le 2026-10-10 sur Gumroad (Checkout > Discounts) : −30 %,
-   valable jusqu'au 24 octobre 2026 23:59 (heure de Paris), sur
-   34 produits. Le code est collé automatiquement aux liens
+   valable jusqu'au 31 octobre 2026 23:59 (heure de Paris), sur
+   TOUS les produits payants (code étendu le 2026-10-24). Le code est collé automatiquement aux liens
    d'achat (/l/<slug>/HUMPIRE30), donc le client paie exactement
    le prix affiché.
 
@@ -25,33 +25,10 @@
 window.Promo = (function () {
   const CODE = 'HUMPIRE30';
   const PERCENT = 30;
-  const UNTIL = Date.parse('2026-10-24T23:59:00+02:00');
+  const UNTIL = Date.parse('2026-10-31T23:59:00+01:00');
 
   /* slugs d'achat utilisés par le site + permalinks courts Gumroad */
-  const ELIGIBLE = new Set([
-    // plugins et instruments (slug personnalisé + permalink court)
-    'station-synth-legendary-bundle', 'ozpudm',
-    'thuglife', 'quwjty',
-    'oriental-instrument-djbilbox-beats', 'zfhkh',
-    'xaziro',                       // BIGBASS
-    'ykdzli',                       // VICE CITY
-    'jvdta',                        // ROBOTALK
-    'ocpoej',                       // MATRIX MODULAR
-    'mastering', 'vptjlg',          // MASTERING
-    // bundles
-    'djbilbox-pro-bundle', 'zufkrv',
-    'fhpnge',                       // bundle des 16 packs payants
-    // pédales
-    'pharaoh-comp', 'wrvnxn', 'surf-tremolo', 'krwhfy', 'neon-phaser', 'lqcun',
-    'coral-chorus', 'nxkwfd', 'aurora-verb', 'dzranx', 'canyon-echo', 'cbbot',
-    'lava-fuzz', 'gjebft', 'storm-rider', 'hfmjow', 'camel-pedal', 'fimvw',
-    'jet-flanger', 'lbceu', 'camel-pedals', 'awwbw',
-    // packs et kits
-    'westcoast-vybes-vol01', 'tbycyi', 'ejmwmz', 'west-side-drum-kit', 'tiyemt',
-    'yrkzl', 'mkijdn', 'fnpdxf', 'pohwt', 'yecrn', 'argerk', 'ecrmh', 'seuyup',
-    'fkodxs', 'oceljx', 'pkesp', 'fhzxyv', 'czpvfx', 'break-ya-neck-vol2',
-    'zpcjxk', 'ghruf'
-  ]);
+  const ELIGIBLE = new Set(["aajff","ajpebi","alien-808","aurora-verb","auxhyu","awwbw","block-gorilla","bsscfh","camel-pedal","camel-pedals","camel-pilot","canyon-echo","capesm","casbah-chords","cbbot","chdoa","chocolatine","coral-chorus","dfosrq","dipvtj","djbilbox-pro-bundle","douhjk","dzranx","fhpnge","fimvw","gjebft","hfmjow","hntzne","hqlss","humpire-vst-suite","imqzs","iqwrwh","jdfemx","jdrqvz","jet-flanger","jukebox-new-york","jvdta","jxgob","krwhfy","la-baguette","lava-fuzz","lqcun","mastering","mjnau","nbdpba","neon-phaser","nxkwfd","ocpoej","ohiyxu","oriental-instrument-djbilbox-beats","owqnh","oyomwb","ozpudm","pharaoh-comp","qcuvdq","qkjjl","qmsaon","quwjty","sgfzgi","sirmb","station-synth-legendary-bundle","storm-rider","surf-tremolo","svdue","szmhtb","taxi-alger","tfhvc","thuglife","uetjad","uvxck","vptjlg","vslvad","wbmbpi","wgbeza","wlkzna","wrvnxn","xaziro","xwrzb","xxbxebh","ykdzli","yrkzl","yvlyecx","zfhkh","zfkdea","zqyvvu","zufkrv","zzcpzf"]);
 
   const num = v => parseFloat(String(v).replace(',', '.').replace(/[^0-9.]/g, '')) || 0;
   const active = () => Date.now() < UNTIL;
