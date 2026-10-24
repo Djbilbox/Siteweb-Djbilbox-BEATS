@@ -19,6 +19,12 @@
    2026-08-01: the plug-in does not work, and the bundle shipped it as one
    of its five VSTs. Do not re-add either without a fixed build. */
 window.VSTS = [
+  /* ========== GFUNK 2027 — fiche Gumroad `xdbrjj`, $29 (Windows : VST3 + standalone ; macOS bientôt) ========== */
+  { id:"gfunk-2027", name:"GFUNK 2027 — West Coast G-Funk Synth", img:"img/vst/new/gfunk-2027.jpg", category:"instrument",
+    tags:["1000 presets", "West Coast G-Funk Synth", "VST3 · Standalone · Win"], tier:"pro", price:"29", badge:"🆕 New",
+    buy:"xdbrjj", demo:"",
+    note:"Whistle leads, sub-boogie basses, talkbox pads and lowrider brass: 1000 presets, 8-voice engine, 6 skins. macOS coming soon." },
+
   /* ========== HALLOWEEN 2026 DROP — 29 new products (Gumroad, USD) ========== */
   { id:"warzone808", name:"WARZONE808", img:"img/vst/new/warzone808.jpg", category:"instrument",
     tags:["70 presets", "808 Bass Synthesizer", "VST3 · AU · Win · Mac"], tier:"pro", price:"19", badge:"🎃 New",
