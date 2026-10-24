@@ -296,9 +296,9 @@ window.VSTS = [
     note:"Vintage optical and harmonic tremolo pedal · rhythmic pulse and wave shaping" },
 
   { id:"eq-pro-spider", playNow:"eq-pro-spider", yt:"t8N7Z6bG7u0", name:"EQ-PRO SPIDER — 8-Band EQ Plugin", img:"https://public-files.gumroad.com/pewpk4wx84fcy9rn6igvz5bfi8vq", category:"effect",
-    tags:["8-Band Parametric EQ","Visual Spectrum Analyzer","VST3 · AU · Standalone"], price:"10", badge:"🎚️ EQ",
+    tags:["8-Band Parametric EQ","Visual Spectrum Analyzer","VST3 · AU · Standalone"], price:"0", free:true, badge:"✅ FREE",
     buy:"eq-pro-spider", demo:"",
-    note:"Professional 8-band parametric equalizer with real-time analyzer" },
+    note:"FREE · Professional 8-band parametric equalizer with real-time analyzer" },
 
   { id:"mini-mpc-humpire", playNow:"mini-mpc-humpire", yt:"_0a3LF_2O0Y", name:"MINI MPC HUMPIRE — Free Beat Machine (64 Pads)", img:"https://public-files.gumroad.com/4l3h0k0qe4alih949ll89f6sjqvf", category:"instrument",
     tags:["64 Pads Sampler","Built-in Sequencer · Kits","Standalone · App"], price:"0", free:true, badge:"✅ FREE BASIC",
@@ -317,7 +317,7 @@ window.VSTS = [
 
   /* ========== EFFECTS ========== */
   { id:"matrix-modular", playNow:"matrix-modular", yt:"QMOsU3igGrM", name:"MATRIX MODULAR — Westcoast Oriental VST Effect", img:"img/vst/ui/matrix-modular-card.jpg", category:"effect",
-    tags:["Stereo Modulation · Auto-Pan","VST3 · Standalone"], tier:"pro", price:"15",
+    tags:["Stereo Modulation · Auto-Pan","VST3 · Standalone"], tier:"pro", price:"10",
     buy:"ocpoej", demo:"",
     note:"Stereo modulation · auto-pan · westcoast oriental colour" },
 
