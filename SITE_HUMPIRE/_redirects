@@ -65,3 +65,28 @@
 /product.html  id=mpc-2026  /p/mpc-2026.html  301
 /product.html  id=oriental-instrument-free  /p/oriental-instrument-free-demo.html  301
 /product.html  /p/  301
+/shop.html  /p/  301
+/vst.html  /p/  301
+/free-vst.html  /t/free-vst-plugins.html  301
+/drum-kits.html  /t/trap-drill-drum-kits.html  301
+/oriental-instrument.html  /p/oriental-instrument.html  301
+/thuglife.html  /p/thuglife.html  301
+/station-synth-demo.html  /p/station-synth-free-demo.html  301
+/beats-redesign.html  /p/931-free-rap-beats.html  301
+/pricing-2026.html  /p/  301
+/license.html  /p/  301
+/reviews.html  /p/  301
+/news.html  /p/  301
+/blog.html  /p/  301
+/beatmaker.html  /  301
+/ai-mastering.html  /  302
+/services.html  /  302
+/studio-setup.html  /  302
+/video-studio.html  /  302
+/locations/*  /  302
+/game/*  /  302
+/streetwear.html  https://djbilbox-beats-shop.fourthwall.com/en-eur  302
+/discography.html  https://www.youtube.com/@Djbilboxbeats  302
+/playlists.html  https://www.youtube.com/@Djbilboxbeats  302
+/account.html  https://gumroad.com/library  302
+/cart.html  https://djbilboxbeats.gumroad.com/  302
