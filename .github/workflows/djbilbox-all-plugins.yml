@@ -1,7 +1,7 @@
 name: DJBILBOX ALL PLUGINS (Windows)
 on:
   push:
-    branches: [claude/blissful-newton-cxepis]
+    branches: [claude/blissful-newton-cxepis, humpire-orbit-release]
     paths-ignore:
       - '.github/workflows/djbilbox-macos.yml'
       - 'ALL_PLUGINS/make_mac_packages.sh'

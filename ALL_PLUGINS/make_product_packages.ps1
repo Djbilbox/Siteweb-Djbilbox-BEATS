@@ -3,7 +3,7 @@
 #  Input : <Stage>\synths|loadout|orbit\*.vst3   (+ <Stage>\docs\*)
 #  Output: <Out>\packages\<slug>.zip  (Setup.exe + README.txt + EULA + notices + manual PDF when available)
 #          plus bundle packages: humpire-loadout, humpire-orbit, djbilbox-beats-synth-collection
-#  HUMPIRE CHAABI ORCHESTRA is intentionally NOT packaged (no real sample library yet).
+#  HUMPIRE CHAABI ORCHESTRA is packaged as its own product (it plays its built-in modelled instruments).
 # =============================================================================
 param(
     [Parameter(Mandatory = $true)][string]$Stage,
@@ -37,7 +37,7 @@ function Get-AppGuid([string]$slug) {
 
 # ---- collect bundles
 $all = New-Object System.Collections.Generic.List[object]
-foreach ($g in @("synths", "loadout", "orbit")) {
+foreach ($g in @("synths", "loadout", "orbit", "chaabi")) {
     $dir = Join-Path $Stage $g
     if (-not (Test-Path $dir)) { continue }
     foreach ($b in (Get-ChildItem -Path $dir -Directory -Filter "*.vst3" | Sort-Object Name)) {

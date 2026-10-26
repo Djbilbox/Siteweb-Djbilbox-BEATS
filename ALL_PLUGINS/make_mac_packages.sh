@@ -29,7 +29,7 @@ slug() { echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-
 # ---- collect "group:Name" items (a product = a .vst3 and/or .component with the same name)
 ITEMS_FILE="$OUT/work/items.txt"
 : > "$ITEMS_FILE"
-for g in synths loadout orbit; do
+for g in synths loadout orbit chaabi; do
     [ -d "$STAGE/$g" ] || continue
     for b in "$STAGE/$g"/*.vst3 "$STAGE/$g"/*.component; do
         [ -e "$b" ] || continue

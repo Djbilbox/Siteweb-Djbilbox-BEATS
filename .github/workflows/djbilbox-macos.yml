@@ -3,7 +3,7 @@ name: DJBILBOX ALL PLUGINS (macOS)
 # Push sur ce workflow / ce script = test rapide sur un sous-ensemble. Lancement manuel = filtre libre.
 on:
   push:
-    branches: [claude/blissful-newton-cxepis]
+    branches: [claude/blissful-newton-cxepis, humpire-orbit-release]
     paths:
       - '.github/workflows/djbilbox-macos.yml'
       - 'ALL_PLUGINS/make_mac_packages.sh'
@@ -31,9 +31,9 @@ jobs:
     timeout-minutes: 340
     env:
       JUCE_DIR: ${{ github.workspace }}/_juce
-      FILTER: ${{ github.event_name == 'workflow_dispatch' && inputs.filter || 'ARENA_BASS|HumpireGlitch' }}
-      DO_ORBIT: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.orbit) || 'false' }}
-      DO_ROCKPUNK: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.rockpunk) || 'true' }}
+      FILTER: ${{ github.event_name == 'workflow_dispatch' && inputs.filter || (github.ref_name == 'humpire-orbit-release' && '^NONE$' || 'ARENA_BASS|HumpireGlitch') }}
+      DO_ORBIT: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.orbit) || (github.ref_name == 'humpire-orbit-release' && 'true' || 'false') }}
+      DO_ROCKPUNK: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.rockpunk) || (github.ref_name == 'humpire-orbit-release' && 'false' || 'true') }}
       CMAKE_OSX_ARCHITECTURES: "arm64;x86_64"
       CMAKE_OSX_DEPLOYMENT_TARGET: "11.0"
     steps:
@@ -78,6 +78,18 @@ jobs:
           targets=$(ninja -C build/orbit -t targets all | grep -E '^[A-Za-z0-9_]+_(VST3|AU):' | cut -d: -f1 | grep -v '^cmake_' | sort -u | tr '\n' ' ')
           ninja -C build/orbit -k 0 $targets
 
+      # ---------------- 2b) HUMPIRE CHAABI ORCHESTRA
+      - name: Build HUMPIRE CHAABI ORCHESTRA
+        id: chaabi
+        if: env.DO_ORBIT == 'true'
+        continue-on-error: true
+        run: |
+          sed -i.bak 's/FORMATS VST3 Standalone/FORMATS VST3 AU/' HUMPIRE_Chaabi_Orchestra/Source/Plugin/CMakeLists.txt
+          cmake -S HUMPIRE_Chaabi_Orchestra -B build/chaabi -G Ninja -DCMAKE_BUILD_TYPE=Release -DHUMPIRE_JUCE_DIR="$JUCE_DIR" -DHUMPIRE_COPY_PLUGIN=OFF -DHUMPIRE_BUILD_TESTS=OFF -DCMAKE_OSX_ARCHITECTURES="$CMAKE_OSX_ARCHITECTURES" -DCMAKE_OSX_DEPLOYMENT_TARGET="$CMAKE_OSX_DEPLOYMENT_TARGET"
+          targets=$(ninja -C build/chaabi -t targets all | grep -E '^[A-Za-z0-9_]+_(VST3|AU):' | cut -d: -f1 | grep -v '^cmake_' | sort -u | tr '\n' ' ')
+          echo "Targets: $targets"
+          ninja -C build/chaabi -k 0 $targets
+
       # ---------------- 3) ROCKPUNK
       - name: Build ROCKPUNK
         id: rockpunk
@@ -107,6 +119,7 @@ jobs:
             stage "$d" synths
           done
           stage build/orbit orbit
+          stage build/chaabi chaabi
           stage build/rockpunk synths
       - name: Ad-hoc codesign + architecture check
         run: |
@@ -149,7 +162,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "super: ${{ steps.super.outcome }} | orbit: ${{ steps.orbit.outcome }} | rockpunk: ${{ steps.rockpunk.outcome }}"
+          echo "super: ${{ steps.super.outcome }} | orbit: ${{ steps.orbit.outcome }} | chaabi: ${{ steps.chaabi.outcome }} | rockpunk: ${{ steps.rockpunk.outcome }}"
           cat stage/arch_report.txt stage/pluginval_report.txt dist/packages_report.txt 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         with:
