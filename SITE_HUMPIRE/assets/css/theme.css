@@ -48,6 +48,7 @@ body{
 .ticker-product strong{font-size:.78rem;text-shadow:0 1px 0 #000,0 0 13px currentColor}
 .ticker-product small{font-family:var(--font-a);font-size:.54rem;font-weight:700;letter-spacing:.16em;color:rgba(255,255,255,.62)}
 .ticker-synth{color:#ff63c6}.ticker-effect{color:#45ddff}
+.ticker-kicker,.ticker-divider{white-space:nowrap}
 .ticker-kicker{font-size:.68rem;color:#fff;letter-spacing:.25em;text-shadow:0 0 16px rgba(255,255,255,.5)}
 .ticker-divider{font-size:.62rem;color:#f7c75d;letter-spacing:.3em;border-left:1px solid rgba(247,199,93,.5);padding-left:30px}
 .ticker-product::after{content:'✦';font-size:.62rem;color:#fff;opacity:.55;margin-left:5px}
