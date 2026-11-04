@@ -254,13 +254,6 @@ function mountPromo(){
   if(document.querySelector('.promo-bar')) return;
   const p=document.createElement('div');
   p.className='promo-bar';
-  if(Promo.active()){
-    p.innerHTML=`<strong>🔥 −${Promo.PERCENT}% SALE</strong> — on every paid plugin and pack until October 31 · applied automatically at checkout.
-      <a href="/halloween-sale.html" class="promo-cta">Shop the sale</a>
-      <button class="promo-close" onclick="closePromo()" aria-label="Close">✕</button>`;
-    document.body.appendChild(p);
-    return;
-  }
   p.innerHTML=`<strong>🔥 931 Beats Free</strong> — Download the DJBILBOX BIG PACK · free for profit.
     <a href="${gumroadUrl(BIG_PACK)}" target="_blank" class="promo-cta">Get the pack</a>
     <button class="promo-close" onclick="closePromo()" aria-label="Close">✕</button>`;
