@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-latest
     timeout-minutes: 340
     env:
       JUCE_DIR: ${{ github.workspace }}/_juce
