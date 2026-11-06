@@ -1,6 +1,6 @@
 # Séquences e-mail après téléchargement gratuit (Gumroad Workflows)
 
-Réglages communs : déclencheur **Purchase** du produit gratuit, **« Also send to past customers » désactivé** (seuls les nouveaux téléchargements reçoivent les e-mails), exclusion des clients qui ont déjà le produit proposé. Créées dans Gumroad le 7/11/2026, **non publiées** (à publier après relecture).
+Réglages communs : déclencheur **Purchase** du produit gratuit, **« Also send to past customers » désactivé** (seuls les nouveaux téléchargements reçoivent les e-mails), exclusion des clients qui ont déjà le produit proposé. Créées et **publiées** le 7/11/2026, sans envoi aux anciens clients.
 
 ---
 

@@ -60,7 +60,7 @@ C'est un cercle vicieux : pas de vente, donc pas de visibilité, donc pas de ven
 
 | # | Action | Impact | Facilité | Qui |
 |---|---|---|---|---|
-| 1 | ✅ (créées le 7/11, non publiées) Séquence e-mail automatique après chaque gratuit, vers le payant le plus proche (GFUNK → THUGLIFE/K2000 ; démo Oriental → ORIENTAL 29 $ ; MINI MPC → BLOCK GORILLA) | ★★★★★ | ★★★★ | Claude prépare, tu valides |
+| 1 | ✅ (publiées le 7/11) Séquence e-mail automatique après chaque gratuit, vers le payant le plus proche (GFUNK → THUGLIFE/K2000 ; démo Oriental → ORIENTAL 29 $ ; MINI MPC → BLOCK GORILLA) | ★★★★★ | ★★★★ | Claude prépare, tu valides |
 | 2 | Offre de lancement aux 2 200 clients gratuits : synthés à **-50 % pendant 72 h** (vraies ventes, donc visibilité Discover) | ★★★★★ | ★★★★ | Claude prépare, tu valides l'envoi |
 | 3 | Mettre en avant 1 seul bundle phare (Synth Collection 79 $) et dépublier les bundles en double | ★★★★ | ★★★★★ | Claude, avec ton accord |
 | 4 | Une vidéo YouTube Short par produit phare (règles HUMPIRE : sans prix ni nom d'artiste) | ★★★★ | ★★★ | Claude prépare scripts et visuels |
