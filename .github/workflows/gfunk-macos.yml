@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   mac:
-    runs-on: macos-14
+    runs-on: macos-latest
     timeout-minutes: 120
     strategy:
       fail-fast: false
