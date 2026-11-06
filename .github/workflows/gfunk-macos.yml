@@ -1,0 +1,91 @@
+name: GFUNK 2027 (macOS)
+# macOS universal (arm64 + x86_64) : VST3 + AU + Standalone, .pkg dans un zip, publie en release GitHub.
+# Push sur ce workflow ou sur le code GFUNK = build. Lancement manuel possible (Actions > Run workflow).
+on:
+  push:
+    branches: [claude/blissful-newton-cxepis]
+    paths:
+      - '.github/workflows/gfunk-macos.yml'
+      - 'GFUNK_2027_VST_Project/Source/**'
+      - 'GFUNK_2027_VST_Project/CMakeLists.txt'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: gfunk-macos-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  mac:
+    runs-on: macos-14
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [pro, free]
+    defaults:
+      run:
+        working-directory: GFUNK_2027_VST_Project
+    env:
+      PRODUCT: ${{ matrix.edition == 'free' && 'GFUNK 2027 Free' || 'GFUNK 2027' }}
+      SLUG: ${{ matrix.edition == 'free' && 'GFUNK_2027_Free_Mac' || 'GFUNK_2027_Mac' }}
+      FREE: ${{ matrix.edition == 'free' && 'ON' || 'OFF' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (universal arm64 + x86_64)
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DGFUNK_FREE=$FREE -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
+
+      - name: Build VST3, AU, Standalone and the render test
+        run: cmake --build build --config Release --parallel 4 --target GFUNK2027_VST3 GFUNK2027_AU GFUNK2027_Standalone GFunkRenderTest
+
+      - name: Render test (every preset, no NaN / silence / clipping)
+        run: |
+          ./build/GFunkRenderTest_artefacts/Release/GFunkRenderTest
+          ./build/GFunkRenderTest_artefacts/Release/GFunkRenderTest hot
+
+      - name: Check universal binaries
+        run: |
+          A=build/GFUNK2027_artefacts/Release
+          lipo -info "$A/VST3/$PRODUCT.vst3/Contents/MacOS/$PRODUCT"
+          lipo -info "$A/AU/$PRODUCT.component/Contents/MacOS/$PRODUCT"
+
+      - name: AU validation (auval)
+        continue-on-error: true
+        run: |
+          mkdir -p ~/Library/Audio/Plug-Ins/Components
+          cp -R "build/GFUNK2027_artefacts/Release/AU/$PRODUCT.component" ~/Library/Audio/Plug-Ins/Components/
+          killall -9 AudioComponentRegistrar 2>/dev/null || true
+          auval -a | grep -i gfunk || true
+          code=$(auval -a | grep -i "gfunk" | head -1 | awk '{print $1, $2, $3}')
+          [ -n "$code" ] && auval -v $code
+
+      - name: Ad-hoc sign and build the installer package
+        run: |
+          set -e
+          A=build/GFUNK2027_artefacts/Release
+          for b in "$A/VST3/$PRODUCT.vst3" "$A/AU/$PRODUCT.component" "$A/Standalone/$PRODUCT.app"; do
+            codesign --force --deep -s - "$b"
+          done
+          mkdir -p pkgroot/Library/Audio/Plug-Ins/VST3 pkgroot/Library/Audio/Plug-Ins/Components pkgroot/Applications
+          cp -R "$A/VST3/$PRODUCT.vst3" pkgroot/Library/Audio/Plug-Ins/VST3/
+          cp -R "$A/AU/$PRODUCT.component" pkgroot/Library/Audio/Plug-Ins/Components/
+          cp -R "$A/Standalone/$PRODUCT.app" pkgroot/Applications/
+          mkdir -p dist/$SLUG
+          pkgbuild --root pkgroot --identifier com.humpire.$(echo $SLUG | tr -d '_' | tr 'A-Z' 'a-z') --version 2.1.${{ github.run_number }} --install-location / dist/$SLUG/$SLUG.pkg
+          sed "s/GFUNK 2027/$PRODUCT/g; s/GFUNK_2027_Mac/$SLUG/g" mac/README_FIRST_MAC.txt > dist/$SLUG/README_FIRST.txt
+          cp LICENSE.md dist/$SLUG/LICENSE.txt
+          cd dist && ditto -c -k --keepParent $SLUG ${SLUG}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.SLUG }}
+          path: GFUNK_2027_VST_Project/dist/${{ env.SLUG }}.zip
+
+      - name: Release GitHub (macOS)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: gfunk2027-macos-v2.1.${{ github.run_number }}
+          name: GFUNK 2027 - macOS v2.1.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          body: "GFUNK 2027 for macOS universal (Apple Silicon + Intel): VST3, Audio Unit and standalone app. Not notarized: right-click > Open the installer (see README_FIRST.txt)."
+          files: GFUNK_2027_VST_Project/dist/${{ env.SLUG }}.zip
