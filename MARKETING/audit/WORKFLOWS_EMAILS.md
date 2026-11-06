@@ -1,6 +1,6 @@
 # Séquences e-mail après téléchargement gratuit (Gumroad Workflows)
 
-Réglages communs : déclencheur **Purchase** du produit gratuit, **« Also send to past customers » désactivé** (seuls les nouveaux téléchargements reçoivent les e-mails), exclusion des clients qui ont déjà le produit proposé. À créer en **non publié**, puis publier après validation.
+Réglages communs : déclencheur **Purchase** du produit gratuit, **« Also send to past customers » désactivé** (seuls les nouveaux téléchargements reçoivent les e-mails), exclusion des clients qui ont déjà le produit proposé. Créées dans Gumroad le 7/11/2026, **non publiées** (à publier après relecture).
 
 ---
 
@@ -73,16 +73,18 @@ https://djbilboxbeats.gumroad.com/l/oriental-instrument-djbilbox-beats
 Djbilbox Beats (HUMPIRE)
 ```
 
-**E-mail 2 — 7 jours après** · Objet : *20% off the full version, for demo users*
+**E-mail 2 — 7 jours après** · Objet : *Still thinking about the full ORIENTAL INSTRUMENT?*
 ```
 Hi,
 
-As a demo user, you can get the full ORIENTAL INSTRUMENT with 20% off using the code DEMO20 at checkout:
+Did the ORIENTAL INSTRUMENT demo find its way into your beats? If you want the full library (280 presets, the complete sample bank, loops, one-shots, pads and FX textures), it is here:
 https://djbilboxbeats.gumroad.com/l/oriental-instrument-djbilbox-beats
+
+Any question about it? Just reply to this email.
 
 Djbilbox Beats (HUMPIRE)
 ```
-(Code DEMO20 à créer dans Checkout → Discounts, limité à ORIENTAL INSTRUMENT.)
+(Pas de code promo : tous les codes ont été supprimés le 7/11 à la demande.)
 
 ---
 

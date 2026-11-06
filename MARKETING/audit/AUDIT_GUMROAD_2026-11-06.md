@@ -60,7 +60,7 @@ C'est un cercle vicieux : pas de vente, donc pas de visibilité, donc pas de ven
 
 | # | Action | Impact | Facilité | Qui |
 |---|---|---|---|---|
-| 1 | Séquence e-mail automatique après chaque gratuit, vers le payant le plus proche (GFUNK → THUGLIFE/K2000 ; démo Oriental → ORIENTAL 29 $ ; MINI MPC → BLOCK GORILLA) | ★★★★★ | ★★★★ | Claude prépare, tu valides |
+| 1 | ✅ (créées le 7/11, non publiées) Séquence e-mail automatique après chaque gratuit, vers le payant le plus proche (GFUNK → THUGLIFE/K2000 ; démo Oriental → ORIENTAL 29 $ ; MINI MPC → BLOCK GORILLA) | ★★★★★ | ★★★★ | Claude prépare, tu valides |
 | 2 | Offre de lancement aux 2 200 clients gratuits : synthés à **-50 % pendant 72 h** (vraies ventes, donc visibilité Discover) | ★★★★★ | ★★★★ | Claude prépare, tu valides l'envoi |
 | 3 | Mettre en avant 1 seul bundle phare (Synth Collection 79 $) et dépublier les bundles en double | ★★★★ | ★★★★★ | Claude, avec ton accord |
 | 4 | Une vidéo YouTube Short par produit phare (règles HUMPIRE : sans prix ni nom d'artiste) | ★★★★ | ★★★ | Claude prépare scripts et visuels |
@@ -74,7 +74,7 @@ C'est un cercle vicieux : pas de vente, donc pas de visibilité, donc pas de ven
 ## 5. Prix : tests A/B proposés
 
 - **Synthés à 19 $** : passer 3 d'entre eux (WARZONE808, STREETLIGHT TRAP, CYBERPUNK LEAD) en prix libre avec **minimum 5 $** pendant 2 semaines. Mesurer les ventes et la visibilité Discover, puis comparer avec 3 synthés restés à 19 $.
-- **ORIENTAL INSTRUMENT 29 $** : garder le prix, ajouter un code « DEMO20 » (-20 %) envoyé uniquement aux 76 personnes qui ont la démo.
+- **ORIENTAL INSTRUMENT 29 $** : garder le prix ; relance de la démo par e-mail (séquence créée). Tous les codes promo ont été supprimés le 7/11 : toute offre future demandera un nouveau code.
 - **Bundle** : Synth Collection 79 $ = 19 synthés (valeur affichée 361 $, soit -78 %). Montrer cette valeur barrée dans la description.
 - **Upsell** : sur chaque synthé à 19 $, ajouter la ligne « Get all 19 synths for $79 ».
 
