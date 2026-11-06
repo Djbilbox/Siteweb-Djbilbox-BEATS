@@ -15,6 +15,13 @@ Une seule soumission par site et par produit. Texte factuel, sans superlatifs : 
 
 Espacer les envois : un produit par site et par semaine (leçon KVR : trop d'envois d'un coup = blocage).
 
+## Journal des envois
+
+| Date | Site | Produit | Moyen | Statut |
+|---|---|---|---|---|
+| 2026-11-06 | Bedroom Producers Blog | NEON SYNTH 80s 2.0 | e-mail tomislav@bedroomproducersblog.com | envoyé |
+| prochain (~13/11) | Bedroom Producers Blog | MINI MPC HUMPIRE | même e-mail | à faire |
+
 ## Corrections faites le 6/11 (plus rien à corriger avant d'envoyer)
 
 1. GFUNK 2027 : variante Mac vide retirée, titre « Windows » ; le build Mac existe maintenant (GitHub release gfunk2027-macos-v2.1.3) → à remettre en variante avec son fichier.
