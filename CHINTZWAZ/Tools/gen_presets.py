@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genere Source/Presets.h : 70 presets CHINTZWAZ (7 banques x 10)."""
+"""Genere Source/Presets.h : 70 presets CHINTAWAZ (7 banques x 10)."""
 D = dict(eng=0, cut=9000, a=.01, d=.7, s=.8, r=.5, t1=.5, t2=.5, t3=.5, t4=.3, t5=.2, fen=0, fa=.002, fdc=.3, fs=0, rso=.15, vel=.5,
          rev=.4, cho=.1, dis=0, dly=0, tm=.35, fb=.35, src=0, dst=0, rate=5, amt=0, gl=0, pit=0, ft=0, mono=0, vol=.7)
 KEY = dict(eng='waveform', cut='filter', a='attack', d='decay', s='sustain', r='release', t1='t1', t2='t2', t3='t3',

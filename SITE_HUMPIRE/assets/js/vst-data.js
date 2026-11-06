@@ -166,7 +166,7 @@ window.VSTS = [
     buy:"owqnh", demo:"",
     note:"Neon supersaws, PWM, glitch FM, reese and bit-crushed FX: 70 presets from 8 engines." },
 
-  { id:"chintzwaz", name:"CHINTZWAZ", img:"img/vst/new/chintzwaz.jpg", category:"instrument",
+  { id:"chintzwaz", name:"CHINTAWAZ", img:"img/vst/new/chintzwaz.jpg", category:"instrument",
     tags:["70 presets", "Retro Floral Synthesizer", "VST3 · AU · Win · Mac"], tier:"pro", price:"19", badge:"🎃 New",
     buy:"xxbxebh", demo:"",
     note:"Sitar, flower-power keys, tape strings, flutes, kalimba, pads and organ: 70 presets from 8 engines." },

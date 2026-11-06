@@ -8,6 +8,7 @@ GhProcessor::GhProcessor()
       apvts (*this, nullptr, "GOLDHAWK", createLayout())
 {
     ptrs.bind (apvts);
+    glideState.live = &live;
     for (int i = 0; i < 16; ++i) synth.addVoice (new GhVoice (ptrs, glideState));
     synth.addSound (new GhSound());
 }
@@ -51,6 +52,7 @@ void GhProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     buffer.clear();
     if (n == 0 || buffer.getNumChannels() < 1 || dly.bl.empty()) return;   // nothing to do / not prepared yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
+    live.beginBlock (midi);
 
     const bool monoMode = ptrs (mono) > 0.5f;
     if (monoMode) // mono : derniere note prioritaire, coupe la precedente
@@ -142,6 +144,7 @@ void GhProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
         L[i] = std::tanh (yl);
         if (R != L) R[i] = std::tanh (yr);
     }
+    live.publish (L, R, n);
 }
 
 void GhProcessor::getStateInformation (juce::MemoryBlock& dest)

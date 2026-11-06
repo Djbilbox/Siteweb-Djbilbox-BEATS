@@ -1,4 +1,4 @@
-# CHINTZWAZ — synthé floral rétro / bohème psychédélique by Humpire / DJBILBOX BEATS
+# CHINTAWAZ — synthé floral rétro / bohème psychédélique by Humpire / DJBILBOX BEATS
 
 VST3 + Standalone (JUCE 8.0.4, C++17). Synthèse sans samples, 16 voix, 70 presets. Interface d'après la maquette `Assets/faceplate_mockup.jpg` (aperçu : `screenshot.png`) : plaque rose métal brossé, néons cyan/rose, papier peint à fleurs.
 
@@ -11,7 +11,7 @@ RATE / AMOUNT / PITCH (LFO ; source Sine…S&H, destination Pitch/Filter/Amp/Tim
 Écarts avec la maquette : j'ai pris la 2e (la 1re étiquetait ses sliders de droite « FILTER / 5 / ADSR / 5 / VELOCITY » et n'avait pas de bouton DELAY). Dans la 2e, les étiquettes des sliders de droite étaient tronquées (« ATACK / DE / SUST / VELOCIT ») : rétablies en ATTACK / DECAY / SUSTAIN / VELOCITY. Les petits boutons de timbre, RES et ENV sont ajoutés dans les haut-parleurs. Typographie du titre (lettres à motif floral) approchée par un texte clair à contour cyan. Le papier peint à fleurs est dessiné en motifs simplifiés. Les 5 menus affichent la valeur courante.
 
 ## Presets (70)
-7 banques de 10 : Sitar & Strings, Flower EP, Mellotron & Choir, Hippie Flutes, Kalimba & Bells, Daisy Pads, Bloom Bass & Organs. Source : `Tools/gen_presets.py` → `Source/Presets.h`. Save écrit un `.czpreset` dans `Documents\DJBILBOX BEATS\CHINTZWAZ\Presets`. Le bouton cassette EXPANSION est un placeholder.
+7 banques de 10 : Sitar & Strings, Flower EP, Mellotron & Choir, Hippie Flutes, Kalimba & Bells, Daisy Pads, Bloom Bass & Organs. Source : `Tools/gen_presets.py` → `Source/Presets.h`. Save écrit un `.czpreset` dans `Documents\DJBILBOX BEATS\CHINTAWAZ\Presets`. Le bouton cassette EXPANSION est un placeholder.
 
 ## Compiler (Windows)
 Visual Studio 2022 (C++), CMake, Git : `build_windows.bat` puis `install_windows.bat` (administrateur). FL Studio : Options > Manage plugins > Find installed plugins.

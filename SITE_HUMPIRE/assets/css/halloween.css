@@ -140,3 +140,8 @@ input,select,textarea{background:var(--surface-2);color:var(--text);border-color
 .stat-band{background:rgba(14,6,32,.9) !important}
 .section[style*='background:var(--surface)']{background:#0e0720 !important}
 .neon80{filter:saturate(1.1)}
+
+.hw-gl{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:3;opacity:0;transition:opacity 1.6s ease}
+.hw-gl.on{opacity:1}
+.hw-webgl .hw-crystal{display:none}
+.hw-webgl .hw-fog{opacity:.7}

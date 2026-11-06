@@ -9,6 +9,8 @@ CzProcessor::CzProcessor()
       synth (glideState)
 {
     ptrs.bind (apvts);
+    glideState.live = &live;
+    Cz::FluteBank::get();   // decode the real flute now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new CzVoice (ptrs, glideState));
     synth.addSound (new CzSound());
 }
@@ -52,6 +54,7 @@ void CzProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     buffer.clear();
     if (n == 0 || buffer.getNumChannels() < 1 || dly.bl.empty()) return;   // nothing to do / prepareToPlay not called yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
+    live.beginBlock (midi);
 
     if (ptrs (mono) > 0.5f) // mono : derniere note prioritaire, coupe la precedente
     {
@@ -142,6 +145,7 @@ void CzProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
         L[i] = std::tanh (yl);
         if (R != L) R[i] = std::tanh (yr);
     }
+    live.publish (L, R, n);
 }
 
 void CzProcessor::getStateInformation (juce::MemoryBlock& dest)
@@ -159,7 +163,7 @@ void CzProcessor::setStateInformation (const void* data, int size)
         {
             auto vt = juce::ValueTree::fromXml (*xml);
             presetIndex = vt.getProperty ("presetIndex", -1);
-            presetName = vt.getProperty ("presetName", "CHINTZWAZ - Init Patch").toString();
+            presetName = vt.getProperty ("presetName", "CHINTAWAZ - Init Patch").toString().replace ("CHINTZWAZ", "CHINTAWAZ");
             apvts.replaceState (vt);
         }
 }

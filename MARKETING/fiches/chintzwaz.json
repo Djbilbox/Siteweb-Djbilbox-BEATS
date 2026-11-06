@@ -1,15 +1,15 @@
 {
   "id": "chintzwaz",
-  "name": "CHINTZWAZ",
+  "name": "CHINTAWAZ",
   "group": "synths",
   "category": "instrument",
   "kind": "Retro Floral Synthesizer",
   "tagline": "Sitar, flower-power keys, tape strings, flutes, kalimba, pads and organ: 70 presets from 8 engines.",
   "sub": "Sitar, EP, tape strings, flute and kalimba",
-  "gumroad_title": "CHINTZWAZ - Retro Synthesizer VST3 + AU Plugin (70 Presets) | Sitar, Mellotron, Kalimba, Pads",
+  "gumroad_title": "CHINTAWAZ - Retro Synthesizer VST3 + AU Plugin (70 Presets) | Sitar, Mellotron, Kalimba, Pads",
   "summary": "A retro synthesizer plugin (VST3 and Audio Unit) with eight synthesis engines (sitar, electric piano, tape strings, flute, kalimba, pad, bass and organ) and 70 factory presets.",
   "about": [
-    "CHINTZWAZ, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines, shape it with five character controls (TONE, BODY, BRIGHT, WIDTH, TEXTURE), then run it through a multimode filter with its own envelope, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb.",
+    "CHINTAWAZ, sold under the HUMPIRE brand by DJBILBOX BEATS, generates every sound in real time with no samples. Choose one of eight engines, shape it with five character controls (TONE, BODY, BRIGHT, WIDTH, TEXTURE), then run it through a multimode filter with its own envelope, an amplitude envelope, an LFO, distortion, chorus, ping-pong delay and reverb.",
     "58 of the 70 presets load in Poly mode, which plays up to 16 voices for chords and pads. The other 12 load in Mono mode for flute leads, tape violin, bass and organ lines.",
     "Built for Lo-fi Hip-Hop and Boom Bap loops, psychedelic Soul and Funk, Oriental-flavored melodies, Afrobeats and Amapiano, and dreamy retro pads."
   ],
@@ -86,7 +86,7 @@
     }
   ],
   "includes": [
-    "CHINTZWAZ plugin (Windows VST3; macOS VST3 + Audio Unit)",
+    "CHINTAWAZ plugin (Windows VST3; macOS VST3 + Audio Unit)",
     "Windows installer",
     "PDF user manual",
     "Royalty-free license"

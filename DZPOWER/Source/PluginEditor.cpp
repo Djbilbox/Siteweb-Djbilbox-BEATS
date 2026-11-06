@@ -1,5 +1,6 @@
 #include "PluginEditor.h"
 #include "BinaryData.h"
+#include "FaceplateLayout.h"
 
 using namespace Dz;
 
@@ -44,6 +45,7 @@ DzLNF::DzLNF()
     setColour (juce::PopupMenu::backgroundColourId, dark);
     setColour (juce::PopupMenu::textColourId, juce::Colour (0xffeee6d0));
     setColour (juce::PopupMenu::highlightedBackgroundColourId, juce::Colour (0xff3a2a1d));
+    faderImg = juce::ImageFileFormat::loadFrom (BinaryData::fader_png, BinaryData::fader_pngSize);
 }
 
 void DzLNF::drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float a0, float a1, juce::Slider& s)
@@ -56,15 +58,16 @@ void DzLNF::drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h, flo
     juce::Path track; track.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, a1, true);
     g.setColour (juce::Colours::white.withAlpha (0.08f)); g.strokePath (track, juce::PathStrokeType (4.f));
     juce::Path val; val.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, ang, true);
+    const float glow = (float) s.getProperties().getWithDefault ("glow", 0.f);
     g.setColour (col.withAlpha (0.3f)); g.strokePath (val, juce::PathStrokeType (8.f));
     g.setColour (col); g.strokePath (val, juce::PathStrokeType (3.5f));
-    const float kr = r * 0.74f;
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffeaeaea), ctr.x - kr * 0.4f, ctr.y - kr * 0.5f, juce::Colour (0xff3d3d3d), ctr.x + kr * 0.6f, ctr.y + kr * 0.7f, false));
-    g.fillEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2);
-    g.setColour (juce::Colours::black.withAlpha (0.7f)); g.drawEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2, 1.4f);
-    juce::Path p; p.addRoundedRectangle (-1.6f, -kr, 3.2f, kr * 0.42f, 1.4f);
-    g.setColour (juce::Colour (0xff1a1a1a)); g.fillPath (p, juce::AffineTransform::rotation (ang).translated (ctr.x, ctr.y));
-    juce::ignoreUnused (s);
+    if (glow > 0.45f)   // lit: a white-hot core along the arc (the halo itself is drawn by the panel, behind)
+    { g.setColour (col.interpolatedWith (juce::Colours::white, 0.7f).withAlpha (juce::jmin (1.f, (glow - 0.45f) * 1.2f))); g.strokePath (val, juce::PathStrokeType (1.4f)); }
+    // the knob cap is part of the faceplate photo; here only the lit index on it, turning with the value
+    const float capR = r * 0.79f;
+    const juce::Point<float> dir (std::sin (ang), -std::cos (ang));
+    juce::Path idx; idx.startNewSubPath (ctr + dir * (capR * 0.3f)); idx.lineTo (ctr + dir * (capR * 0.86f));
+    hfx::neonStroke (g, idx, col, r > 15.f ? 2.f : 1.5f, 0.6f + 0.6f * glow);
 }
 
 void DzLNF::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float, float, juce::Slider::SliderStyle, juce::Slider& s)
@@ -73,39 +76,34 @@ void DzLNF::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, flo
     const float cx = (float) x + (float) w * 0.5f;
     if (wheel)
     {
-        g.setColour (juce::Colour (0xff050505)); g.fillRoundedRectangle ((float) x + 6, (float) y, (float) w - 12, (float) h, 8.f);
-        const float th = 52.f;
+        const float th = 52.f;   // the slot is part of the faceplate: only the cap here
         auto cap = juce::Rectangle<float> (cx - 20.f, pos - th * 0.5f, 40.f, th);
         g.setGradientFill (juce::ColourGradient (juce::Colour (0xff5d5d5d), cap.getX(), 0, juce::Colour (0xff222222), cap.getRight(), 0, false));
         g.fillRoundedRectangle (cap, 8.f);
         g.setColour (juce::Colours::black); for (int i = 1; i < 7; ++i) g.drawHorizontalLine ((int) (cap.getY() + i * th / 7.f), cap.getX() + 4, cap.getRight() - 4);
         return;
     }
-    g.setColour (juce::Colour (0xff060606)); g.fillRoundedRectangle (cx - 3.f, (float) y, 6.f, (float) h, 2.f);
+    // the slot and its LED dots are part of the faceplate (the panel lights the dots); here a thin lit strip inside
+    // the slot below the cap, and the cap
     const float t = 1.f - (pos - (float) y) / (float) h;
-    g.setColour (ramp (1.f - t).withAlpha (0.9f)); g.fillRoundedRectangle (cx - 2.f, pos, 4.f, (float) y + (float) h - pos, 2.f);
-    for (int i = 0; i <= 8; ++i)   // graduations braise
+    g.setColour (ramp (1.f - t).withAlpha (0.8f)); g.fillRoundedRectangle (cx - 1.f, pos, 2.f, (float) y + (float) h - pos, 1.f);
+    const float led = (float) s.getProperties().getWithDefault ("led", 0.f);
+    // photo-real cap with a soft shadow under it; its centre groove lights up while its stage plays
+    const float cw = (float) w, ch = cw * (float) faderImg.getHeight() / (float) juce::jmax (1, faderImg.getWidth());
+    const auto cap = juce::Rectangle<float> (cx - cw * 0.5f, pos - ch * 0.5f, cw, ch);
+    hfx::glowSpot (g, cap.getCentre().translated (0.f, 4.f), cw * 0.55f, juce::Colours::black, 0.75f);
+    g.setOpacity (1.f);
+    g.drawImage (faderImg, cap, juce::RectanglePlacement::stretchToFit);
+    if (led > 0.f)
     {
-        const float yy = (float) y + (float) h * (float) i / 8.f;
-        g.setColour (ramp ((float) i / 8.f).withAlpha (0.6f));
-        g.fillRect (cx - 16.f, yy, 5.f, 2.f); g.fillRect (cx + 11.f, yy, 5.f, 2.f);
+        juce::Path groove; groove.startNewSubPath (cap.getX() + cw * 0.22f, cap.getCentreY()); groove.lineTo (cap.getRight() - cw * 0.22f, cap.getCentreY());
+        hfx::neonStroke (g, groove, ramp (1.f - led), 1.2f, 0.5f + led);
     }
-    auto cap = juce::Rectangle<float> (cx - 12.f, pos - 7.f, 24.f, 14.f);
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffdcdcdc), 0, cap.getY(), juce::Colour (0xff4b4b4b), 0, cap.getBottom(), false));
-    g.fillRoundedRectangle (cap, 3.f);
-    g.setColour (juce::Colours::black); g.drawRoundedRectangle (cap, 3.f, 1.2f); g.drawHorizontalLine ((int) cap.getCentreY(), cap.getX() + 3, cap.getRight() - 3);
 }
 
-void DzLNF::drawComboBox (juce::Graphics& g, int w, int h, bool, int, int, int, int, juce::ComboBox&)
+void DzLNF::drawComboBox (juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&)
 {
-    const auto r = juce::Rectangle<float> (0, 0, (float) w, (float) h).reduced (1.5f);
-    g.setColour (amber.withAlpha (0.18f)); g.fillRoundedRectangle (r.expanded (1.5f), 9.f);
-    g.setColour (dark); g.fillRoundedRectangle (r, 8.f);
-    g.setGradientFill (juce::ColourGradient (amber, r.getX(), 0, ember, r.getRight(), 0, false));
-    g.drawRoundedRectangle (r, 8.f, 1.7f);
-    juce::Path t; const float cx = (float) w - 18.f, cy = (float) h * 0.5f;
-    t.addTriangle (cx - 5, cy - 3, cx + 5, cy - 3, cx, cy + 4);
-    g.setColour (juce::Colour (0xffeee6d0)); g.fillPath (t);
+    // the box and its arrow are part of the faceplate: only the text (the combo's label) is drawn
 }
 
 void DzLNF::positionComboBoxText (juce::ComboBox& b, juce::Label& l)
@@ -133,6 +131,15 @@ DzPanel::DzPanel (DzProcessor& p)
     camel = load (BinaryData::camel_png, BinaryData::camel_pngSize);
     logo = load (BinaryData::logo_png, BinaryData::logo_pngSize);
     cassette = load (BinaryData::cassette_png, BinaryData::cassette_pngSize);
+    faceImg = load (BinaryData::faceplate_jpg, BinaryData::faceplate_jpgSize);
+    const juce::Colour ledCols[3] { juce::Colour (0xff35ff6a), juce::Colour (0xffffc23a), juce::Colour (0xffff3b3b) };
+    for (int i = 0; i < 3; ++i)
+    {
+        ledSprite[i] = juce::Image (juce::Image::ARGB, 15, 15, true);
+        juce::Graphics gs (ledSprite[i]);
+        hfx::glowSpot (gs, { 7.5f, 7.5f }, 7.f, ledCols[i], 0.35f);
+        gs.setColour (ledCols[i].withAlpha (0.95f)); gs.fillEllipse (5.f, 5.f, 5.f, 5.f);
+    }
 
     addKnob (rate, P::rate, "RATE");       addKnob (amount, P::amount, "AMOUNT");  addKnob (pitch, P::pitch, "TRANSPOSE");
     addKnob (glide, P::glide, "GLIDE");    addKnob (filter, P::filter, "CUTOFF");
@@ -179,13 +186,47 @@ DzPanel::DzPanel (DzProcessor& p)
     keys.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, amber.withAlpha (0.6f));
     keys.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, ember.withAlpha (0.3f));
     keys.setScrollButtonsVisible (false);
+    keys.neon = ember; keys.neonHot = amber;
+    keys.setOverlayOnly();   // the keys are part of the faceplate photo
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
     setSize (1000, 746);
+    lastTick = juce::Time::getMillisecondCounterHiRes();
+    if (animationsOn()) startTimerHz (45);
 }
 
-DzPanel::~DzPanel() { setLookAndFeel (nullptr); }
+DzPanel::~DzPanel() { stopTimer(); setLookAndFeel (nullptr); }
+
+float DzPanel::param (int index) const { return proc.apvts.getRawParameterValue (ids[index])->load(); }
+bool DzPanel::animationsOn() const { return (bool) proc.apvts.state.getProperty ("animations", true); }
+
+void DzPanel::setAnimations (bool on)
+{
+    proc.apvts.state.setProperty ("animations", on, nullptr);
+    if (on) { lastTick = juce::Time::getMillisecondCounterHiRes(); startTimerHz (45); }
+    else stopTimer();
+    repaint();
+}
+
+void DzPanel::mouseDown (const juce::MouseEvent& e)
+{
+    if (! e.mods.isPopupMenu()) return;
+    juce::PopupMenu m;
+    m.addItem (1, "Animations", true, animationsOn());
+    m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (this).withMousePosition(), [this] (int r) { if (r == 1) setAnimations (! animationsOn()); });
+}
+
+void DzPanel::timerCallback()
+{
+    const double now = juce::Time::getMillisecondCounterHiRes();
+    float dt = (float) juce::jlimit (0.0, 0.1, (now - lastTick) * 0.001);
+    lastTick = now;
+    // 45 frames per second while playing; quiet: 15 are plenty for slow breathing light
+    if (! view.sounding && view.sinceHit > 2.f && (++skip % 3) != 0) { idleDt += dt; return; }
+    dt += idleDt; idleDt = 0.f;
+    advance (dt);
+}
 
 void DzPanel::addKnob (Knob& k, int idx, const juce::String& label, juce::Slider::SliderStyle style)
 {
@@ -206,7 +247,7 @@ void DzPanel::addCombo (Combo& c, int idx, const juce::StringArray& items)
     addAndMakeVisible (c.c);
 }
 
-void DzPanel::refreshPresetLabel() { presetLabel.setText (proc.currentPresetName(), juce::dontSendNotification); }
+void DzPanel::refreshPresetLabel() { presetLabel.setText (proc.currentPresetName(), juce::dontSendNotification); presetFlash = 1.f; }
 
 void DzPanel::stepPreset (int d)
 {
@@ -285,124 +326,374 @@ void DzPanel::showExpansion()
         "Expansion packs are coming soon.\n\nhttps://djbilboxbeats.gumroad.com/");
 }
 
+namespace
+{
+// fixed places of the moving parts, in panel pixels
+const juce::Point<float> medallion { 500.5f, 209.5f };
+constexpr float medallionR = 92.f;
+juce::Rectangle<float> grilles (int i) { return (i == 0 ? R (575, 305, 225, 205) : R (1200, 305, 230, 205)).toFloat(); }
+// the LED dots beside fader i (0..3 amp envelope, 4..8 filter envelope), row 0 at the top
+juce::Point<float> faderDot (int i, int side, int row)
+{
+    const bool amp = i < 4;
+    const float top = amp ? Face::envLedTop : Face::rslLedTop, bottom = amp ? Face::envLedBottom : Face::rslLedBottom;
+    return { Face::slotX[i] + (side == 0 ? -Face::ledDx : Face::ledDx), top + (bottom - top) * (float) row / (float) (Face::ledRows - 1) };
+}
+}
+
 void DzPanel::paint (juce::Graphics& g)
 {
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xff4e5638), 0, 0, juce::Colour (0xff2e3322), 0, (float) getHeight(), false));
-    g.fillAll();
-    juce::Random cl (3);   // metal patine / rayures
-    for (int i = 0; i < 160; ++i)
+    const float sc = g.getInternalContext().getPhysicalPixelScaleFactor();
+    if (bgCache.isNull() || std::abs (sc - bgScale) > 0.01f)
     {
-        const float x = cl.nextFloat() * (float) getWidth(), y = cl.nextFloat() * (float) getHeight(), r = 12.f + cl.nextFloat() * 45.f;
-        g.setColour (juce::Colours::black.withAlpha (0.03f)); g.fillEllipse (x - r, y - r, r * 2, r * 2);
+        bgScale = sc;
+        bgCache = juce::Image (juce::Image::RGB, juce::jmax (1, juce::roundToInt ((float) getWidth() * sc)), juce::jmax (1, juce::roundToInt ((float) getHeight() * sc)), false);
+        juce::Graphics gb (bgCache);
+        gb.addTransform (juce::AffineTransform::scale (sc));
+        paintStatic (gb);
     }
-    for (int side = 0; side < 2; ++side)   // rails sombres a plaques
+    {   // the cache already has the screen's pixel size: a plain copy, no smoothing (much cheaper)
+        juce::Graphics::ScopedSaveState ss (g);
+        g.setImageResamplingQuality (juce::Graphics::lowResamplingQuality);
+        g.drawImage (bgCache, getLocalBounds().toFloat());
+    }
+    paintLive (g);
+}
+
+void DzPanel::paintStatic (juce::Graphics& g)
+{
+    // the whole front panel is one photo-real render (Assets/faceplate.jpg): knob caps, slots, screens, texts, artwork
+    g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+    g.drawImage (faceImg, getLocalBounds().toFloat(), juce::RectanglePlacement::stretchToFit);
+}
+
+//============================================================================== light and motion
+void DzPanel::advance (float dt)
+{
+    view.update (proc.live, dt);
+    const float lv = view.level, hit = view.hit;
+    const auto gold = juce::Colour (0xffffd34a);
+
+    // knob light: every arc glows a little, more with the sound; some follow what they control
+    for (auto* k : all)
+        if (! k->lin) { k->glow = 0.28f + 0.55f * lv; k->mod = -1.f; k->orbit = -1.f; }
+    volume.glow = 0.3f + 1.0f * lv;
+    reverb.glow = param (P::reverb) > 0.01f ? 0.3f + 0.9f * lv : 0.2f;
+    chorus.glow = param (P::chorus) > 0.01f ? 0.3f + 0.9f * lv : 0.2f;
+    dist.glow = param (P::dist) > 0.01f ? 0.3f + 1.1f * lv * (0.5f + param (P::dist)) : 0.2f;
+    // LFO: a dot circles RATE at the real LFO speed, AMOUNT breathes with the LFO
+    lfoIdlePhase = std::fmod (lfoIdlePhase + dt * param (P::rate), 1.f);
+    rate.orbit = view.sounding ? view.lfoPhase : lfoIdlePhase;
+    amount.glow = 0.28f + 0.7f * param (P::amount) * (0.5f + 0.5f * (view.sounding ? view.lfo : std::sin (juce::MathConstants<float>::twoPi * lfoIdlePhase)));
+    // filter: CUTOFF shows where the filter really is, FLT ENV and RESONANCE light with the filter envelope
+    filter.glow = 0.3f + 0.6f * lv + 0.6f * view.filt * param (P::fenv);
+    if (view.sounding) filter.mod = (float) filter.s.valueToProportionOfLength (20.0 * std::pow (1000.0, (double) view.cutoff));
+    fenvK.glow = 0.25f + 1.1f * view.filt * juce::jmax (0.2f, param (P::fenv));
+    resoK.glow = 0.25f + 0.9f * lv * (0.3f + param (P::reso));
+    glide.glow = param (P::glide) > 0.001f ? 0.28f + 0.9f * hit : 0.28f;
+    // delay: TIME and FEEDBACK flash on every echo of the last note
+    echo = 0.f;
+    if (param (P::delay) > 0.01f)
     {
-        auto r = side == 0 ? R (0, 0, 135, 1493) : R (1870, 0, 130, 1493);
-        g.setGradientFill (juce::ColourGradient (juce::Colour (0xff3c3e40), (float) r.getX(), 0, juce::Colour (0xff1a1c1e), (float) r.getRight(), 0, false));
-        g.fillRect (r);
-        for (int y : { 150, 585, 1045 })
+        const float T = juce::jmax (0.03f, param (P::dtime)), fb = param (P::fb);
+        float a = 1.f;
+        for (int k = 1; k <= 6; ++k) { a *= fb; const float d = (view.sinceHit - (float) k * T) / 0.05f; echo += a * std::exp (-d * d); }
+        echo = juce::jmin (1.f, echo * param (P::delay) * 2.f);
+    }
+    dtime.glow = 0.28f + 1.1f * echo; feedback.glow = 0.28f + 1.1f * echo; delay.glow = 0.28f + 0.6f * lv + 0.6f * echo;
+    for (auto* k : all) k->s.getProperties().set ("glow", k->glow);
+
+    // envelope faders: the LEDs of the stage playing now rise with the envelope
+    for (int i = 0; i < 4; ++i)
+        env[i].s.getProperties().set ("led", view.ampStage == i ? juce::jmax (0.08f, view.amp) : 0.f);
+    for (int i = 0; i < 4; ++i)
+        rsl[i].s.getProperties().set ("led", view.filtStage == i ? juce::jmax (0.08f, view.filt) : 0.f);
+    rsl[4].s.getProperties().set ("led", hit * 0.9f);
+
+    // electricity: arcs jump from the medallion on every note, and now and then by themselves
+    auto arc = [this] (float strength)
+    {
+        const float a = rnd.nextFloat() * juce::MathConstants<float>::twoPi, spread = 0.25f + rnd.nextFloat() * 0.5f;
+        const auto p0 = medallion + juce::Point<float> (std::cos (a), std::sin (a)) * (medallionR + 2.f);
+        const auto p1 = medallion + juce::Point<float> (std::cos (a + spread), std::sin (a + spread)) * (medallionR + 24.f + 30.f * strength);
+        const juce::Colour cols[3] { amber, ember, juce::Colour (0xffffd34a) };
+        bolts.add (hfx::lightning (p0, p1, rnd, 0.35f, 14.f), cols[rnd.nextInt (3)], 0.12f + 0.12f * strength, 1.2f + strength);
+    };
+    if (view.newNote)
+    {
+        arc (1.f); arc (0.6f);
+        sparks.emit ({ medallion.x - 60.f, medallion.y + 70.f, 120.f, 20.f }, 10, { 0.f, -70.f }, 120.f, 1.1f, 2.4f, gold);
+        if (rnd.nextFloat() < 0.35f)   // a crack of electricity across the title
         {
-            const auto pl = R (side == 0 ? 30 : 1900, y, 70, y == 585 ? 280 : 310);
-            g.setGradientFill (juce::ColourGradient (juce::Colour (0xff8a8c90), (float) pl.getX(), 0, juce::Colour (0xff34363a), (float) pl.getRight(), 0, false));
-            g.fillRoundedRectangle (pl.toFloat(), 8.f);
+            const auto b = title.getBounds();
+            const float y0 = b.getY() + b.getHeight() * (0.2f + 0.6f * rnd.nextFloat()), y1 = b.getY() + b.getHeight() * (0.2f + 0.6f * rnd.nextFloat());
+            bolts.add (hfx::lightning ({ b.getX() + 6.f, y0 }, { b.getRight() - 6.f, y1 }, rnd, 0.12f), juce::Colour (0xfffff2c8), 0.14f, 1.1f);
         }
-        g.setColour ((side == 0 ? amber : ember).withAlpha (0.5f)); g.fillRect (side == 0 ? r.getRight() - 2 : r.getX(), 0, 2, r.getHeight());
-        for (int y : { 80, 520, 985, 1410 }) { g.setColour (juce::Colour (0xff101214)); g.fillEllipse ((float) r.getCentreX() - 16, y * K - 16, 32.f, 32.f); g.setColour (juce::Colour (0xff8a8c90)); g.fillEllipse ((float) r.getCentreX() - 11, y * K - 11, 22.f, 22.f); }
     }
-    // haut-parleurs perfores (portent les petits boutons)
-    for (auto r : { R (575, 305, 225, 205), R (1200, 305, 230, 205) })
+    if ((idleBolt -= dt) <= 0.f) { arc (0.3f); idleBolt = 2.5f + rnd.nextFloat() * 4.f; }
+
+    // keys: sparks rise from every key that goes down
+    for (int n = 36; n <= 96; ++n)
     {
-        g.setColour (juce::Colour (0xff23261b)); g.fillRoundedRectangle (r.toFloat(), 14.f);
-        for (float yy = (float) r.getY() + 8; yy < (float) r.getBottom() - 6; yy += 8.f)
-            for (float xx = (float) r.getX() + 8; xx < (float) r.getRight() - 6; xx += 8.f)
-            { g.setColour (juce::Colour (0xff0b0d08)); g.fillEllipse (xx, yy, 5.f, 5.f); }
+        const bool down = proc.keyboardState.isNoteOnForChannels (0xffff, n);
+        if (down && ! keyWasDown[(size_t) n])
+        {
+            const auto kr = keys.getRectangleForKey (n).translated ((float) keys.getX(), (float) keys.getY());
+            sparks.emit ({ kr.getX(), kr.getY() - 2.f, kr.getWidth(), 4.f }, 7, { 0.f, -110.f }, 70.f, 0.9f, 2.f, n % 2 ? amber : ember);
+        }
+        keyWasDown[(size_t) n] = down;
     }
-    g.drawImage (camel, R (815, 235, 372, 368).toFloat(), juce::RectanglePlacement::centred);
-    {   // logo
-        auto lr = R (1584, 78, 112, 108).toFloat();
-        g.setColour (juce::Colours::white); g.drawImage (logo, lr, juce::RectanglePlacement::centred);
+    // a few embers float up all the time
+    if ((idleSpark -= dt) <= 0.f)
+    {
+        sparks.emit ({ 70.f, 520.f, 860.f, 30.f }, 1, { 0.f, -25.f }, 20.f, 4.f, 1.6f, rnd.nextBool() ? amber : ember);
+        idleSpark = view.sounding ? 0.06f : 0.35f;
     }
-    for (float a : { 0.15f, 0.25f })
-    { g.setColour (amber.withAlpha (a)); g.setFont (juce::FontOptions (23.f + (0.3f - a) * 6.f, juce::Font::bold)); g.drawFittedText ("DJBILBOXBEATS", R (1420, 195, 440, 75), juce::Justification::centred, 1); }
-    g.setColour (juce::Colour (0xffeee6d0)); g.setFont (juce::FontOptions (22.f, juce::Font::bold));
-    g.drawFittedText ("DJBILBOXBEATS", R (1420, 195, 440, 75), juce::Justification::centred, 1);
-    // titre electrique
-    const auto titleR = R (700, 625, 600, 120);
-    g.setFont (juce::FontOptions (56.f, juce::Font::bold));
-    g.setColour (amber.withAlpha (0.35f)); g.drawFittedText ("DZPOWER", titleR.translated (-3, 0), juce::Justification::centred, 1);
-    g.setColour (ember.withAlpha (0.35f)); g.drawFittedText ("DZPOWER", titleR.translated (3, 0), juce::Justification::centred, 1);
-    g.setColour (juce::Colour (0xff101010)); for (int dx = -2; dx <= 2; dx += 2) for (int dy = -2; dy <= 2; dy += 2) g.drawFittedText ("DZPOWER", titleR.translated (dx, dy), juce::Justification::centred, 1);
-    g.setColour (juce::Colour (0xfff4f2ea)); g.drawFittedText ("DZPOWER", titleR, juce::Justification::centred, 1);
-    g.setColour (juce::Colour (0xffd4d4c8)); g.setFont (juce::FontOptions (20.f, juce::Font::bold));
-    g.drawFittedText ("By Humpire", R (880, 735, 240, 44), juce::Justification::centred, 1);
-    // ecran preset
-    auto scr = R (597, 72, 808, 118).toFloat();
-    g.setGradientFill (juce::ColourGradient (amber, scr.getX(), 0, ember, scr.getRight(), 0, false)); g.fillRoundedRectangle (scr.expanded (2.f), 14.f);
-    g.setColour (juce::Colour (0xff4a4c50)); g.fillRoundedRectangle (scr, 12.f);
-    g.setColour (juce::Colour (0xff120e0e)); g.fillRoundedRectangle (scr.reduced (6.f), 9.f);
-    g.setColour (juce::Colour (0xff1c1210)); g.fillRoundedRectangle (R (702, 100, 596, 66).toFloat(), 4.f);
-    {   // icones
-        g.setColour (juce::Colour (0xffa8a898)); const auto f = R (632, 112, 50, 40).toFloat();
-        juce::Path fo; fo.addRoundedRectangle (f.getX(), f.getY() + 5, f.getWidth(), f.getHeight() - 5, 3.f); fo.addRoundedRectangle (f.getX(), f.getY(), f.getWidth() * 0.45f, 8.f, 2.f);
-        g.strokePath (fo, juce::PathStrokeType (1.6f));
-        const auto d = R (1324, 112, 44, 44).toFloat();
-        g.drawRoundedRectangle (d, 3.f, 1.8f); g.drawRect (d.getX() + d.getWidth() * 0.2f, d.getY(), d.getWidth() * 0.55f, d.getHeight() * 0.35f, 1.5f);
-        g.drawRect (d.getX() + d.getWidth() * 0.2f, d.getY() + d.getHeight() * 0.58f, d.getWidth() * 0.6f, d.getHeight() * 0.42f, 1.5f);
-        g.setColour (juce::Colour (0xffe8e0c8));
-        for (int sgn : { -1, 1 })
-        { const float cx = sgn < 0 ? (float) R (728, 0, 0, 0).getX() : (float) R (1272, 0, 0, 0).getX(), cy = (float) R (0, 133, 0, 0).getY();
-          juce::Path c; c.startNewSubPath (cx - sgn * 5.f, cy - 10.f); c.lineTo (cx + sgn * 5.f, cy); c.lineTo (cx - sgn * 5.f, cy + 10.f); g.strokePath (c, juce::PathStrokeType (2.2f)); }
+    sparks.update (dt);
+    bolts.update (dt);
+    keys.advance (dt);
+
+    // the cassette turns while something plays
+    reelSpeed += ((view.sounding ? 1.f : 0.f) - reelSpeed) * (1.f - std::exp (-dt / 0.4f));
+    reelAngle += dt * reelSpeed * juce::MathConstants<float>::twoPi * 0.55f;
+    presetFlash *= std::exp (-dt / 0.5f);
+    invalidateChanges();
+}
+
+juce::Point<float> DzPanel::runnerPos() const
+{
+    juce::Path frame; frame.addRoundedRectangle (R (597, 72, 808, 118).toFloat().expanded (1.f), 14.f);
+    return frame.getPointAlongPath (std::fmod (view.time * 0.18f, 1.f) * frame.getLength());
+}
+
+void DzPanel::invalidateChanges()
+{
+    // a full repaint of the panel 30-60 times per second costs far too much CPU: only what changed is redrawn
+    if (view.time < 1.5f) { repaint(); prevMoving.clear(); return; }   // neon ignition: everything flickers
+    juce::RectangleList<int> dirty, moving;
+    auto add = [] (juce::RectangleList<int>& l, juce::Rectangle<float> r) { l.add (r.getSmallestIntegerContainer()); };
+    auto square = [] (juce::Point<float> c, float half) { return juce::Rectangle<float> (half * 2.f, half * 2.f).withCentre (c); };
+
+    add (dirty, title.getBounds().expanded (44.f));                          // breathing neon
+    add (dirty, square (medallion, medallionR + 48.f));                       // halo
+    if (view.sinceHit < 0.7f) add (moving, square (medallion, medallionR + view.sinceHit * 170.f + 14.f));   // shock ring
+
+    const float meter = view.levelL + view.levelR + view.holdL + view.holdR;
+    if (std::abs (meter - shownMeter) > 0.002f)
+    {
+        for (int i = 0; i < 2; ++i) add (dirty, grilles (i).expanded (6.f));
+        add (dirty, R (1490, 282, 340, 22).toFloat().expanded (4.f));
+        shownMeter = meter;
     }
-    // cassette
-    g.setColour (juce::Colours::white);   // drawImage applique l'alpha de la couleur courante
-    g.drawImage (cassette, R (205, 92, 317, 386).toFloat(), juce::RectanglePlacement::centred);
-    g.setColour (juce::Colour (0xffeee6d0)); g.setFont (juce::FontOptions (14.f));
-    g.drawFittedText ("EXPANSION", R (240, 40, 230, 40), juce::Justification::centred, 1);
-    // plaque des molettes
-    g.setColour (juce::Colour (0xff0e100c)); g.fillRoundedRectangle (R (175, 1080, 367, 352).toFloat(), 10.f);
-    g.setColour (juce::Colour (0xff3a3e32)); g.drawRoundedRectangle (R (175, 1080, 367, 352).toFloat(), 10.f, 2.f);
-    // labels
-    g.setColour (juce::Colour (0xffe6e0cc));
+    const float rail = view.level + view.hit;
+    if (std::abs (rail - shownRail) > 0.004f || view.sinceHit < 1.f)
+    {
+        for (float x : { 66.5f, 936.f }) add (dirty, { x - 30.f, 0.f, 60.f, (float) getHeight() });
+        shownRail = rail;
+    }
     for (auto* k : all)
     {
-        const auto r = k->s.getBounds();
-        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 9.5f : 12.f)));
-        g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : 0), r.getWidth() + 50, 18, juce::Justification::centred, 1);
+        if (k->lin)
+        {
+            const float led = (float) k->s.getProperties().getWithDefault ("led", 0.f);
+            if (std::abs (led - k->shownLed) > 0.004f) { add (dirty, k->s.getBounds().toFloat().expanded (22.f, 8.f)); k->shownLed = led; }
+            continue;
+        }
+        if (std::abs (k->glow - k->shownGlow) > 0.004f || k->orbit >= 0.f || k->mod >= 0.f || k->shownMod)
+        {
+            add (dirty, k->s.getBounds().toFloat().expanded (18.f));
+            k->shownGlow = k->glow; k->shownMod = k->mod >= 0.f;
+        }
     }
-    {   // section headers and captions
-        const juce::Colour txt (0xffe6e0cc), dim (0xffbdb8a4);
-        header (g, "LFO", 336, 556, 104, txt, 15.f);                     // RATE + AMOUNT only (PITCH is the transpose knob)
-        header (g, "AMP ENVELOPE", 415, 756, 186, txt, 12.f);
-        header (g, "FILTER ENVELOPE", 1534, 506, 140, txt, 13.f);
-        g.setColour (txt.withAlpha (0.3f));                               // velocity sensitivity is not part of the filter envelope
-        g.drawLine (1728.f * K, 548.f * K, 1728.f * K, 700.f * K, 1.f);
-        header (g, "MASTER", 1663, 318, 150, txt, 13.f);
-        header (g, "FILTER", 1145, 792, 80, txt, 15.f);
-        header (g, "EFFECTS", 1451, 765, 120, txt, 12.f);
-        header (g, "DELAY", 1707, 765, 114, txt, 12.f);
-        caption (g, "WAVEFORM", 767, 968, dim);
-        caption (g, "LFO SOURCE", 1002, 968, dim);
-        caption (g, "LFO DESTINATION", 1237, 968, dim);
-        caption (g, "FILTER TYPE", 1476, 968, dim);
-        caption (g, "MONO / POLY", 1715, 968, dim);
-        header (g, "PITCH & MOD", 358, 1103, 150, txt, 11.f);
-        caption (g, "PITCH BEND", 281, 1398, dim);
-        caption (g, "MOD WHEEL", 432, 1398, dim);
+    const bool lit = std::any_of (keys.heat.begin(), keys.heat.end(), [] (float h) { return h > 0.f; });
+    if (lit || keysLit) keys.repaint();
+    keysLit = lit;
+    const float line = view.level + 0.3f * view.hit;
+    if (std::abs (line - shownLine) > 0.004f)                                         // neon line on top of the keyboard
+    {
+        add (dirty, keys.getBounds().toFloat().withHeight (1.f).expanded (2.f, 22.f));
+        shownLine = line;
     }
+    if (reelSpeed > 0.002f) for (auto rl : Face::reels) add (dirty, square ({ rl.x, rl.y }, 20.f));
+    add (moving, square (runnerPos(), 18.f));
+    if (presetFlash > 0.01f) add (dirty, square (presetLabel.getBounds().toFloat().getCentre(), 152.f));
+    for (auto& p : sparks.ps) add (moving, square (p.pos, p.size * 3.f + 2.f));
+    for (auto& b : bolts.bolts) add (moving, b.path.getBounds().expanded (16.f));
+
+    dirty.add (moving); dirty.add (prevMoving);
+    prevMoving = moving;
+    dirty.consolidate();
+    for (auto& r : dirty) repaint (r);
+}
+
+void DzPanel::paintLive (juce::Graphics& g)
+{
+    const float lv = view.level, hit = view.hit, ign = view.ignition(), t = view.time;
+
+    // neon strips along the rails, a pulse runs down them on every note
+    for (int side = 0; side < 2; ++side)
+    {
+        const float x = side == 0 ? 66.5f : 936.f;
+        juce::Path strip; strip.startNewSubPath (x, 0.f); strip.lineTo (x, (float) getHeight());
+        const auto c = side == 0 ? amber : ember;
+        if (! g.clipRegionIntersects (juce::Rectangle<int> ((int) x - 30, 0, 60, getHeight()))) continue;
+        hfx::neonStroke (g, strip, c, 2.f, ign * (0.3f + 0.8f * lv + 0.4f * hit));
+        if (view.sinceHit < 0.9f) hfx::glowSpot (g, { x, view.sinceHit * 900.f }, 26.f, c, 0.9f * (1.f - view.sinceHit / 0.9f));
+    }
+
+    // speaker grilles = LED meters: the holes of the faceplate light up from the bottom with the level (left grille =
+    // left channel), green -> amber -> red, the middle columns a little higher, the peak row stays lit a moment
+    for (int i = 0; i < 2; ++i)
+    {
+        const auto r = grilles (i);
+        if (! g.clipRegionIntersects (r.expanded (8.f).getSmallestIntegerContainer())) continue;
+        const float level = i == 0 ? view.levelL : view.levelR, hold = i == 0 ? view.holdL : view.holdR;
+        const auto* holes = i == 0 ? Face::grille0 : Face::grille1;
+        const int n = i == 0 ? (int) std::size (Face::grille0) : (int) std::size (Face::grille1);
+        float top = 1e9f, bottom = -1e9f, left = 1e9f, right = -1e9f;
+        for (int k = 0; k < n; ++k) { top = juce::jmin (top, holes[k].y); bottom = juce::jmax (bottom, holes[k].y); left = juce::jmin (left, holes[k].x); right = juce::jmax (right, holes[k].x); }
+        const float span = juce::jmax (1.f, bottom - top), midX = (left + right) * 0.5f, halfW = juce::jmax (1.f, (right - left) * 0.5f);
+        for (int k = 0; k < n; ++k)
+        {
+            const float h = (bottom - holes[k].y) / span;   // 0 at the bottom, 1 at the top
+            const float centre = 1.f - std::abs (holes[k].x - midX) / halfW;
+            const float colLevel = juce::jlimit (0.f, 1.f, level * (0.7f + 0.3f * centre) + 0.06f * std::sin (t * 7.f + holes[k].x * 0.21f) * level);
+            const bool lit = h <= colLevel + 0.02f, peak = std::abs (h - hold) < 5.f / span && hold > 0.05f;
+            if (! (lit || peak)) continue;
+            g.setOpacity (peak && ! lit ? 0.8f : 1.f);
+            g.drawImageAt (ledSprite[h < 0.6f ? 0 : h < 0.82f ? 1 : 2], juce::roundToInt (holes[k].x) - 7, juce::roundToInt (holes[k].y) - 7);
+        }
+    }
+    // envelope faders: the faceplate's LED dots beside the stage playing now rise with the envelope
+    for (int i = 0; i < 9; ++i)
+    {
+        const auto& k = i < 4 ? env[i] : rsl[i - 4];
+        const float led = (float) k.s.getProperties().getWithDefault ("led", 0.f);
+        if (led <= 0.f || ! g.clipRegionIntersects (k.s.getBounds().expanded (12))) continue;
+        for (int row = 0; row < Face::ledRows; ++row)
+        {
+            const float h = (float) (Face::ledRows - 1 - row) / (float) (Face::ledRows - 1);
+            if (h > led + 0.02f) continue;
+            for (int side = 0; side < 2; ++side)
+            {
+                const auto p = faderDot (i, side, row);
+                g.setOpacity (1.f);
+                g.drawImageAt (ledSprite[h < 0.55f ? 0 : h < 0.8f ? 1 : 2], juce::roundToInt (p.x) - 7, juce::roundToInt (p.y) - 7);
+            }
+        }
+    }
+
+    // medallion: a halo breathing with the sound, a shock ring on every note
+    if (g.clipRegionIntersects (juce::Rectangle<float> (2.f * (medallionR + 48.f), 2.f * (medallionR + 48.f)).withCentre (medallion).getSmallestIntegerContainer()))
+    {
+        const float mix = 0.5f + 0.5f * std::sin (t * 0.7f), k = ign * (0.3f + 1.1f * lv + 0.7f * hit);
+        haloA.draw (g, medallion, medallionR, 34.f, amber, k * (1.f - mix));
+        haloB.draw (g, medallion, medallionR, 34.f, ember, k * mix);
+    }
+    if (view.sinceHit < 0.6f)
+    {
+        juce::Path ring; const float rr = medallionR + view.sinceHit * 170.f;
+        ring.addEllipse (medallion.x - rr, medallion.y - rr, rr * 2.f, rr * 2.f);
+        hfx::neonStroke (g, ring, amber.interpolatedWith (ember, view.sinceHit / 0.6f), 1.6f, 0.9f * (1.f - view.sinceHit / 0.6f));
+    }
+
+    // knob halos behind the knobs; the LFO dot around RATE; the live cutoff marker on CUTOFF
+    for (auto* k : all)
+    {
+        if (k->lin || ! g.clipRegionIntersects (k->s.getBounds().expanded (18))) continue;
+        const auto b = k->s.getBounds().toFloat().reduced (3.f);
+        const float r = juce::jmin (b.getWidth(), b.getHeight()) * 0.5f;
+        const auto c = b.getCentre();
+        const auto rp = k->s.getRotaryParameters();
+        const float pos = (float) k->s.valueToProportionOfLength (k->s.getValue());
+        const float a = rp.startAngleRadians + pos * (rp.endAngleRadians - rp.startAngleRadians);
+        juce::Path val; val.addCentredArc (c.x, c.y, r, r, 0.f, rp.startAngleRadians, a, true);
+        hfx::neonStroke (g, val, ramp (pos), 3.5f, ign * k->glow, false);
+        if (k->orbit >= 0.f)
+        {
+            const float oa = juce::MathConstants<float>::twoPi * k->orbit - juce::MathConstants<float>::halfPi;
+            const auto p = c + juce::Point<float> (std::cos (oa), std::sin (oa)) * (r + 5.f);
+            hfx::glowSpot (g, p, 9.f, ember, 0.9f * ign);
+            g.setColour (juce::Colours::white); g.fillEllipse (p.x - 1.8f, p.y - 1.8f, 3.6f, 3.6f);
+        }
+        if (k->mod >= 0.f)
+        {
+            const float ma = rp.startAngleRadians + juce::jlimit (0.f, 1.f, k->mod) * (rp.endAngleRadians - rp.startAngleRadians);
+            const auto p = c + juce::Point<float> (std::sin (ma), -std::cos (ma)) * r;
+            hfx::glowSpot (g, p, 10.f, juce::Colours::white, 0.8f);
+        }
+    }
+
+    // neon title: ignites when the plug-in opens, breathes, flares with the sound; a band of light sweeps it every 7 s
+    if (g.clipRegionIntersects (title.getBounds().expanded (44.f).getSmallestIntegerContainer()))
+    {
+        const auto b = title.getBounds();
+        juce::ColourGradient brush (amber, b.getX(), 0.f, ember, b.getRight(), 0.f, false);
+        const float flicker = rnd.nextFloat() < 0.004f ? 0.55f : 1.f;
+        const float sweep = std::fmod (t, 7.f) / 1.3f;
+        title.draw (g, brush, juce::Colour (0xfffbf6ea), ign * flicker * (0.55f + 0.15f * view.breathe (3.5f, 0.f, 1.f) + 0.55f * lv + 0.45f * hit), sweep < 1.2f ? sweep : -1.f);
+    }
+
+    // cassette reels: the hubs turn while notes play
+    for (auto rl : Face::reels)
+    {
+        const juce::Point<float> c { rl.x, rl.y };
+        if (! g.clipRegionIntersects (juce::Rectangle<int> ((int) c.x - 20, (int) c.y - 20, 40, 40))) continue;
+        g.setColour (juce::Colour (0xff1b1b1b)); g.fillEllipse (c.x - 10.f, c.y - 10.f, 20.f, 20.f);
+        g.setColour (juce::Colour (0xffe8e4dc)); g.drawEllipse (c.x - 7.6f, c.y - 7.6f, 15.2f, 15.2f, 2.2f);
+        for (int i = 0; i < 6; ++i)
+        {
+            const float a = reelAngle + (float) i * juce::MathConstants<float>::twoPi / 6.f;
+            juce::Path tooth; tooth.addRectangle (-1.1f, -7.2f, 2.2f, 3.2f);
+            g.fillPath (tooth, juce::AffineTransform::rotation (a).translated (c.x, c.y));
+        }
+        if (reelSpeed > 0.05f) hfx::glowSpot (g, c, 16.f, amber, 0.25f * reelSpeed);
+    }
+
+    // preset screen: a light runs around its frame, the name lights up when the preset changes
+    {
+        const float f = std::fmod (t * 0.18f, 1.f);
+        const auto rp = runnerPos();
+        if (g.clipRegionIntersects (juce::Rectangle<int> ((int) rp.x - 18, (int) rp.y - 18, 36, 36)))
+            hfx::glowSpot (g, rp, 16.f, f < 0.5f ? amber : ember, 0.8f * ign);
+        if (presetFlash > 0.02f) hfx::glowSpot (g, presetLabel.getBounds().toFloat().getCentre(), 150.f, juce::Colour (0xfffff2c8), 0.18f * presetFlash);
+    }
+
+    // stereo LED meter under the brand name
+    {
+        const auto m = R (1490, 282, 340, 22).toFloat();
+        if (g.clipRegionIntersects (m.expanded (4.f).getSmallestIntegerContainer()))
+        {
+            hfx::ledBar (g, m.withHeight (4.5f), view.levelL, view.holdL);
+            hfx::ledBar (g, m.withTrimmedTop (6.5f), view.levelR, view.holdR);
+        }
+    }
+
+    // keyboard: a neon line along its top edge
+    {
+        juce::Path top; top.startNewSubPath ((float) keys.getX(), (float) keys.getY() - 1.f); top.lineTo ((float) keys.getRight(), (float) keys.getY() - 1.f);
+        if (g.clipRegionIntersects (keys.getBounds().withHeight (1).expanded (2, 22)))
+            hfx::neonStroke (g, top, ember.interpolatedWith (amber, hit), 1.4f, ign * (0.25f + 0.9f * lv));
+    }
+
+    sparks.draw (g);
+    bolts.draw (g);
 }
 
 void DzPanel::resized()
 {
-    auto place = [] (Knob& k, int cx, int cy, int sz) { k.s.setBounds (C (cx, cy, sz, sz)); };
-    place (rate, 258, 648, 100);  place (amount, 413, 648, 100); place (pitch, 567, 648, 100);
-    place (volume, 1575, 395, 100); place (reverb, 1752, 395, 100);
-    place (glide, 825, 865, 100); place (filter, 1068, 865, 100); place (resoK, 1222, 865, 100);
-    place (chorus, 1387, 838, 100); place (dist, 1515, 838, 100); place (dtime, 1643, 860, 100); place (feedback, 1771, 860, 100);
-    place (tone, 640, 365, 64);  place (body, 740, 365, 64); place (bright, 640, 455, 64); place (width, 740, 455, 64);
-    place (texture, 1262, 365, 64); place (fenvK, 1362, 365, 64); place (delay, 1312, 455, 64);
-    const int ex[4] = { 257, 362, 467, 573 }, tx[5] = { 1388, 1485, 1583, 1680, 1776 };
-    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 28, 775, 56, 190));
-    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 545, 56, 155));
+    // knobs: centred on their caps in the faceplate, the value ring just outside the cap
+    Knob* byName[] = { &rate, &amount, &pitch, &volume, &reverb, &glide, &filter, &resoK, &chorus, &dist, &dtime, &feedback,
+                       &tone, &body, &bright, &width, &texture, &fenvK, &delay };
+    for (size_t i = 0; i < std::size (Face::caps); ++i)
+    {
+        const auto& c = Face::caps[i];
+        const float ring = c.r + (c.r > 14.f ? 4.5f : 2.6f), half = ring + 3.f;
+        byName[i]->s.setBounds (juce::Rectangle<float> (half * 2.f, half * 2.f).withCentre ({ c.x, c.y }).toNearestInt());
+    }
+    // faders: on the slots of the faceplate, travelling over the slot's length
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (juce::Rectangle<int> (28, 86).withCentre ({ juce::roundToInt (Face::slotX[i]), 435 }));
+    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (juce::Rectangle<int> (28, 66).withCentre ({ juce::roundToInt (Face::slotX[4 + i]), 311 }));
     bend.s.setBounds (C (280, 1255, 90, 260)); modw.s.setBounds (C (432, 1255, 90, 260));
     cWave.c.setBounds (R (665, 985, 205, 57)); cLfo.c.setBounds (R (900, 985, 205, 57)); cDest.c.setBounds (R (1135, 985, 205, 57));
     cFilt.c.setBounds (R (1373, 985, 207, 57)); cMono.c.setBounds (R (1612, 985, 206, 57));
@@ -413,4 +704,6 @@ void DzPanel::resized()
     const auto kb = R (583, 1110, 1232, 305);
     keys.setKeyWidth ((float) kb.getWidth() / 36.f);   // 36 white keys between MIDI 36 and 96 fill the keyboard area exactly
     keys.setBounds (kb);
+    title.set ("DZPOWER", juce::FontOptions (56.f, juce::Font::bold), R (700, 625, 600, 120).toFloat());
+    bgCache = {};
 }

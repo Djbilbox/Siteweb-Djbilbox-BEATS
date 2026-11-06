@@ -1,4 +1,4 @@
-# CHINTZWAZ
+# CHINTAWAZ
 
 Retro floral synthesizer: sitar, flower-power keys, tape strings, flutes, kalimba, pads and psychedelic organ, from eight synthesis engines.
 
@@ -13,16 +13,16 @@ Retro floral synthesizer: sitar, flower-power keys, tape strings, flutes, kalimb
 
 ## Overview
 
-CHINTZWAZ is a retro, bohemian synthesizer sold under the HUMPIRE brand by DJBILBOX BEATS. It uses no samples. Every sound is generated in real time by one of eight engines: Sitar Bloom (a plucked string with a buzzing bridge), Flower EP (an electric piano with a bell-like tine), Mellotron (five detuned saws with tape flutter and breath), Hippie Flute (a sine with harmonics, vibrato and breath noise), Kalimba (short metallic tines), Daisy Pad (detuned saws with a sub octave and a slowly breathing filter), Bloom Bass (a filtered triangle/saw with a round sub) and Psyche Organ (a drawbar organ with tremolo).
+CHINTAWAZ is a retro, bohemian synthesizer sold under the HUMPIRE brand by DJBILBOX BEATS. It uses no samples. Every sound is generated in real time by one of eight engines: Sitar Bloom (a plucked string with a buzzing bridge), Flower EP (an electric piano with a bell-like tine), Mellotron (five detuned saws with tape flutter and breath), Hippie Flute (a sine with harmonics, vibrato and breath noise), Kalimba (short metallic tines), Daisy Pad (detuned saws with a sub octave and a slowly breathing filter), Bloom Bass (a filtered triangle/saw with a round sub) and Psyche Organ (a drawbar organ with tremolo).
 
 Five character controls (TONE, BODY, BRIGHT, WIDTH, TEXTURE) reshape each engine. The sound then goes through a multimode filter with its own envelope, an amplitude envelope, an LFO and an effects chain: distortion, chorus, ping-pong delay and reverb. The look is a pink brushed-metal faceplate on floral wallpaper.
 
-CHINTZWAZ fits Lo-fi Hip-Hop and Boom Bap loops, psychedelic Soul and Funk, Oriental-flavored melodies (sitar, flute), Afrobeats and Amapiano (kalimba, pads), dreamy pads and retro keys. Most presets load in Poly mode (up to 16 voices). Twelve presets load in Mono mode: one flute-and-tape lead and the bass and organ voices.
+CHINTAWAZ fits Lo-fi Hip-Hop and Boom Bap loops, psychedelic Soul and Funk, Oriental-flavored melodies (sitar, flute), Afrobeats and Amapiano (kalimba, pads), dreamy pads and retro keys. Most presets load in Poly mode (up to 16 voices). Twelve presets load in Mono mode: one flute-and-tape lead and the bass and organ voices.
 
 ## Quick start in FL Studio
 
-1. In the **Channel rack**, click **+** and choose **CHINTZWAZ** (vendor **DJBILBOX BEATS**). You can also drag it from the **Plugin database > Generators** browser.
-2. The plugin opens on **CHINTZWAZ - Init Patch**: the Sitar Bloom engine in Poly mode.
+1. In the **Channel rack**, click **+** and choose **CHINTAWAZ** (vendor **DJBILBOX BEATS**). You can also drag it from the **Plugin database > Generators** browser.
+2. The plugin opens on **CHINTAWAZ - Init Patch**: the Sitar Bloom engine in Poly mode.
 3. Click the **folder icon** at the left of the preset display. Pick a bank, then a preset. You can also step through all 70 presets with the **<** and **>** arrows.
 4. Play from your MIDI keyboard or draw notes in the **Piano roll**. The on-screen keyboard covers MIDI notes 48 to 96 (C4 to C8 in FL Studio naming, where middle C is C5). Keys, pads and plucks work well in the middle of that range; the Bloom Bass presets sit lower, so play them from a MIDI keyboard or the Piano roll.
 5. Shape the sound with the three main controls:
@@ -41,7 +41,7 @@ The window opens at 1000 x 746 pixels. Drag the bottom-right corner to resize it
 
 **Logo (top right).** The DB logo and the DJBILBOXBEATS name.
 
-**Center.** The camel artwork, the CHINTZWAZ title and "By Humpire". The two perforated speaker grilles on each side of the artwork carry the small character knobs (see below).
+**Center.** The camel artwork, the CHINTAWAZ title and "By Humpire". The two perforated speaker grilles on each side of the artwork carry the small character knobs (see below).
 
 **LFO section (left).** **RATE** and **AMOUNT** set the LFO speed and depth. **TRANSPOSE**, also under this header, is the global transposition (-12 to +12 semitones). It is not an LFO control.
 
@@ -69,7 +69,7 @@ The window opens at 1000 x 746 pixels. Drag the bottom-right corner to resize it
 
 Signal flow: engine, then filter, then amplitude envelope (per voice). The voices are summed, then processed by Distortion, Chorus, Delay and Reverb. A DC blocker and a soft limiter protect the output.
 
-CHINTZWAZ exposes 34 automatable parameters. The host name is shown in parentheses when it differs from the panel label.
+CHINTAWAZ exposes 34 automatable parameters. The host name is shown in parentheses when it differs from the panel label.
 
 | Control | Range | Default | What it does |
 |---|---|---|---|
@@ -123,7 +123,7 @@ CHINTZWAZ exposes 34 automatable parameters. The host name is shown in parenthes
 
 ## Factory presets
 
-CHINTZWAZ includes 70 factory presets in 7 banks of 10. 58 load in Poly mode and 12 in Mono mode (Violin Tape; Breathy Dawn, Sad Daisy, Flute Echo, Wind In Petals and Whistling Gardener; and the Bloom Bass & Organs presets Bloom Bass, Round Sub, Fuzz Petal, Slide Stem, Pluck Root and Vox Garden).
+CHINTAWAZ includes 70 factory presets in 7 banks of 10. 58 load in Poly mode and 12 in Mono mode (Violin Tape; Breathy Dawn, Sad Daisy, Flute Echo, Wind In Petals and Whistling Gardener; and the Bloom Bass & Organs presets Bloom Bass, Round Sub, Fuzz Petal, Slide Stem, Pluck Root and Vox Garden).
 
 **Sitar & Strings** (Sitar Bloom engine): Sitar Bloom, Raga Morning, Patchouli Pluck, Jawari Buzz, Marigold Drone, Soft Tamboura, Hippie Strum, Bazaar Echo, Low Sitar, Glass Sitar.
 
@@ -141,7 +141,7 @@ CHINTZWAZ includes 70 factory presets in 7 banks of 10. 58 load in Poly mode and
 
 **Loading a preset** first resets every parameter to its default value, then applies the preset. The two wheels are not changed.
 
-**User presets.** Click the disk icon to save the current sound as a `.czpreset` file. The default folder is `DJBILBOX BEATS/CHINTZWAZ/Presets` inside your Documents folder. Files in this folder appear in the **User** submenu of the preset menu. Use **Open a .czpreset file...** in the same menu to load a file from another location. The preset display shows the file name.
+**User presets.** Click the disk icon to save the current sound as a `.czpreset` file. The default folder is `DJBILBOX BEATS/CHINTAWAZ/Presets` inside your Documents folder. Files in this folder appear in the **User** submenu of the preset menu. Use **Open a .czpreset file...** in the same menu to load a file from another location. The preset display shows the file name.
 
 The host also sees the 70 factory presets as a program list. Your project saves the full state of the plugin, including the preset name.
 
@@ -158,7 +158,7 @@ The host also sees the 70 factory presets as a program list. Your project saves 
 
 ## MIDI, automation and performance
 
-**Notes and channels.** CHINTZWAZ responds to all 128 MIDI notes on any MIDI channel. Velocity controls the level according to the VELOCITY slider.
+**Notes and channels.** CHINTAWAZ responds to all 128 MIDI notes on any MIDI channel. Velocity controls the level according to the VELOCITY slider.
 
 **Polyphony.** Up to 16 voices in Poly mode. When you play a 17th note, a voice is taken over. In Mono mode, each new note stops the previous one (last-note priority). Releasing the newest note does not bring back an earlier note that you still hold.
 
@@ -176,8 +176,8 @@ The host also sees the 70 factory presets as a program list. Your project saves 
 
 ## FAQ
 
-**CHINTZWAZ does not appear in FL Studio.**
-Open **Options > Manage plugins**, check that `C:\Program Files\Common Files\VST3` is in the search paths, then click **Find installed plugins**. The plugin is listed as **CHINTZWAZ** under **DJBILBOX BEATS**. It is an instrument: load it in the Channel rack, not in a Mixer insert slot.
+**CHINTAWAZ does not appear in FL Studio.**
+Open **Options > Manage plugins**, check that `C:\Program Files\Common Files\VST3` is in the search paths, then click **Find installed plugins**. The plugin is listed as **CHINTAWAZ** under **DJBILBOX BEATS**. It is an instrument: load it in the Channel rack, not in a Mixer insert slot.
 
 **I hear nothing, or almost nothing, when I click the on-screen keyboard.**
 Check VOLUME, and check that CUTOFF is not turned all the way down with FILTER TYPE set to Low Pass. Some presets have a long attack (pads, Slow Bloom), so the sound fades in slowly. For notes outside the on-screen keyboard range (MIDI 48 to 96), play from a MIDI keyboard or the Piano roll.

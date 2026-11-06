@@ -21,6 +21,32 @@ juce_add_plugin(HIGHROLLER_GOLD
 
 target_sources(HIGHROLLER_GOLD PRIVATE
     Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+target_include_directories(HIGHROLLER_GOLD PRIVATE ../ALL_PLUGINS/HumpireFX)   # NeonFX.h / PremiumSkin.h: premium skin and live light
+target_compile_definitions(HIGHROLLER_GOLD PRIVATE JUCE_USE_WINDOWS_MEDIA_FORMAT=0)
+
+# MinGW (llvm-mingw): C++ runtime linked statically (no libc++.dll on the customer's machine) and a Common Controls v6
+# manifest inside the VST3 DLL (FL Studio's bridge has none: without it the plug-in would not load)
+if(MINGW)
+    foreach(fmt IN ITEMS VST3 Standalone)
+        if(TARGET HIGHROLLER_GOLD_${fmt})
+            target_link_options(HIGHROLLER_GOLD_${fmt} PRIVATE -static)
+        endif()
+    endforeach()
+    target_sources(HIGHROLLER_GOLD_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ALL_PLUGINS/HumpireFX/plugin_manifest.rc)
+endif()
+
+# films / captures the interface (Tools/UiFrames.cpp): checks the premium skin; not part of the plug-in
+option(HUMPIRE_UI_TOOLS "Build the interface capture tool" OFF)
+if(HUMPIRE_UI_TOOLS)
+    juce_add_console_app(HIGHROLLER_GOLDUiFrames PRODUCT_NAME "HIGHROLLER_GOLDUiFrames")
+    target_sources(HIGHROLLER_GOLDUiFrames PRIVATE Tools/UiFrames.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+    target_compile_definitions(HIGHROLLER_GOLDUiFrames PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_USE_WINDOWS_MEDIA_FORMAT=0)
+    target_include_directories(HIGHROLLER_GOLDUiFrames PRIVATE Source ../ALL_PLUGINS/HumpireFX)
+    target_link_libraries(HIGHROLLER_GOLDUiFrames PRIVATE HgAssets juce::juce_audio_utils juce::juce_dsp juce::juce_recommended_config_flags)
+    if(MINGW)
+        target_link_options(HIGHROLLER_GOLDUiFrames PRIVATE -static)
+    endif()
+endif()
 target_compile_definitions(HIGHROLLER_GOLD PUBLIC
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 target_link_libraries(HIGHROLLER_GOLD PRIVATE HgAssets

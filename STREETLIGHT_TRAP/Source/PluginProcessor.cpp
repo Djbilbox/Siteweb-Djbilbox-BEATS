@@ -9,6 +9,7 @@ SlProcessor::SlProcessor()
       synth (glideState)
 {
     ptrs.bind (apvts);
+    glideState.live = &live;
     for (int i = 0; i < 16; ++i) synth.addVoice (new SlVoice (ptrs, glideState));
     synth.addSound (new SlSound());
 }
@@ -52,6 +53,7 @@ void SlProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     buffer.clear();
     if (n == 0 || buffer.getNumChannels() < 1 || dly.bl.empty()) return;   // nothing to do / prepareToPlay not called yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
+    live.beginBlock (midi);
 
     if (ptrs (mono) > 0.5f) // mono : derniere note prioritaire, coupe la precedente
     {
@@ -142,6 +144,7 @@ void SlProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
         L[i] = std::tanh (yl);
         if (R != L) R[i] = std::tanh (yr);
     }
+    live.publish (L, R, n);
 }
 
 void SlProcessor::getStateInformation (juce::MemoryBlock& dest)

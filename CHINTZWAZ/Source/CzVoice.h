@@ -1,5 +1,7 @@
 #pragma once
 #include "Params.h"
+#include "NeonFX.h"
+#include "FluteBank.h"
 #include <cmath>
 
 namespace Cz
@@ -8,6 +10,7 @@ struct GlideState
 {
     std::atomic<float> lastFreq { 0.f };
     std::atomic<float> lastMod { 0.f };   // latest mod wheel (CC1) value 0..1, kept even when no voice is playing
+    hfx::LiveTap* live = nullptr;          // what the interface shows (envelopes, LFO, cutoff of the loudest voice)
 };
 
 struct SVF
@@ -66,13 +69,14 @@ public:
         for (auto* s : { &breathBP, &sym1, &sym2, &f1, &f2, &fl, &voiceFilter }) s->reset();
         pan = (rng.nextFloat() - 0.5f) * 2.f;
         lfoPh = 0.0; shValue = rng.nextFloat() * 2.f - 1.f;
-        freshNote = true; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        freshNote = true; released = false; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        flute = nullptr; flutePos = 0.0; noteKey = midiNote;   // the real flute picks its recording when it first plays
         fadsr.noteOn(); adsr.noteOn();
     }
 
     void stopNote (float, bool allowTailOff) override
     {
-        if (allowTailOff) { adsr.noteOff(); fadsr.noteOff(); }
+        if (allowTailOff) { adsr.noteOff(); fadsr.noteOff(); released = true; }
         else { adsr.reset(); fadsr.reset(); clearCurrentNote(); }
     }
 
@@ -129,7 +133,7 @@ public:
             float t[5];
             for (int k = 0; k < 5; ++k) t[k] = juce::jlimit (0.f, 1.f, tb[k] + (dst == 3 ? mod * 0.5f : 0.f));
 
-            static constexpr float trim[8] = { 1.1f, 1.2f, 1.0f, 0.7f, 1.4f, 1.0f, 0.8f, 1.2f };   // equilibrage des niveaux entre moteurs
+            static constexpr float trim[8] = { 1.1f, 1.2f, 1.0f, 1.05f, 1.4f, 1.0f, 0.8f, 1.2f };   // equilibrage des niveaux entre moteurs
             float y = renderEngine (freq, t, (float) sr) * trim[eng];
             { const float dcOut = y - dcX + dcR * dcY; dcX = y; dcY = dcOut; y = dcOut; } // bloqueur DC
 
@@ -137,11 +141,13 @@ public:
             {
                 float fc = smCut * std::exp2 ((dst == 1 ? mod * 3.f : 0.f) + (float) std::log2 (freq / 261.6) * 0.25f + fdepth * fenvLevel * 5.f);
                 voiceFilter.set (fc, resoQ, sr);
+                lastFc = fc;
             }
             auto fo = voiceFilter.process (y);
             y = ft == 0 ? fo.lp : ft == 1 ? fo.hp : fo.bp * 1.5f;
 
             const float env = adsr.getNextSample();
+            lastEnv = env; lastLfo = lfo;
             fenvLevel = fadsr.getNextSample();
             float amp = env * ((1.f - velSens) + velSens * vel) * smVol * 0.5f;
             if (dst == 2) amp *= 1.f - 0.5f * amt * (0.5f + 0.5f * lfo);
@@ -151,6 +157,12 @@ public:
             if (R) R[start + i] += y * gR;
             if (age < 0x3fffffff) ++age;   // saturate: no signed overflow on very long held notes
             if (! adsr.isActive()) { clearCurrentNote(); break; }
+        }
+        if (auto* t = glideState.live; t != nullptr && isVoiceActive())
+        {
+            const float secs = (float) age / (float) sr;
+            t->voice (lastEnv, hfx::envStage (released, secs, P (atk), P (dec)), fenvLevel, hfx::envStage (released, secs, P (fatk), P (fdec)),
+                      lastLfo, (float) lfoPh, lastFc);
         }
     }
 
@@ -227,16 +239,26 @@ private:
             out = fl.process (s).lp * 0.7f + f1.process (s).bp * body * 0.7f + noise * 0.02f * tex;
             break;
         }
-        case 3: // hippie flute : sinus + harmoniques + souffle + vibrato
+        case 3: // hippie flute: a real recorded flute (VSCO 2 CE, CC0), each note looped while it is held.
+                // WIDTH: above half = the recording played with vibrato, below = straight tone (soft or loud take after
+                // the velocity); TONE darkens, BRIGHT adds air on top, BODY warms the low end, TEXTURE adds breath.
         {
-            ph[4] += 5.2 / sr; wrap (ph[4]);
-            const float vib = std::sin ((float) ph[4] * twoPi) * width * 0.012f * juce::jmin (1.f, tsec * 2.f);
-            dt *= 1.0 + (double) vib;
-            ph[0] += dt; wrap (ph[0]);
-            const float s1 = std::sin ((float) ph[0] * twoPi);
-            out = s1 + 0.25f * bright * std::sin (2.f * (float) ph[0] * twoPi) + 0.12f * bright * std::sin (3.f * (float) ph[0] * twoPi);
-            f1.set ((float) f * (2.f + 3.f * tone), 3.f + 4.f * body, sr);
-            out = out * 0.55f + f1.process (noise).bp * (0.12f + 0.6f * tex);
+            if (flute == nullptr) { flute = FluteBank::get().pick (noteKey, width >= 0.5f, vel); flutePos = 0.0; }
+            if (flute == nullptr) break;
+            const auto& info = *flute->info;
+            const float* buf = flute->audio.getReadPointer (0);
+            const double root = juce::MidiMessage::getMidiNoteInHertz (info.key) * std::exp2 ((double) info.cents / 1200.0);
+            const int i0 = (int) flutePos;
+            const float fr = (float) (flutePos - i0);
+            const float s0 = buf[juce::jmin (i0, info.length - 1)], s1 = buf[juce::jmin (i0 + 1, info.length - 1)];
+            float smp = s0 + (s1 - s0) * fr;
+            flutePos += f / root * 44100.0 / (double) sr;
+            if (flutePos >= (double) info.loopEnd) flutePos -= (double) (info.loopEnd - info.loopStart);
+            f1.set (juce::jlimit (300.f, sr * 0.45f, (float) f * (3.f + 10.f * (1.f - tone))), 0.7f, sr);       // tone: a gentle low pass
+            auto lp = f1.process (smp);
+            smp = lp.lp * (0.6f + 0.4f * (1.f - bright)) + lp.hp * (0.15f + 0.6f * bright) + lp.bp * 0.25f * body;
+            f2.set ((float) f * 2.2f, 1.5f, sr);
+            out = smp * 1.6f + f2.process (noise).bp * (0.015f + 0.12f * tex);
             break;
         }
         case 4: // kalimba : lames metalliques courtes
@@ -305,10 +327,13 @@ private:
     float ksPrev = 0.f, exciteLP = 0.f, targetFreq = 440.f, curFreq = 440.f, vel = 1.f, pan = 0.f;
     float midiBend = 0.f, midiMod = 0.f, shValue = 0.f;
     float smVol = 0.f, smSemi = 0.f, smBend = 0.f, smCut = 9000.f;
-    bool freshNote = true;
-    float fenvLevel = 0.f;
+    bool freshNote = true, released = false;
+    float fenvLevel = 0.f, lastEnv = 0.f, lastLfo = 0.f, lastFc = 9000.f;   // for the interface
     float dcX = 0.f, dcY = 0.f, dcR = 0.998f;
     double ph[8] {}, lfoPh = 0.0;
+    const FluteBank::Note* flute = nullptr;   // real flute: the recording this note plays and where it is
+    double flutePos = 0.0;
+    int noteKey = 60;
     float fmFb = 0.f, holdV = 0.f, holdC = 0.f;
 };
 }

@@ -30,7 +30,7 @@ Hi,
 If GFUNK 2027 found a place in your beats, two HUMPIRE synths go further in the same direction:
 
 THUGLIFE: a G-Funk synth focused on West Coast leads and bass.
-https://djbilboxbeats.gumroad.com/l/quwjty
+https://djbilboxbeats.gumroad.com/l/thuglife
 
 SAN ANDREAS LEAD: 70 G-Funk lead presets, from whistles to talkbox-style leads.
 https://djbilboxbeats.gumroad.com/l/zfkdea

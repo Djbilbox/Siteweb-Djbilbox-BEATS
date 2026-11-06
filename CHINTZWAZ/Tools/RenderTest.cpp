@@ -1,4 +1,4 @@
-// Suite de validation hors-ligne CHINTZWAZ (voir skill dsp-quality-validation).
+// Suite de validation hors-ligne CHINTAWAZ (voir skill dsp-quality-validation).
 //  1) rendu des 70 presets en WAV (accord C3)           2) matrice frequence d'echantillonnage x taille de bloc
 //  3) silence, notes rapides, polyphonie max/vol de voix  4) panic (CC123/CC120), pedale sustain, tail
 //  5) changement de preset en cours de lecture            6) rappel d'etat (save/restore)

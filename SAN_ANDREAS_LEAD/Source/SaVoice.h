@@ -1,5 +1,6 @@
 #pragma once
 #include "Params.h"
+#include "NeonFX.h"
 #include <cmath>
 
 namespace Sa
@@ -8,6 +9,7 @@ struct GlideState
 {
     std::atomic<float> lastFreq { 0.f };
     std::atomic<float> lastMod { 0.f };   // latest mod wheel (CC1) value 0..1, kept even when no voice is playing
+    hfx::LiveTap* live = nullptr;          // what the interface shows (envelopes, LFO, cutoff of the loudest voice)
 };
 
 struct SVF
@@ -66,13 +68,13 @@ public:
         for (auto* s : { &breathBP, &sym1, &sym2, &f1, &f2, &fl, &voiceFilter }) s->reset();
         pan = (rng.nextFloat() - 0.5f) * 2.f;
         lfoPh = 0.0; shValue = rng.nextFloat() * 2.f - 1.f;
-        freshNote = true; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        freshNote = true; released = false; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
         fadsr.noteOn(); adsr.noteOn();
     }
 
     void stopNote (float, bool allowTailOff) override
     {
-        if (allowTailOff) { adsr.noteOff(); fadsr.noteOff(); }
+        if (allowTailOff) { adsr.noteOff(); fadsr.noteOff(); released = true; }
         else { adsr.reset(); fadsr.reset(); clearCurrentNote(); }
     }
 
@@ -137,11 +139,13 @@ public:
             {
                 float fc = smCut * std::exp2 ((dst == 1 ? mod * 3.f : 0.f) + (float) std::log2 (freq / 261.6) * 0.25f + fdepth * fenvLevel * 5.f);
                 voiceFilter.set (fc, resoQ, sr);
+                lastFc = fc;
             }
             auto fo = voiceFilter.process (y);
             y = ft == 0 ? fo.lp : ft == 1 ? fo.hp : fo.bp * 1.5f;
 
             const float env = adsr.getNextSample();
+            lastEnv = env; lastLfo = lfo;
             fenvLevel = fadsr.getNextSample();
             float amp = env * ((1.f - velSens) + velSens * vel) * smVol * 0.5f;
             if (dst == 2) amp *= 1.f - 0.5f * amt * (0.5f + 0.5f * lfo);
@@ -151,6 +155,12 @@ public:
             if (R) R[start + i] += y * gR;
             if (age < 0x3fffffff) ++age;   // saturate: no signed overflow on very long held notes
             if (! adsr.isActive()) { clearCurrentNote(); break; }
+        }
+        if (auto* t = glideState.live; t != nullptr && isVoiceActive())
+        {
+            const float secs = (float) age / (float) sr;
+            t->voice (lastEnv, hfx::envStage (released, secs, P (atk), P (dec)), fenvLevel, hfx::envStage (released, secs, P (fatk), P (fdec)),
+                      lastLfo, (float) lfoPh, lastFc);
         }
     }
 
@@ -296,8 +306,8 @@ private:
     float ksPrev = 0.f, exciteLP = 0.f, targetFreq = 440.f, curFreq = 440.f, vel = 1.f, pan = 0.f;
     float midiBend = 0.f, midiMod = 0.f, shValue = 0.f;
     float smVol = 0.f, smSemi = 0.f, smBend = 0.f, smCut = 9000.f;
-    bool freshNote = true;
-    float fenvLevel = 0.f;
+    bool freshNote = true, released = false;
+    float fenvLevel = 0.f, lastEnv = 0.f, lastLfo = 0.f, lastFc = 9000.f;   // for the interface
     float dcX = 0.f, dcY = 0.f, dcR = 0.998f;
     double ph[8] {}, lfoPh = 0.0;
     float fmFb = 0.f, holdV = 0.f, holdC = 0.f;
