@@ -8,6 +8,7 @@ on:
       - '.github/workflows/gfunk-macos.yml'
       - 'GFUNK_2027_VST_Project/Source/**'
       - 'GFUNK_2027_VST_Project/CMakeLists.txt'
+      - 'GFUNK_2027_VST_Project/mac/**'
   workflow_dispatch:
 permissions:
   contents: write
