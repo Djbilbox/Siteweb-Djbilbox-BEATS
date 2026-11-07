@@ -1,0 +1,72 @@
+name: GFUNK 2027 (Windows)
+# Build Windows sur un runner GitHub propre (le PC local est compromis) : VST3 + Standalone, test des presets,
+# installateur IExpress (installer/build_installer.ps1), zip identique a celui de Gumroad.
+on:
+  push:
+    branches: [claude/blissful-newton-cxepis]
+    paths:
+      - '.github/workflows/gfunk-windows.yml'
+      - 'GFUNK_2027_VST_Project/Source/**'
+      - 'GFUNK_2027_VST_Project/CMakeLists.txt'
+      - 'GFUNK_2027_VST_Project/installer/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: gfunk-windows-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: GFUNK_2027_VST_Project
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (Visual Studio, x64)
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DGFUNK_FREE=OFF
+
+      - name: Build VST3, Standalone and the render test
+        run: cmake --build build --config Release --parallel 4 --target GFUNK2027_VST3 GFUNK2027_Standalone GFunkRenderTest
+
+      - name: Render test (every preset, no NaN / silence / clipping)
+        run: |
+          ./build/GFunkRenderTest_artefacts/Release/GFunkRenderTest.exe
+          ./build/GFunkRenderTest_artefacts/Release/GFunkRenderTest.exe hot
+
+      - name: Installer and zip
+        run: |
+          $a = 'build\GFUNK2027_artefacts\Release'
+          New-Item -ItemType Directory -Force Builds\Windows | Out-Null
+          Copy-Item "$a\VST3\GFUNK 2027.vst3" Builds\Windows -Recurse -Force
+          Copy-Item "$a\Standalone\GFUNK 2027.exe" Builds\Windows -Force
+          New-Item -ItemType Directory -Force dist\GFUNK_2027_Windows | Out-Null
+          ./installer/build_installer.ps1 -Out "$((Resolve-Path dist).Path)\GFUNK_2027_Windows\GFUNK_2027_Setup.exe"
+          pip install markdown | Out-Null
+          python installer/make_guide_html.py dist\GFUNK_2027_Windows\USER_GUIDE.html
+          Copy-Item LICENSE.md dist\GFUNK_2027_Windows\LICENSE.txt
+          Copy-Item installer\README_FIRST.txt dist\GFUNK_2027_Windows\README_FIRST.txt
+          Compress-Archive -Path dist\GFUNK_2027_Windows -DestinationPath dist\GFUNK_2027_Windows.zip -CompressionLevel Optimal
+          Get-FileHash dist\GFUNK_2027_Windows.zip, dist\GFUNK_2027_Windows\GFUNK_2027_Setup.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $(Split-Path $_.Path -Leaf)" } | Out-File dist\SHA256SUMS.txt
+          Get-Content dist\SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GFUNK_2027_Windows
+          path: |
+            GFUNK_2027_VST_Project/dist/GFUNK_2027_Windows.zip
+            GFUNK_2027_VST_Project/dist/SHA256SUMS.txt
+
+      - name: Release GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: gfunk2027-windows-v2.1.${{ github.run_number }}
+          name: GFUNK 2027 - Windows v2.1.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          body: "Built on a clean GitHub Windows runner: installer (VST3 + standalone), licence, README and user guide. SHA-256 sums in SHA256SUMS.txt."
+          files: |
+            GFUNK_2027_VST_Project/dist/GFUNK_2027_Windows.zip
+            GFUNK_2027_VST_Project/dist/SHA256SUMS.txt
