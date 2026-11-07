@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beats — G-Funk, Oriental, Afro &amp; Trap Type Beats | DJBILBOX BEATS</title>
+<meta name="description" content="Listen to 770+ instrumentals by DJBILBOX BEATS: G-Funk, West Coast, Oriental, Afro, Trap and Drill type beats. MP3, WAV and unlimited licenses for your next release.">
+<link rel="canonical" href="https://humpireplugins.netlify.app/beats.html">
+<meta property="og:title" content="Beats by DJBILBOX BEATS — Type beats for your next release">
+<meta property="og:description" content="770+ instrumentals: G-Funk, Oriental, Afro, Trap, Drill. Stream them all, license the one you need.">
+<meta property="og:image" content="https://humpireplugins.netlify.app/img/og-djbilbox.jpg">
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="assets/css/theme.css?v=26110401">
+<link rel="stylesheet" href="assets/css/theme-neon.css?v=26110401">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="assets/css/beats.css?v=26110701">
+</head>
+<body data-page="music" class="beats-page">
+
+<main class="bt">
+  <section class="bt-hero">
+    <p class="bt-eyebrow">DJBILBOX BEATS · Instrumentals</p>
+    <h1>Beats that move.<br><span>Built for your next record.</span></h1>
+    <p class="bt-lead">Stream every instrumental for free. When one is yours, pick a license and record tonight.</p>
+  </section>
+
+  <section class="bt-bar" aria-label="Filters">
+    <div class="bt-chips" id="btGenres" role="group" aria-label="Genre"></div>
+    <div class="bt-tools">
+      <label class="bt-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input id="btSearch" type="search" placeholder="Search a beat, an artist, a mood…" autocomplete="off"></label>
+      <select id="btSort" aria-label="Sort">
+        <option value="new">Newest</option>
+        <option value="az">A → Z</option>
+        <option value="shuffle">Shuffle</option>
+      </select>
+    </div>
+  </section>
+
+  <p class="bt-count" id="btCount"></p>
+  <section class="bt-grid" id="btGrid" aria-live="polite"></section>
+  <div class="bt-more"><button type="button" id="btMore" class="bt-btn ghost">Load more beats</button></div>
+
+  <section class="bt-licenses" id="licenses">
+    <h2>Licenses</h2>
+    <p class="bt-lead">Same beat, three ways to use it. Every license includes the untagged file and a PDF contract.</p>
+    <div class="bt-lic-grid" id="btLicGrid"></div>
+  </section>
+
+  <section class="bt-yt">
+    <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+    <div><h2>New beats every week on YouTube</h2>
+      <p>Subscribe so you hear them first — and tell me in the comments which one you're recording on.</p></div>
+    <a class="bt-btn" href="https://www.youtube.com/@Humpireplugins?sub_confirmation=1" target="_blank" rel="noopener">Subscribe</a>
+  </section>
+</main>
+
+<!-- licence picker -->
+<div class="bt-modal" id="btModal" hidden>
+  <div class="bt-modal-card" role="dialog" aria-modal="true" aria-labelledby="btModalTitle">
+    <button type="button" class="bt-x" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div class="bt-modal-head"><img id="btModalImg" alt=""><div><p class="bt-eyebrow">License</p><h3 id="btModalTitle"></h3><p id="btModalType" class="bt-dim"></p></div></div>
+    <div class="bt-lic-grid compact" id="btModalLic"></div>
+  </div>
+</div>
+
+<!-- player: the YouTube video stays visible while it plays -->
+<div class="bt-video" id="btVideo" hidden><div id="btYT"></div>
+  <a class="bt-video-yt" id="btOnYT" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> Watch on YouTube</a></div>
+<div class="bt-player" id="btPlayer" hidden>
+  <div class="bt-now"><img id="btNowImg" alt=""><div><b id="btNowName"></b><span id="btNowType"></span></div></div>
+  <div class="bt-ctrl">
+    <div class="bt-ctrl-btns">
+      <button type="button" id="btShuffle" aria-label="Shuffle" aria-pressed="false"><i class="fa-solid fa-shuffle"></i></button>
+      <button type="button" id="btPrev" aria-label="Previous"><i class="fa-solid fa-backward-step"></i></button>
+      <button type="button" id="btPlay" class="bt-play" aria-label="Play"><i class="fa-solid fa-play"></i></button>
+      <button type="button" id="btNext" aria-label="Next"><i class="fa-solid fa-forward-step"></i></button>
+      <button type="button" id="btRepeat" aria-label="Repeat" aria-pressed="false"><i class="fa-solid fa-repeat"></i></button>
+    </div>
+    <div class="bt-seek"><span id="btCur">0:00</span><input type="range" id="btSeek" min="0" max="1000" value="0" aria-label="Seek"><span id="btDur">0:00</span></div>
+  </div>
+  <div class="bt-side">
+    <label class="bt-vol"><i class="fa-solid fa-volume-high" aria-hidden="true"></i><input type="range" id="btVol" min="0" max="100" value="80" aria-label="Volume"></label>
+    <button type="button" class="bt-btn" id="btBuyNow">Get license</button>
+    <button type="button" class="bt-close" id="btClose" aria-label="Close player"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+</div>
+
+<script src="assets/js/beats-data.js?v=26110701"></script>
+<script src="assets/js/beats.js?v=26110701"></script>
+<script src="assets/js/site.js?v=26110701"></script>
+</body>
+</html>

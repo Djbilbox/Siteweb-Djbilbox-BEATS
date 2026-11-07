@@ -31,7 +31,7 @@ const DISCORD_URL = 'https://discord.gg/7HeMSvbN';
 /* First NAV_SPLIT entries render under "Browse", the rest under "Library". */
 const NAV_SPLIT = 9;
 const NAV = [
-  { key:'music',       label:'Music',        href:'/beats-redesign.html',      icon:'fa-music' },
+  { key:'music',       label:'Beats',        href:'/beats.html',      icon:'fa-music' },
   { key:'beatmaker',   label:'Beatmaker',    href:'/beatmaker.html',           icon:'fa-headphones' },
   { key:'shop',        label:'Shop',         href:'/shop.html',                icon:'fa-store' },
   { key:'synths',      label:'Synths',       href:'/shop.html#synths',         icon:'fa-star' },
@@ -165,7 +165,7 @@ function reflectAuthState(){
 const FOOTER_COLS = [
   { t:'Quick links', links:[
     ['Home','/index.html'],
-    ['Music','/beats-redesign.html'],
+    ['Beats','/beats.html'],
     ['Shop','/shop.html'],
     ['Streetwear','/streetwear.html'],
     ['ORIENTAL INSTRUMENT','/oriental-instrument.html'],
@@ -189,7 +189,7 @@ const FOOTER_COLS = [
     ['My Account','/account.html'],
   ]},
   { t:'For Creators', links:[
-    ['Free Beats','/beats-redesign.html'],
+    ['Free Beats','/beats.html'],
     ['Free VST Plugins','/free-vst.html'],
     /* free-bundle.html is only a redirect stub to vst.html — link the
        real free pack instead of bouncing the visitor through it.
