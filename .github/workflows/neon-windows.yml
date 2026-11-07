@@ -1,0 +1,88 @@
+name: NEON SYNTH 80s 2.0 (Windows + zip Gumroad)
+# Build Windows sur un runner GitHub propre (le PC local est compromis) : VST3 + Standalone, test des 70 presets,
+# installateur Inno Setup, puis zip unique Windows + Mac (paquet Mac pris dans la derniere release macOS).
+on:
+  push:
+    branches: [claude/blissful-newton-cxepis]
+    paths:
+      - '.github/workflows/neon-windows.yml'
+      - 'NEON_SYNTH_80S/Source/**'
+      - 'NEON_SYNTH_80S/CMakeLists.txt'
+      - 'NEON_SYNTH_80S/installer/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: neon-windows-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: NEON_SYNTH_80S
+        shell: pwsh
+    env:
+      PRODUCT: NEON SYNTH 80s 2.0
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (Visual Studio, x64)
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Build VST3, Standalone and the render test
+        run: cmake --build build --config Release --parallel 4 --target NeonSynth80s_VST3 NeonSynth80s_Standalone NeonTest
+
+      - name: Render test (70 presets, voice modes, state recall)
+        run: ./build/NeonTest_artefacts/Release/NeonTest.exe
+
+      - name: Installer (Inno Setup)
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null }
+          $bin = Join-Path $env:RUNNER_TEMP 'neon_bin'; New-Item -ItemType Directory -Force $bin | Out-Null
+          $a = 'build\NeonSynth80s_artefacts\Release'
+          Copy-Item "$a\VST3\$env:PRODUCT.vst3" $bin -Recurse
+          Copy-Item "$a\Standalone\$env:PRODUCT.exe" $bin
+          New-Item -ItemType Directory -Force dist | Out-Null
+          & $iscc /Q "/DBinDir=$bin" "/DOutDir=$((Resolve-Path dist).Path)" installer\NeonSynth80s2.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
+          Get-FileHash dist\NEON_SYNTH_80s_2_Setup.exe -Algorithm SHA256 | Format-List
+
+      - name: Zip Windows + Mac
+        run: |
+          $tag = (gh release list --limit 50 --json tagName --jq '.[].tagName' | Where-Object { $_ -like 'neon-synth-80s-2-macos-*' } | Select-Object -First 1)
+          if (-not $tag) { throw "no macOS release found" }
+          gh release download $tag -p NEON_SYNTH_80s_2_Mac.zip -D $env:RUNNER_TEMP --clobber
+          $root = Join-Path $env:RUNNER_TEMP 'pack\NEON SYNTH 80s 2.0'
+          New-Item -ItemType Directory -Force "$root\Windows" | Out-Null
+          Copy-Item dist\NEON_SYNTH_80s_2_Setup.exe, USER_GUIDE.md "$root\Windows"
+          Copy-Item LICENSE.md "$root\Windows\LICENSE.txt"
+          Expand-Archive (Join-Path $env:RUNNER_TEMP 'NEON_SYNTH_80s_2_Mac.zip') (Join-Path $env:RUNNER_TEMP 'mac')
+          Move-Item (Join-Path $env:RUNNER_TEMP 'mac\NEON_SYNTH_80s_2_Mac') "$root\Mac"
+          Compress-Archive -Path $root -DestinationPath dist\NEON_SYNTH_80s_2_Windows_Mac.zip -CompressionLevel Optimal
+          "mac package from release $tag" | Out-File dist\SOURCE.txt
+          Get-FileHash dist\*.zip, dist\*.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $(Split-Path $_.Path -Leaf)" } | Out-File dist\SHA256SUMS.txt
+          Get-Content dist\SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NEON_SYNTH_80s_2_Windows_Mac
+          path: |
+            NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Windows_Mac.zip
+            NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Setup.exe
+            NEON_SYNTH_80S/dist/SHA256SUMS.txt
+
+      - name: Release GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: neon-synth-80s-2-windows-v2.0.${{ github.run_number }}
+          name: NEON SYNTH 80s 2.0 - Windows + Mac v2.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          body: "Built on a clean GitHub Windows runner: Inno Setup installer (VST3 + standalone) and the combined Windows + macOS zip for Gumroad. SHA-256 sums in SHA256SUMS.txt."
+          files: |
+            NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Windows_Mac.zip
+            NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Setup.exe
+            NEON_SYNTH_80S/dist/SHA256SUMS.txt
