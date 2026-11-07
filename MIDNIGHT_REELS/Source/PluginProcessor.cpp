@@ -10,6 +10,7 @@ MrProcessor::MrProcessor()
 {
     ptrs.bind (apvts);
     glideState.live = &live;
+    Mr::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new MrVoice (ptrs, glideState));
     synth.addSound (new MrSound());
 }

@@ -1,0 +1,5 @@
+CHINTAWAZ - real flute: credits
+
+The Hippie Flute engine plays recorded flute notes from VSCO 2 Community Edition,
+Versilian Studios (CC0 1.0, https://creativecommons.org/publicdomain/zero/1.0/)  https://github.com/sgossner/VSCO-2-CE
+Notes cut, tuned, level-matched and looped by HUMPIRE PLUGINS.

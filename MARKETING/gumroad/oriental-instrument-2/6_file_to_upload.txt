@@ -1,0 +1,2 @@
+Windows: C:/Users/djbil/Desktop/HUMPIRE/Claude/FENNEC - Windows.zip (Setup.exe + README + user guide + licence + preset list + sample credits).
+macOS (VST3 + AU): not built yet. Add the Mac zip and the macOS lines of the description once the Mac build is done.

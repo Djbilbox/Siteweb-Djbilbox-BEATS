@@ -10,6 +10,7 @@ SlProcessor::SlProcessor()
 {
     ptrs.bind (apvts);
     glideState.live = &live;
+    Sl::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new SlVoice (ptrs, glideState));
     synth.addSound (new SlSound());
 }

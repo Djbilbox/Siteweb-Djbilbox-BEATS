@@ -1,0 +1,5 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+bell: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Glockenspiel
+keys: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Chordophones/Zithers/Upright Piano, Yamaha/Sustains
+brass: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/stac
+flute: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Woodwinds/Flute/susvib

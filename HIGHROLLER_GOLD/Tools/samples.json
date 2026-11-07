@@ -1,0 +1,44 @@
+{
+ "namespace": "Hg",
+ "instruments": [
+  {
+   "name": "bell",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 1",
+   "velocities": {
+    "_pp_": 1,
+    "_p_": 1,
+    "_f_": 2,
+    "_ff_": 2,
+    "_fff_": 2
+   },
+   "maxlen": 3.5
+  },
+  {
+   "name": "keys",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Chordophones/Zithers/Upright Piano, Yamaha/Sustains",
+   "velocity": "_vl(\\d)_",
+   "maxlen": 3.0
+  },
+  {
+   "name": "brass",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/sus",
+   "velocity": "_v(\\d)_",
+   "sustain": true
+  },
+  {
+   "name": "mallets",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Marimba",
+   "velocities": {
+    "_med_": 1,
+    "_loud_": 2
+   },
+   "maxlen": 2.2
+  },
+  {
+   "name": "strings",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib",
+   "velocity": "_v(\\d)\\.",
+   "sustain": true
+  }
+ ]
+}

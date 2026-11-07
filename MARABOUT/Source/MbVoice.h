@@ -1,6 +1,8 @@
 #pragma once
 #include "Params.h"
 #include "NeonFX.h"
+#include "BinaryData.h"
+#include "SampleMap.h"
 #include <cmath>
 
 namespace Mb
@@ -38,6 +40,21 @@ public:
     bool appliesToChannel (int) override { return true; }
 };
 
+// The real instruments of MARABOUT: recorded notes (see Assets/samples/CREDITS.txt) played by some engines instead of
+// synthesis. Decoded once, on the message thread (processor constructor).
+struct RealInstruments
+{
+    hfx::SampleSet kora, balafon, oud, ney, zurna;
+    static const RealInstruments& get() { static const RealInstruments r; return r; }
+    // engine -> its recordings (nullptr: the engine stays synthesised)
+    const hfx::SampleSet* forEngine (int e) const
+    {
+        switch (e) { case 0: return &kora; case 1: return &balafon; case 2: return &oud; case 3: return &ney; case 4: return &zurna; default: return nullptr; }
+    }
+private:
+    RealInstruments() { kora.load (koraNotes, BinaryData::getNamedResource); balafon.load (balafonNotes, BinaryData::getNamedResource); oud.load (oudNotes, BinaryData::getNamedResource); ney.load (neyNotes, BinaryData::getNamedResource); zurna.load (zurnaNotes, BinaryData::getNamedResource); }
+};
+
 class MbVoice : public juce::SynthesiserVoice
 {
 public:
@@ -69,6 +86,7 @@ public:
         pan = (rng.nextFloat() - 0.5f) * 2.f;
         lfoPh = 0.0; shValue = rng.nextFloat() * 2.f - 1.f;
         freshNote = true; released = false; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        real.note = nullptr; realEngine = -1; noteKey = midiNote;   // the recording is picked when the note first sounds
         fadsr.noteOn(); adsr.noteOn();
     }
 
@@ -132,7 +150,11 @@ public:
             for (int k = 0; k < 5; ++k) t[k] = juce::jlimit (0.f, 1.f, tb[k] + (dst == 3 ? mod * 0.5f : 0.f));
 
             static constexpr float trim[8] = { 1.3f, 1.2f, 1.3f, 0.6f, 0.9f, 0.4f, 1.0f, 0.6f };   // equilibrage des niveaux entre moteurs
-            float y = renderEngine (freq, t, (float) sr) * trim[eng];
+            float y;
+            if (const auto* set = RealInstruments::get().forEngine (eng))
+                y = playReal (*set, freq, t, (float) sr);
+            else
+                y = renderEngine (freq, t, (float) sr) * trim[eng];
             { const float dcOut = y - dcX + dcR * dcY; dcX = y; dcY = dcOut; y = dcOut; } // bloqueur DC
 
             if ((i & 7) == 0)
@@ -317,7 +339,7 @@ private:
     GlideState& glideState;
     juce::ADSR adsr, fadsr;
     juce::Random rng;
-    SVF breathBP, sym1, sym2, f1, f2, fl, voiceFilter;
+    SVF breathBP, sym1, sym2, f1, f2, fl, voiceFilter, realTone;
     std::vector<float> ksBuf;
     int ksW = 0, eng = 0, age = 0;
     float ksPrev = 0.f, exciteLP = 0.f, targetFreq = 440.f, curFreq = 440.f, vel = 1.f, pan = 0.f;
@@ -327,5 +349,25 @@ private:
     float fenvLevel = 0.f, lastEnv = 0.f, lastLfo = 0.f, lastFc = 9000.f;   // for the interface
     float dcX = 0.f, dcY = 0.f, dcR = 0.998f;
     double ph[6] {}, lfoPh = 0.0;
+    hfx::SamplePlayer real;      // the real instrument's recording this note plays
+    int realEngine = -1, noteKey = 60;
+    float realGain[8] { 1.30f, 4.40f, 1.09f, 0.63f, 0.70f, 1.00f, 1.00f, 1.00f };   // levels of the recordings, matched to the synthesised engines (set_levels)
+
+    // a recorded note, coloured by the engine's knobs: TONE darkens, BRIGHT adds air, BODY warms, TEXTURE adds breath
+    float playReal (const hfx::SampleSet& set, double f, const float* t, float sr)
+    {
+        if (realEngine != eng || ! real.active())
+        {
+            int key = noteKey;
+            if (false) key = 36 + ((noteKey - 36) % 24 + 24) % 24;   // drums: every octave plays the strokes
+            real.start (set.pick (key, vel)); realEngine = eng;
+        }
+        float x = real.next (f, (double) sr);
+        const float tone = t[0], body = t[1], bright = t[2], tex = t[4];
+        realTone.set (juce::jlimit (200.f, sr * 0.45f, real.isDrum() ? 2500.f + 14000.f * (1.f - tone) : (float) f * (4.f + 14.f * (1.f - tone))), 0.7f, sr);
+        const auto o = realTone.process (x);
+        x = o.lp * (0.65f + 0.35f * (1.f - bright)) + o.hp * (0.1f + 0.7f * bright) + o.bp * 0.3f * body;
+        return (x * 1.7f + (real.isDrum() ? 0.f : (rng.nextFloat() * 2.f - 1.f) * 0.01f * tex)) * realGain[eng];
+    }
 };
 }

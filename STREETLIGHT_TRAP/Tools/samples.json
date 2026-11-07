@@ -1,0 +1,30 @@
+{
+ "namespace": "Sl",
+ "instruments": [
+  {
+   "name": "bell",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Glockenspiel",
+   "match": "loud",
+   "maxlen": 2.4
+  },
+  {
+   "name": "keys",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Chordophones/Zithers/Upright Piano, Yamaha/Sustains",
+   "velocity": "_vl(\\d)_",
+   "maxlen": 3.0
+  },
+  {
+   "name": "brass",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/stac",
+   "match": "_rr1",
+   "velocity": "_v(\\d)_",
+   "maxlen": 1.2,
+   "spacing": 2
+  },
+  {
+   "name": "flute",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Woodwinds/Flute/susvib",
+   "sustain": true
+  }
+ ]
+}

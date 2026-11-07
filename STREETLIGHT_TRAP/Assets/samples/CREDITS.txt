@@ -1,0 +1,13 @@
+STREETLIGHT TRAP - real instruments: credits
+
+Some engines play recorded notes (cut, tuned, level-matched and looped by HUMPIRE PLUGINS).
+Thank you to the musicians and recordists.
+
+Licences:  CC0 1.0    https://creativecommons.org/publicdomain/zero/1.0/
+           CC BY 3.0  https://creativecommons.org/licenses/by/3.0/
+           CC BY 4.0  https://creativecommons.org/licenses/by/4.0/
+
+bell       Versilian Community Sample Library, Versilian Studios (CC0)  https://github.com/sgossner/VCSL
+keys       Versilian Community Sample Library, Versilian Studios (CC0)  https://github.com/sgossner/VCSL
+brass      VSCO 2 Community Edition, Versilian Studios (CC0)  https://github.com/sgossner/VSCO-2-CE
+flute      VSCO 2 Community Edition, Versilian Studios (CC0)  https://github.com/sgossner/VSCO-2-CE

@@ -1,0 +1,39 @@
+ORIENTAL INSTRUMENT 2.0 - fiche Gumroad (NOUVEAU produit, separe de l'ancien)
+==========================================================================
+
+RIEN N'EST PUBLIE. A faire seulement quand le plugin est valide.
+
+L'ancien ORIENTAL INSTRUMENT (29 EUR, page /l/oriental-instrument-djbilbox-beats)
+reste tel quel. On l'ameliorera plus tard, apres la 2.0.
+
+CREER LE PRODUIT SUR GUMROAD
+  1. Gumroad > Products > New product > Digital product.
+  2. Nom ........ 1_title.txt
+  3. Prix ....... 79 EUR (choisi le 4 nov. 2026)
+  4. Lien ....... dans "Custom permalink", mettez exactement : oriental-instrument-2
+                  (le README et le guide du plugin pointent vers
+                   https://djbilboxbeats.gumroad.com/l/oriental-instrument-2)
+  5. Resume ..... 3_summary.txt
+  6. Description  ouvrir 4_description.html dans le navigateur, tout copier, coller
+  7. Tags ....... 5_tags.txt
+  8. Fichier .... 6_file_to_upload.txt  (ORIENTAL INSTRUMENT 2.0.zip)
+  9. Images :
+       Thumbnail (carre) ........ 7_thumbnail_600x600.png
+       Cover 1 (principale) ..... 8_cover_1280x720.png
+       Cover 2 .................. 9_cover_2_skins_1280x720.png
+       Cover 3 .................. 10_cover_3_instruments_1280x720.png
+
+PRIX
+  - Ancien produit : 29 EUR.
+  - Reference du marche : ORIENT V2 de BuJaa Beats = 249,95 EUR, mais avec
+    276 instruments ENREGISTRES (vrais samples).
+  - La 2.0 = 10 instruments en vrais enregistrements libres de droits + 323 presets + 5 skins.
+  - Conseil : 79 EUR (ou 59 EUR en prix de lancement avec un code promo).
+    Au-dessus de ~99 EUR, les acheteurs vont comparer avec les gros produits a
+    samples et demander des remboursements.
+  - Idee : code promo pour les clients de l'ancienne version (ex. -30 %).
+
+MAC (AU / VST3)
+  Pas encore compile. Il faut votre accord pour pousser le projet sur votre
+  GitHub (compilation Mac automatique). Ensuite on ajoute le zip Mac et les
+  lignes macOS dans la description.

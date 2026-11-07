@@ -1,0 +1,47 @@
+DZPOWER - real instruments: credits
+
+Some engines of DZPOWER play recorded notes (cut, tuned, level-matched and looped by HUMPIRE PLUGINS).
+Thank you to the musicians and recordists.
+
+Licences:  CC0 1.0    https://creativecommons.org/publicdomain/zero/1.0/
+           CC BY 3.0  https://creativecommons.org/licenses/by/3.0/
+           CC BY 4.0  https://creativecommons.org/licenses/by/4.0/
+
+Ghaita (mizmar)    https://freesound.org/s/18661/  cdrk (Freesound), CC BY 3.0  (10 samples)
+Gasba (ney)       https://freesound.org/s/115398/  xserra (Freesound), CC BY 3.0  (11 samples)
+Gasba (ney)       https://freesound.org/s/194637/  ajaysm (Freesound), CC BY 4.0  (16 samples)
+Gasba (ney)       https://freesound.org/s/580759/  aliaref (Freesound), CC0  (1 samples)
+Qanun (qanun)     https://freesound.org/s/211133/  barisbozkurt (Freesound), CC0  (40 samples)
+Mandole (saz)       https://freesound.org/s/115227/  xserra (Freesound), CC BY 3.0  (14 samples)
+Mandole (saz)       https://freesound.org/s/558938/  lopopopooo (Freesound), CC0  (3 samples)
+Mandole (saz)       https://freesound.org/s/717175/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717176/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717177/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717178/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717179/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717180/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717181/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717182/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717183/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717184/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717185/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717186/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717188/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717189/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717191/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717192/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717194/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717195/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717196/  fcerim (Freesound), CC0  (2 samples)
+Mandole (saz)       https://freesound.org/s/717197/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717198/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717199/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717200/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717201/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717202/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717203/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/717204/  fcerim (Freesound), CC0  (1 samples)
+Mandole (saz)       https://freesound.org/s/719281/  fcerim (Freesound), CC0  (2 samples)
+Mandole (saz)       https://freesound.org/s/749332/  Hybridkin (Freesound), CC0  (12 samples)
+Chaabi Strings  violin from VSCO 2 Community Edition, Versilian Studios (CC0)  https://github.com/sgossner/VSCO-2-CE
+Derbouka, Bendir  Versilian Community Sample Library, Versilian Studios (CC0)  https://github.com/sgossner/VCSL

@@ -1,0 +1,4 @@
+// Common Controls v6 for the plug-in DLL. A DLL needs resource ID 2 (ISOLATIONAWARE_MANIFEST_RESOURCE_ID):
+// without it, hosts whose process has no Common Controls v6 manifest (FL Studio ilbridge.exe) cannot
+// resolve TaskDialogIndirect and refuse to load the plug-in.
+2 24 "comctl6.manifest"

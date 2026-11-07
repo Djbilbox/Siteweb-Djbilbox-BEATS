@@ -7,7 +7,10 @@ include(FetchContent)
 FetchContent_Declare(JUCE GIT_REPOSITORY https://github.com/juce-framework/JUCE.git GIT_TAG 8.0.4 GIT_SHALLOW ON)
 FetchContent_MakeAvailable(JUCE)
 
-juce_add_binary_data(MrAssets SOURCES Assets/camel.png Assets/logo.png Assets/cassette.png)
+# Assets/samples: the real instruments (see Assets/samples/CREDITS.txt), made by
+# ALL_PLUGINS/HumpireFX/tools/make_samples.py from Tools/samples.json
+file(GLOB REAL_SAMPLES ${CMAKE_CURRENT_SOURCE_DIR}/Assets/samples/*.flac)
+juce_add_binary_data(MrAssets SOURCES Assets/camel.png Assets/logo.png Assets/cassette.png ${REAL_SAMPLES})
 
 juce_add_plugin(MIDNIGHT_REELS
     COMPANY_NAME "DJBILBOX BEATS"

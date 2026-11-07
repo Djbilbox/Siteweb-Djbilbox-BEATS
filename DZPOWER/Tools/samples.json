@@ -1,0 +1,62 @@
+{
+ "namespace": "Dz",
+ "instruments": [
+  {
+   "name": "mandole",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Saz/Saz.sfz",
+   "maxlen": 2.2,
+   "spacing": 2
+  },
+  {
+   "name": "qanun",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Qanun/Qanun.sfz",
+   "maxlen": 2.2,
+   "spacing": 2
+  },
+  {
+   "name": "gasba",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Ney/Ney.sfz",
+   "spacing": 1
+  },
+  {
+   "name": "ghaita",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Mizmar/Mizmar.sfz",
+   "spacing": 1,
+   "fills": true
+  },
+  {
+   "name": "strings",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Violin/Violin.sfz",
+   "group": "sw_last=24",
+   "velocities": {
+    "_p_": 1,
+    "_f_": 2
+   },
+   "spacing": 3
+  },
+  {
+   "name": "derbouka",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Darbuka/Darbuka.sfz",
+   "drums": true,
+   "maxlen": 1.2,
+   "velocities": {
+    "_vl1_": 1,
+    "_vl2_": 2,
+    "_vl3_": 3,
+    "_vl4_": 4
+   }
+  },
+  {
+   "name": "bendir",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Bendir/Bendir.sfz",
+   "drums": true,
+   "maxlen": 1.6,
+   "velocities": {
+    "_vl1_": 1,
+    "_vl2_": 2,
+    "_vl3_": 3,
+    "_vl4_": 4
+   }
+  }
+ ]
+}

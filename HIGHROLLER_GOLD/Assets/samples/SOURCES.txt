@@ -1,0 +1,6 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+bell: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 1
+keys: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Chordophones/Zithers/Upright Piano, Yamaha/Sustains
+brass: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/sus
+mallets: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Marimba
+strings: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib

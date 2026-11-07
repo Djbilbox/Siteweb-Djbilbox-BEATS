@@ -1,0 +1,34 @@
+{
+ "namespace": "Mb",
+ "instruments": [
+  {
+   "name": "kora",
+   "folder": "C:\\Users\\djbil\\AppData\\Local\\Temp/cc0/VCSL/Chordophones/Composite Chordophones/Folk Harp",
+   "velocity": "_v(\\d)_",
+   "maxlen": 2.6,
+   "spacing": 2
+  },
+  {
+   "name": "balafon",
+   "folder": "C:\\Users\\djbil\\AppData\\Local\\Temp/cc0/VCSL/Idiophones/Struck Idiophones/Balafon/Traditional Mallet",
+   "velocity": "_vl(\\d)_",
+   "maxlen": 1.8
+  },
+  {
+   "name": "oud",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Oud/Oud.sfz",
+   "maxlen": 2.4,
+   "spacing": 2
+  },
+  {
+   "name": "ney",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Ney/Ney.sfz",
+   "spacing": 1
+  },
+  {
+   "name": "zurna",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Mizmar/Mizmar.sfz",
+   "fills": true
+  }
+ ]
+}

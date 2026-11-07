@@ -1,0 +1,6 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+vibes: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Vibraphone/Soft Mallets
+trumpet: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/straightM-sus
+sax: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Reed Aerophones/Tenor Saxophone/Vibrato
+bass: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Solo Contrabass/Pizz
+strings: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib

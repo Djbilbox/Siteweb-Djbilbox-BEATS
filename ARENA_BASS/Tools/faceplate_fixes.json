@@ -1,0 +1,8 @@
+[
+  {"box": [640, 258, 200, 14], "text": "", "size": 8},
+  {"box": [641, 258, 48, 14], "text": "RES", "size": 8, "colour": "#cfd5df"},
+  {"box": [691, 258, 48, 14], "text": "ENV AMT", "size": 8, "colour": "#cfd5df"},
+  {"box": [741, 258, 48, 14], "text": "DISTORTION", "size": 7, "colour": "#cfd5df"},
+  {"box": [791, 258, 48, 14], "text": "DLY MIX", "size": 8, "colour": "#cfd5df"},
+  {"box": [103, 561, 70, 14], "text": "Pitch Bend", "size": 9.5, "colour": "#d0d4dc"}
+]

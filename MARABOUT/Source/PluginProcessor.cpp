@@ -10,6 +10,7 @@ MbProcessor::MbProcessor()
 {
     ptrs.bind (apvts);
     glideState.live = &live;
+    Mb::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new MbVoice (ptrs, glideState));
     synth.addSound (new MbSound());
 }

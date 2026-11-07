@@ -1,0 +1,6 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+kora: C:\Users\djbil\AppData\Local\Temp/cc0/VCSL/Chordophones/Composite Chordophones/Folk Harp
+balafon: C:\Users\djbil\AppData\Local\Temp/cc0/VCSL/Idiophones/Struck Idiophones/Balafon/Traditional Mallet
+oud: C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Oud/Oud.sfz
+ney: C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Ney/Ney.sfz
+zurna: C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Mizmar/Mizmar.sfz

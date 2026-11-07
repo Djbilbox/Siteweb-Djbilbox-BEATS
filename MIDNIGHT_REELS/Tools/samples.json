@@ -1,0 +1,36 @@
+{
+ "namespace": "Mr",
+ "instruments": [
+  {
+   "name": "vibes",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Vibraphone/Soft Mallets",
+   "velocity": "_v(\\d)_",
+   "maxlen": 3.0
+  },
+  {
+   "name": "trumpet",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/straightM-sus",
+   "velocity": "_v(\\d)_",
+   "sustain": true
+  },
+  {
+   "name": "sax",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Reed Aerophones/Tenor Saxophone/Vibrato",
+   "sustain": true
+  },
+  {
+   "name": "bass",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Solo Contrabass/Pizz",
+   "match": "_rr1",
+   "velocity": "_v(\\d)_",
+   "maxlen": 2.0,
+   "spacing": 2
+  },
+  {
+   "name": "strings",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib",
+   "velocity": "_v(\\d)\\.",
+   "sustain": true
+  }
+ ]
+}
