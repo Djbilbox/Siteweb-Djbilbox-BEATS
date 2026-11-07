@@ -123,6 +123,16 @@ Read EULA_DJBILBOX_BEATS.txt for the full terms.
 SUPPORT: djbilboxbeats.com
 "@
     [System.IO.File]::WriteAllText((Join-Path $work "README.txt"), $readme, (New-Object System.Text.UTF8Encoding($true)))
+    # credits of the real recorded instruments (CC-BY needs them) of every synth in this package
+    $wanted = @($Items | ForEach-Object { $_.Slug })
+    $credits = @(Get-ChildItem (Join-Path $PSScriptRoot "..") -Directory | ForEach-Object {
+        $c = @((Join-Path $_.FullName "Assets\samples\CREDITS.txt"), (Join-Path $_.FullName "Assets\flute\CREDITS.txt")) | Where-Object { Test-Path $_ } | Select-Object -First 1
+        $s = ($_.Name.ToLower() -replace '_', '-') -replace '^chintzwaz$', 'chintawaz'
+        if ($c -and $wanted -contains $s) { "=== $($s.ToUpper()) ===`r`n" + (Get-Content $c -Raw) }
+    })
+    if ($credits.Count -gt 0) {
+        [System.IO.File]::WriteAllText((Join-Path $work "SAMPLE_CREDITS.txt"), ($credits -join "`r`n"), (New-Object System.Text.UTF8Encoding($true)))
+    }
     $zip = Join-Path $PkgDir "$Slug.zip"
     if (Test-Path $zip) { Remove-Item -Force $zip }
     Compress-Archive -Path (Join-Path $work "*") -DestinationPath $zip -CompressionLevel Optimal
