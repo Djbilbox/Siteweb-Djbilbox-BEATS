@@ -1074,4 +1074,9 @@
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url><loc>https://humpireplugins.netlify.app/p/neon-synth-80s-2.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://humpireplugins.netlify.app/shop.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://humpireplugins.netlify.app/beatmaker.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://humpireplugins.netlify.app/ai-mastering.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://humpireplugins.netlify.app/video-studio.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>

@@ -19,6 +19,18 @@
    2026-08-01: the plug-in does not work, and the bundle shipped it as one
    of its five VSTs. Do not re-add either without a fixed build. */
 window.VSTS = [
+  /* ========== FENNEC — ORIENTAL INSTRUMENT 2.0, fiche Gumroad `oriental-instrument-2`, $79 (2026-11-07) ========== */
+  { id:"fennec", name:"FENNEC", img:"img/vst/fennec-thumb.jpg", category:"instrument", detail:"p/fennec.html",
+    tags:["330 presets", "10 real oriental instruments", "VST3 · Win · Mac"], tier:"oriental", price:"79", badge:"🦊 New",
+    buy:"oriental-instrument-2", demo:"",
+    note:"Oud, saz, qanun, violin, ney, mizmar, darbuka… recorded for real, with true quarter tones and 5 skins." },
+
+  /* ========== NEON SYNTH 80s 2.0 — fiche Gumroad `neon-synth-80s-2` (permalink tifon), gratuite (2026-11-07) ========== */
+  { id:"neon-synth-80s-2", name:"NEON SYNTH 80s 2.0", img:"https://public-files.gumroad.com/uzamf8xvbh46810eppwcr0it8b55", category:"instrument", detail:"p/neon-synth-80s-2.html",
+    tags:["70 presets", "80s Synthwave Synth", "VST3 · AU · Win · Mac"], tier:"pro", price:"0", badge:"✨ New · Free",
+    buy:"neon-synth-80s-2", demo:"",
+    note:"FREE · Supersaw leads, analog-style basses and lush pads: rebuilt engine, 70 presets, installs next to v1." },
+
   /* ========== GFUNK 2027 — fiche Gumroad `xdbrjj`, téléchargement GRATUIT (prix libre $0+), pour attirer vers la boutique (Windows : VST3 + standalone ; macOS bientôt) ========== */
   { id:"gfunk-2027", name:"GFUNK 2027 — West Coast G-Funk Synth", img:"img/vst/new/gfunk-2027.jpg", category:"instrument",
     tags:["1000 presets", "West Coast G-Funk Synth", "VST3 · Standalone · Win"], price:"0", free:true, badge:"✅ FREE",

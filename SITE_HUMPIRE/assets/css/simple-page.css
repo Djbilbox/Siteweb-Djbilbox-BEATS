@@ -1,0 +1,28 @@
+/* ============================================================
+   THEME & INFO PAGES (t/, fr/, es/, pt/, de/, p/index, contact)
+   Same palette and header as the product pages (product-page.css)
+   ============================================================ */
+.sp-main{max-width:1180px;margin:0 auto;padding:34px 20px 80px}
+.sp-main h1{font:800 clamp(2rem,4.6vw,3.2rem)/1.08 'Sora',sans-serif;letter-spacing:-.02em;margin:0 0 12px;color:#fff}
+.sp-main h2{font:800 clamp(1.3rem,2.4vw,1.7rem)/1.2 'Sora',sans-serif;margin:46px 0 16px;color:#fff}
+.sp-main .sub,.sp-main>p{color:var(--pp-muted);font-size:1.05rem;max-width:760px}
+.sp-main .sub{margin:0 0 30px}
+.sp-main ul.rel{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.sp-main ul.rel li a{display:flex;flex-direction:column;height:100%;background:var(--pp-surface);border:1px solid var(--pp-line);
+  border-radius:16px;overflow:hidden;text-decoration:none;color:var(--pp-text)!important;transition:border-color .2s,transform .2s}
+.sp-main ul.rel li a:hover{border-color:rgba(233,185,73,.5);transform:translateY(-2px)}
+.sp-main ul.rel img{width:100%!important;aspect-ratio:1;object-fit:contain;display:block;border-radius:0!important;margin:0!important;background:#1c1920}
+.sp-main ul.rel strong{display:block;padding:14px 16px 2px;font-size:.98rem;color:#fff}
+.sp-main ul.rel .s{display:block;padding:0 16px;color:var(--pp-muted);font-size:.82rem;line-height:1.45}
+.sp-main ul.rel .pr{display:block;margin-top:auto;padding:10px 16px 16px;color:var(--pp-gold-2);font-weight:800}
+.sp-main ul.rel li a:not(:has(img)){padding:4px 0 12px}
+.sp-main ul.rel li a:not(:has(img)) strong{padding:16px 18px 6px}
+.sp-main .card{background:var(--pp-surface);border:1px solid var(--pp-line);border-radius:18px;padding:24px 26px;margin:20px 0;color:#ddd6e1}
+.sp-main .cta{display:inline-flex;align-items:center;gap:8px;background:var(--pp-gold);color:#1a1205!important;text-decoration:none;
+  font-weight:800;padding:14px 24px;border-radius:999px;margin:8px 0}
+.sp-main .cta:hover{background:var(--pp-gold-2)}
+.sp-main .tag{display:inline-block;color:var(--pp-gold);font:700 .72rem/1 'Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px}
+.sp-main .share{color:var(--pp-muted);font-size:.86rem}
+.sp-main .share a{color:var(--pp-muted)}
+.sp-langs{margin-top:40px;font-size:.88rem;color:var(--pp-muted)}
+.sp-langs a{color:var(--pp-muted)}

@@ -1,0 +1,83 @@
+/* ============================================================
+   SHOP — collections page: one split banner per collection,
+   style groups underneath. Site palette (theme-neon) + gold prices.
+   ============================================================ */
+.sh-page{background:#07090b;color:#eef7f2}
+.sh-page main{display:block}
+.sh-kicker{font:800 .72rem/1 'Inter',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--accent,#39ff88);margin:0 0 14px}
+
+.sh-hero{max-width:1240px;margin:0 auto;padding:70px 20px 30px;text-align:center}
+.sh-hero h1{font:800 clamp(2.2rem,5.6vw,4rem)/1.04 'Sora',sans-serif;letter-spacing:-.02em;margin:0 0 16px;color:#fff}
+.sh-hero h1 span{color:#8fa39a}
+.sh-lead{color:#b7c6bd;font-size:1.06rem;max-width:640px;margin:0 auto 26px}
+.sh-search{display:flex;align-items:center;gap:12px;max-width:520px;margin:0 auto;background:#0d1114;border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:0 20px}
+.sh-search i{color:#7f9288}
+.sh-search input{flex:1;min-width:0;background:none;border:0;outline:0;color:#fff;font:inherit;padding:14px 0}
+
+.sh-nav{position:sticky;top:64px;z-index:30;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;padding:10px 16px;
+  background:rgba(7,9,11,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.07);border-top:1px solid rgba(255,255,255,.07)}
+.sh-nav a{color:#cfdcd5;text-decoration:none;font:700 .8rem 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:9px 14px;border-radius:999px;white-space:nowrap}
+.sh-nav a:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sh-nav a.on{background:var(--accent,#39ff88);color:#04110a}
+
+.sh-sec{max-width:1240px;margin:0 auto;padding:56px 20px 10px;scroll-margin-top:120px}
+.sh-banner{display:grid;grid-template-columns:1fr 1.15fr;gap:40px;align-items:center;background:linear-gradient(120deg,#0f1518,#0b0e10);
+  border:1px solid rgba(255,255,255,.08);border-radius:26px;padding:34px;overflow:hidden;position:relative}
+.sh-banner::before{content:'';position:absolute;inset:-40% auto auto -10%;width:60%;height:140%;background:radial-gradient(closest-side,rgba(57,255,136,.10),transparent);pointer-events:none}
+.sh-banner-txt{position:relative}
+.sh-banner h2{font:800 clamp(2rem,4.6vw,3.4rem)/1 'Sora',sans-serif;letter-spacing:-.02em;margin:0 0 12px;color:#fff;text-transform:uppercase}
+.sh-banner p{color:#b7c6bd;margin:0 0 18px;font-size:1.02rem}
+.sh-banner-art img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;border-radius:16px;box-shadow:0 26px 60px rgba(0,0,0,.55);transform:rotate(1.2deg)}
+.sh-chips{display:flex;flex-wrap:wrap;gap:8px}
+.sh-chips a{color:#eef7f2;text-decoration:none;font-size:.82rem;font-weight:700;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:8px 13px}
+.sh-chips a:hover{border-color:var(--accent,#39ff88);color:var(--accent,#39ff88)}
+
+.sh-group{margin-top:38px;scroll-margin-top:130px}
+.sh-group-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:12px;margin-bottom:18px}
+.sh-group-head h3{font:800 1.35rem/1.2 'Sora',sans-serif;margin:0;color:#fff}
+.sh-group-head p{margin:0;color:#7f9288;font-size:.92rem;flex:1}
+.sh-group-head span{color:#56665e;font-weight:700;font-size:.85rem}
+
+.sh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.sh-page .sh-card{display:flex;flex-direction:column;background:#0d1114;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;
+  text-decoration:none;color:#eef7f2;transition:border-color .2s,transform .2s,box-shadow .2s;box-shadow:none}
+.sh-page .sh-card:hover{border-color:rgba(57,255,136,.45);transform:translateY(-3px);box-shadow:0 18px 40px rgba(0,0,0,.4)}
+.sh-card[hidden],.sh-group[hidden],.sh-sec[hidden],.sh-banner[hidden]{display:none!important}
+.sh-img{position:relative;display:block;aspect-ratio:1;background:#131a1e;overflow:hidden}
+/* covers are square or 16:9: show them whole over a blurred copy */
+.sh-img::before{content:'';position:absolute;inset:-24px;background:var(--cover) center/cover;filter:blur(22px) brightness(.5) saturate(1.2)}
+.sh-img img{position:relative;width:100%;height:100%;object-fit:contain;transition:transform .45s}
+.sh-card:hover .sh-img img{transform:scale(1.05)}
+.sh-badge{position:absolute;top:10px;left:10px;font:800 .66rem/1 'Inter',sans-serif;font-style:normal;letter-spacing:.12em;text-transform:uppercase;padding:6px 9px;border-radius:7px}
+.sh-badge.new{background:#e9b949;color:#1a1205}
+.sh-badge.free{background:var(--accent,#39ff88);color:#04110a}
+.sh-body{display:flex;flex-direction:column;flex:1;padding:13px 14px 14px}
+.sh-body b{font-size:.98rem;color:#fff;line-height:1.25}
+.sh-body small{color:#7f9288;font-size:.78rem;line-height:1.4;margin:4px 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sh-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sh-price{font:800 1.05rem 'Sora',sans-serif;color:#f7d77c}
+.sh-price.free{color:var(--accent,#39ff88)}
+.sh-flags{display:flex;gap:6px}
+.sh-flags span{font-size:.68rem;font-weight:700;color:#b7c6bd;background:#131a1e;border-radius:6px;padding:4px 7px;white-space:nowrap}
+.sh-flags .fa-youtube{color:#ff4d4d}
+.sh-flags .fa-keyboard{color:var(--accent,#39ff88)}
+.sh-empty{text-align:center;color:#7f9288;padding:60px 20px}
+
+.sh-trust{max-width:1240px;margin:70px auto 0;padding:34px 20px 130px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;border-top:1px solid rgba(255,255,255,.07)}
+.sh-trust div{display:flex;flex-direction:column;gap:4px;color:#7f9288;font-size:.88rem}
+.sh-trust i{font-size:1.3rem;color:var(--accent,#39ff88);margin-bottom:6px}
+.sh-trust b{color:#fff}
+
+@media (max-width:900px){
+  .sh-banner{grid-template-columns:1fr;padding:24px;gap:22px}
+  .sh-banner-art{order:-1}
+  .sh-banner-art img{transform:none}
+  .sh-trust{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  .sh-nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto}
+  .sh-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .sh-body{padding:10px}
+  .sh-flags span{padding:3px 5px}
+  .sh-trust{grid-template-columns:1fr}
+}
