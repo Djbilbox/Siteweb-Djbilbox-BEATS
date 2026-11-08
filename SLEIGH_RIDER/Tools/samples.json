@@ -1,0 +1,40 @@
+{
+ "namespace": "Sr",
+ "instruments": [
+  {
+   "name": "bell",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 2",
+   "velocity": "_v(\\d)_",
+   "maxlen": 3.5
+  },
+  {
+   "name": "keys",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Keys/Upright Piano",
+   "velocity": "_dyn(\\d)_",
+   "maxlen": 3.0,
+   "spacing": 2
+  },
+  {
+   "name": "sleigh",
+   "sfz": "C:/Users/djbil/AppData/Local/Temp/cc0/sleighbells/SleighBells.sfz",
+   "drums": true,
+   "maxlen": 2.0
+  },
+  {
+   "name": "mallets",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Glockenspiel",
+   "velocities": {
+    "_soft_": 1,
+    "_medium_": 1,
+    "_loud_": 2
+   },
+   "maxlen": 2.8
+  },
+  {
+   "name": "strings",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib",
+   "velocity": "_v(\\d)\\.",
+   "sustain": true
+  }
+ ]
+}

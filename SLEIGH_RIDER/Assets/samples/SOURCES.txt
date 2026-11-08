@@ -1,0 +1,6 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+bell: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 2
+keys: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Keys/Upright Piano
+sleigh: C:/Users/djbil/AppData/Local/Temp/cc0/sleighbells/SleighBells.sfz
+mallets: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Glockenspiel
+strings: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib

@@ -102,7 +102,7 @@ inline void plateWheel (juce::Graphics& g, int x, int w, float pos)
 }
 
 //============================================================================== the live layer
-enum class Theme { electric, spotlights, glitch, police, goldRain, scanner, smoke, film, sun, bubbles, ghostFlame, sunset, rain, bassShake, orientalGold };
+enum class Theme { electric, spotlights, glitch, police, goldRain, scanner, smoke, film, sun, bubbles, ghostFlame, sunset, rain, bassShake, orientalGold, snow, waves };
 
 class PremiumOverlay : public juce::Component, private juce::Timer
 {
@@ -510,6 +510,14 @@ private:
                 if (emit) spawn ({ rx(), ar.getY() - 6.f }, { (rnd.nextFloat() - 0.5f) * 20.f, 60.f + 60.f * rnd.nextFloat() }, 5.f, 3.f + 3.f * rnd.nextFloat(), a);
                 if (view.newNote) for (int i = 0; i < 8; ++i) spawn ({ mascot.x + (rnd.nextFloat() - 0.5f) * mascotR, mascot.y + mascotR * 0.6f }, { (rnd.nextFloat() - 0.5f) * 140.f, -80.f - 80.f * rnd.nextFloat() }, 1.6f, 4.f, a);
                 break;
+            case Theme::waves:         // sound waves rings leaving the mascot's mouth, louder notes send more
+                if (mascotR > 0.f && (view.newNote || (view.sounding && emit && rnd.nextFloat() < 0.35f + 0.5f * lv)))
+                    spawn ({ mascot.x + mascotR * 0.35f, mascot.y + mascotR * 0.05f }, { 0.f, 0.f }, 1.6f, mascotR * 0.25f, view.newNote ? a : b);
+                break;
+            case Theme::snow:          // snowflakes drifting down, a flurry from the mascot on every note
+                if (emit || rnd.nextFloat() < 0.5f) spawn ({ rx(), ar.getY() - 6.f }, { (rnd.nextFloat() - 0.5f) * 16.f, 22.f + 34.f * rnd.nextFloat() }, 14.f, 1.2f + 2.6f * rnd.nextFloat(), juce::Colour (0xfff2f8ff));
+                if (view.newNote && mascotR > 0.f) for (int i = 0; i < 10; ++i) spawn ({ mascot.x + (rnd.nextFloat() - 0.5f) * mascotR * 1.6f, mascot.y - mascotR * 0.8f }, { (rnd.nextFloat() - 0.5f) * 120.f, -40.f + 100.f * rnd.nextFloat() }, 3.f, 1.5f + 2.5f * rnd.nextFloat(), juce::Colours::white);
+                break;
             case Theme::bubbles:       // bubbles rising
                 if (emit) spawn ({ rx(), ar.getBottom() + 6.f }, { 0.f, -30.f - 40.f * rnd.nextFloat() }, 9.f, 2.f + 5.f * rnd.nextFloat(), b);
                 if (view.newNote) for (int i = 0; i < 6; ++i) spawn ({ mascot.x + (rnd.nextFloat() - 0.5f) * mascotR, mascot.y + mascotR }, { 0.f, -60.f - 60.f * rnd.nextFloat() }, 3.f, 3.f + 4.f * rnd.nextFloat(), a);
@@ -542,7 +550,7 @@ private:
                 if (theme == Theme::glitch) shake *= std::exp (-dt / 0.12f);
                 break;
         }
-        for (auto& o : blobs) { o.p += o.v * dt; o.life -= dt; if (theme == Theme::goldRain || theme == Theme::bubbles) o.p.x += std::sin (themeT * 2.f + o.size) * 10.f * dt; }
+        for (auto& o : blobs) { o.p += o.v * dt; o.life -= dt; if (theme == Theme::goldRain || theme == Theme::bubbles || theme == Theme::snow) o.p.x += std::sin (themeT * 2.f + o.size) * 10.f * dt; if (theme == Theme::waves) o.size += 70.f * dt; }
         blobs.erase (std::remove_if (blobs.begin(), blobs.end(), [&ar] (const Blob& o) { return o.life <= 0.f || ! ar.expanded (60.f).contains (o.p); }), blobs.end());
     }
 
@@ -622,6 +630,14 @@ private:
                     g.setColour (juce::Colours::white.withAlpha (0.6f * k)); g.fillEllipse (o.p.x - w * 0.4f, o.p.y - o.size * 0.7f, w * 0.5f, o.size * 0.5f);
                     break;
                 }
+                case Theme::waves:      // an expanding ring
+                    g.setColour (o.c.withAlpha (0.55f * k)); g.drawEllipse (o.p.x - o.size, o.p.y - o.size, o.size * 2.f, o.size * 2.f, 2.f);
+                    g.setColour (o.c.withAlpha (0.18f * k)); g.drawEllipse (o.p.x - o.size, o.p.y - o.size, o.size * 2.f, o.size * 2.f, 6.f);
+                    break;
+                case Theme::snow:       // a soft flake: halo and a bright core
+                    glowSpot (g, o.p, o.size * 2.6f, o.c, 0.35f * k);
+                    g.setColour (o.c.withAlpha (0.9f * k)); g.fillEllipse (o.p.x - o.size * 0.6f, o.p.y - o.size * 0.6f, o.size * 1.2f, o.size * 1.2f);
+                    break;
                 case Theme::bubbles:
                     g.setColour (o.c.withAlpha (0.55f * k)); g.drawEllipse (o.p.x - o.size, o.p.y - o.size, o.size * 2.f, o.size * 2.f, 1.f);
                     g.setColour (juce::Colours::white.withAlpha (0.6f * k)); g.fillEllipse (o.p.x - o.size * 0.5f, o.p.y - o.size * 0.6f, o.size * 0.5f, o.size * 0.4f);
@@ -732,6 +748,16 @@ private:
                     const float f = (float) i / 4.f, fl = 0.75f + 0.25f * std::sin (t * (7.f + (float) i) + (float) i * 1.7f);
                     const auto p = c + juce::Point<float> (std::sin (t * 3.f + (float) i) * R * 0.12f * f, R * 0.7f - f * R * 1.2f * e);
                     glowSpot (g, p, R * (0.55f - 0.35f * f) * fl, (theme == Theme::ghostFlame ? b : a).interpolatedWith (juce::Colours::white, f * 0.5f), 0.75f * e * (1.f - 0.4f * f));
+                }
+                break;
+            case Theme::snow:                                                      // flakes falling slowly across the cap
+                for (int i = 0; i < n; ++i)
+                {
+                    const float ph = std::fmod (t * (0.18f + 0.15f * hash (i, 1)) + hash (i, 2), 1.f);
+                    const auto p = c + juce::Point<float> ((hash (i, 3) - 0.5f) * R * 1.4f + std::sin (t * 1.5f + (float) i) * 2.f, -R + ph * R * 2.f);
+                    const float sz = 0.8f + 1.4f * hash (i, 4);
+                    glowSpot (g, p, sz * 3.f, juce::Colours::white, 0.5f * e);
+                    g.setColour (juce::Colours::white.withAlpha (0.9f * e)); g.fillEllipse (p.x - sz * 0.5f, p.y - sz * 0.5f, sz, sz);
                 }
                 break;
             case Theme::rain:                                                      // drops falling across the cap

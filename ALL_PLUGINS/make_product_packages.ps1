@@ -37,7 +37,7 @@ function Get-AppGuid([string]$slug) {
 
 # ---- collect bundles
 $all = New-Object System.Collections.Generic.List[object]
-foreach ($g in @("synths", "loadout", "orbit")) {
+foreach ($g in @("synths", "loadout", "orbit", "solo")) {   # solo: own package only, no bundle
     $dir = Join-Path $Stage $g
     if (-not (Test-Path $dir)) { continue }
     foreach ($b in (Get-ChildItem -Path $dir -Directory -Filter "*.vst3" | Sort-Object Name)) {
