@@ -30,5 +30,5 @@ inline constexpr Slot envSlots[] = { { 113.8f, 404.0f, 506.0f }, { 160.2f, 404.0
 inline constexpr Slot rslSlots[] = { { 735.3f, 231.5f, 336.0f }, { 772.9f, 231.5f, 336.0f }, { 808.8f, 231.5f, 336.0f }, { 845.8f, 231.5f, 336.0f }, { 891.8f, 231.5f, 336.0f } };
 inline constexpr float mascotX = 499.7f, mascotY = 276.7f, mascotR = 87.4f;
 inline constexpr float titleX = 345.0f, titleY = 371.0f, titleW = 310.0f, titleH = 42.5f, titleSize = 56.0f;
-inline constexpr const char* titleText = "TALKAMEL";
+inline constexpr const char* titleText = "HBX-84 TALKBOX";
 }

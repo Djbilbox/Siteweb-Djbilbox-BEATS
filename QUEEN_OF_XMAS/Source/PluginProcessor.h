@@ -31,7 +31,7 @@ public:
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
-    const juce::String getName() const override { return "SLEIGH RIDER"; }
+    const juce::String getName() const override { return "QUEEN OF XMAS"; }
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
@@ -53,7 +53,7 @@ public:
     juce::MidiKeyboardState keyboardState;
     hfx::LiveTap live;   // audio thread -> interface: levels, envelopes, LFO, cutoff, note-ons
     int presetIndex = -1;
-    juce::String presetName { "SLEIGH RIDER - Init Patch" };
+    juce::String presetName { "QUEEN OF XMAS - Init Patch" };
 
 private:
     struct StereoDelay

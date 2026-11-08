@@ -1,4 +1,4 @@
-// Captures / films the TALKAMEL interface. --still out.png: one quiet frame at 2x (the picture the faceplate is made from);
+// Captures / films the QUEEN_OF_XMAS interface. --still out.png: one quiet frame at 2x (the picture the faceplate is made from);
 // <out dir> [fps] [seconds] [preset]: plays a chord and a riff, saves one PNG per frame and the sound (audio.wav).
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -10,11 +10,11 @@ int main (int argc, char** argv)
     const double sr = 48000.0;
     const int fps = argc > 2 && juce::String (argv[1]) != "--still" ? juce::String (argv[2]).getIntValue() : 30;
     const int block = (int) (sr / fps);
-    TkProcessor proc;
+    SrProcessor proc;
     proc.setRateAndBufferSizeDetails (sr, block);
     proc.prepareToPlay (sr, block);
     if (argc > 4) proc.applyPreset (juce::String (argv[4]).getIntValue());
-    TkPanel panel (proc);
+    SrPanel panel (proc);
     panel.setBounds (panel.getBounds());
     auto save = [] (const juce::Image& img, const juce::File& f)
     {

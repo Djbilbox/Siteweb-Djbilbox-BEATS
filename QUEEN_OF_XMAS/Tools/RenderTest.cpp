@@ -1,4 +1,4 @@
-// Suite de validation hors-ligne TALKAMEL (voir skill dsp-quality-validation).
+// Suite de validation hors-ligne QUEEN_OF_XMAS (voir skill dsp-quality-validation).
 //  1) rendu des 70 presets en WAV (accord C3)           2) matrice frequence d'echantillonnage x taille de bloc
 //  3) silence, notes rapides, polyphonie max/vol de voix  4) panic (CC123/CC120), pedale sustain, tail
 //  5) changement de preset en cours de lecture            6) rappel d'etat (save/restore)
@@ -19,7 +19,7 @@ struct Stats { bool finite = true; float peak = 0.f; double rms = 0.0, dc = 0.0;
 using Script = std::function<void (int blockStartSample, int blockSize, juce::MidiBuffer&)>;
 
 // Rend 'seconds' secondes ; tailSeconds = fenetre finale pour mesurer la queue.
-Stats render (TkProcessor& p, double sr, int block, double seconds, double tailSeconds, const Script& script,
+Stats render (SrProcessor& p, double sr, int block, double seconds, double tailSeconds, const Script& script,
               juce::AudioBuffer<float>* keep = nullptr)
 {
     p.setPlayConfigDetails (0, 2, sr, block);
@@ -63,7 +63,7 @@ Script chordThenRelease (double sr, double offAt, std::initializer_list<int> not
 int main()
 {
     juce::ScopedJuceInitialiser_GUI init;
-    TkProcessor proc;
+    SrProcessor proc;
     auto outDir = juce::File::getCurrentWorkingDirectory().getChildFile ("renders"); outDir.createDirectory();
     juce::WavAudioFormat wav;
 
@@ -86,7 +86,7 @@ int main()
       std::printf ("  rms median %.3f (min %.3f, max %.3f), pic max %.3f\n", r[r.size() / 2], r.front(), r.back(), pk); }
 
     std::printf ("== 2. matrice SR x bloc (1 preset par moteur) ==\n");
-    const int reps[] = { 0, 10, 20, 30, 40, 50, 56, 65 };
+    const int reps[] = { 0, 10, 20, 30, 40, 50, 60, 65 };
     int matrixFail = 0;
     for (double sr : { 44100.0, 48000.0, 88200.0, 96000.0 })
         for (int block : { 32, 480, 2048 })
@@ -117,7 +117,7 @@ int main()
     { juce::AudioBuffer<float> b (2, 64); proc.processBlock (b, garbage); check (std::isfinite (b.getSample (0, 5)), "flot MIDI aberrant (CC/pitchwheel) sans NaN"); }
 
     std::printf ("== 4. panic, sustain, queue ==\n");
-    proc.applyPreset (64); // pad long (Fog Pad)
+    proc.applyPreset (64); // pad long, release 3 s, reverb
     auto panic = render (proc, 48000.0, 256, 4.0, 0.5, [] (int pos, int, juce::MidiBuffer& m)
     { if (pos == 0) for (int n : { 48, 55, 60 }) m.addEvent (juce::MidiMessage::noteOn (1, n, 0.8f), 0);
       if (pos >= 48000 && pos < 48256) { m.addEvent (juce::MidiMessage::allSoundOff (1), 0); } });
@@ -153,10 +153,10 @@ int main()
     proc.applyPreset (12);
     proc.apvts.getParameter ("filter")->setValueNotifyingHost (0.37f);
     juce::MemoryBlock mb; proc.getStateInformation (mb);
-    TkProcessor other;
+    SrProcessor other;
     other.setStateInformation (mb.getData(), (int) mb.getSize());
     bool same = true;
-    for (int i = 0; i < Tk::COUNT; ++i) same = same && std::abs (other.apvts.getParameter (Tk::ids[i])->getValue() - proc.apvts.getParameter (Tk::ids[i])->getValue()) < 1e-5f;
+    for (int i = 0; i < Sr::COUNT; ++i) same = same && std::abs (other.apvts.getParameter (Sr::ids[i])->getValue() - proc.apvts.getParameter (Sr::ids[i])->getValue()) < 1e-5f;
     check (same && other.presetIndex == 12, "tous les parametres + index de preset restaures");
     other.setStateInformation ("garbage", 7);
     check (other.apvts.getParameter ("filter")->getValue() == proc.apvts.getParameter ("filter")->getValue(), "etat invalide ignore sans corrompre");

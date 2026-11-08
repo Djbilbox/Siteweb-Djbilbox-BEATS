@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genere Source/Presets.h : 70 presets TALKAMEL (7 banques x 10)."""
+"""Genere Source/Presets.h : 70 presets HBX-84 TALKBOX (7 banques x 10)."""
 D = dict(eng=0, cut=9000, a=.003, d=.4, s=.8, r=.3, t1=.5, t2=.5, t3=.5, t4=.3, t5=.2, fen=0, fa=.002, fdc=.3, fs=0, fr=.3, rso=.15, vel=.5,
          rev=.25, cho=0, dis=0, dly=0, tm=.35, fb=.35, src=0, dst=0, rate=5, amt=0, gl=0, pit=0, ft=0, mono=0, vol=.7)
 KEY = dict(eng='waveform', cut='filter', a='attack', d='decay', s='sustain', r='release', t1='t1', t2='t2', t3='t3',

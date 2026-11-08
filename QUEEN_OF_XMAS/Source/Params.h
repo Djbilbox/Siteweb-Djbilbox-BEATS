@@ -15,7 +15,7 @@ inline const char* const ids[COUNT] = {
     "t1", "t2", "t3", "t4", "t5", "fenv", "fattack", "fdecay", "fsustain", "frelease", "resonance", "velocity", "reverb", "chorus", "distortion", "delay", "time", "feedback",
     "waveform", "lfosource", "destination", "filtertype", "monopoly", "bend", "modwheel" };
 
-inline const juce::StringArray engineNames { "Church Bells", "Fireplace Piano", "Sleigh Bells", "Christmas Organ", "Snow Glock", "Winter Strings", "Santa 808", "Northern Lights" };
+inline const juce::StringArray engineNames { "Church Bells", "Fireplace Piano", "Sleigh Bells", "Christmas Organ", "Snow Glock", "Winter Strings", "Santa 808", "Diva Voice" };
 inline const juce::StringArray lfoNames    { "Sine", "Triangle", "Saw", "Square", "Sample&Hold" };
 inline const juce::StringArray destNames   { "Pitch", "Filter", "Amp", "Timbre" };
 inline const juce::StringArray filterNames { "Low Pass", "High Pass", "Band Pass" };

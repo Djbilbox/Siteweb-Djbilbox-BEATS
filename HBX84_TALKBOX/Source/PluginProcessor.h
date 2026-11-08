@@ -31,7 +31,7 @@ public:
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
-    const juce::String getName() const override { return "TALKAMEL"; }
+    const juce::String getName() const override { return "HBX-84 TALKBOX"; }
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
@@ -53,7 +53,7 @@ public:
     juce::MidiKeyboardState keyboardState;
     hfx::LiveTap live;   // audio thread -> interface: levels, envelopes, LFO, cutoff, note-ons
     int presetIndex = -1;
-    juce::String presetName { "TALKAMEL - Init Patch" };
+    juce::String presetName { "HBX-84 TALKBOX - Init Patch" };
 
 private:
     struct StereoDelay

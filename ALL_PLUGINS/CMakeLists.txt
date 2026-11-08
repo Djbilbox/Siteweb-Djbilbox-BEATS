@@ -18,7 +18,7 @@ set(DJB_SYNTHS
     ARENA_BASS CHINTZWAZ CYBERPUNK_LEAD DZPOWER FUNKYKOPS GOLDHAWK HIGHROLLER_GOLD K2000
     MARABOUT MIDNIGHT_REELS OCCITANIE OCTOPUS PHANTOM_RIDER SAN_ANDREAS_LEAD SHAMAN
     STREETLIGHT_TRAP VOODOO WAZONE808
-    SLEIGH_RIDER TALKAMEL)   # sold on their own: staged as "solo", not in the Synth Collection
+    QUEEN_OF_XMAS HBX84_TALKBOX)   # sold on their own: staged as "solo", not in the Synth Collection
 
 # Pas de tests console dans le super-build
 foreach(s IN LISTS DJB_SYNTHS)

@@ -101,8 +101,8 @@ jobs:
             }
           }
           Stage "build/all/HUMPIRE_LOADOUT" "loadout"
-          Get-ChildItem build/all -Directory | Where-Object { $_.Name -notin @('HUMPIRE_LOADOUT','_deps','CMakeFiles','SLEIGH_RIDER','TALKAMEL') } | ForEach-Object { Stage $_.FullName "synths" }
-          foreach ($s in @('SLEIGH_RIDER','TALKAMEL')) { Stage "build/all/$s" "solo" }   # sold on their own, not in the Synth Collection
+          Get-ChildItem build/all -Directory | Where-Object { $_.Name -notin @('HUMPIRE_LOADOUT','_deps','CMakeFiles','QUEEN_OF_XMAS','HBX84_TALKBOX') } | ForEach-Object { Stage $_.FullName "synths" }
+          foreach ($s in @('QUEEN_OF_XMAS','HBX84_TALKBOX')) { Stage "build/all/$s" "solo" }   # sold on their own, not in the Synth Collection
           Stage "build/orbit" "orbit"
           Stage "build/chaabi" "chaabi"
           Stage "build/rockpunk" "synths"

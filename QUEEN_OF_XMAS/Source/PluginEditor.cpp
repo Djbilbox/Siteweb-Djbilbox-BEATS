@@ -199,7 +199,7 @@ void SrPanel::stepPreset (int d)
 
 juce::File SrPanel::userPresetDir()
 {
-    auto d = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("DJBILBOX BEATS").getChildFile ("SLEIGH_RIDER").getChildFile ("Presets");
+    auto d = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("DJBILBOX BEATS").getChildFile ("QUEEN_OF_XMAS").getChildFile ("Presets");
     d.createDirectory();
     return d;
 }
@@ -215,18 +215,18 @@ void SrPanel::showPresetMenu()
     }
     menu.addSubMenu (cur, sub);
     menu.addSeparator();
-    auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.srpreset"); files.sort();
+    auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.qxpreset"); files.sort();
     juce::PopupMenu user;
     for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
     if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
-    menu.addItem (999, "Open a .srpreset file...");
+    menu.addItem (999, "Open a .qxpreset file...");
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
         if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
         else if (r == 999)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.srpreset");
+            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.qxpreset");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                                   [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
         }
@@ -236,12 +236,12 @@ void SrPanel::showPresetMenu()
 
 void SrPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.srpreset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.qxpreset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
         auto f = fc.getResult(); if (f == juce::File()) return;
-        if (auto xml = proc.apvts.copyState().createXml()) xml->writeTo (f.withFileExtension ("srpreset"));
+        if (auto xml = proc.apvts.copyState().createXml()) xml->writeTo (f.withFileExtension ("qxpreset"));
         proc.presetName = f.getFileNameWithoutExtension(); refreshPresetLabel();
     });
 }

@@ -232,7 +232,7 @@ void TkPanel::stepPreset (int d)
 
 juce::File TkPanel::userPresetDir()
 {
-    auto d = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("DJBILBOX BEATS").getChildFile ("TALKAMEL").getChildFile ("Presets");
+    auto d = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("DJBILBOX BEATS").getChildFile ("HBX-84 TALKBOX").getChildFile ("Presets");
     d.createDirectory();
     return d;
 }
@@ -248,18 +248,18 @@ void TkPanel::showPresetMenu()
     }
     menu.addSubMenu (cur, sub);
     menu.addSeparator();
-    auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.tkpreset"); files.sort();
+    auto files = userPresetDir().findChildFiles (juce::File::findFiles, false, "*.hbxpreset"); files.sort();
     juce::PopupMenu user;
     for (int i = 0; i < files.size(); ++i) user.addItem (1000 + i, files[i].getFileNameWithoutExtension());
     if (files.isEmpty()) user.addItem (-1, "(no user presets)", false);
     menu.addSubMenu ("User", user);
-    menu.addItem (999, "Open a .tkpreset file...");
+    menu.addItem (999, "Open a .hbxpreset file...");
     menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&folder), [this, files] (int r)
     {
         if (r >= 1000 && r - 1000 < files.size()) loadUserPreset (files[r - 1000]);
         else if (r == 999)
         {
-            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.tkpreset");
+            chooser = std::make_unique<juce::FileChooser> ("Load preset", userPresetDir(), "*.hbxpreset");
             chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                                   [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) loadUserPreset (fc.getResult()); });
         }
@@ -269,12 +269,12 @@ void TkPanel::showPresetMenu()
 
 void TkPanel::savePreset()
 {
-    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.tkpreset");
+    chooser = std::make_unique<juce::FileChooser> ("Save preset", userPresetDir(), "*.hbxpreset");
     chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
                           [this] (const juce::FileChooser& fc)
     {
         auto f = fc.getResult(); if (f == juce::File()) return;
-        if (auto xml = proc.apvts.copyState().createXml()) xml->writeTo (f.withFileExtension ("tkpreset"));
+        if (auto xml = proc.apvts.copyState().createXml()) xml->writeTo (f.withFileExtension ("hbxpreset"));
         proc.presetName = f.getFileNameWithoutExtension(); refreshPresetLabel();
     });
 }

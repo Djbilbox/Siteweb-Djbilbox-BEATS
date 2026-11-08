@@ -2,10 +2,10 @@
 #include "Params.h"
 #include "NeonFX.h"
 #include "BinaryData.h"
-#include "SampleMap.h"
+#include "SampleSet.h"
 #include <cmath>
 
-namespace Sr
+namespace Tk
 {
 struct GlideState
 {
@@ -33,34 +33,27 @@ struct SVF
     void reset() { ic1 = ic2 = 0; }
 };
 
-class SrSound : public juce::SynthesiserSound
+class TkSound : public juce::SynthesiserSound
 {
 public:
     bool appliesToNote (int) override { return true; }
     bool appliesToChannel (int) override { return true; }
 };
 
-// The real instruments of SLEIGH_RIDER: recorded notes (see Assets/samples/CREDITS.txt) played by some engines instead of
+// The real instruments of HBX-84 TALKBOX: recorded notes (see Assets/samples/CREDITS.txt) played by some engines instead of
 // synthesis. Decoded once, on the message thread (processor constructor).
 struct RealInstruments
 {
-    hfx::SampleSet bell, keys, sleigh, mallets, strings;
     static const RealInstruments& get() { static const RealInstruments r; return r; }
-    // engine -> its recordings (nullptr: the engine stays synthesised)
-    const hfx::SampleSet* forEngine (int e) const
-    {
-        switch (e) { case 0: return &bell; case 1: return &keys; case 2: return &sleigh; case 4: return &mallets; case 5: return &strings; default: return nullptr; }
-    }
-private:
-    RealInstruments() { bell.load (bellNotes, BinaryData::getNamedResource); keys.load (keysNotes, BinaryData::getNamedResource); sleigh.load (sleighNotes, BinaryData::getNamedResource); mallets.load (malletsNotes, BinaryData::getNamedResource); strings.load (stringsNotes, BinaryData::getNamedResource); }
+    const hfx::SampleSet* forEngine (int) const { return nullptr; }   // every HBX-84 TALKBOX engine is a synthesised voice
 };
 
-class SrVoice : public juce::SynthesiserVoice
+class TkVoice : public juce::SynthesiserVoice
 {
 public:
-    SrVoice (const ParamPtrs& pp, GlideState& gs) : P (pp), glideState (gs) {}
+    TkVoice (const ParamPtrs& pp, GlideState& gs) : P (pp), glideState (gs) {}
 
-    bool canPlaySound (juce::SynthesiserSound* s) override { return dynamic_cast<SrSound*> (s) != nullptr; }
+    bool canPlaySound (juce::SynthesiserSound* s) override { return dynamic_cast<TkSound*> (s) != nullptr; }
 
     void setCurrentPlaybackSampleRate (double sr) override
     {
@@ -80,12 +73,12 @@ public:
         midiMod = glideState.lastMod.load();   // idle voices never received CC1: start from the latest wheel position
         age = 0;
         for (auto& p : ph) p = rng.nextDouble();
-        std::fill (ksBuf.begin(), ksBuf.end(), 0.f);
+        std::fill (ksBuf.begin(), ksBuf.end(), 0.f); fmFb = 0.f; holdV = 0.f; holdC = 0.f;
         ksW = 0; ksPrev = 0.f;
         for (auto* s : { &breathBP, &sym1, &sym2, &f1, &f2, &fl, &voiceFilter }) s->reset();
         pan = (rng.nextFloat() - 0.5f) * 2.f;
         lfoPh = 0.0; shValue = rng.nextFloat() * 2.f - 1.f;
-        freshNote = true; released = false; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        freshNote = true; released = false; relSec = 0.f; robotFrom = 4; robotTo = 0; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
         real.note = nullptr; realEngine = -1; noteKey = midiNote;   // the recording is picked when the note first sounds
         fadsr.noteOn(); adsr.noteOn();
     }
@@ -149,7 +142,7 @@ public:
             float t[5];
             for (int k = 0; k < 5; ++k) t[k] = juce::jlimit (0.f, 1.f, tb[k] + (dst == 3 ? mod * 0.5f : 0.f));
 
-            static constexpr float trim[8] = { 1.1f, 1.2f, 1.1f, 1.2f, 1.5f, 1.0f, 0.6f, 1.0f };   // equilibrage des niveaux entre moteurs
+            static constexpr float trim[8] = { 1.0f, 1.3f, 1.2f, 0.33f, 1.0f, 1.0f, 1.7f, 0.85f };   // equilibrage des niveaux entre moteurs
             float y;
             if (const auto* set = RealInstruments::get().forEngine (eng))
                 y = playReal (*set, freq, t, (float) sr);
@@ -196,6 +189,52 @@ private:
     float saw (double phase, double dt) const { return (float) (2.0 * phase - 1.0) - polyBlep (phase, dt); }
     static void wrap (double& p) { p -= std::floor (p); }
 
+    static float sawBL (double ph, double dt) { return (float) (2.0 * ph - 1.0) - polyBlep (ph, dt); }
+
+    static float pulse (double phase, double dt, double pw)
+    {
+        double p2 = phase + pw; p2 -= std::floor (p2);
+        const float a = (float) (2.0 * phase - 1.0) - polyBlep (phase, dt), b2 = (float) (2.0 * p2 - 1.0) - polyBlep (p2, dt);
+        return a - b2;
+    }
+    static void vowel (float v, float& F1, float& F2, float& F3)
+    {
+        static const float T[4][3] = { { 800.f, 1200.f, 2600.f }, { 500.f, 900.f, 2500.f }, { 320.f, 800.f, 2400.f }, { 300.f, 2300.f, 3000.f } };
+        const float x = juce::jlimit (0.f, 0.9999f, v) * 3.f; const int i = (int) x; const float fr = x - (float) i;
+        F1 = T[i][0] + (T[i + 1][0] - T[i][0]) * fr; F2 = T[i][1] + (T[i + 1][1] - T[i][1]) * fr; F3 = T[i][2] + (T[i + 1][2] - T[i][2]) * fr;
+    }
+
+    // the five vowels of a (male) mouth, formants F1 F2 F3 in Hz: A E I O U
+    static void vowelAt (int v, float& F1, float& F2, float& F3)
+    {
+        static const float T[5][3] = { { 730.f, 1090.f, 2440.f }, { 530.f, 1840.f, 2480.f }, { 290.f, 2250.f, 3010.f }, { 570.f, 840.f, 2410.f }, { 320.f, 870.f, 2240.f } };
+        F1 = T[v][0]; F2 = T[v][1]; F3 = T[v][2];
+    }
+    // the mouth moving from vowel a to vowel b (x = 0..1)
+    static void vowelGlide (int a, int b, float x, float& F1, float& F2, float& F3)
+    {
+        float a1, a2, a3, b1, b2, b3; vowelAt (a, a1, a2, a3); vowelAt (b, b1, b2, b3);
+        x = juce::jlimit (0.f, 1.f, x);
+        F1 = a1 + (b1 - a1) * x; F2 = a2 + (b2 - a2) * x; F3 = a3 + (b3 - a3) * x;
+    }
+    // the talkbox: the synth's sound through the mouth (three resonances), a little throat and breath
+    float mouthOut (float carrier, float F1, float F2, float F3, float body, float bright, float tex, float noise, float sr)
+    {
+        const float shift = 0.85f + 0.3f * bright;   // BRIGHT: a smaller (higher) or bigger (lower) mouth
+        f1.set (F1 * shift, 7.f, sr); f2.set (F2 * shift, 9.f, sr); sym1.set (F3 * shift, 10.f, sr);
+        const float in = carrier + noise * 0.05f * tex;
+        const float o = f1.process (in).bp * 1.6f + f2.process (in).bp * 1.1f + sym1.process (in).bp * 0.55f;
+        return (o * 0.28f * (0.55f + 0.6f * body) + carrier * 0.03f) * talkTrim[eng];
+    }
+    // how open the mouth is: opens with the note, closes when the key is released, the mod wheel opens it more
+    float mouthOpen (float tsec, float speed, float sr)
+    {
+        if (released) relSec += 1.f / sr;
+        float m = 1.f - std::exp (-tsec / speed);
+        if (released) m *= std::exp (-relSec / 0.09f);
+        return juce::jmax (m, midiMod);
+    }
+
     float renderEngine (double f, const float* t, float sr)
     {
         double dt = f / sr;
@@ -203,119 +242,91 @@ private:
         const float tone = t[0], body = t[1], bright = t[2], width = t[3], tex = t[4];
         const float noise = rng.nextFloat() * 2.f - 1.f;
         const float tsec = (float) age / sr;
-        float out = 0.f;
+        const float speed = 0.04f + 0.45f * width;   // WIDTH: how slowly the mouth opens
+        float out = 0.f, F1 = 0.f, F2 = 0.f, F3 = 0.f;
+
+        // the talkbox carrier: saw + square, TONE moves from a hollow square to a full saw
+        auto carrier = [&] (double d)
+        {
+            ph[0] += d; wrap (ph[0]);
+            return sawBL (ph[0], d) * (0.45f + 0.35f * tone) + pulse (ph[0], d, 0.5) * (0.4f - 0.3f * tone);
+        };
 
         switch (eng)
         {
-        case 0: // gold bell : FM cloche, jackpot
+        case 0: // Ooh-Wah: the mouth opens from "ooh" to "wah"
         {
-            const float ratio = 1.4f + tone * 3.1f;
-            const float idx = bright * 3.5f * std::exp (-tsec / (0.2f + body * 2.f));
-            ph[1] += dt * (double) ratio; wrap (ph[1]);
-            const float m = std::sin ((float) ph[1] * twoPi);
-            ph[0] += dt; wrap (ph[0]); ph[2] += dt * (1.0 + 0.003 * (double) width); wrap (ph[2]);
-            out = 0.5f * (std::sin ((float) ph[0] * twoPi + idx * m) + std::sin ((float) ph[2] * twoPi + idx * m)) * std::exp (-tsec / (0.4f + body * 3.f) * 0.5f);
-            out += noise * std::exp (-tsec * 200.f) * tex * 0.2f;
+            const float m = mouthOpen (tsec, speed, sr);
+            vowelGlide (4, 0, m, F1, F2, F3);
+            out = mouthOut (carrier (dt), F1, F2, F3, body, bright, tex, noise, sr);
             break;
         }
-        case 1: // velvet keys : tine + cloche
+        case 1: // Yeah: "ee" -> "eh" -> "ah"
         {
-            static const float R[4] = { 1.f, 2.f, 4.f, 7.01f }, A[4] = { 1.f, .3f, .14f, .18f }, DR[4] = { 1.f, 2.2f, 4.5f, 12.f };
-            const float barkAmt = 0.3f + 1.3f * bright * (0.4f + 0.6f * vel);
-            for (int k = 0; k < 4; ++k)
-            {
-                ph[(size_t) k] += dt * R[k]; wrap (ph[(size_t) k]);
-                const float rate = DR[k] / (0.5f + body * 3.f);
-                out += A[k] * (k == 0 ? 1.f : barkAmt) * std::exp (-tsec * rate) * std::sin ((float) ph[(size_t) k] * twoPi);
-            }
-            out *= 0.7f;
-            out += noise * std::exp (-tsec * 120.f) * 0.1f * (0.3f + tex);
+            const float m = mouthOpen (tsec, speed, sr);
+            if (m < 0.5f) vowelGlide (2, 1, m * 2.f, F1, F2, F3); else vowelGlide (1, 0, m * 2.f - 1.f, F1, F2, F3);
+            out = mouthOut (carrier (dt), F1, F2, F3, body, bright, tex, noise, sr);
             break;
         }
-        case 2: // big band brass : 3 saws, filtre qui s'ouvre
+        case 2: // Ay: "ah" closing to "ee", the classic sung talkbox line
         {
-            float s = 0.f;
-            for (int k = 0; k < 3; ++k)
-            {
-                const double det = 1.0 + (double) (k - 1) * (0.002 + width * 0.01);
-                ph[(size_t) k] += dt * det; wrap (ph[(size_t) k]);
-                s += saw (ph[(size_t) k], dt * det);
-            }
-            s *= 0.33f;
-            const float open = 1.f - std::exp (-tsec / (0.02f + tone * 0.4f));
-            fl.set ((float) f * (1.5f + (2.f + 10.f * bright) * open), 0.8f, sr);
-            out = fl.process (s).lp * (0.6f + body * 0.4f) + noise * 0.02f * tex;
+            const float m = mouthOpen (tsec, speed * 1.6f, sr);
+            vowelGlide (0, 2, m, F1, F2, F3);
+            out = mouthOut (carrier (dt), F1, F2, F3, body, bright, tex, noise, sr);
             break;
         }
-        case 3: // vegas organ : tirettes, percussion, clic
+        case 3: // classic talkbox: TONE picks the vowel (oo-oh-ah-eh-ee), WIDTH makes the mouth wobble
         {
-            static const float H[6] = { 0.5f, 1.f, 2.f, 3.f, 4.f, 6.f };
-            const float lv[6] = { tone, 0.9f, body, bright * 0.8f, bright, bright * 0.6f };
-            for (int k = 0; k < 6; ++k)
-            { ph[(size_t) k] += dt * H[k]; wrap (ph[(size_t) k]); out += lv[k] * std::sin ((float) ph[(size_t) k] * twoPi); }
-            out *= 0.28f;
-            out += width * 0.5f * std::exp (-tsec * 9.f) * std::sin (2.f * (float) ph[1] * twoPi) * 0.6f;
-            out += noise * std::exp (-tsec * 400.f) * tex * 0.25f;
+            ph[7] += (0.5 + 5.0 * (double) width) / sr; wrap (ph[7]);
+            const float v = juce::jlimit (0.f, 0.999f, tone + 0.2f * width * std::sin ((float) ph[7] * twoPi) + 0.5f * midiMod) * 4.f;
+            static const int path[5] = { 4, 3, 0, 1, 2 };
+            const int i = (int) v;
+            vowelGlide (path[i], path[juce::jmin (4, i + 1)], v - (float) i, F1, F2, F3);
+            out = mouthOut (carrier (dt), F1, F2, F3, body, bright, tex, noise, sr);
             break;
         }
-        case 4: // roulette mallets : lames + trémolo
+        case 4: // Talk bass: the carrier an octave down with a sub, "oh" opening to "ah"
         {
-            static const float Rt[3] = { 1.f, 4.0f, 10.f }, Am[3] = { 1.f, .45f, .2f }, Dr[3] = { 1.f, 3.f, 8.f };
-            const float len = 0.5f + body * 3.f;
-            for (int k = 0; k < 3; ++k)
-            {
-                ph[(size_t) k] += dt * Rt[k]; wrap (ph[(size_t) k]);
-                out += Am[k] * (k == 0 ? 1.f : 0.25f + bright) * std::exp (-tsec * Dr[k] / len) * std::sin ((float) ph[(size_t) k] * twoPi);
-            }
-            out *= 0.7f;
-            out += noise * std::exp (-tsec * 300.f) * 0.12f * (0.2f + tone);
-            ph[6] += (2.f + 7.f * tex) / sr; wrap (ph[6]);
-            out *= 1.f - width * 0.6f * (0.5f + 0.5f * std::sin ((float) ph[6] * twoPi));
+            const float m = mouthOpen (tsec, speed * 0.7f, sr);
+            vowelGlide (3, 0, m, F1, F2, F3);
+            const float c = carrier (dt * 0.5);
+            ph[1] += dt * 0.5; wrap (ph[1]);
+            out = mouthOut (c, F1 * 0.85f, F2 * 0.85f, F3, body, bright, tex, noise, sr) + std::sin ((float) ph[1] * twoPi) * 0.45f * body;
             break;
         }
-        case 5: // silk strings : 5 saws + flottement
+        case 5: // Vocoder choir: five voices slightly apart singing "oh-ah"
         {
-            ph[6] += (0.5 + 1.5 * (double) tex) / sr; wrap (ph[6]);
-            const float wob = std::sin ((float) ph[6] * twoPi) * 0.0015f * width;
-            float s = 0.f;
+            float c = 0.f;
             for (int k = 0; k < 5; ++k)
             {
-                const double det = 1.0 + (double) (k - 2) * (0.003 + width * 0.006) + (double) wob;
-                ph[(size_t) k] += dt * det; wrap (ph[(size_t) k]);
-                s += saw (ph[(size_t) k], dt * det);
+                const double det = 1.0 + (double) (k - 2) * (0.003 + 0.008 * (double) width);
+                ph[(size_t) (k + 1)] += dt * det; wrap (ph[(size_t) (k + 1)]);
+                c += sawBL (ph[(size_t) (k + 1)], dt * det);
             }
-            s *= 0.2f;
-            fl.set ((float) f * (1.5f + 9.f * bright), 0.7f, sr);
-            f1.set (350.f + 500.f * tone, 2.f, sr);
-            out = fl.process (s).lp * 0.8f + f1.process (s).bp * body * 0.6f;
+            c *= 0.22f;
+            vowelGlide (3, 0, 0.3f + 0.6f * tone + 0.3f * midiMod, F1, F2, F3);
+            out = mouthOut (c, F1, F2, F3, body, bright, tex, noise, sr) * 0.9f;
             break;
         }
-        case 6: // gold sub : sinus, knock de hauteur, saturation
+        case 6: // Robot talk: the mouth jumps from vowel to vowel in rhythm (WIDTH: how fast)
         {
-            const float knock = 1.f + tone * 2.f * std::exp (-tsec * 28.f);
-            ph[0] += dt * (double) knock; wrap (ph[0]);
-            const float s1 = std::sin ((float) ph[0] * twoPi);
-            out = std::tanh (s1 * (1.f + tex * 5.f)) * 0.9f + body * 0.35f * std::sin (2.f * (float) ph[0] * twoPi);
-            out += noise * std::exp (-tsec * 90.f) * 0.25f * bright;
-            out *= 0.8f;
+            ph[7] += (2.0 + 10.0 * (double) width) / sr;
+            if (ph[7] >= 1.0) { ph[7] -= 1.0; robotFrom = robotTo; robotTo = (robotTo + 1 + (int) (rng.nextFloat() * 4.f)) % 5; }
+            const float x = juce::jlimit (0.f, 1.f, (float) ph[7] * (3.f - 2.5f * tone));
+            vowelGlide (robotFrom, robotTo, x, F1, F2, F3);
+            out = mouthOut (carrier (dt), F1, F2, F3, body, bright, tex, noise, sr);
             break;
         }
-        default: // 7 cigar smoke : pad saws detunees + souffle, filtre qui respire
+        default: // 7 G-funk whistle: sine + soft saw, vibrato that settles in
         {
-            ph[7] += 0.18 / sr; wrap (ph[7]);
-            float s = 0.f;
-            for (int k = 0; k < 5; ++k)
-            {
-                const double det = 1.0 + (double) (k - 2) * (0.002 + width * 0.012);
-                ph[(size_t) k] += dt * det; wrap (ph[(size_t) k]);
-                s += saw (ph[(size_t) k], dt * det);
-            }
-            s *= 0.2f;
-            ph[5] += dt * 0.5; wrap (ph[5]);
-            s += std::sin ((float) ph[5] * twoPi) * (0.1f + 0.4f * body);
-            const float breathe = 0.7f + 0.3f * std::sin ((float) ph[7] * twoPi);
-            fl.set ((float) f * (1.5f + 10.f * bright * breathe), 0.7f, sr);
-            out = fl.process (s + noise * 0.05f * tex).lp * 0.8f;
+            ph[4] += 5.4 / sr; wrap (ph[4]);
+            const float vib = std::sin ((float) ph[4] * twoPi) * width * 0.02f * juce::jmin (1.f, juce::jmax (0.f, tsec - 0.15f) * 2.f);
+            dt *= 1.0 + (double) vib;
+            ph[0] += dt; wrap (ph[0]); ph[1] += dt * 2.0; wrap (ph[1]);
+            const float sn = std::sin ((float) ph[0] * twoPi);
+            out = sn * (0.6f + body * 0.4f) + sawBL (ph[0], dt) * 0.35f * tone + std::sin ((float) ph[1] * twoPi) * tex * 0.4f;
+            fl.set ((float) f * (2.f + 9.f * bright), 0.8f, sr);
+            out = fl.process (out).lp * 0.8f;
             break;
         }
         }
@@ -333,12 +344,15 @@ private:
     float midiBend = 0.f, midiMod = 0.f, shValue = 0.f;
     float smVol = 0.f, smSemi = 0.f, smBend = 0.f, smCut = 9000.f;
     bool freshNote = true, released = false;
+    float relSec = 0.f;                       // time since the key was released (the mouth closes)
+    float talkTrim[8] { 0.74f, 0.62f, 0.67f, 2.56f, 1.05f, 2.26f, 0.50f, 1.00f };   // per-engine level, measured so every voice sits around -16 dB like the other synths
+    int robotFrom = 4, robotTo = 0;           // Robot talk: the vowels it moves between
     float fenvLevel = 0.f, lastEnv = 0.f, lastLfo = 0.f, lastFc = 9000.f;   // for the interface
     float dcX = 0.f, dcY = 0.f, dcR = 0.998f;
     double ph[8] {}, lfoPh = 0.0;
     hfx::SamplePlayer real;      // the real instrument's recording this note plays
     int realEngine = -1, noteKey = 60;
-    float realGain[8] { 1.57f, 1.33f, 3.01f, 1.00f, 2.02f, 1.09f, 1.00f, 1.00f };   // levels of the recordings, matched to the synthesised engines (set_levels)
+    float realGain[8] { 1.00f, 1.00f, 1.00f, 1.00f, 1.88f, 1.00f, 1.96f, 1.80f };   // levels of the recordings, matched to the synthesised engines (set_levels)
 
     // a recorded note, coloured by the engine's knobs: TONE darkens, BRIGHT adds air, BODY warms, TEXTURE adds breath
     float playReal (const hfx::SampleSet& set, double f, const float* t, float sr)
@@ -346,7 +360,7 @@ private:
         if (realEngine != eng || ! real.active())
         {
             int key = noteKey;
-            if (eng == 2) key = 36 + ((noteKey - 36) % 24 + 24) % 24;   // drums: every octave plays the strokes
+            if (false) key = 36 + ((noteKey - 36) % 24 + 24) % 24;   // drums: every octave plays the strokes
             real.start (set.pick (key, vel)); realEngine = eng;
         }
         float x = real.next (f, (double) sr);
@@ -356,5 +370,6 @@ private:
         x = o.lp * (0.65f + 0.35f * (1.f - bright)) + o.hp * (0.1f + 0.7f * bright) + o.bp * 0.3f * body;
         return (x * 1.7f + (real.isDrum() ? 0.f : (rng.nextFloat() * 2.f - 1.f) * 0.01f * tex)) * realGain[eng];
     }
+    float fmFb = 0.f, holdV = 0.f, holdC = 0.f;
 };
 }

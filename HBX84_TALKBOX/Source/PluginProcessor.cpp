@@ -1,21 +1,21 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-using namespace Sr;
+using namespace Tk;
 
-SrProcessor::SrProcessor()
+TkProcessor::TkProcessor()
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
-      apvts (*this, nullptr, "SLEIGH_RIDER", createLayout()),
+      apvts (*this, nullptr, "HBX84_TALKBOX", createLayout()),
       synth (glideState)
 {
     ptrs.bind (apvts);
     glideState.live = &live;
-    Sr::RealInstruments::get();   // decode the real instruments now, not in the audio thread
-    for (int i = 0; i < 16; ++i) synth.addVoice (new SrVoice (ptrs, glideState));
-    synth.addSound (new SrSound());
+    Tk::RealInstruments::get();   // decode the real instruments now, not in the audio thread
+    for (int i = 0; i < 16; ++i) synth.addVoice (new TkVoice (ptrs, glideState));
+    synth.addSound (new TkSound());
 }
 
-void SrProcessor::prepareToPlay (double sr, int block)
+void TkProcessor::prepareToPlay (double sr, int block)
 {
     sampleRate = sr;
     maxBlock = juce::jmax (1, block);
@@ -32,7 +32,7 @@ void SrProcessor::prepareToPlay (double sr, int block)
     distSm.setCurrentAndTargetValue (0.f); delaySm.setCurrentAndTargetValue (0.f);
 }
 
-void SrProcessor::applyPreset (int index)
+void TkProcessor::applyPreset (int index)
 {
     const auto& list = presets();
     if (index < 0 || index >= (int) list.size()) return;
@@ -47,7 +47,7 @@ void SrProcessor::applyPreset (int index)
     presetName = list[(size_t) index].name;
 }
 
-void SrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
+void TkProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     juce::ScopedNoDenormals nd;
     const int n = buffer.getNumSamples();
@@ -81,7 +81,7 @@ void SrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     float* R = buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : L;
 
     // distorsion
-    distSm.setTargetValue (ptrs (Sr::dist));
+    distSm.setTargetValue (ptrs (Tk::dist));
     if (distSm.getCurrentValue() > 0.005f || distSm.getTargetValue() > 0.005f)
     {
         for (int i = 0; i < n; ++i)
@@ -94,7 +94,7 @@ void SrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     }
 
     // chorus
-    const float cho = ptrs (Sr::chorus);
+    const float cho = ptrs (Tk::chorus);
     if (cho > 0.005f)
     {
         chorus.setMix (cho * 0.8f);
@@ -110,7 +110,7 @@ void SrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     }
 
     // delay ping-pong
-    delaySm.setTargetValue (ptrs (Sr::delay));
+    delaySm.setTargetValue (ptrs (Tk::delay));
     if (delaySm.getCurrentValue() > 0.005f || delaySm.getTargetValue() > 0.005f)
     {
         const float fbk = ptrs (fb), targetLen = juce::jlimit (8.f, (float) dly.bl.size() - 4.f, ptrs (dtime) * (float) sampleRate);
@@ -128,7 +128,7 @@ void SrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     }
 
     // reverb
-    const float rv = ptrs (Sr::reverb);
+    const float rv = ptrs (Tk::reverb);
     if (rv > 0.005f)
     {
         juce::Reverb::Parameters rp;
@@ -148,7 +148,7 @@ void SrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     live.publish (L, R, n);
 }
 
-void SrProcessor::getStateInformation (juce::MemoryBlock& dest)
+void TkProcessor::getStateInformation (juce::MemoryBlock& dest)
 {
     auto state = apvts.copyState();
     state.setProperty ("presetIndex", presetIndex, nullptr);
@@ -156,17 +156,17 @@ void SrProcessor::getStateInformation (juce::MemoryBlock& dest)
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, dest);
 }
 
-void SrProcessor::setStateInformation (const void* data, int size)
+void TkProcessor::setStateInformation (const void* data, int size)
 {
     if (auto xml = getXmlFromBinary (data, size))
         if (xml->hasTagName (apvts.state.getType()))
         {
             auto vt = juce::ValueTree::fromXml (*xml);
             presetIndex = vt.getProperty ("presetIndex", -1);
-            presetName = vt.getProperty ("presetName", "SLEIGH RIDER - Init Patch").toString();
+            presetName = vt.getProperty ("presetName", "HBX-84 TALKBOX - Init Patch").toString();
             apvts.replaceState (vt);
         }
 }
 
-juce::AudioProcessorEditor* SrProcessor::createEditor() { return new SrEditor (*this); }
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new SrProcessor(); }
+juce::AudioProcessorEditor* TkProcessor::createEditor() { return new TkEditor (*this); }
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new TkProcessor(); }

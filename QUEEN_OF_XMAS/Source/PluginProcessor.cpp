@@ -1,21 +1,21 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-using namespace Tk;
+using namespace Sr;
 
-TkProcessor::TkProcessor()
+SrProcessor::SrProcessor()
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
-      apvts (*this, nullptr, "TALKAMEL", createLayout()),
+      apvts (*this, nullptr, "QUEEN_OF_XMAS", createLayout()),
       synth (glideState)
 {
     ptrs.bind (apvts);
     glideState.live = &live;
-    Tk::RealInstruments::get();   // decode the real instruments now, not in the audio thread
-    for (int i = 0; i < 16; ++i) synth.addVoice (new TkVoice (ptrs, glideState));
-    synth.addSound (new TkSound());
+    Sr::RealInstruments::get();   // decode the real instruments now, not in the audio thread
+    for (int i = 0; i < 16; ++i) synth.addVoice (new SrVoice (ptrs, glideState));
+    synth.addSound (new SrSound());
 }
 
-void TkProcessor::prepareToPlay (double sr, int block)
+void SrProcessor::prepareToPlay (double sr, int block)
 {
     sampleRate = sr;
     maxBlock = juce::jmax (1, block);
@@ -32,7 +32,7 @@ void TkProcessor::prepareToPlay (double sr, int block)
     distSm.setCurrentAndTargetValue (0.f); delaySm.setCurrentAndTargetValue (0.f);
 }
 
-void TkProcessor::applyPreset (int index)
+void SrProcessor::applyPreset (int index)
 {
     const auto& list = presets();
     if (index < 0 || index >= (int) list.size()) return;
@@ -47,7 +47,7 @@ void TkProcessor::applyPreset (int index)
     presetName = list[(size_t) index].name;
 }
 
-void TkProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
+void SrProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     juce::ScopedNoDenormals nd;
     const int n = buffer.getNumSamples();
@@ -81,7 +81,7 @@ void TkProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     float* R = buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : L;
 
     // distorsion
-    distSm.setTargetValue (ptrs (Tk::dist));
+    distSm.setTargetValue (ptrs (Sr::dist));
     if (distSm.getCurrentValue() > 0.005f || distSm.getTargetValue() > 0.005f)
     {
         for (int i = 0; i < n; ++i)
@@ -94,7 +94,7 @@ void TkProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     }
 
     // chorus
-    const float cho = ptrs (Tk::chorus);
+    const float cho = ptrs (Sr::chorus);
     if (cho > 0.005f)
     {
         chorus.setMix (cho * 0.8f);
@@ -110,7 +110,7 @@ void TkProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     }
 
     // delay ping-pong
-    delaySm.setTargetValue (ptrs (Tk::delay));
+    delaySm.setTargetValue (ptrs (Sr::delay));
     if (delaySm.getCurrentValue() > 0.005f || delaySm.getTargetValue() > 0.005f)
     {
         const float fbk = ptrs (fb), targetLen = juce::jlimit (8.f, (float) dly.bl.size() - 4.f, ptrs (dtime) * (float) sampleRate);
@@ -128,7 +128,7 @@ void TkProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     }
 
     // reverb
-    const float rv = ptrs (Tk::reverb);
+    const float rv = ptrs (Sr::reverb);
     if (rv > 0.005f)
     {
         juce::Reverb::Parameters rp;
@@ -148,7 +148,7 @@ void TkProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuff
     live.publish (L, R, n);
 }
 
-void TkProcessor::getStateInformation (juce::MemoryBlock& dest)
+void SrProcessor::getStateInformation (juce::MemoryBlock& dest)
 {
     auto state = apvts.copyState();
     state.setProperty ("presetIndex", presetIndex, nullptr);
@@ -156,17 +156,17 @@ void TkProcessor::getStateInformation (juce::MemoryBlock& dest)
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, dest);
 }
 
-void TkProcessor::setStateInformation (const void* data, int size)
+void SrProcessor::setStateInformation (const void* data, int size)
 {
     if (auto xml = getXmlFromBinary (data, size))
         if (xml->hasTagName (apvts.state.getType()))
         {
             auto vt = juce::ValueTree::fromXml (*xml);
             presetIndex = vt.getProperty ("presetIndex", -1);
-            presetName = vt.getProperty ("presetName", "TALKAMEL - Init Patch").toString();
+            presetName = vt.getProperty ("presetName", "QUEEN OF XMAS - Init Patch").toString();
             apvts.replaceState (vt);
         }
 }
 
-juce::AudioProcessorEditor* TkProcessor::createEditor() { return new TkEditor (*this); }
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new TkProcessor(); }
+juce::AudioProcessorEditor* SrProcessor::createEditor() { return new SrEditor (*this); }
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new SrProcessor(); }

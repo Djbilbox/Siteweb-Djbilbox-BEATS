@@ -103,7 +103,7 @@ jobs:
           }
           stage build/all/HUMPIRE_LOADOUT loadout
           for d in build/all/*/; do
-            case "$(basename "$d")" in HUMPIRE_LOADOUT|_deps|CMakeFiles) continue ;; SLEIGH_RIDER|TALKAMEL) stage "$d" solo; continue ;; esac   # solo: sold on their own
+            case "$(basename "$d")" in HUMPIRE_LOADOUT|_deps|CMakeFiles) continue ;; QUEEN_OF_XMAS|HBX84_TALKBOX) stage "$d" solo; continue ;; esac   # solo: sold on their own
             stage "$d" synths
           done
           stage build/orbit orbit
