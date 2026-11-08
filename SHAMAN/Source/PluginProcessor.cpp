@@ -10,6 +10,7 @@ ShProcessor::ShProcessor()
 {
     ptrs.bind (apvts);
     glideState.live = &live;
+    Sh::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new ShVoice (ptrs, glideState));
     synth.addSound (new ShSound());
 }

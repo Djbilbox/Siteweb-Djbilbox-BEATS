@@ -1,5 +1,6 @@
 #pragma once
 #include "Params.h"
+#include "NeonFX.h"
 #include <cmath>
 
 namespace K2k
@@ -52,6 +53,7 @@ struct SharedState
     std::atomic<float> lastFreq { 0.f };     // portamento
     std::atomic<float> lfoChorus { 0.f };    // valeur du LFO quand la destination est Chorus
     std::atomic<float> lastMod { 0.f };      // latest mod wheel (CC1) value 0..1, kept even when no voice is playing
+    hfx::LiveTap* live = nullptr;            // what the interface shows (envelopes, LFO, cutoff of the loudest voice)
 };
 
 class KSound : public juce::SynthesiserSound
@@ -158,11 +160,13 @@ public:
 
             // filtre
             const float fe = fenvAdsr.getNextSample();
+            lastFenv = fe; lastLfo = lfoEff;
             if ((i & 7) == 0)
             {
                 const float fc = smCut * std::exp2 ((dst == 0 ? lfoEff * 4.f : 0.f) + envAmt * fe * 5.f + mw * 0.8f);
                 ladder.set (fc, ft == 4 ? juce::jmin (1.f, resA * 1.1f + 0.25f) : resA, sr);
                 svf.set (fc, 0.6f + resA * 9.f, sr);
+                lastFc = fc;
             }
             float x = s * (1.f + drv * 3.f);
             if (drv > 0.01f || ft == 4) x = std::tanh (x * (ft == 4 ? 1.8f : 1.f));
@@ -176,7 +180,9 @@ public:
             }
             { const float o = y - dcX + dcR * dcY; dcX = y; dcY = o; y = o; }   // bloqueur DC
 
-            float a = amp.getNextSample() * envSens * dynGain;
+            const float envNow = amp.getNextSample();
+            lastEnv = envNow;
+            float a = envNow * envSens * dynGain;
             if (dst == 3) a *= 1.f - 0.5f * juce::jmax (0.f, lfoEff);
             y *= a * 0.85f;
 
@@ -184,7 +190,14 @@ public:
             const float gL = std::cos (juce::MathConstants<float>::pi * 0.25f * (1.f + pn)), gR = std::sin (juce::MathConstants<float>::pi * 0.25f * (1.f + pn));
             L[start + i] += y * gL;
             if (R) R[start + i] += y * gR;
+            if (age < 0x3fffffff) ++age;
             if (! amp.isActive()) { if (isVoiceActive()) clearCurrentNote(); break; }
+        }
+        if (auto* t = shared.live; t != nullptr && isVoiceActive())
+        {
+            const float secs = (float) age / (float) sr;
+            t->voice (lastEnv, hfx::envStage (! held, secs, P (ampAtk), P (ampDec)), lastFenv, hfx::envStage (! held, secs, 0.002f, juce::jlimit (0.03f, 3.f, P (ampDec))),
+                      lastLfo, (float) lfoPh, lastFc);
         }
     }
 
@@ -245,7 +258,7 @@ private:
         for (auto& p : ph) p = rng.nextDouble();
         lfoPh = rng.nextDouble() * 0.0; shVal = rng.nextFloat() * 2.f - 1.f;
         pan = (rng.nextFloat() - 0.5f) * 0.4f;
-        fresh = true; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        fresh = true; age = 0; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
         ladder.reset(); svf.reset();
         amp.noteOn(); fenvAdsr.noteOn(); lfoAdsr.noteOn();
     }
@@ -259,7 +272,8 @@ private:
     float targetFreq = 440.f, curFreq = 440.f, vel = 1.f, pan = 0.f, shVal = 0.f;
     float midiBend = 0.f, midiMod = 0.f, smCut = 3200.f;
     float dcX = 0.f, dcY = 0.f, dcR = 0.998f;
-    int note = -1;
+    int note = -1, age = 0;
+    float lastEnv = 0.f, lastFenv = 0.f, lastLfo = 0.f, lastFc = 3200.f;   // for the interface
     bool fresh = true, held = false;
 };
 }

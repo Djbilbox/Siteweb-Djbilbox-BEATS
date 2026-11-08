@@ -1,0 +1,20 @@
+{
+ "namespace": "Sh",
+ "instruments": [
+  {
+   "name": "drum",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Bendir/Bendir.sfz",
+   "drums": true
+  },
+  {
+   "name": "flute",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Ney/Ney.sfz",
+   "spacing": 1
+  },
+  {
+   "name": "chimes",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Hand Chimes",
+   "maxlen": 3.2
+  }
+ ]
+}

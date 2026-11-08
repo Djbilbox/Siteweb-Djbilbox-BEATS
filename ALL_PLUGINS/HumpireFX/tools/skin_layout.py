@@ -70,7 +70,7 @@ slots_rsl = [slot(x, ty, thh) for x in tx]
 prev_path = os.path.join(D, 'Source', 'FaceplateLayout.h')
 prev = open(prev_path, encoding='utf-8').read() if os.path.exists(prev_path) else ''
 num = lambda k: float(re.search(r'\b%s = ([\d.]+)f' % k, prev).group(1))
-m = re.search(r'drawImage \(camel, R \((\d+), (\d+), (\d+), (\d+)\)', ed)
+m = re.search(r'drawImage \(camel, R \((\d+), (\d+), (\d+), (\d+)\)', ed) or re.search(r'\bmed = R \((\d+), (\d+), (\d+), (\d+)\)', ed)   # or clipped in a medallion rect
 if m:
     mx, my, mw, mh = [int(v) for v in m.groups()]
     mcx, mcy, mr = circle((mx + mw / 2) * 0.5, (my + mh / 2) * 0.5, min(mw, mh) * 0.5 * 0.5 * 0.85, min(mw, mh) * 0.5 * 0.5 * 1.08, 16)

@@ -42,15 +42,16 @@ private:
 };
 
 class %(voice)s : public juce::SynthesiserVoice''' % {'n': name, 'members': ', '.join(insts), 'cases': cases, 'loads': loads, 'voice': voice}, 1)
-    v = v.replace('        fadsr.noteOn(); adsr.noteOn();', '        real.note = nullptr; realEngine = -1; noteKey = midiNote;   // the recording is picked when the note first sounds\n        fadsr.noteOn(); adsr.noteOn();', 1)
-    m = re.search(r'            float y = renderEngine \(freq, t, \(float\) sr\) \* trim\[eng\];', v)
+    v = re.sub(r'\n        ((?:fadsr\.noteOn\(\); )?adsr\.noteOn\(\);)', lambda m: '\n        real.note = nullptr; realEngine = -1; noteKey = midiNote;   // the recording is picked when the note first sounds\n        ' + m.group(1), v, count=1)   # no filter envelope: adsr.noteOn() alone
+    m = re.search(r'            float y = renderEngine \(freq, t, \(float\) sr\)( \* trim\[eng\])?;', v)
     assert m, (name, 'no renderEngine line')
-    lay = ''.join(' + (eng == %s ? renderEngine (freq, t, (float) sr) * trim[eng] * %sf : 0.f)' % (e, x) for e, x in layers.items())
+    trim = m.group(1) or ''   # some synths have no per-engine trim
+    lay = ''.join(' + (eng == %s ? renderEngine (freq, t, (float) sr)%s * %sf : 0.f)' % (e, trim, x) for e, x in layers.items())
     v = v[:m.start()] + '''            float y;
             if (const auto* set = RealInstruments::get().forEngine (eng))
                 y = playReal (*set, freq, t, (float) sr)%s;
             else
-                y = renderEngine (freq, t, (float) sr) * trim[eng];''' % lay + v[m.end():]
+                y = renderEngine (freq, t, (float) sr)%s;''' % (lay, trim) + v[m.end():]
     v = re.sub(r'(    SVF [^;]*voiceFilter)(;)', r'\1, realTone\2', v, count=1)
     drum_test = ' || '.join('eng == %s' % e for e in sorted(drums)) or 'false'
     m = re.search(r'    double ph\[\d+\] \{\}, lfoPh = 0\.0;', v)

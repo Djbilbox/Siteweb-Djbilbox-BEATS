@@ -153,6 +153,7 @@ void WarzoneProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
     buffer.clear();
     if (n == 0 || buffer.getNumChannels() < 1) return;
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
+    live.beginBlock (midi);
 
     float* L = buffer.getWritePointer (0);
     float* R = buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : buffer.getWritePointer (0);
@@ -179,6 +180,9 @@ void WarzoneProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
         auto soft = [] (float v) { const float a = std::abs (v); return a < 0.9f ? v : std::copysign (0.9f + 0.1f * std::tanh ((a - 0.9f) / 0.1f), v); };
         L[i] = soft (yl); if (R != L) R[i] = soft (yr);
     }
+    engine.forEachActiveVoice ([this] (const Voice& v)
+        { live.voice (v.liveAmp(), v.liveAmpStage(), v.liveFilt(), v.liveFiltStage(), v.liveLfo(), v.liveLfoPhase(), v.liveCutoff()); });
+    live.publish (L, R, n);
 }
 
 void WarzoneProcessor::getStateInformation (juce::MemoryBlock& dest)

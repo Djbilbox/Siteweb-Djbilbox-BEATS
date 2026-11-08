@@ -1,0 +1,4 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+bass: C:/Users/djbil/Desktop/HUMPIRE/Claude/BANQUE SAMPLES LIBRES - GENERALE/Bass/CC-BY/fretless_bass by FaireDesVagues [4498]
+strings: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib
+clav: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Electrophones/TX81Z/Clavisynth

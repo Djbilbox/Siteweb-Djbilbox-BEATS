@@ -1,0 +1,49 @@
+{
+ "namespace": "Occ",
+ "instruments": [
+  {
+   "name": "cabrette",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Mizmar/Mizmar.sfz",
+   "fills": true
+  },
+  {
+   "name": "vielle",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Solo Violin/Arco Vib",
+   "velocities": {
+    "_p.": 1,
+    "_f.": 2
+   },
+   "sustain": true
+  },
+  {
+   "name": "galoubet",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Edge-blown Aerophones/Baroque Soprano Recorder/Sustain",
+   "match": "_Sus_",
+   "sustain": true
+  },
+  {
+   "name": "mandoline",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Qanun/Qanun.sfz",
+   "maxlen": 2.2,
+   "spacing": 2
+  },
+  {
+   "name": "accordeon",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Free Aerophones/Harmonica-Hohner-Super64/Sustains/Normal",
+   "match": "Normal",
+   "sustain": true
+  },
+  {
+   "name": "carillon",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 1",
+   "velocities": {
+    "_pp_": 1,
+    "_p_": 1,
+    "_f_": 2,
+    "_ff_": 2,
+    "_fff_": 2
+   },
+   "maxlen": 3.5
+  }
+ ]
+}

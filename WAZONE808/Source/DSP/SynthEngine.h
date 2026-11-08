@@ -61,6 +61,26 @@ public:
     bool isHeld() const { return held; }
     void setHeld(bool h) { held = h; }
 
+    // What the premium interface shows (read on the audio thread, after render).
+    float liveAmp() const { return (float) envelope.getOutput(); }
+    float liveFilt() const { return (float) filterEnv.getOutput(); }
+    int liveAmpStage() const { return stageOf (envelope.getState()); }
+    int liveFiltStage() const { return stageOf (filterEnv.getState()); }
+    float liveLfo() const { return (float) lastLfo; }
+    float liveLfoPhase() const { return (float) lfo.getPhase(); }
+    float liveCutoff() const { return (float) lastCutoffHz; }
+    static int stageOf (ADSREnvelope::State s)
+    {
+        switch (s)
+        {
+            case ADSREnvelope::State::Attack:  return 0;
+            case ADSREnvelope::State::Decay:   return 1;
+            case ADSREnvelope::State::Sustain: return 2;
+            case ADSREnvelope::State::Release: return 3;
+            default:                           return -1;
+        }
+    }
+
     static constexpr int kMaxUnison = 7;
 
 private:
@@ -105,6 +125,7 @@ private:
     double modWheelAmount = 0.0;
 
     double sampleRate = 44100.0;
+    double baseCutoffHz = 1000.0, lastCutoffHz = 1000.0, lastLfo = 0.0;   // for the interface
 
     void updatePitch();
 };
@@ -154,6 +175,7 @@ public:
     void setFilterSustain(double level);
     void setVelocitySensitivity(double amount01);
     bool anyVoiceActive() const;
+    template <typename F> void forEachActiveVoice (F&& f) const { for (const auto& v : voices) if (v->isActive()) f (*v); }
 
     // Performance controls
     void setPitchBend(double semitones);

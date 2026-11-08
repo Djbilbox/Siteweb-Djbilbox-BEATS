@@ -1,0 +1,4 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+clav: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Electrophones/TX81Z/Clavisynth
+brass: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/sus
+strings: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib

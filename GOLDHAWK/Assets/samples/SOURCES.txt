@@ -1,0 +1,5 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+brass: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/F Horn/sus
+pluck: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Chordophones/Composite Chordophones/Concert Harp
+bells: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Glockenspiel
+strings: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib

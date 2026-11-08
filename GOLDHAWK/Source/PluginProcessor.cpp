@@ -9,6 +9,7 @@ GhProcessor::GhProcessor()
 {
     ptrs.bind (apvts);
     glideState.live = &live;
+    Gh::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new GhVoice (ptrs, glideState));
     synth.addSound (new GhSound());
 }

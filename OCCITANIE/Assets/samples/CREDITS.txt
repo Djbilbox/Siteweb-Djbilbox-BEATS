@@ -1,0 +1,15 @@
+OCCITANIE - real instruments: credits
+
+Some engines play recorded notes (cut, tuned, level-matched and looped by HUMPIRE PLUGINS).
+Thank you to the musicians and recordists.
+
+Licences:  CC0 1.0    https://creativecommons.org/publicdomain/zero/1.0/
+           CC BY 3.0  https://creativecommons.org/licenses/by/3.0/
+           CC BY 4.0  https://creativecommons.org/licenses/by/4.0/
+
+cabrette   https://freesound.org/s/18661/  cdrk (Freesound), CC BY 3.0  (10 samples)
+vielle     VSCO 2 Community Edition, Versilian Studios (CC0)  https://github.com/sgossner/VSCO-2-CE
+galoubet   Versilian Community Sample Library, Versilian Studios (CC0)  https://github.com/sgossner/VCSL
+mandoline  https://freesound.org/s/211133/  barisbozkurt (Freesound), CC0  (40 samples)
+accordeon  Versilian Community Sample Library, Versilian Studios (CC0)  https://github.com/sgossner/VCSL
+carillon   Versilian Community Sample Library, Versilian Studios (CC0)  https://github.com/sgossner/VCSL

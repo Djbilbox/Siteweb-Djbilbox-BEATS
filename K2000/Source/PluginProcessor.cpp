@@ -8,6 +8,7 @@ K2000AudioProcessor::K2000AudioProcessor()
       apvts (*this, nullptr, "PARAMETERS", createLayout())
 {
     ptrs.bind (apvts);
+    shared.live = &live;
     for (int i = 0; i < 16; ++i) { voices[(size_t) i] = new KVoice (ptrs, shared); synth.addVoice (voices[(size_t) i]); }
     synth.addSound (new KSound());
     noMidi.ensureSize (64);
@@ -89,6 +90,7 @@ void K2000AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     buffer.clear();
     if (n == 0 || buffer.getNumChannels() < 1 || ! prepared) return;   // nothing to do / prepareToPlay not called yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
+    live.beginBlock (midi);
 
     const int mode = juce::jlimit (0, 3, (int) ptrs (vmode));
     if (mode != lastMode)
@@ -127,6 +129,7 @@ void K2000AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
         limiter.process (l, r, volSm.getNextValue());
         L[i] = l; if (R != L) R[i] = r;
     }
+    live.publish (L, R, n);
 }
 
 void K2000AudioProcessor::getStateInformation (juce::MemoryBlock& dest)

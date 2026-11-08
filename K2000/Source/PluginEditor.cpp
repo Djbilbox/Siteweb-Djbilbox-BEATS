@@ -1,5 +1,6 @@
 #include "PluginEditor.h"
 #include "BinaryData.h"
+#include "FaceplateLayout.h"
 
 using namespace K2k;
 
@@ -38,64 +39,18 @@ K2kLNF::K2kLNF()
 
 void K2kLNF::drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float a0, float a1, juce::Slider& s)
 {
-    const auto c = juce::Rectangle<float> ((float) x, (float) y, (float) w, (float) h).reduced (3.f);
-    const float r = juce::jmin (c.getWidth(), c.getHeight()) * 0.5f;
-    const auto ctr = c.getCentre();
-    const float ang = a0 + pos * (a1 - a0);
-    const auto col = ramp (pos);
-    juce::Path track; track.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, a1, true);
-    g.setColour (juce::Colours::white.withAlpha (0.08f)); g.strokePath (track, juce::PathStrokeType (4.f));
-    juce::Path val; val.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, ang, true);
-    g.setColour (col.withAlpha (0.3f)); g.strokePath (val, juce::PathStrokeType (8.f));
-    g.setColour (col); g.strokePath (val, juce::PathStrokeType (3.5f));
-    const float kr = r * 0.74f;
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffeaeaea), ctr.x - kr * 0.4f, ctr.y - kr * 0.5f, juce::Colour (0xff3d3d3d), ctr.x + kr * 0.6f, ctr.y + kr * 0.7f, false));
-    g.fillEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2);
-    g.setColour (juce::Colours::black.withAlpha (0.7f)); g.drawEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2, 1.4f);
-    juce::Path p; p.addRoundedRectangle (-1.6f, -kr, 3.2f, kr * 0.42f, 1.4f);
-    g.setColour (juce::Colour (0xff1a1a1a)); g.fillPath (p, juce::AffineTransform::rotation (ang).translated (ctr.x, ctr.y));
-    juce::ignoreUnused (s);
+    hfx::plateRotary (g, x, y, w, h, pos, a0, a1, s, ramp (pos));
 }
 
 void K2kLNF::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float, float, juce::Slider::SliderStyle, juce::Slider& s)
 {
-    const bool wheel = s.getProperties()["wheel"];
-    const float cx = (float) x + (float) w * 0.5f;
-    if (wheel)
-    {
-        g.setColour (juce::Colour (0xff050505)); g.fillRoundedRectangle ((float) x + 6, (float) y, (float) w - 12, (float) h, 8.f);
-        const float th = 52.f;
-        auto cap = juce::Rectangle<float> (cx - 20.f, pos - th * 0.5f, 40.f, th);
-        g.setGradientFill (juce::ColourGradient (juce::Colour (0xff5d5d5d), cap.getX(), 0, juce::Colour (0xff222222), cap.getRight(), 0, false));
-        g.fillRoundedRectangle (cap, 8.f);
-        g.setColour (juce::Colours::black); for (int i = 1; i < 7; ++i) g.drawHorizontalLine ((int) (cap.getY() + i * th / 7.f), cap.getX() + 4, cap.getRight() - 4);
-        return;
-    }
-    g.setColour (juce::Colour (0xff060606)); g.fillRoundedRectangle (cx - 3.f, (float) y, 6.f, (float) h, 2.f);
-    const float t = 1.f - (pos - (float) y) / (float) h;
-    g.setColour (ramp (1.f - t).withAlpha (0.9f)); g.fillRoundedRectangle (cx - 2.f, pos, 4.f, (float) y + (float) h - pos, 2.f);
-    for (int i = 0; i <= 8; ++i)   // graduations braise
-    {
-        const float yy = (float) y + (float) h * (float) i / 8.f;
-        g.setColour (ramp ((float) i / 8.f).withAlpha (0.6f));
-        g.fillRect (cx - 16.f, yy, 5.f, 2.f); g.fillRect (cx + 11.f, yy, 5.f, 2.f);
-    }
-    auto cap = juce::Rectangle<float> (cx - 12.f, pos - 7.f, 24.f, 14.f);
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffdcdcdc), 0, cap.getY(), juce::Colour (0xff4b4b4b), 0, cap.getBottom(), false));
-    g.fillRoundedRectangle (cap, 3.f);
-    g.setColour (juce::Colours::black); g.drawRoundedRectangle (cap, 3.f, 1.2f); g.drawHorizontalLine ((int) cap.getCentreY(), cap.getX() + 3, cap.getRight() - 3);
+    if ((bool) s.getProperties()["wheel"]) { hfx::plateWheel (g, x, w, pos); return; }
+    hfx::plateLinear (g, x, y, w, h, pos, s, faderCap, ramp ((pos - (float) y) / (float) juce::jmax (1, h)));
 }
 
-void K2kLNF::drawComboBox (juce::Graphics& g, int w, int h, bool, int, int, int, int, juce::ComboBox&)
+void K2kLNF::drawComboBox (juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&)
 {
-    const auto r = juce::Rectangle<float> (0, 0, (float) w, (float) h).reduced (1.5f);
-    g.setColour (amber.withAlpha (0.18f)); g.fillRoundedRectangle (r.expanded (1.5f), 9.f);
-    g.setColour (dark); g.fillRoundedRectangle (r, 8.f);
-    g.setGradientFill (juce::ColourGradient (amber, r.getX(), 0, ember, r.getRight(), 0, false));
-    g.drawRoundedRectangle (r, 8.f, 1.7f);
-    juce::Path t; const float cx = (float) w - 18.f, cy = (float) h * 0.5f;
-    t.addTriangle (cx - 5, cy - 3, cx + 5, cy - 3, cx, cy + 4);
-    g.setColour (juce::Colour (0xffc8f6ff)); g.fillPath (t);
+    // the box and its arrow are part of the faceplate: only the text (the combo's label) is drawn
 }
 
 void K2kLNF::positionComboBoxText (juce::ComboBox& b, juce::Label& l)
@@ -144,11 +99,11 @@ K2kPanel::K2kPanel (K2000AudioProcessor& p)
     addKnob (dmix, P::delayMix, "DLY MIX"); addKnob (dtime, P::delayTime, "DLY TIME"); addKnob (dfb, P::delayFb, "FEEDBACK");
     addKnob (res, P::res, "RES"); addKnob (fenvK, P::fenv, "FLT ENV"); addKnob (rel, P::ampRel, "AMP REL"); addKnob (detune, P::detune, "DETUNE");
     for (auto* k : { &res, &fenvK, &rel, &detune }) k->s.getProperties().set ("small", true);
-    const char* ln[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
-    for (int i = 0; i < 4; ++i) addKnob (lfoEnv[i], P::lfoAtk + i, ln[i], juce::Slider::LinearVertical);
-    const char* an[5] = { "ATTACK", "DECAY", "SUSTAIN", "BANK", "ADSR" };   // sit under the "VELOCITY" header
+    const char* en[4] = { "ATTACK", "DECAY", "SUSTAIN", "RELEASE" };
+    for (int i = 0; i < 4; ++i) addKnob (env[i], P::lfoAtk + i, en[i], juce::Slider::LinearVertical);
+    const char* tn[5] = { "ATTACK", "DECAY", "SUSTAIN", "BANK", "ADSR" };   // sit under the "VELOCITY" header
     const int ai[5] = { P::ampAtk, P::ampDec, P::ampSus, P::velBank, P::velAdsr };
-    for (int i = 0; i < 5; ++i) addKnob (ampEnv[i], ai[i], an[i], juce::Slider::LinearVertical);
+    for (int i = 0; i < 5; ++i) addKnob (rsl[i], ai[i], tn[i], juce::Slider::LinearVertical);
     addKnob (bend, P::bend, "", juce::Slider::LinearVertical);
     addKnob (modw, P::modw, "", juce::Slider::LinearVertical);
     bend.s.getProperties().set ("wheel", true); modw.s.getProperties().set ("wheel", true);
@@ -183,6 +138,43 @@ K2kPanel::K2kPanel (K2000AudioProcessor& p)
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
+    // premium skin: the photo-real faceplate, the live light on top (see ALL_PLUGINS/HumpireFX/PremiumSkin.h)
+    face.setImage (juce::ImageFileFormat::loadFrom (BinaryData::faceplate_jpg, BinaryData::faceplate_jpgSize));
+    face.setMascot (camel, { Face::mascotX, Face::mascotY }, Face::mascotR);   // the original artwork in the medallion
+    lnf.faderCap = juce::ImageFileFormat::loadFrom (BinaryData::fader_png, BinaryData::fader_pngSize);
+    keys.neon = ember; keys.neonHot = amber;
+    keys.setOverlayOnly();   // the keys are part of the faceplate
+    overlay.a = amber; overlay.b = ember; overlay.theme = hfx::Theme::scanner;
+    overlay.mascot = { Face::mascotX, Face::mascotY }; overlay.mascotR = Face::mascotR;
+    overlay.setTitleFromFace (juce::ImageFileFormat::loadFrom (BinaryData::faceplate_jpg, BinaryData::faceplate_jpgSize),
+                              { Face::titleX, Face::titleY, Face::titleW, Face::titleH });   // light from the real letters
+    overlay.addKnob (rate.s, hfx::PremiumOverlay::lfoRate);
+    overlay.addKnob (amount.s, hfx::PremiumOverlay::lfoAmount);
+    overlay.addKnob (volume.s, hfx::PremiumOverlay::volume);
+    overlay.addKnob (reverb.s, hfx::PremiumOverlay::effect);
+    overlay.addKnob (chorus.s, hfx::PremiumOverlay::effect);
+    overlay.addKnob (dist.s, hfx::PremiumOverlay::effect);
+    overlay.addKnob (glide.s, hfx::PremiumOverlay::glide);
+    overlay.addKnob (cutoff.s, hfx::PremiumOverlay::plain);
+    overlay.addKnob (drive.s, hfx::PremiumOverlay::plain);
+    overlay.addKnob (dmix.s, hfx::PremiumOverlay::plain);
+    overlay.addKnob (dtime.s, hfx::PremiumOverlay::delayTime);
+    overlay.addKnob (dfb.s, hfx::PremiumOverlay::plain);
+    overlay.addKnob (res.s, hfx::PremiumOverlay::plain);
+    overlay.addKnob (fenvK.s, hfx::PremiumOverlay::filterEnv);
+    overlay.addKnob (rel.s, hfx::PremiumOverlay::plain);
+    overlay.addKnob (detune.s, hfx::PremiumOverlay::plain);
+    overlay.addFader (env[0].s, true, 0, hfx::PremiumOverlay::ledColumns (Face::envSlots[0].x, Face::envSlots[0].top + 3.f, Face::envSlots[0].bottom - 3.f));
+    overlay.addFader (env[1].s, true, 1, hfx::PremiumOverlay::ledColumns (Face::envSlots[1].x, Face::envSlots[1].top + 3.f, Face::envSlots[1].bottom - 3.f));
+    overlay.addFader (env[2].s, true, 2, hfx::PremiumOverlay::ledColumns (Face::envSlots[2].x, Face::envSlots[2].top + 3.f, Face::envSlots[2].bottom - 3.f));
+    overlay.addFader (env[3].s, true, 3, hfx::PremiumOverlay::ledColumns (Face::envSlots[3].x, Face::envSlots[3].top + 3.f, Face::envSlots[3].bottom - 3.f));
+    overlay.addFader (rsl[0].s, false, 0, hfx::PremiumOverlay::ledColumns (Face::rslSlots[0].x, Face::rslSlots[0].top + 3.f, Face::rslSlots[0].bottom - 3.f));
+    overlay.addFader (rsl[1].s, false, 1, hfx::PremiumOverlay::ledColumns (Face::rslSlots[1].x, Face::rslSlots[1].top + 3.f, Face::rslSlots[1].bottom - 3.f));
+    overlay.addFader (rsl[2].s, false, 2, hfx::PremiumOverlay::ledColumns (Face::rslSlots[2].x, Face::rslSlots[2].top + 3.f, Face::rslSlots[2].bottom - 3.f));
+    overlay.addPlainFader (rsl[3].s, hfx::PremiumOverlay::ledColumns (Face::rslSlots[3].x, Face::rslSlots[3].top + 3.f, Face::rslSlots[3].bottom - 3.f));   // a timbre fader (BANK)
+    overlay.addPlainFader (rsl[4].s, hfx::PremiumOverlay::ledColumns (Face::rslSlots[4].x, Face::rslSlots[4].top + 3.f, Face::rslSlots[4].bottom - 3.f));   // a timbre fader (ADSR)
+    addAndMakeVisible (overlay);
+
     setSize (1000, 746);
 }
 
@@ -288,105 +280,7 @@ void K2kPanel::showExpansion()
 
 void K2kPanel::paint (juce::Graphics& g)
 {
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xff2c3036), 0, 0, juce::Colour (0xff14171b), 0, (float) getHeight(), false));
-    g.fillAll();
-    juce::Random cl (9);   // grain brosse / rayures
-    for (int i = 0; i < 140; ++i)
-    {
-        const float x = cl.nextFloat() * (float) getWidth(), y = cl.nextFloat() * (float) getHeight(), r = 12.f + cl.nextFloat() * 40.f;
-        g.setColour (juce::Colours::black.withAlpha (0.03f)); g.fillEllipse (x - r, y - r, r * 2, r * 2);
-    }
-    for (int side = 0; side < 2; ++side)   // rails chromes + poignee
-    {
-        auto r = side == 0 ? R (35, 30, 140, 1435) : R (1825, 30, 140, 1435);
-        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffb0b4b8), (float) r.getX(), 0, juce::Colour (0xff3c4044), (float) r.getRight(), 0, false));
-        g.fillRoundedRectangle (r.toFloat(), 6.f);
-        const auto hd = side == 0 ? R (88, 170, 58, 1160) : R (1855, 170, 58, 1160);
-        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffd0d4d8), (float) hd.getX(), 0, juce::Colour (0xff4a4e52), (float) hd.getRight(), 0, false));
-        g.fillRoundedRectangle (hd.toFloat(), 16.f);
-        g.setColour (amber.withAlpha (0.7f)); g.fillRect (side == 0 ? r.getRight() - 3 : r.getX(), r.getY() + 4, 3, r.getHeight() - 8);
-        for (int y : { 98, 1390 }) { g.setColour (juce::Colour (0xff181a1c)); g.fillEllipse ((float) r.getCentreX() - 17, y * K - 17, 34.f, 34.f); g.setColour (juce::Colour (0xff9a9ea2)); g.fillEllipse ((float) r.getCentreX() - 12, y * K - 12, 24.f, 24.f); }
-    }
-    // grilles de ventilation (portent les petits boutons)
-    for (auto r : { R (680, 265, 125, 325), R (1195, 265, 125, 325) })
-    {
-        g.setColour (amber.withAlpha (0.35f)); g.fillRoundedRectangle (r.toFloat().expanded (2.f), 10.f);
-        g.setColour (juce::Colour (0xff0a1418)); g.fillRoundedRectangle (r.toFloat(), 8.f);
-        for (float yy = (float) r.getY() + 8; yy < (float) r.getBottom() - 6; yy += 8.f)
-            for (float xx = (float) r.getX() + 8; xx < (float) r.getRight() - 6; xx += 8.f)
-            { g.setColour (juce::Colour (0xff1c4a54)); g.fillEllipse (xx - 1.f, yy - 1.f, 6.f, 6.f); g.setColour (juce::Colour (0xff04090b)); g.fillEllipse (xx, yy, 4.5f, 4.5f); }
-    }
-    g.drawImage (camel, R (843, 272, 314, 316).toFloat(), juce::RectanglePlacement::centred);
-    {   // logo
-        auto lr = R (1688, 98, 106, 102).toFloat();
-        g.setColour (juce::Colours::white); g.drawImage (logo, lr, juce::RectanglePlacement::centred);
-    }
-    g.setColour (juce::Colour (0xffb8c4cc)); g.setFont (juce::FontOptions (17.f, juce::Font::bold));
-    g.drawFittedText ("DJBILBOXBEATS", R (1425, 125, 262, 60), juce::Justification::centred, 1);
-    // titre K2000 : afficheur a LED cyan
-    const auto titleR = R (780, 600, 440, 130);
-    for (float a : { 0.10f, 0.16f, 0.26f })
-    { g.setColour (amber.withAlpha (a)); g.setFont (juce::FontOptions (64.f + (0.3f - a) * 16.f, juce::Font::bold)); g.drawFittedText ("K2000", titleR, juce::Justification::centred, 1); }
-    g.setColour (juce::Colour (0xff7af8ff)); g.setFont (juce::FontOptions (62.f, juce::Font::bold));
-    g.drawFittedText ("K2000", titleR, juce::Justification::centred, 1);
-    g.setColour (juce::Colour (0xffc4ccd4)); g.setFont (juce::FontOptions (20.f));
-    g.drawFittedText ("By Humpire", R (880, 722, 240, 44), juce::Justification::centred, 1);
-    // ecran preset
-    auto scr = R (590, 85, 820, 125).toFloat();
-    g.setColour (amber.withAlpha (0.3f)); g.fillRoundedRectangle (scr.expanded (3.f), 14.f);
-    g.setColour (juce::Colour (0xff484c52)); g.fillRoundedRectangle (scr, 12.f);
-    g.setColour (juce::Colour (0xff0b1318)); g.fillRoundedRectangle (scr.reduced (6.f), 9.f);
-    g.setColour (juce::Colour (0xff10202a)); g.fillRoundedRectangle (R (705, 110, 590, 75).toFloat(), 5.f);
-    {   // icones
-        g.setColour (juce::Colour (0xffa8b4bc)); const auto f = R (628, 125, 56, 46).toFloat();
-        juce::Path fo; fo.addRoundedRectangle (f.getX(), f.getY() + 5, f.getWidth(), f.getHeight() - 5, 3.f); fo.addRoundedRectangle (f.getX(), f.getY(), f.getWidth() * 0.45f, 8.f, 2.f);
-        g.strokePath (fo, juce::PathStrokeType (1.6f));
-        const auto d = R (1318, 122, 50, 50).toFloat();
-        g.drawRoundedRectangle (d, 3.f, 1.8f); g.drawRect (d.getX() + d.getWidth() * 0.2f, d.getY(), d.getWidth() * 0.55f, d.getHeight() * 0.35f, 1.5f);
-        g.drawRect (d.getX() + d.getWidth() * 0.2f, d.getY() + d.getHeight() * 0.58f, d.getWidth() * 0.6f, d.getHeight() * 0.42f, 1.5f);
-        g.setColour (amber);
-        for (int sgn : { -1, 1 })
-        { const float cx = sgn < 0 ? (float) R (733, 0, 0, 0).getX() : (float) R (1265, 0, 0, 0).getX(), cy = (float) R (0, 147, 0, 0).getY();
-          juce::Path c; c.startNewSubPath (cx - sgn * 5.f, cy - 11.f); c.lineTo (cx + sgn * 5.f, cy); c.lineTo (cx - sgn * 5.f, cy + 11.f); g.strokePath (c, juce::PathStrokeType (2.2f)); }
-    }
-    // cassette
-    g.setColour (juce::Colours::white);   // drawImage applique l'alpha de la couleur courante
-    g.drawImage (cassette, R (225, 92, 355, 410).toFloat(), juce::RectanglePlacement::centred);
-    g.setColour (juce::Colour (0xffc8d4dc)); g.setFont (juce::FontOptions (14.f));
-    g.drawFittedText ("EXPANSION", R (270, 522, 220, 40), juce::Justification::centred, 1);
-    // plaque des molettes
-    g.setColour (juce::Colour (0xff080c0e)); g.fillRoundedRectangle (R (222, 1078, 365, 350).toFloat(), 12.f);
-    g.setColour (juce::Colour (0xff2c3438)); g.drawRoundedRectangle (R (222, 1078, 365, 350).toFloat(), 12.f, 2.f);
-    // labels
-    g.setColour (juce::Colour (0xffc6d0d8));
-    for (auto* k : all)
-    {
-        const auto r = k->s.getBounds();
-        g.setFont (juce::FontOptions (k->s.getProperties()["small"] ? 10.f : (k->lin ? 10.f : 12.5f)));
-        g.drawFittedText (k->label, r.getX() - 25, r.getBottom() + (k->lin ? 2 : 0), r.getWidth() + 50, 18, juce::Justification::centred, 1);
-    }
-    // section headers (rules + text), one per group of controls
-    drawHeader (g, "LFO", amber, 16.f, 215, 410, 605);
-    drawHeader (g, "LFO ENVELOPE", amber, 12.f, 430, 790, 605);
-    drawHeader (g, "AMP ENVELOPE", amber, 12.f, 1385, 1610, 295);
-    drawHeader (g, "VELOCITY", amber, 12.f, 1630, 1770, 295);
-    // captions under the five drop-down menus
-    g.setColour (juce::Colour (0xffc6d0d8).withAlpha (0.85f)); g.setFont (juce::FontOptions (10.f, juce::Font::bold));
-    {
-        const char* cap[5] = { "WAVEFORM", "LFO SHAPE", "LFO DESTINATION", "FILTER TYPE", "VOICE MODE" };
-        const int cx[5] = { 360, 680, 1000, 1320, 1640 };
-        for (int i = 0; i < 5; ++i) g.drawFittedText (cap[i], R (cx[i] - 140, 1044, 280, 30), juce::Justification::centred, 1);
-    }
-    g.setColour (juce::Colour (0xffc6d0d8)); g.setFont (juce::FontOptions (10.f));
-    g.drawFittedText ("LFO>PITCH", R (305, 782, 140, 40), juce::Justification::centred, 1);   // the toggle sends the LFO to pitch (it is not the pitch-bend wheel)
-    g.setFont (juce::FontOptions (10.5f));
-    g.drawFittedText ("PITCH BEND", R (245, 1368, 170, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("MODULATION", R (400, 1368, 170, 40), juce::Justification::centred, 1);
-    g.setColour (amber.withAlpha (0.5f));   // liaison RATE - PITCH - AMOUNT
-    g.drawLine ((float) R (345, 0, 0, 0).getX(), (float) R (0, 700, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 700, 0, 0).getY(), 1.f);
-    g.drawLine ((float) R (378, 0, 0, 0).getX(), (float) R (0, 700, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 735, 0, 0).getY(), 1.f);
-    g.drawLine ((float) R (345, 0, 0, 0).getX(), (float) R (0, 862, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 862, 0, 0).getY(), 1.f);
-    g.drawLine ((float) R (378, 0, 0, 0).getX(), (float) R (0, 862, 0, 0).getY(), (float) R (378, 0, 0, 0).getX(), (float) R (0, 830, 0, 0).getY(), 1.f);   // stops under the "LFO>PITCH" caption
+    face.draw (g, getLocalBounds());   // the whole front panel is one photo-real render (see Assets/faceplate.jpg)
 }
 
 void K2kPanel::resized()
@@ -398,9 +292,9 @@ void K2kPanel::resized()
     place (glide, 908, 862, 100); place (cutoff, 1092, 862, 100); place (drive, 1289, 862, 100);
     place (dmix, 1434, 862, 100); place (dtime, 1575, 862, 100); place (dfb, 1718, 862, 100);
     place (res, 742, 385, 64); place (fenvK, 742, 490, 64); place (rel, 1257, 385, 64); place (detune, 1257, 490, 64);
-    const int lx[4] = { 465, 563, 661, 759 }, ax[5] = { 1416, 1497, 1576, 1657, 1738 };
-    for (int i = 0; i < 4; ++i) lfoEnv[i].s.setBounds (R (lx[i] - 28, 668, 56, 232));
-    for (int i = 0; i < 5; ++i) ampEnv[i].s.setBounds (R (ax[i] - 28, 338, 56, 232));
+    const int ex[4] = { 465, 563, 661, 759 }, tx[5] = { 1416, 1497, 1576, 1657, 1738 };
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 28, 668, 56, 232));
+    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 28, 338, 56, 232));
     bend.s.setBounds (C (330, 1250, 90, 260)); modw.s.setBounds (C (480, 1250, 90, 260));
     cWave.c.setBounds (R (225, 988, 270, 57)); cLfo.c.setBounds (R (545, 988, 270, 57)); cDest.c.setBounds (R (865, 988, 270, 57));
     cFilt.c.setBounds (R (1185, 988, 270, 57)); cMode.c.setBounds (R (1505, 988, 270, 57));
@@ -410,4 +304,45 @@ void K2kPanel::resized()
     expansion.setBounds (R (240, 100, 340, 410));
     keys.setBounds (R (610, 1090, 1165, 325));
     keys.setKeyWidth ((float) keys.getWidth() / (float) countWhiteKeys (kKeyLow, kKeyHigh));   // fit the whole range exactly
+
+    // on the faceplate: knobs centred on their caps (value ring just outside), faders on their slots
+    for (const auto& cap : Face::caps)
+        for (auto* k : { &rate, &amount, &volume, &reverb, &chorus, &dist, &glide, &cutoff, &drive, &dmix, &dtime, &dfb, &res, &fenvK, &rel, &detune })
+            if (juce::String (cap.name) == knobName (k))
+            {
+                const float ring = cap.r + (cap.r > 14.f ? 4.5f : 2.6f), half = ring + 3.f;
+                k->s.setBounds (juce::Rectangle<float> (half * 2.f, half * 2.f).withCentre ({ cap.x, cap.y }).toNearestInt());
+            }
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (juce::Rectangle<float> (28.f, Face::envSlots[i].bottom - Face::envSlots[i].top + 8.f).withCentre ({ Face::envSlots[i].x, (Face::envSlots[i].top + Face::envSlots[i].bottom) * 0.5f }).toNearestInt());
+    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (juce::Rectangle<float> (28.f, Face::rslSlots[i].bottom - Face::rslSlots[i].top + 8.f).withCentre ({ Face::rslSlots[i].x, (Face::rslSlots[i].top + Face::rslSlots[i].bottom) * 0.5f }).toNearestInt());
+    overlay.setBounds (getLocalBounds());
+}
+
+juce::String K2kPanel::knobName (const Knob* k) const
+{
+    if (k == &rate) return "rate";
+    if (k == &amount) return "amount";
+    if (k == &volume) return "volume";
+    if (k == &reverb) return "reverb";
+    if (k == &chorus) return "chorus";
+    if (k == &dist) return "dist";
+    if (k == &glide) return "glide";
+    if (k == &cutoff) return "cutoff";
+    if (k == &drive) return "drive";
+    if (k == &dmix) return "dmix";
+    if (k == &dtime) return "dtime";
+    if (k == &dfb) return "dfb";
+    if (k == &res) return "res";
+    if (k == &fenvK) return "fenvK";
+    if (k == &rel) return "rel";
+    if (k == &detune) return "detune";
+    return {};
+}
+
+void K2kPanel::mouseDown (const juce::MouseEvent& e)
+{
+    if (! e.mods.isPopupMenu()) return;
+    juce::PopupMenu m;
+    m.addItem (1, "Animations", true, overlay.animationsOn());
+    m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (this).withMousePosition(), [this] (int r) { if (r == 1) overlay.setAnimations (! overlay.animationsOn()); });
 }

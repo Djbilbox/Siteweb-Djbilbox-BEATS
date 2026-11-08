@@ -51,6 +51,7 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
     juce::MidiKeyboardState keyboardState;
+    hfx::LiveTap live;   // audio thread -> interface: levels, envelopes, LFO, cutoff, note-ons
     int presetIndex = -1;
     juce::String presetName { "OCCITANIE - Init Patch" };
 

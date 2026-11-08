@@ -1,0 +1,4 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+organ: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Edge-blown Aerophones/Pipe Organ/Quiet
+bells: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 1
+wind: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Woodwinds/Flute/susNV

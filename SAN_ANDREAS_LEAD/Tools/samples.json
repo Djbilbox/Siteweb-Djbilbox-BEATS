@@ -1,0 +1,24 @@
+{
+ "namespace": "Sa",
+ "instruments": [
+  {
+   "name": "bass",
+   "folder": "C:/Users/djbil/Desktop/HUMPIRE/Claude/BANQUE SAMPLES LIBRES - GENERALE/Bass/CC-BY/fretless_bass by FaireDesVagues [4498]",
+   "maxlen": 2.2,
+   "credit": "fretless_bass pack by FaireDesVagues (Freesound), CC BY 3.0  https://freesound.org/people/FaireDesVagues/packs/4498/"
+  },
+  {
+   "name": "strings",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib",
+   "velocity": "_v(\\d)\\.",
+   "sustain": true
+  },
+  {
+   "name": "clav",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Electrophones/TX81Z/Clavisynth",
+   "velocity": "_vl(\\d)",
+   "maxlen": 1.6,
+   "spacing": 2
+  }
+ ]
+}

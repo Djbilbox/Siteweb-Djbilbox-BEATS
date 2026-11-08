@@ -1,0 +1,37 @@
+{
+ "namespace": "Gh",
+ "instruments": [
+  {
+   "name": "brass",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/F Horn/sus",
+   "velocity": "_v(\\d)_",
+   "sustain": true
+  },
+  {
+   "name": "pluck",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Chordophones/Composite Chordophones/Concert Harp",
+   "velocities": {
+    "_mf": 1,
+    "_f1": 2,
+    "_f2": 2
+   },
+   "maxlen": 2.6
+  },
+  {
+   "name": "bells",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Glockenspiel",
+   "velocities": {
+    "_soft_": 1,
+    "_medium_": 1,
+    "_loud_": 2
+   },
+   "maxlen": 2.8
+  },
+  {
+   "name": "strings",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib",
+   "velocity": "_v(\\d)\\.",
+   "sustain": true
+  }
+ ]
+}

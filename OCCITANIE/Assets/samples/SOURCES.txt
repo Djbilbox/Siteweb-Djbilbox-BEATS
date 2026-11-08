@@ -1,0 +1,7 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+cabrette: C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Mizmar/Mizmar.sfz
+vielle: C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Solo Violin/Arco Vib
+galoubet: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Edge-blown Aerophones/Baroque Soprano Recorder/Sustain
+mandoline: C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Qanun/Qanun.sfz
+accordeon: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Free Aerophones/Harmonica-Hohner-Super64/Sustains/Normal
+carillon: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 1

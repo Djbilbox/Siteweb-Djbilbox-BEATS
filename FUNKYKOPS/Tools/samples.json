@@ -1,0 +1,24 @@
+{
+ "namespace": "Fk",
+ "instruments": [
+  {
+   "name": "clav",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Electrophones/TX81Z/Clavisynth",
+   "velocity": "_vl(\\d)",
+   "maxlen": 1.6,
+   "spacing": 2
+  },
+  {
+   "name": "brass",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Brass/Trumpet/sus",
+   "velocity": "_v(\\d)_",
+   "sustain": true
+  },
+  {
+   "name": "strings",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Strings/Violin Section/susVib",
+   "velocity": "_v(\\d)\\.",
+   "sustain": true
+  }
+ ]
+}

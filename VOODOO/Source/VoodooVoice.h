@@ -1,5 +1,8 @@
 #pragma once
 #include "Params.h"
+#include "NeonFX.h"
+#include "BinaryData.h"
+#include "SampleMap.h"
 #include <cmath>
 
 namespace Voodoo
@@ -8,6 +11,7 @@ struct GlideState
 {
     std::atomic<float> lastFreq { 0.f };
     std::atomic<float> lastMod { 0.f };   // latest mod wheel (CC1) value 0..1, kept even when no voice is playing
+    hfx::LiveTap* live = nullptr;          // what the interface shows (envelopes, LFO, cutoff of the loudest voice)
 };
 
 struct SVF
@@ -34,6 +38,21 @@ class VoodooSound : public juce::SynthesiserSound
 public:
     bool appliesToNote (int) override { return true; }
     bool appliesToChannel (int) override { return true; }
+};
+
+// The real instruments of VOODOO: recorded notes (see Assets/samples/CREDITS.txt) played by some engines instead of
+// synthesis. Decoded once, on the message thread (processor constructor).
+struct RealInstruments
+{
+    hfx::SampleSet flute, shakuhachi, sitar, oud, kalimba, erhu;
+    static const RealInstruments& get() { static const RealInstruments r; return r; }
+    // engine -> its recordings (nullptr: the engine stays synthesised)
+    const hfx::SampleSet* forEngine (int e) const
+    {
+        switch (e) { case 0: return &flute; case 2: return &shakuhachi; case 3: return &sitar; case 4: return &oud; case 5: return &kalimba; case 6: return &erhu; default: return nullptr; }
+    }
+private:
+    RealInstruments() { flute.load (fluteNotes, BinaryData::getNamedResource); shakuhachi.load (shakuhachiNotes, BinaryData::getNamedResource); sitar.load (sitarNotes, BinaryData::getNamedResource); oud.load (oudNotes, BinaryData::getNamedResource); kalimba.load (kalimbaNotes, BinaryData::getNamedResource); erhu.load (erhuNotes, BinaryData::getNamedResource); }
 };
 
 class VoodooVoice : public juce::SynthesiserVoice
@@ -66,13 +85,14 @@ public:
         for (auto* s : { &breathBP, &sym1, &sym2, &f1, &f2, &fl, &voiceFilter }) s->reset();
         pan = (rng.nextFloat() - 0.5f) * 2.f;
         lfoPh = 0.0; shValue = rng.nextFloat() * 2.f - 1.f;
-        freshNote = true; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        freshNote = true; released = false; dcX = dcY = 0.f; dcR = 1.f - juce::MathConstants<float>::twoPi * 12.f / (float) getSampleRate();
+        real.note = nullptr; realEngine = -1; noteKey = midiNote;   // the recording is picked when the note first sounds
         adsr.noteOn();
     }
 
     void stopNote (float, bool allowTailOff) override
     {
-        if (allowTailOff) adsr.noteOff();
+        if (allowTailOff) { adsr.noteOff(); released = true; }
         else { adsr.reset(); clearCurrentNote(); }
     }
 
@@ -126,18 +146,24 @@ public:
             float t[5];
             for (int k = 0; k < 5; ++k) t[k] = juce::jlimit (0.f, 1.f, tb[k] + (dst == 3 ? mod * 0.5f : 0.f));
 
-            float y = renderEngine (freq, t, (float) sr);
+            float y;
+            if (const auto* set = RealInstruments::get().forEngine (eng))
+                y = playReal (*set, freq, t, (float) sr);
+            else
+                y = renderEngine (freq, t, (float) sr);
             { const float dcOut = y - dcX + dcR * dcY; dcX = y; dcY = dcOut; y = dcOut; } // bloqueur DC
 
             if ((i & 7) == 0)
             {
                 float fc = smCut * std::exp2 ((dst == 1 ? mod * 3.f : 0.f) + (float) std::log2 (freq / 261.6) * 0.25f);
                 voiceFilter.set (fc, 0.7f + tb[1] * 1.2f, sr);
+                lastFc = fc;
             }
             auto fo = voiceFilter.process (y);
             y = ft == 0 ? fo.lp : ft == 1 ? fo.hp : fo.bp * 1.5f;
 
             const float env = adsr.getNextSample();
+            lastEnv = env; lastLfo = lfo;
             float amp = env * (0.35f + 0.65f * vel) * smVol * 0.5f;
             if (dst == 2) amp *= 1.f - 0.5f * amt * (0.5f + 0.5f * lfo);
             y *= amp;
@@ -146,6 +172,12 @@ public:
             if (R) R[start + i] += y * gR;
             if (age < 0x3fffffff) ++age;   // saturate: no signed overflow on very long held notes
             if (! adsr.isActive()) { clearCurrentNote(); break; }
+        }
+        if (auto* t = glideState.live; t != nullptr && isVoiceActive())
+        {
+            const float secs = (float) age / (float) sr;
+            t->voice (lastEnv, hfx::envStage (released, secs, P (atk), P (dec)), fenvLevel, hfx::envStage (released, secs, P (atk), P (dec)),
+                      lastLfo, (float) lfoPh, lastFc);
         }
     }
 
@@ -251,14 +283,35 @@ private:
     GlideState& glideState;
     juce::ADSR adsr;
     juce::Random rng;
-    SVF breathBP, sym1, sym2, f1, f2, fl, voiceFilter;
+    SVF breathBP, sym1, sym2, f1, f2, fl, voiceFilter, realTone;
     std::vector<float> ksBuf;
     int ksW = 0, eng = 0, age = 0;
     float ksPrev = 0.f, exciteLP = 0.f, targetFreq = 440.f, curFreq = 440.f, vel = 1.f, pan = 0.f;
     float midiBend = 0.f, midiMod = 0.f, shValue = 0.f;
     float smVol = 0.f, smSemi = 0.f, smBend = 0.f, smCut = 9000.f;
-    bool freshNote = true;
+    bool freshNote = true, released = false;
+    float fenvLevel = 0.f, lastEnv = 0.f, lastLfo = 0.f, lastFc = 9000.f;   // for the interface (no filter envelope here)
     float dcX = 0.f, dcY = 0.f, dcR = 0.998f;
     double ph[6] {}, lfoPh = 0.0;
+    hfx::SamplePlayer real;      // the real instrument's recording this note plays
+    int realEngine = -1, noteKey = 60;
+    float realGain[8] { 0.98f, 1.00f, 0.80f, 2.05f, 1.23f, 1.41f, 0.89f, 1.00f };   // levels of the recordings, matched to the synthesised engines (set_levels)
+
+    // a recorded note, coloured by the engine's knobs: TONE darkens, BRIGHT adds air, BODY warms, TEXTURE adds breath
+    float playReal (const hfx::SampleSet& set, double f, const float* t, float sr)
+    {
+        if (realEngine != eng || ! real.active())
+        {
+            int key = noteKey;
+            if (false) key = 36 + ((noteKey - 36) % 24 + 24) % 24;   // drums: every octave plays the strokes
+            real.start (set.pick (key, vel)); realEngine = eng;
+        }
+        float x = real.next (f, (double) sr);
+        const float tone = t[0], body = t[1], bright = t[2], tex = t[4];
+        realTone.set (juce::jlimit (200.f, sr * 0.45f, real.isDrum() ? 2500.f + 14000.f * (1.f - tone) : (float) f * (4.f + 14.f * (1.f - tone))), 0.7f, sr);
+        const auto o = realTone.process (x);
+        x = o.lp * (0.65f + 0.35f * (1.f - bright)) + o.hp * (0.1f + 0.7f * bright) + o.bp * 0.3f * body;
+        return (x * 1.7f + (real.isDrum() ? 0.f : (rng.nextFloat() * 2.f - 1.f) * 0.01f * tex)) * realGain[eng];
+    }
 };
 }

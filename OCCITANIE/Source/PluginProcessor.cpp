@@ -9,6 +9,8 @@ OccProcessor::OccProcessor()
       synth (glideState)
 {
     ptrs.bind (apvts);
+    glideState.live = &live;
+    Occ::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new OccVoice (ptrs, glideState));
     synth.addSound (new OccSound());
 }
@@ -52,6 +54,7 @@ void OccProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuf
     buffer.clear();
     if (n == 0 || buffer.getNumChannels() < 1 || dly.bl.empty()) return;   // nothing to do / prepareToPlay not called yet
     keyboardState.processNextMidiBuffer (midi, 0, n, true);
+    live.beginBlock (midi);
 
     if (ptrs (mono) > 0.5f) // mono : derniere note prioritaire, coupe la precedente
     {
@@ -142,6 +145,7 @@ void OccProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuf
         L[i] = std::tanh (yl);
         if (R != L) R[i] = std::tanh (yr);
     }
+    live.publish (L, R, n);
 }
 
 void OccProcessor::getStateInformation (juce::MemoryBlock& dest)

@@ -9,6 +9,7 @@ FkProcessor::FkProcessor()
 {
     ptrs.bind (apvts);
     glideState.live = &live;
+    Fk::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new FkVoice (ptrs, glideState));
     synth.addSound (new FkSound());
 }

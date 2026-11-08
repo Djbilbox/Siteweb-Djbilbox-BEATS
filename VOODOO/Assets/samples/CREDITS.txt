@@ -1,0 +1,62 @@
+VOODOO - real instruments: credits
+
+Some engines play recorded notes (cut, tuned, level-matched and looped by HUMPIRE PLUGINS).
+Thank you to the musicians and recordists.
+
+Licences:  CC0 1.0    https://creativecommons.org/publicdomain/zero/1.0/
+           CC BY 3.0  https://creativecommons.org/licenses/by/3.0/
+           CC BY 4.0  https://creativecommons.org/licenses/by/4.0/
+
+flute      VSCO 2 Community Edition, Versilian Studios (CC0)  https://github.com/sgossner/VSCO-2-CE
+shakuhachi https://freesound.org/s/115398/  xserra (Freesound), CC BY 3.0  (11 samples)
+shakuhachi https://freesound.org/s/194637/  ajaysm (Freesound), CC BY 4.0  (16 samples)
+shakuhachi https://freesound.org/s/580759/  aliaref (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/115227/  xserra (Freesound), CC BY 3.0  (14 samples)
+sitar      https://freesound.org/s/558938/  lopopopooo (Freesound), CC0  (3 samples)
+sitar      https://freesound.org/s/717175/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717176/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717177/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717178/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717179/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717180/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717181/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717182/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717183/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717184/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717185/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717186/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717188/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717189/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717191/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717192/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717194/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717195/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717196/  fcerim (Freesound), CC0  (2 samples)
+sitar      https://freesound.org/s/717197/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717198/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717199/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717200/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717201/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717202/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717203/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/717204/  fcerim (Freesound), CC0  (1 samples)
+sitar      https://freesound.org/s/719281/  fcerim (Freesound), CC0  (2 samples)
+sitar      https://freesound.org/s/749332/  Hybridkin (Freesound), CC0  (12 samples)
+oud        https://freesound.org/s/152332/  captainnfo (Freesound), CC BY 3.0  (1 samples)
+oud        https://freesound.org/s/152333/  captainnfo (Freesound), CC BY 3.0  (27 samples)
+oud        https://freesound.org/s/162410/  hieronyme (Freesound), CC BY 4.0  (9 samples)
+oud        https://freesound.org/s/172682/  hammondman (Freesound), CC0  (1 samples)
+oud        https://freesound.org/s/172683/  hammondman (Freesound), CC0  (1 samples)
+oud        https://freesound.org/s/172684/  hammondman (Freesound), CC0  (1 samples)
+oud        https://freesound.org/s/182730/  xserra (Freesound), CC BY 3.0  (2 samples)
+oud        https://freesound.org/s/550873/  tarane468 (Freesound), CC0  (1 samples)
+oud        https://freesound.org/s/550874/  tarane468 (Freesound), CC0  (3 samples)
+oud        https://freesound.org/s/550876/  tarane468 (Freesound), CC0  (2 samples)
+oud        https://freesound.org/s/550877/  tarane468 (Freesound), CC0  (2 samples)
+oud        https://freesound.org/s/550878/  tarane468 (Freesound), CC0  (2 samples)
+oud        https://freesound.org/s/550880/  tarane468 (Freesound), CC0  (2 samples)
+oud        https://freesound.org/s/550881/  tarane468 (Freesound), CC0  (2 samples)
+oud        https://freesound.org/s/550882/  tarane468 (Freesound), CC0  (1 samples)
+kalimba    Versilian Community Sample Library, Versilian Studios (CC0)  https://github.com/sgossner/VCSL
+erhu       https://freesound.org/s/338238/  brightonmatt2 (Freesound), CC0  (3 samples)
+erhu       https://freesound.org/s/348175/  redafs (Freesound), CC BY 4.0  (18 samples)

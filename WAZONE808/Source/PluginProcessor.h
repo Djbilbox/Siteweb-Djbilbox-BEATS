@@ -4,6 +4,7 @@
 #include "Params/PresetData.h"
 #include "Params/ExpansionPack.h"
 #include "DSP/SynthEngine.h"
+#include "NeonFX.h"
 
 class WarzoneProcessor : public juce::AudioProcessor
 {
@@ -44,6 +45,7 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
     juce::MidiKeyboardState keyboardState;
+    hfx::LiveTap live;   // audio thread -> interface: levels, envelopes, LFO, cutoff, note-ons
     int presetIndex = -1;
     juce::String presetName { "WARZONE808 - Init Patch" };
 

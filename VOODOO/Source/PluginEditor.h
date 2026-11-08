@@ -1,9 +1,11 @@
 #pragma once
 #include "PluginProcessor.h"
+#include "PremiumSkin.h"
 
 class VoodooLNF : public juce::LookAndFeel_V4
 {
 public:
+    juce::Image faderCap;   // photo-real fader cap (the knob caps and slots are part of the faceplate)
     VoodooLNF();
     void drawRotarySlider (juce::Graphics&, int x, int y, int w, int h, float pos, float a0, float a1, juce::Slider&) override;
     void drawLinearSlider (juce::Graphics&, int x, int y, int w, int h, float pos, float, float, juce::Slider::SliderStyle, juce::Slider&) override;
@@ -20,6 +22,7 @@ public:
     ~VoodooPanel() override;
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown (const juce::MouseEvent&) override;   // right click: animations on / off
 
 private:
     struct Knob { juce::Slider s; std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> a; juce::String label; };
@@ -38,15 +41,19 @@ private:
     VoodooProcessor& proc;
     VoodooLNF lnf;
     Knob rate, amount, pitch, glide, filter, volume, reverb, chorus, dist, delay, dtime, feedback;
-    Knob env[4], timb[5];
+    Knob env[4], rsl[5];
     Knob bend, modw;
     Combo cWave, cLfo, cDest, cFilt, cMono;
     juce::TextButton prev { "<" }, next { ">" }, folder { "Presets" }, save { "Save" }, expansion { "EXPANSION" };
     juce::Label presetLabel;
-    juce::MidiKeyboardComponent keys;
+    hfx::NeonKeyboard keys;
     juce::Image camel, logo;
     std::unique_ptr<juce::FileChooser> chooser;
     std::vector<Knob*> all;
+    juce::String knobName (const Knob*) const;   // member name of a knob (FaceplateLayout.h names them)
+
+    hfx::FaceplateBackground face;                 // the photo-real front panel (Assets/faceplate.jpg)
+    hfx::PremiumOverlay overlay { proc.live, proc.keyboardState, keys, proc.apvts.state };   // everything that lights up
 };
 
 // Editeur redimensionnable : le panneau reste en 1000x746 et est mis a l'echelle.

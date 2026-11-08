@@ -10,6 +10,7 @@ SaProcessor::SaProcessor()
 {
     ptrs.bind (apvts);
     glideState.live = &live;
+    Sa::RealInstruments::get();   // decode the real instruments now, not in the audio thread
     for (int i = 0; i < 16; ++i) synth.addVoice (new SaVoice (ptrs, glideState));
     synth.addSound (new SaSound());
 }

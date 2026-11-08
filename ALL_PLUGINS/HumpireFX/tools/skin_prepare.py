@@ -15,18 +15,23 @@ ed_h = read(src('PluginEditor.h'))
 panel = re.search(r'class (\w+Panel)\b', ed_h).group(1)
 proc_h = read(src('PluginProcessor.h'))
 proc = re.search(r'class (\w+)\s*:\s*public juce::AudioProcessor\b', proc_h).group(1)
-voice_f = [f for f in os.listdir(os.path.join(D, 'Source')) if re.search(r'Voice\.h$', f)][0]
+voices = [f for f in os.listdir(os.path.join(D, 'Source')) if re.search(r'Voice\.h$', f)]
+voice_f = voices[0] if voices else None   # WARZONE808: own engine, its live tap is written by hand
 target = re.search(r'juce_add_plugin\((\w+)', read(os.path.join(D, 'CMakeLists.txt'))).group(1)
 print(name, panel, proc, voice_f, target)
 
 # ---- voice: report the loudest voice to the interface
-v = read(src(voice_f))
+v = read(src(voice_f)) if voice_f else '"NeonFX.h"'
 if '"NeonFX.h"' not in v:
     v = re.sub(r'(#include "Params.h"\n)', r'\1#include "NeonFX.h"\n', v, count=1)
     gs = v.index('struct GlideState'); end = v.index('\n};', gs)   # (its members hold braces: find the struct's own end)
     v = v[:end] + '\n    hfx::LiveTap* live = nullptr;          // what the interface shows (envelopes, LFO, cutoff of the loudest voice)' + v[end:]
     v = v.replace('freshNote = true;', 'freshNote = true; released = false;', 1)
     v = re.sub(r'if \(allowTailOff\) \{ adsr\.noteOff\(\); fadsr\.noteOff\(\); \}', 'if (allowTailOff) { adsr.noteOff(); fadsr.noteOff(); released = true; }', v, count=1)
+    # synths without a filter envelope (OCCITANIE, VOODOO...): only the amp envelope
+    v = re.sub(r'if \(allowTailOff\) adsr\.noteOff\(\);', 'if (allowTailOff) { adsr.noteOff(); released = true; }', v, count=1)
+    params = read(src('Params.h')) if os.path.exists(src('Params.h')) else ''
+    fa, fd = ('fatk', 'fdec') if re.search(r'\bfatk\b', params) else ('atk', 'dec')
     v = re.sub(r'(voiceFilter\.set \((\w+), [^;]*;)', r'\1\n                lastFc = \2;', v, count=1)
     v = re.sub(r'(const float env = adsr\.getNextSample\(\);)', r'\1\n            lastEnv = env; lastLfo = lfo;', v, count=1)
     # end of renderNextBlock: the loop ends with the clearCurrentNote / break line
@@ -34,12 +39,14 @@ if '"NeonFX.h"' not in v:
                r'''\1        if (auto* t = glideState.live; t != nullptr && isVoiceActive())
         {
             const float secs = (float) age / (float) sr;
-            t->voice (lastEnv, hfx::envStage (released, secs, P (atk), P (dec)), fenvLevel, hfx::envStage (released, secs, P (fatk), P (fdec)),
+            t->voice (lastEnv, hfx::envStage (released, secs, P (atk), P (dec)), fenvLevel, hfx::envStage (released, secs, P (%(fa)s), P (%(fd)s)),
                       lastLfo, (float) lfoPh, lastFc);
         }
-\2''', v, count=1)
+\2''' % {'fa': fa, 'fd': fd}, v, count=1)
     v = re.sub(r'(bool freshNote = true)(;)', r'\1, released = false\2', v, count=1)
     v = re.sub(r'(float fenvLevel = 0\.f)(;)', r'\1, lastEnv = 0.f, lastLfo = 0.f, lastFc = 9000.f\2   // for the interface', v, count=1)
+    if 'lastEnv = 0.f' not in v:   # no filter envelope level member: add the interface members after freshNote
+        v = re.sub(r'(bool freshNote = true, released = false;)', r'\1\n    float fenvLevel = 0.f, lastEnv = 0.f, lastLfo = 0.f, lastFc = 9000.f;   // for the interface (no filter envelope here)', v, count=1)
     for need in ('released = true', 'lastFc =', 'lastEnv = env', 't->voice', 'released = false', 'lastLfo = 0.f', 'hfx::LiveTap* live', '"NeonFX.h"'):
         assert need in v, (name, 'voice patch failed at', need)
     write(src(voice_f), v)
@@ -54,7 +61,8 @@ if 'hfx::LiveTap live' not in ph:
 pc = read(src('PluginProcessor.cpp'))
 if 'live.beginBlock' not in pc:
     pc = pc.replace('keyboardState.processNextMidiBuffer (midi, 0, n, true);\n', 'keyboardState.processNextMidiBuffer (midi, 0, n, true);\n    live.beginBlock (midi);\n', 1)
-    pc = re.sub(r'(\n    ptrs\.bind \(apvts\);\n)', r'\1    glideState.live = &live;\n', pc, count=1)
+    st = re.search(r'::(?:GlideState|SharedState) (\w+);', ph); stn = st.group(1) if st else 'glideState'   # K2000: 'shared'
+    pc = re.sub(r'(\n    ptrs\.bind \(apvts\);\n)', r'\1    %s.live = &live;\n' % stn, pc, count=1)
     # the last line of processBlock: publish the output
     m = re.search(r'void \w+::processBlock[^{]*\{', pc); start = m.end()
     depth, i = 1, start
@@ -63,7 +71,7 @@ if 'live.beginBlock' not in pc:
     L = re.findall(r'float\* (\w+) = buffer\.getWritePointer \(0\);', pc[start:body_end]); R = re.findall(r'float\* (\w+) = buffer\.getNumChannels\(\) > 1 \? buffer\.getWritePointer \(1\) : \w+;', pc[start:body_end])
     assert L and R, (name, 'no L/R pointers')
     pc = pc[:body_end] + '    live.publish (%s, %s, n);\n' % (L[0], R[0]) + pc[body_end:]
-    for need in ('live.beginBlock', 'glideState.live = &live', 'live.publish'):
+    for need in ('live.beginBlock', '%s.live = &live' % stn, 'live.publish'):
         assert need in pc, (name, 'processor patch failed at', need)
     write(src('PluginProcessor.cpp'), pc)
 

@@ -85,7 +85,9 @@ if 'FaceplateLayout.h' not in c:
         setup.append('    overlay.addFader (env[%d].s, true, %d, hfx::PremiumOverlay::ledColumns (Face::envSlots[%d].x, Face::envSlots[%d].top + 3.f, Face::envSlots[%d].bottom - 3.f));' % (i, stages.index(l), i, i, i))
     for i, l in enumerate(tn):
         cols = 'hfx::PremiumOverlay::ledColumns (Face::rslSlots[%d].x, Face::rslSlots[%d].top + 3.f, Face::rslSlots[%d].bottom - 3.f)' % (i, i, i)
-        setup.append('    overlay.addFader (rsl[%d].s, false, %d, %s);' % (i, stages.index(l), cols) if l in stages else '    overlay.addVelocityFader (rsl[%d].s, %s);' % (i, cols))
+        setup.append('    overlay.addFader (rsl[%d].s, false, %d, %s);' % (i, stages.index(l), cols) if l in stages else
+                     '    overlay.addVelocityFader (rsl[%d].s, %s);' % (i, cols) if l == 'VELOCITY' else
+                     '    overlay.addPlainFader (rsl[%d].s, %s);   // a timbre fader (%s)' % (i, cols, l))
     setup += ['    addAndMakeVisible (overlay);', '']
     n_env, n_rsl = len(en), len(tn)
     m = re.search(r'\n(    setSize \(1000, 746\);)', c[c.index('%s::%s (' % (panel, panel)):])

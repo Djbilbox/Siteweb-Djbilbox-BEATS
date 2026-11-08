@@ -1,0 +1,4 @@
+Where each real instrument comes from (licences: see CREDITS.txt):
+drum: C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Bendir/Bendir.sfz
+flute: C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Ney/Ney.sfz
+chimes: C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Hand Chimes

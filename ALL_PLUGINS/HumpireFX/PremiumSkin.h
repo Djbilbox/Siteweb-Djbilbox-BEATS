@@ -200,6 +200,7 @@ public:
     void addFader (juce::Slider& s, bool ampEnvelope, int stage, std::vector<juce::Point<float>> dots, bool dimDots = true)
     { faders.push_back ({ &s, ampEnvelope, stage, std::move (dots), dimDots }); }
     void addVelocityFader (juce::Slider& s, std::vector<juce::Point<float>> dots, bool dimDots = true) { faders.push_back ({ &s, false, -2, std::move (dots), dimDots }); }
+    void addPlainFader (juce::Slider& s, std::vector<juce::Point<float>> dots, bool dimDots = true) { faders.push_back ({ &s, false, -3, std::move (dots), dimDots }); }
     // two columns of LED dots beside a fader slot (x = slot centre line), `rows` rows from top to bottom
     static std::vector<juce::Point<float>> ledColumns (float x, float top, float bottom, int rows = 8, float dx = 11.f)
     {
@@ -264,6 +265,7 @@ public:
         {
             float led = 0.f;
             if (f.stage == -2) led = hit * 0.9f;
+            else if (f.stage == -3) led = (0.25f + 0.75f * lv) * (float) f.s->valueToProportionOfLength (f.s->getValue());   // a timbre fader: lit to its value, breathing with the sound
             else if (f.amp ? view.ampStage == f.stage : view.filtStage == f.stage) led = juce::jmax (0.08f, f.amp ? view.amp : view.filt);
             f.s->getProperties().set ("led", led);
             f.led = led;
@@ -316,6 +318,7 @@ public:
                 const float ma = rp.startAngleRadians + juce::jlimit (0.f, 1.f, k.mod) * (rp.endAngleRadians - rp.startAngleRadians);
                 glowSpot (g, c + juce::Point<float> (std::sin (ma), -std::cos (ma)) * r, 10.f, juce::Colours::white, 0.8f);
             }
+            knobCore (g, c, r, pos, k.glow * ign, (int) (&k - knobs.data()));
         }
         // fader LEDs on the faceplate's dots
         for (auto& f : faders)
@@ -687,6 +690,69 @@ private:
             default: break;
         }
         juce::ignoreUnused (lv);
+    }
+
+    // A living knob: a small animation of the theme inside the cap, as strong as the knob's value, moving while the
+    // sound plays (the knob is repainted when its light changes). Kept faint so the lit index stays readable.
+    void knobCore (juce::Graphics& g, juce::Point<float> c, float r, float pos, float glow, int seed)
+    {
+        const float R = r * 0.56f;
+        const float e = juce::jlimit (0.f, 1.f, pos * (0.55f + 0.6f * glow));
+        if (R < 5.f || e < 0.03f) return;
+        juce::Graphics::ScopedSaveState ss (g);
+        juce::Path disk; disk.addEllipse (c.x - R, c.y - R, R * 2.f, R * 2.f);
+        g.reduceClipRegion (disk);
+        const float t = themeT + (float) seed * 0.37f;
+        auto hash = [seed] (int i, int salt) { juce::Random h ((juce::int64) (seed * 977 + i * 131 + salt)); return h.nextFloat(); };
+        const int n = 2 + (int) (e * 5.f);
+        switch (theme)
+        {
+            case Theme::goldRain: case Theme::orientalGold: case Theme::sun:      // gold sparkles twinkling
+                for (int i = 0; i < n; ++i)
+                {
+                    const float ang = hash (i, 1) * juce::MathConstants<float>::twoPi + t * 0.4f, d = std::sqrt (hash (i, 2)) * R * 0.85f;
+                    const auto p = c + juce::Point<float> (std::cos (ang), std::sin (ang)) * d;
+                    const float tw = 0.5f + 0.5f * std::sin (t * (2.5f + 2.f * hash (i, 3)) + hash (i, 4) * 6.f);
+                    glowSpot (g, p, 3.f + 4.f * tw, a, 0.8f * e * tw);
+                    g.setColour (juce::Colours::white.withAlpha (0.9f * e * tw)); g.fillEllipse (p.x - 1.f, p.y - 1.f, 2.f, 2.f);
+                }
+                break;
+            case Theme::bubbles:                                                   // bubbles rising through the cap
+                for (int i = 0; i < n; ++i)
+                {
+                    const float ph = std::fmod (t * (0.25f + 0.3f * hash (i, 1)) + hash (i, 2), 1.f);
+                    const auto p = c + juce::Point<float> ((hash (i, 3) - 0.5f) * R * 1.2f + std::sin (t * 2.f + (float) i) * 2.f, R - ph * R * 2.f);
+                    const float s = 1.2f + 2.2f * hash (i, 4);
+                    g.setColour (b.withAlpha (0.85f * e * (1.f - ph))); g.drawEllipse (p.x - s, p.y - s, s * 2.f, s * 2.f, 1.f);
+                }
+                break;
+            case Theme::smoke: case Theme::ghostFlame: case Theme::sunset:       // a small flame licking up from the bottom of the cap
+                for (int i = 0; i < 5; ++i)
+                {
+                    const float f = (float) i / 4.f, fl = 0.75f + 0.25f * std::sin (t * (7.f + (float) i) + (float) i * 1.7f);
+                    const auto p = c + juce::Point<float> (std::sin (t * 3.f + (float) i) * R * 0.12f * f, R * 0.7f - f * R * 1.2f * e);
+                    glowSpot (g, p, R * (0.55f - 0.35f * f) * fl, (theme == Theme::ghostFlame ? b : a).interpolatedWith (juce::Colours::white, f * 0.5f), 0.75f * e * (1.f - 0.4f * f));
+                }
+                break;
+            case Theme::rain:                                                      // drops falling across the cap
+                for (int i = 0; i < n; ++i)
+                {
+                    const float ph = std::fmod (t * (0.9f + 0.6f * hash (i, 1)) + hash (i, 2), 1.f);
+                    const float x = c.x + (hash (i, 3) - 0.5f) * R * 1.6f, y = c.y - R + ph * R * 2.f;
+                    g.setColour (b.withAlpha (0.8f * e)); g.drawLine (x, y, x - 1.f, y + 5.f, 1.1f);
+                }
+                break;
+            case Theme::electric: case Theme::glitch: case Theme::scanner: case Theme::police: case Theme::bassShake: case Theme::spotlights:
+            {                                                                      // a plasma arc spinning inside the cap
+                juce::Path arcP; const float rr = R * (0.45f + 0.35f * e), st = t * (1.5f + 3.f * e);
+                arcP.addCentredArc (c.x, c.y, rr, rr, 0.f, st, st + 1.2f + 2.f * e, true);
+                neonStroke (g, arcP, a.interpolatedWith (b, 0.5f + 0.5f * std::sin (t)), 1.5f, 0.9f * e);
+                break;
+            }
+            default:                                                               // film and the rest: a soft light breathing
+                glowSpot (g, c, R * (0.6f + 0.3f * std::sin (t * 2.f)), a, 0.6f * e);
+                break;
+        }
     }
 
     //------------------------------------------------------------------ repaint only what changes

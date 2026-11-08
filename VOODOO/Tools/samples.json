@@ -1,0 +1,38 @@
+{
+ "namespace": "Voodoo",
+ "instruments": [
+  {
+   "name": "flute",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Woodwinds/Flute/susvib",
+   "velocity": "_v(\\d)_",
+   "sustain": true
+  },
+  {
+   "name": "shakuhachi",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Ney/Ney.sfz",
+   "spacing": 1
+  },
+  {
+   "name": "sitar",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Saz/Saz.sfz",
+   "maxlen": 2.4,
+   "spacing": 2
+  },
+  {
+   "name": "oud",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Oud/Oud.sfz",
+   "maxlen": 2.5,
+   "spacing": 2
+  },
+  {
+   "name": "kalimba",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Plucked Idiophones/Kalimba, Tanzania",
+   "maxlen": 2.4,
+   "spacing": 2
+  },
+  {
+   "name": "erhu",
+   "sfz": "C:/work/repo/ORIENTAL_INSTRUMENT_2/Library/Rababah/Rababah.sfz"
+  }
+ ]
+}

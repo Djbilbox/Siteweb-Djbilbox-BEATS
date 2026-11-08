@@ -1,0 +1,28 @@
+{
+ "namespace": "Pr",
+ "instruments": [
+  {
+   "name": "organ",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Aerophones/Edge-blown Aerophones/Pipe Organ/Quiet",
+   "sustain": true
+  },
+  {
+   "name": "bells",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VCSL/Idiophones/Struck Idiophones/Tubular Bells 1",
+   "velocities": {
+    "_pp_": 1,
+    "_p_": 1,
+    "_f_": 2,
+    "_ff_": 2,
+    "_fff_": 2
+   },
+   "maxlen": 3.5
+  },
+  {
+   "name": "wind",
+   "folder": "C:/Users/djbil/AppData/Local/Temp/cc0/VSCO-2-CE/Woodwinds/Flute/susNV",
+   "velocity": "_v(\\d)_",
+   "sustain": true
+  }
+ ]
+}

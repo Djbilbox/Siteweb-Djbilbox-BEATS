@@ -1,11 +1,14 @@
 #include "PluginEditor.h"
 #include "BinaryData.h"
+#include "FaceplateLayout.h"
 
 using namespace Voodoo;
 
 namespace
 {
 const juce::Colour red { 0xffff3b52 }, purple { 0xffb44bff }, panel { 0xffe8e2e0 }, dark { 0xff1a0f1c };
+const juce::Colour amber { 0xffff3b52 }, ember { 0xffb44bff };   // the premium skin's two lights: crimson and violet
+juce::Colour ramp (float t) { return amber.interpolatedWith (ember, juce::jlimit (0.f, 1.f, t)); }
 constexpr float K = 0.5f; // mockup 2000 px -> 1000 px
 juce::Rectangle<int> R (int x, int y, int w, int h) { return { (int) (x * K), (int) (y * K), (int) (w * K), (int) (h * K) }; }
 
@@ -38,57 +41,18 @@ VoodooLNF::VoodooLNF()
 
 void VoodooLNF::drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float a0, float a1, juce::Slider& s)
 {
-    const auto c = juce::Rectangle<float> ((float) x, (float) y, (float) w, (float) h).reduced (4.f);
-    const float r = juce::jmin (c.getWidth(), c.getHeight()) * 0.5f;
-    const auto ctr = c.getCentre();
-    const auto ring = s.getProperties()["purple"] ? purple : red;
-    const float ang = a0 + pos * (a1 - a0);
-    juce::Path track; track.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, a1, true);
-    g.setColour (ring.withAlpha (0.18f)); g.strokePath (track, juce::PathStrokeType (5.f));
-    juce::Path val; val.addCentredArc (ctr.x, ctr.y, r, r, 0, a0, ang, true);
-    g.setColour (ring.withAlpha (0.35f)); g.strokePath (val, juce::PathStrokeType (9.f));
-    g.setColour (ring); g.strokePath (val, juce::PathStrokeType (4.5f));
-    const float kr = r * 0.74f;
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xfff2f2f2), ctr.x - kr * 0.4f, ctr.y - kr * 0.5f, juce::Colour (0xff4a4a4a), ctr.x + kr * 0.6f, ctr.y + kr * 0.7f, false));
-    g.fillEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2);
-    g.setColour (juce::Colours::black.withAlpha (0.6f)); g.drawEllipse (ctr.x - kr, ctr.y - kr, kr * 2, kr * 2, 1.5f);
-    juce::Path p; p.addRoundedRectangle (-1.8f, -kr, 3.6f, kr * 0.45f, 1.5f);
-    g.setColour (juce::Colour (0xff202020)); g.fillPath (p, juce::AffineTransform::rotation (ang).translated (ctr.x, ctr.y));
+    hfx::plateRotary (g, x, y, w, h, pos, a0, a1, s, ramp (pos));
 }
 
 void VoodooLNF::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float, float, juce::Slider::SliderStyle, juce::Slider& s)
 {
-    const bool wheel = s.getProperties()["wheel"];
-    const float cx = (float) x + (float) w * 0.5f;
-    if (wheel)
-    {
-        g.setColour (juce::Colour (0xff0c0c0c)); g.fillRoundedRectangle ((float) x + 4, (float) y, (float) w - 8, (float) h, 8.f);
-        const float th = 48.f;
-        auto cap = juce::Rectangle<float> (cx - 20.f, pos - th * 0.5f, 40.f, th);
-        g.setGradientFill (juce::ColourGradient (juce::Colour (0xff6a6a6a), cap.getX(), 0, juce::Colour (0xff2a2a2a), cap.getRight(), 0, false));
-        g.fillRoundedRectangle (cap, 8.f);
-        g.setColour (juce::Colours::black); for (int i = 1; i < 6; ++i) g.drawHorizontalLine ((int) (cap.getY() + i * th / 6.f), cap.getX() + 4, cap.getRight() - 4);
-        return;
-    }
-    g.setColour (juce::Colour (0xff222222)); g.fillRoundedRectangle (cx - 2.5f, (float) y, 5.f, (float) h, 2.f);
-    g.setColour (red.withAlpha (0.8f)); g.fillRoundedRectangle (cx - 2.5f, pos, 5.f, (float) y + (float) h - pos, 2.f);
-    auto cap = juce::Rectangle<float> (cx - 12.f, pos - 7.f, 24.f, 14.f);
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffe0e0e0), 0, cap.getY(), juce::Colour (0xff555555), 0, cap.getBottom(), false));
-    g.fillRoundedRectangle (cap, 3.f);
-    g.setColour (juce::Colours::black); g.drawRoundedRectangle (cap, 3.f, 1.2f);
-    g.drawHorizontalLine ((int) cap.getCentreY(), cap.getX() + 3, cap.getRight() - 3);
+    if ((bool) s.getProperties()["wheel"]) { hfx::plateWheel (g, x, w, pos); return; }
+    hfx::plateLinear (g, x, y, w, h, pos, s, faderCap, ramp ((pos - (float) y) / (float) juce::jmax (1, h)));
 }
 
-void VoodooLNF::drawComboBox (juce::Graphics& g, int w, int h, bool, int, int, int, int, juce::ComboBox& b)
+void VoodooLNF::drawComboBox (juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&)
 {
-    const auto r = juce::Rectangle<float> (0, 0, (float) w, (float) h).reduced (1.5f);
-    const auto glow = b.getProperties()["purple"] ? purple : red;
-    g.setColour (glow.withAlpha (0.25f)); g.fillRoundedRectangle (r.expanded (1.5f), 8.f);
-    g.setColour (dark); g.fillRoundedRectangle (r, 7.f);
-    g.setColour (glow); g.drawRoundedRectangle (r, 7.f, 1.6f);
-    juce::Path t; const float cx = (float) w - 18.f, cy = (float) h * 0.5f;
-    t.addTriangle (cx - 5, cy - 3, cx + 5, cy - 3, cx, cy + 4);
-    g.setColour (juce::Colour (0xffff8a98)); g.fillPath (t);
+    // the box and its arrow are part of the faceplate: only the text (the combo's label) is drawn
 }
 
 void VoodooLNF::positionComboBoxText (juce::ComboBox& b, juce::Label& l)
@@ -127,11 +91,11 @@ VoodooPanel::VoodooPanel (VoodooProcessor& p)
         addKnob (env[i], P::atk + i, en[i], false, juce::Slider::LinearVertical);
         env[i].s.getProperties().set ("fs", 13.f); env[i].s.getProperties().set ("lw", 34);   // caption size / max width (px): neighbours are only 33 px apart
     }
-    const char* tm[5] = { "BREATH", "BODY", "BRIGHT", "WIDTH", "TEXTURE" };   // timbre sliders: names of Params t1..t5 (the sliders are too close together for one row of captions)
+    const char* tn[5] = { "BREATH", "BODY", "BRIGHT", "WIDTH", "TEXTURE" };   // timbre sliders: names of Params t1..t5 (the sliders are too close together for one row of captions)
     for (int i = 0; i < 5; ++i)
     {
-        addKnob (timb[i], P::t1 + i, tm[i], false, juce::Slider::LinearVertical);
-        timb[i].s.getProperties().set ("fs", 11.f); timb[i].s.getProperties().set ("lw", 56); timb[i].s.getProperties().set ("row", i & 1);   // alternate two caption rows
+        addKnob (rsl[i], P::t1 + i, tn[i], false, juce::Slider::LinearVertical);
+        rsl[i].s.getProperties().set ("fs", 11.f); rsl[i].s.getProperties().set ("lw", 56); rsl[i].s.getProperties().set ("row", i & 1);   // alternate two caption rows
     }
     addKnob (bend, P::bend, "PITCH BEND", false, juce::Slider::LinearVertical);
     addKnob (modw, P::modw, "MOD WHEEL", false, juce::Slider::LinearVertical);
@@ -165,6 +129,37 @@ VoodooPanel::VoodooPanel (VoodooProcessor& p)
     addAndMakeVisible (keys);
 
     refreshPresetLabel();
+    // premium skin: the photo-real faceplate, the live light on top (see ALL_PLUGINS/HumpireFX/PremiumSkin.h)
+    face.setImage (juce::ImageFileFormat::loadFrom (BinaryData::faceplate_jpg, BinaryData::faceplate_jpgSize));
+    face.setMascot (camel, { Face::mascotX, Face::mascotY }, Face::mascotR);   // the original artwork in the medallion
+    lnf.faderCap = juce::ImageFileFormat::loadFrom (BinaryData::fader_png, BinaryData::fader_pngSize);
+    keys.neon = ember; keys.neonHot = amber;
+    keys.setOverlayOnly();   // the keys are part of the faceplate
+    overlay.a = amber; overlay.b = ember; overlay.theme = hfx::Theme::ghostFlame;
+    overlay.mascot = { Face::mascotX, Face::mascotY }; overlay.mascotR = Face::mascotR;
+    overlay.addKnob (rate.s, hfx::PremiumOverlay::lfoRate);
+    overlay.addKnob (amount.s, hfx::PremiumOverlay::lfoAmount);
+    overlay.addKnob (pitch.s, hfx::PremiumOverlay::plain);
+    overlay.addKnob (glide.s, hfx::PremiumOverlay::glide);
+    overlay.addKnob (filter.s, hfx::PremiumOverlay::cutoff);
+    overlay.addKnob (volume.s, hfx::PremiumOverlay::volume);
+    overlay.addKnob (reverb.s, hfx::PremiumOverlay::effect);
+    overlay.addKnob (chorus.s, hfx::PremiumOverlay::effect);
+    overlay.addKnob (dist.s, hfx::PremiumOverlay::effect);
+    overlay.addKnob (delay.s, hfx::PremiumOverlay::delayMix);
+    overlay.addKnob (dtime.s, hfx::PremiumOverlay::delayTime);
+    overlay.addKnob (feedback.s, hfx::PremiumOverlay::delayFeedback);
+    overlay.addFader (env[0].s, true, 0, hfx::PremiumOverlay::ledColumns (Face::envSlots[0].x, Face::envSlots[0].top + 3.f, Face::envSlots[0].bottom - 3.f));
+    overlay.addFader (env[1].s, true, 1, hfx::PremiumOverlay::ledColumns (Face::envSlots[1].x, Face::envSlots[1].top + 3.f, Face::envSlots[1].bottom - 3.f));
+    overlay.addFader (env[2].s, true, 2, hfx::PremiumOverlay::ledColumns (Face::envSlots[2].x, Face::envSlots[2].top + 3.f, Face::envSlots[2].bottom - 3.f));
+    overlay.addFader (env[3].s, true, 3, hfx::PremiumOverlay::ledColumns (Face::envSlots[3].x, Face::envSlots[3].top + 3.f, Face::envSlots[3].bottom - 3.f));
+    overlay.addPlainFader (rsl[0].s, hfx::PremiumOverlay::ledColumns (Face::rslSlots[0].x, Face::rslSlots[0].top + 3.f, Face::rslSlots[0].bottom - 3.f));   // a timbre fader (BREATH)
+    overlay.addPlainFader (rsl[1].s, hfx::PremiumOverlay::ledColumns (Face::rslSlots[1].x, Face::rslSlots[1].top + 3.f, Face::rslSlots[1].bottom - 3.f));   // a timbre fader (BODY)
+    overlay.addPlainFader (rsl[2].s, hfx::PremiumOverlay::ledColumns (Face::rslSlots[2].x, Face::rslSlots[2].top + 3.f, Face::rslSlots[2].bottom - 3.f));   // a timbre fader (BRIGHT)
+    overlay.addPlainFader (rsl[3].s, hfx::PremiumOverlay::ledColumns (Face::rslSlots[3].x, Face::rslSlots[3].top + 3.f, Face::rslSlots[3].bottom - 3.f));   // a timbre fader (WIDTH)
+    overlay.addPlainFader (rsl[4].s, hfx::PremiumOverlay::ledColumns (Face::rslSlots[4].x, Face::rslSlots[4].top + 3.f, Face::rslSlots[4].bottom - 3.f));   // a timbre fader (TEXTURE)
+    addAndMakeVisible (overlay);
+
     setSize (1000, 746);
 }
 
@@ -276,73 +271,7 @@ void VoodooPanel::showExpansion()
 
 void VoodooPanel::paint (juce::Graphics& g)
 {
-    auto b = getLocalBounds().toFloat();
-    g.setGradientFill (juce::ColourGradient (panel.brighter (0.1f), b.getX(), b.getY(), panel.darker (0.12f), b.getRight(), b.getBottom(), false));
-    g.fillAll();
-    // rails metal
-    for (int side = 0; side < 2; ++side)
-    {
-        auto r = side == 0 ? R (0, 0, 70, 1493) : R (1930, 0, 70, 1493);
-        g.setGradientFill (juce::ColourGradient (juce::Colour (0xff8a8a8a), (float) r.getX(), 0, juce::Colour (0xff3c3c3c), (float) r.getRight(), 0, false));
-        g.fillRect (r);
-        g.setColour (juce::Colour (0xff1a1a1a)); for (int y : { 70, 745, 1420 }) g.fillEllipse ((float) r.getCentreX() - 9, y * K - 9, 18.f, 18.f);
-    }
-    // haut-parleurs
-    for (auto r : { R (612, 338, 140, 312), R (1248, 338, 140, 312) })
-    {
-        g.setColour (juce::Colour (0xffc9a3a8)); g.fillRoundedRectangle (r.toFloat(), 6.f);
-        g.setColour (juce::Colour (0xff301820));
-        for (float yy = (float) r.getY() + 8; yy < (float) r.getBottom() - 6; yy += 11.f)
-            for (float xx = (float) r.getX() + 9; xx < (float) r.getRight() - 6; xx += 11.f) g.fillEllipse (xx, yy, 6.f, 6.f);
-    }
-    // medaillon chameau
-    auto med = R (815, 305, 370, 410).toFloat();
-    g.setColour (juce::Colour (0xff6a6a6a)); g.fillEllipse (med.expanded (6.f));
-    { juce::Path clip; clip.addEllipse (med.reduced (3.f)); g.saveState(); g.reduceClipRegion (clip); g.drawImage (camel, med.reduced (3.f)); g.restoreState(); }
-    // logo
-    g.drawImage (logo, R (1440, 60, 380, 210).toFloat(), juce::RectanglePlacement::centred);
-    // titre
-    g.setColour (red); g.setFont (juce::FontOptions (64.f, juce::Font::bold));
-    g.drawFittedText ("VOODOO", R (780, 745, 440, 140), juce::Justification::centred, 1);
-    g.setColour (juce::Colour (0xff222222)); g.setFont (juce::FontOptions (19.f, juce::Font::bold));
-    g.drawFittedText ("By Humpire", R (780, 895, 440, 70), juce::Justification::centred, 1);
-    // ecran preset
-    auto scr = R (610, 105, 780, 125).toFloat();
-    g.setColour (red.withAlpha (0.3f)); g.fillRoundedRectangle (scr.expanded (4.f), 14.f);
-    g.setColour (juce::Colour (0xff8a8a8a)); g.fillRoundedRectangle (scr, 12.f);
-    g.setColour (dark); g.fillRoundedRectangle (scr.reduced (8.f), 8.f);
-    // panneau molettes
-    g.setColour (juce::Colour (0xff232023)); g.fillRoundedRectangle (R (205, 1090, 385, 345).toFloat(), 10.f);
-    g.setColour (juce::Colour (0xff6a6a6a)); g.drawRoundedRectangle (R (205, 1090, 385, 345).toFloat(), 10.f, 2.f);
-    // labels
-    g.setColour (juce::Colour (0xff1c1c1c)); g.setFont (juce::FontOptions (15.f, juce::Font::bold));
-    for (auto* k : all)
-    {
-        if (k == &bend || k == &modw) continue;
-        const auto r = k->s.getBounds();
-        const bool lin = k->s.getSliderStyle() == juce::Slider::LinearVertical;
-        const auto& pr = k->s.getProperties();
-        g.setFont (juce::FontOptions ((float) pr.getWithDefault ("fs", 15.f), juce::Font::bold));
-        const int lw = (int) pr.getWithDefault ("lw", r.getWidth() + 40), row = (int) pr.getWithDefault ("row", 0);
-        g.drawFittedText (k->label, r.getCentreX() - lw / 2, r.getBottom() + (lin ? 2 : -2) + row * 12, lw, 20, juce::Justification::centred, 1);
-    }
-    // section headers (rules + text), one per group of controls
-    const auto ink = juce::Colour (0xff1c1c1c);
-    drawHeader (g, "LFO", ink, 16.f, 190, 548, 408);
-    drawHeader (g, "EFFECTS", ink, 16.f, 1470, 1815, 408);
-    drawHeader (g, "AMP ENVELOPE", ink, 14.f, 505, 790, 718);
-    drawHeader (g, "TIMBRE", ink, 14.f, 1200, 1500, 718);
-    // captions under the five drop-down menus
-    g.setColour (ink); g.setFont (juce::FontOptions (11.f, juce::Font::bold));
-    {
-        const char* cap[5] = { "ENGINE", "LFO SHAPE", "LFO DESTINATION", "FILTER TYPE", "VOICE MODE" };
-        const int cx[5] = { 347, 667, 1000, 1335, 1655 };
-        for (int i = 0; i < 5; ++i) g.drawFittedText (cap[i], R (cx[i] - 140, 1058, 280, 28), juce::Justification::centred, 1);
-    }
-    g.setColour (juce::Colour (0xffcfcfcf));
-    g.setFont (juce::FontOptions (12.f, juce::Font::bold));
-    g.drawFittedText ("Pitch Bend", R (240, 1385, 170, 40), juce::Justification::centred, 1);
-    g.drawFittedText ("Mod Wheel", R (385, 1385, 170, 40), juce::Justification::centred, 1);
+    face.draw (g, getLocalBounds());   // the whole front panel is one photo-real render (see Assets/faceplate.jpg)
 }
 
 void VoodooPanel::resized()
@@ -356,7 +285,7 @@ void VoodooPanel::resized()
     place (dtime, 1569, 888, 140);  place (feedback, 1727, 888, 140);
     const int ex[4] = { 548, 614, 680, 746 }, tx[5] = { 1236, 1292, 1348, 1404, 1460 };
     for (int i = 0; i < 4; ++i) env[i].s.setBounds (R (ex[i] - 25, 745, 50, 170));   // slightly shorter than the knob columns: leaves room for two caption rows above the combos
-    for (int i = 0; i < 5; ++i) timb[i].s.setBounds (R (tx[i] - 22, 745, 44, 170));
+    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (R (tx[i] - 22, 745, 44, 170));
     bend.s.setBounds (R (290, 1135, 70, 250)); modw.s.setBounds (R (435, 1135, 70, 250));
     cWave.c.setBounds (R (207, 992, 280, 62)); cLfo.c.setBounds (R (527, 992, 280, 62)); cDest.c.setBounds (R (860, 992, 280, 62));
     cFilt.c.setBounds (R (1195, 992, 280, 62)); cMono.c.setBounds (R (1515, 992, 280, 62));
@@ -366,4 +295,41 @@ void VoodooPanel::resized()
     expansion.setBounds (R (205, 250, 370, 100));
     keys.setBounds (R (628, 1090, 1172, 380));
     keys.setKeyWidth ((float) keys.getWidth() / (float) countWhiteKeys (kKeyLow, kKeyHigh));   // fit the whole range exactly
+
+    // on the faceplate: knobs centred on their caps (value ring just outside), faders on their slots
+    for (const auto& cap : Face::caps)
+        for (auto* k : { &rate, &amount, &pitch, &glide, &filter, &volume, &reverb, &chorus, &dist, &delay, &dtime, &feedback })
+            if (juce::String (cap.name) == knobName (k))
+            {
+                const float ring = cap.r + (cap.r > 14.f ? 4.5f : 2.6f), half = ring + 3.f;
+                k->s.setBounds (juce::Rectangle<float> (half * 2.f, half * 2.f).withCentre ({ cap.x, cap.y }).toNearestInt());
+            }
+    for (int i = 0; i < 4; ++i) env[i].s.setBounds (juce::Rectangle<float> (28.f, Face::envSlots[i].bottom - Face::envSlots[i].top + 8.f).withCentre ({ Face::envSlots[i].x, (Face::envSlots[i].top + Face::envSlots[i].bottom) * 0.5f }).toNearestInt());
+    for (int i = 0; i < 5; ++i) rsl[i].s.setBounds (juce::Rectangle<float> (28.f, Face::rslSlots[i].bottom - Face::rslSlots[i].top + 8.f).withCentre ({ Face::rslSlots[i].x, (Face::rslSlots[i].top + Face::rslSlots[i].bottom) * 0.5f }).toNearestInt());
+    overlay.setBounds (getLocalBounds());
+}
+
+juce::String VoodooPanel::knobName (const Knob* k) const
+{
+    if (k == &rate) return "rate";
+    if (k == &amount) return "amount";
+    if (k == &pitch) return "pitch";
+    if (k == &glide) return "glide";
+    if (k == &filter) return "filter";
+    if (k == &volume) return "volume";
+    if (k == &reverb) return "reverb";
+    if (k == &chorus) return "chorus";
+    if (k == &dist) return "dist";
+    if (k == &delay) return "delay";
+    if (k == &dtime) return "dtime";
+    if (k == &feedback) return "feedback";
+    return {};
+}
+
+void VoodooPanel::mouseDown (const juce::MouseEvent& e)
+{
+    if (! e.mods.isPopupMenu()) return;
+    juce::PopupMenu m;
+    m.addItem (1, "Animations", true, overlay.animationsOn());
+    m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (this).withMousePosition(), [this] (int r) { if (r == 1) overlay.setAnimations (! overlay.animationsOn()); });
 }

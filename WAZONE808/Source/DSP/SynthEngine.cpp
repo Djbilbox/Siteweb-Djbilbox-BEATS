@@ -182,6 +182,8 @@ void Voice::render(double* left, double* right, int numSamples)
         const double gain = amp * velGain;
         left[i]  = filteredL * gain;
         right[i] = filteredR * gain;
+        lastLfo = lfoRaw;
+        lastCutoffHz = baseCutoffHz * std::exp2 (filterModOctaves);
     }
 }
 
@@ -203,6 +205,7 @@ void Voice::setOscillatorWaveform(Oscillator::Waveform wf)
 
 void Voice::setFilterCutoff(double hz)
 {
+    baseCutoffHz = hz;
     filter.setCutoffFrequency(hz);
     filterRight.setCutoffFrequency(hz);
 }
