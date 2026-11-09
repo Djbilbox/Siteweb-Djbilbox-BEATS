@@ -1,5 +1,6 @@
-"""Build assets/js/shop-data.js for shop.html: every product page p/<slug>.html sorted into
-collections (synths by style, drum machines, effects, drum kits, bundles, free).
+"""Build assets/js/shop-data.js for shop.html: every product page p/<slug>.html with its kind (plugin / kit / bundle),
+buy slug (for the Gumroad release order) and face image. The shop shows ONE flat grid, newest release first.
+SECTIONS below only classifies (synths by style, drum machines, effects, drum kits, bundles, free).
 
 Usage: python tools/build_shop_data.py <site_dir> [audio_dir]
 A new product: add its slug to the right list in SECTIONS (first = shown first).
@@ -9,6 +10,12 @@ import json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NEW = {'fennec', 'neon-synth-80s-2'}          # "New" badge
+# plugin face (interface shot, front view) shown in the shop instead of the promo art
+FACE = {'bigbass': 'img/vst/ui/bigbass-ui.png', 'matrix-modular': 'img/vst/ui/matrix-ui.png',
+        'mini-mpc-humpire': 'img/vst/ui/mini-mpc-humpire-ui.jpg', 'mpc-2026': 'img/vst/ui/mpc-2026-alt.png',
+        'neon-synth-80s': 'img/vst/ui/neon-synth-80s-ui.jpg', 'neon-synth-80s-2': 'img/vst/ui/neon-synth-80s-ui.jpg',
+        'oriental-instrument': 'img/vst/ui/oriental-ui.png', 'thuglife': 'img/vst/ui/thuglife-ui.jpg',
+        'vice-city': 'img/vst/ui/vice-city-ui.png', 'mastering': 'img/vst/ui/mastering-ui.png'}
 SECTIONS = [
     {'id': 'synths', 'title': 'Synths', 'kicker': 'Instruments by style', 'banner': 'pWfqqZt0py0',
      'text': 'Real presets you can play right here, sorted by the sound you are chasing.',
@@ -91,12 +98,21 @@ def main(site, audio_dir):
         f = json.loads(m.group(1))
         slug = fn[:-5]
         play = media.get(slug, {}).get('play', slug)
-        products[slug] = {'slug': slug, 'name': f['name'], 'sub': f['sub'], 'img': f['img'], 'price': f['price'],
-                          'new': slug in NEW, 'video': bool(media.get(slug, {}).get('yt')),
+        face = 'img/vst/faces/%s.jpg' % slug
+        if not os.path.exists(os.path.join(site, face)):
+            face = FACE.get(slug)
+        products[slug] = {'slug': slug, 'name': f['name'], 'sub': f['sub'], 'price': f['price'],
+                          'buy': f['buy'].rstrip('/').split('/')[-1], 'kind': 'plugin',
+                          'face': bool(face), 'new': slug in NEW, 'img': face or f['img'],
+                          'video': bool(media.get(slug, {}).get('yt')),
                           'play': os.path.exists(os.path.join(audio_dir, 'assets', 'audio', 'play', play + '.json'))}
     used = set()
+    KIND = {'kits': 'kit', 'bundles': 'bundle'}
     for sec in SECTIONS:
         for g in sec['groups']:
+            for k in g['items']:
+                if k in products and k not in used:
+                    products[k]['kind'] = KIND.get(sec['id'], 'plugin')
             missing = [s for s in g['items'] if s not in products]
             if missing:
                 print('no page for', missing)
