@@ -5,7 +5,8 @@
           a product missing from that list goes last.
    ============================================================ */
 (function(){
-  const P = Object.values(window.SHOP_PRODUCTS || {});
+  const MODE = window.SHOP_MODE || 'plugins';          // 'plugins' or 'kits'
+  const P = Object.values(window.SHOP_PRODUCTS || {}).filter(p => MODE === 'kits' ? p.kind === 'kit' : p.kind !== 'kit');
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const unesc = s => { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; };
@@ -18,7 +19,10 @@
   })();
   P.sort((a, b) => rankOf(a) - rankOf(b) || a.name.localeCompare(b.name));
 
-  const FILTERS = [['all', 'All'], ['plugin', 'Plugins'], ['kit', 'Kits & loops'], ['bundle', 'Bundles'], ['free', 'Free']];
+  const FILTERS = MODE === 'kits'
+    ? [['all', 'All'], ['kits-westcoast', 'G-Funk & West Coast'], ['kits-trap', 'Hip-Hop, Trap & Drill'], ['kits-horror', 'Horror'], ['kits-world', 'Afro, House & Oriental'], ['free', 'Free']]
+    : [['all', 'All'], ['synth', 'Synths'], ['machine', 'Drum machines'], ['effect', 'Effects'], ['bundle', 'Bundles'], ['free', 'Free']];
+  const matches = (p, f) => f === 'all' || (f === 'free' ? p.price <= 0 : (MODE === 'kits' ? p.group === f : p.cat === f));
   let filter = 'all', query = '';
 
   function card(p){
@@ -34,7 +38,7 @@
 
   function render(){
     const q = query.toLowerCase();
-    const list = P.filter(p => (filter === 'all' || (filter === 'free' ? p.price <= 0 : p.kind === filter)) &&
+    const list = P.filter(p => matches(p, filter) &&
       (!q || (unesc(p.name) + ' ' + unesc(p.sub)).toLowerCase().includes(q)));
     $('shGrid').innerHTML = list.map(card).join('');
     $('shEmpty').hidden = list.length > 0;
@@ -42,6 +46,8 @@
     $('shFilters').innerHTML = FILTERS.map(([k, l]) => `<button type="button" class="sh-chip${k === filter ? ' on' : ''}" data-f="${k}">${l}</button>`).join('');
   }
 
+  const fromHash = location.hash.slice(1);
+  if (FILTERS.some(f => f[0] === fromHash)) filter = fromHash;
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-f]');
     if (b) { filter = b.dataset.f; render(); }

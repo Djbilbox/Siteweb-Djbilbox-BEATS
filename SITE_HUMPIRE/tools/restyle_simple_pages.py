@@ -23,9 +23,8 @@ HEAD = ('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="p
         '<link rel="stylesheet" href="/assets/css/simple-page.css?v=26110702">')
 HEADER = ('<header class="pp-top"><div class="pp-top-in">'
           '<a class="pp-logo" href="/"><img src="/img/humpire-logo.png" alt=""><b>HUM<span>PIRE</span></b></a>'
-          '<nav class="pp-nav"><a href="/beats.html">Beats</a><a href="/t/vst-synths.html">Synths</a>'
-          '<a href="/t/guitar-pedal-and-mixing-plugins.html">Effects</a><a href="/t/trap-drill-drum-kits.html">Drum Kits</a>'
-          '<a href="/t/free-vst-plugins.html">Free VST</a><a href="/streetwear.html">Streetwear</a><a href="/p/">All products</a></nav>'
+          '<nav class="pp-nav"><a href="/beats.html">Beats</a><a href="/shop.html">Plugins</a><a href="/drum-kits.html">Drum Kits</a>'
+          '<a href="/streetwear.html">Streetwear</a><a href="/ai-mastering.html">Mastering</a><a href="/video-studio.html">Video Studio</a></nav>'
           '<a class="pp-store" href="https://djbilboxbeats.gumroad.com/" target="_blank" rel="noopener">Store</a></div></header>')
 FOOTER = ('<footer class="pp-foot">© HUMPIRE by DJBILBOX BEATS · <a href="/">Home</a><a href="/p/">All products</a>'
           '<a href="/beats.html">Beats</a><a href="/streetwear.html">Streetwear</a><a href="/contact.html">Contact</a>'
@@ -40,6 +39,9 @@ def restyle(path, rel_p):
         s = re.sub(r'<header>.*?</header>', HEADER, s, count=1, flags=re.S)
         s = re.sub(r'<footer>.*?</footer>', FOOTER, s, count=1, flags=re.S)
         s = s.replace('<main>', '<main class="sp-main">', 1)
+    if 'class="pp-top"' in s:                       # pages already restyled: refresh header and footer
+        s = re.sub(r'<header class="pp-top">.*?</header>', HEADER, s, count=1, flags=re.S)
+        s = re.sub(r'<footer class="pp-foot">.*?</footer>', FOOTER, s, count=1, flags=re.S)
     # product cards: name / subtitle / price as separate lines, no inline image style
     s = re.sub(r' style="width:100%;border-radius:8px;margin-bottom:6px"', '', s)
     s = re.sub(r'</strong><br>([^<]*)<br>([^<]*)</a></li>', r'</strong><span class="s">\1</span><span class="pr">\2</span></a></li>', s)

@@ -29,14 +29,12 @@ const DISCORD_URL = 'https://discord.gg/7HeMSvbN';
    Each page sets <body data-page="KEY"> to highlight its link.
    ============================================================ */
 /* First NAV_SPLIT entries render under "Browse", the rest under "Library". */
-const NAV_SPLIT = 9;
+const NAV_SPLIT = 7;
 const NAV = [
   { key:'music',       label:'Beats',        href:'/beats.html',      icon:'fa-music' },
   { key:'beatmaker',   label:'Beatmaker',    href:'/beatmaker.html',           icon:'fa-headphones' },
-  { key:'shop',        label:'Shop',         href:'/shop.html',                icon:'fa-store' },
-  { key:'synths',      label:'Synths',       href:'/shop.html#synths',         icon:'fa-star' },
-  { key:'effects',     label:'Effects',      href:'/shop.html#effects',        icon:'fa-sliders' },
-  { key:'drum-kits',   label:'Drum Kits',    href:'/shop.html#kits',           icon:'fa-drum' },
+  { key:'plugins',     label:'Plugins',      href:'/shop.html',                icon:'fa-sliders' },
+  { key:'drum-kits',   label:'Drum Kits',    href:'/drum-kits.html',           icon:'fa-drum' },
   { key:'streetwear',  label:'Streetwear',   href:'/streetwear.html',          icon:'fa-shirt' },
   { key:'mastering',   label:'Mastering',    href:'/ai-mastering.html',        icon:'fa-wand-magic-sparkles' },
   { key:'video',       label:'Video Studio', href:'/video-studio.html',        icon:'fa-clapperboard' },
@@ -166,13 +164,12 @@ const FOOTER_COLS = [
   { t:'Quick links', links:[
     ['Home','/index.html'],
     ['Beats','/beats.html'],
-    ['Shop','/shop.html'],
+    ['Plugins','/shop.html'],
     ['Streetwear','/streetwear.html'],
     ['ORIENTAL INSTRUMENT','/oriental-instrument.html'],
     ['Mastering','/ai-mastering.html'],
     ['Video Studio','/video-studio.html'],
     ['Drum Kits','/drum-kits.html'],
-    ['VST Plugins','/vst.html'],
     ['Studio Setup','/studio-setup.html'],
     ['Services','/services.html'],
     ['Discography','/discography.html'],

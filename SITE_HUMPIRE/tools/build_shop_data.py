@@ -10,6 +10,18 @@ import json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NEW = {'fennec', 'neon-synth-80s-2'}          # "New" badge
+# products whose Gumroad thumbnail is the default Gumroad logo or a mood shot without the product
+IMG_OVERRIDE = {
+    'humpire-vst-and-effects': 'img/vst/new/djbilbox-beats-complete-collection.jpg',
+    'djbilbox-beats': 'https://public-files.gumroad.com/0z7x276er78sc9n1cawv32913z7g',
+    'djbilbox-beats-ozwlb': 'https://public-files.gumroad.com/s59nl0f34izq5c294j3fwdb21px9',
+    'humpire-free-vst-collection': 'https://public-files.gumroad.com/ddhz33xrds5jjxosfmfscq5dg197',
+    'pharaoh-comp': 'https://public-files.gumroad.com/s35yqlyl6e4xc7x8vbt5pvh2lmok',
+    'eq-pro-spider': 'https://public-files.gumroad.com/pewpk4wx84fcy9rn6igvz5bfi8vq',
+    'station-synth-free-demo': 'https://public-files.gumroad.com/9oh6o81lsjrincsnzl5qgu0l4l4n',
+    'oriental-instrument-free-demo': 'https://public-files.gumroad.com/8ne4wgzucav8hp24gvuqxhpivxp2',
+}
+KIT_BUNDLES = {'djbilbox-beats', 'djbilbox-beats-ozwlb'}   # bundles of sounds, not plugins
 # plugin face (interface shot, front view) shown in the shop instead of the promo art
 FACE = {'bigbass': 'img/vst/ui/bigbass-ui.png', 'matrix-modular': 'img/vst/ui/matrix-ui.png',
         'mini-mpc-humpire': 'img/vst/ui/mini-mpc-humpire-ui.jpg', 'mpc-2026': 'img/vst/ui/mpc-2026-alt.png',
@@ -103,21 +115,27 @@ def main(site, audio_dir):
             face = FACE.get(slug)
         products[slug] = {'slug': slug, 'name': f['name'], 'sub': f['sub'], 'price': f['price'],
                           'buy': f['buy'].rstrip('/').split('/')[-1], 'kind': 'plugin',
-                          'face': bool(face), 'new': slug in NEW, 'img': face or f['img'],
+                          'face': bool(face), 'new': slug in NEW, 'img': face or IMG_OVERRIDE.get(slug, f['img']),
                           'video': bool(media.get(slug, {}).get('yt')),
                           'play': os.path.exists(os.path.join(audio_dir, 'assets', 'audio', 'play', play + '.json'))}
     used = set()
     KIND = {'kits': 'kit', 'bundles': 'bundle'}
+    CAT = {'synths': 'synth', 'drum-machines': 'machine', 'effects': 'effect', 'bundles': 'bundle'}
     for sec in SECTIONS:
         for g in sec['groups']:
-            for k in g['items']:
-                if k in products and k not in used:
-                    products[k]['kind'] = KIND.get(sec['id'], 'plugin')
             missing = [s for s in g['items'] if s not in products]
             if missing:
                 print('no page for', missing)
             g['items'] = [s for s in g['items'] if s in products]
+            for k in g['items']:
+                if k not in used:                      # first collection wins
+                    products[k]['kind'] = KIND.get(sec['id'], 'plugin')
+                    products[k]['cat'] = CAT.get(sec['id'], 'synth')
+                    products[k]['group'] = g['id']
             used.update(g['items'])
+    for k in KIT_BUNDLES:
+        products[k]['kind'] = 'kit'
+        products[k]['group'] = 'kits-trap'
     left = sorted(set(products) - used)
     if left:
         print('NOT IN ANY COLLECTION:', left)
