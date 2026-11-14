@@ -162,7 +162,7 @@ TkPanel::TkPanel (TkProcessor& p)
     lnf.faderCap = juce::ImageFileFormat::loadFrom (BinaryData::fader_png, BinaryData::fader_pngSize);
     keys.neon = ember; keys.neonHot = amber;
     keys.setOverlayOnly();   // the keys are part of the faceplate
-    overlay.a = amber; overlay.b = ember; overlay.theme = hfx::Theme::waves;
+    overlay.a = amber; overlay.b = ember; overlay.theme = hfx::Theme::scanner;
     overlay.mascot = { Face::mascotX, Face::mascotY }; overlay.mascotR = Face::mascotR;
     overlay.setTitleFromFace (juce::ImageFileFormat::loadFrom (BinaryData::faceplate_jpg, BinaryData::faceplate_jpgSize),
                               { Face::titleX, Face::titleY, Face::titleW, Face::titleH });   // light from the real letters
