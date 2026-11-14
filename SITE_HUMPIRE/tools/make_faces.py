@@ -1,7 +1,8 @@
 """Web-size the plugin faces for the shop tiles (4:3, nothing cropped).
 
-Source, first match wins: tools/face_sources/<slug>.png (finished interface screenshot),
-then <PLUGIN>/Assets/faceplate.jpg.
+Source, first match wins: tools/face_sources/<slug>.png (finished interface shot or a crop of the
+Gumroad poster), MARKETING/screens/<file>.png (finished interface shots), a card already in the
+site (EXTRA_FILES), then <PLUGIN>/Assets/faceplate.jpg.
 Usage: python tools/make_faces.py <repo_root> <site_dir>
 Writes <site_dir>/img/vst/faces/<product-slug>.jpg (1000x750).
 UNPUBLISHED plugins are skipped: add a folder there until the product is released.
@@ -17,17 +18,27 @@ FOLDERS = {  # plugin folder -> product page slug
     'SHAMAN': 'shaman', 'STREETLIGHT_TRAP': 'streetlight-trap', 'VOODOO': 'voodoo', 'WAZONE808': 'warzone808',
 }
 EXTRA = ['fennec', 'neon-synth-80s-2']   # products without a plugin folder, screenshot only
+SCREENS = {  # product slug -> MARKETING/screens/<name>.png
+    'arena-bass': 'arena-bass', 'chintzwaz': 'chintzwaz', 'cyberpunk-lead': 'cyberpunk-lead', 'dzpower': 'dzpower',
+    'funkykops': 'funkykops', 'goldhawk': 'goldhawk', 'highroller-gold': 'highroller-gold', 'marabout': 'marabout',
+    'midnight-reels': 'midnight-reels', 'octopus': 'octopus', 'phantom-rider': 'phantom-rider', 'rockpunk-guitar': 'rockpunk',
+    'san-andreas-lead': 'san-andreas-lead', 'shaman': 'shaman', 'streetlight-trap': 'streetlight-trap',
+    'humpire-clutch': 'humpire-clutch', 'humpire-combo': 'humpire-combo', 'humpire-glitch': 'humpire-glitch',
+    'humpire-hardcap': 'humpire-hardcap', 'humpire-lag': 'humpire-lag', 'humpire-overclock': 'humpire-overclock',
+    'humpire-respawn': 'humpire-respawn', 'humpire-skilltree': 'humpire-skilltree',
+}
 EXTRA_FILES = {  # slug -> interface shot already in the site (path relative to the site folder)
     'bigbass': 'img/vst/ui/bigbass-card.jpg', 'matrix-modular': 'img/vst/ui/matrix-modular-card.jpg',
     'mini-mpc-humpire': 'img/vst/ui/mini-mpc-humpire-ui.jpg', 'mpc-2026': 'img/vst/ui/mpc-2026-card.jpg',
     'neon-synth-80s': 'img/vst/ui/neon-synth-80s-card.jpg', 'oriental-instrument': 'img/vst/ui/oriental-instrument-card.jpg',
     'thuglife': 'img/vst/ui/thuglife-ui.jpg', 'thuglife-free-demo': 'img/vst/ui/thuglife-ui.jpg',
     'vice-city': 'img/vst/ui/vice-city-card.jpg', 'mastering': 'img/vst/ui/mastering-card.jpg',
-    'station-synth': 'img/vst/ui/station-synth-card.jpg', 'djbilbox-pro-bundle': 'img/vst/ui/pro-bundle-card.jpg',
+    'station-synth': 'img/vst/ui/station-synth-card.jpg', 'station-synth-free-demo': 'img/vst/ui/station-synth-card.jpg',
+    'oriental-instrument-free-demo': 'img/vst/ui/oriental-instrument-card.jpg', 'djbilbox-pro-bundle': 'img/vst/ui/pro-bundle-card.jpg',
 }
 UNPUBLISHED = {'HBX84_TALKBOX', 'QUEEN_OF_XMAS'}   # not released yet: never shown on the site
 
-def trim(im, margin=0.03, thr=22):
+def trim(im, margin=0.04, thr=10):
     """Crop the empty frame around a plugin card (keeps the whole plugin plus a small margin)."""
     px = im.load(); w, h = im.size
     bg = tuple(sum(px[x, y][c] for x, y in ((2, 2), (w - 3, 2), (2, h - 3), (w - 3, h - 3))) // 4 for c in range(3))
@@ -52,6 +63,14 @@ def main(repo, site):
     jobs = {slug: os.path.join(repo, folder, 'Assets', 'faceplate.jpg') for folder, slug in FOLDERS.items() if folder not in UNPUBLISHED}
     for slug in EXTRA:
         jobs[slug] = None
+    shots = os.path.join(here, 'face_sources')
+    for f in os.listdir(shots):                      # every shot/crop in face_sources is a face
+        jobs.setdefault(os.path.splitext(f)[0], None)
+    screens = os.path.join(repo, 'MARKETING', 'screens')
+    for slug, name in SCREENS.items():
+        shot = os.path.join(screens, name + '.png')
+        if os.path.exists(shot):
+            jobs[slug] = shot                         # beats the faceplate fallback
     for slug, fallback in jobs.items():
         shot = os.path.join(here, 'face_sources', slug + '.png')
         src = shot if os.path.exists(shot) else fallback
