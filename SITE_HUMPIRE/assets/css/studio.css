@@ -14,15 +14,15 @@
 /* hero */
 .hr-hero{position:relative;text-align:center;padding:96px 0 70px;overflow:hidden;isolation:isolate}
 .hr-hero{margin:0 -20px;padding-left:20px;padding-right:20px}
-.hr-hero-bg{position:absolute;inset:0;z-index:-2;background:url(../../img/studio/control-room.jpg) center 60%/cover no-repeat;opacity:.75;
+.hr-hero-bg{position:absolute;inset:0;z-index:-2;background:url(../../img/studio/home-desk.jpg) center 30%/cover no-repeat;opacity:.75;
   -webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
 .hr-hero-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 50% 45%,rgba(7,7,7,.62),rgba(7,7,7,.85))}
 
 /* gallery */
-.hr-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.hr-gallery figure{aspect-ratio:4/3}
+.hr-gallery{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hr-gallery figure{aspect-ratio:16/11}
 .hr-gallery figure{position:relative;margin:0;overflow:hidden;border-radius:18px;border:1px solid rgba(255,61,242,.25)}
-.hr-gallery figure.big{grid-column:1/-1;aspect-ratio:16/8}
+.hr-gallery figure.big{aspect-ratio:16/11}
 .hr-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s ease}
 .hr-gallery figure:hover img{transform:scale(1.04)}
 .hr-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:40px 18px 14px;text-align:left;
@@ -99,7 +99,7 @@
 /* booking */
 .hr-book{margin-top:90px;border-radius:22px;overflow:hidden;display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:center;padding:48px;
   border:1px solid var(--line);
-  background:linear-gradient(90deg,rgba(10,9,8,.96) 35%,rgba(10,9,8,.7)),url(../../img/studio/lounge.jpg) center/cover,#0d0c0a}
+  background:linear-gradient(90deg,rgba(10,9,8,.96) 35%,rgba(10,9,8,.7)),url(../../img/studio/home-mic.jpg) center/cover,#0d0c0a}
 .hr-book>div>p{color:var(--mute);line-height:1.6;margin:0 0 22px}
 .hr-hours{list-style:none;margin:0;padding:0}
 .hr-hours li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.92rem}

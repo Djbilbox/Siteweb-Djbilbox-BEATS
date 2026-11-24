@@ -226,6 +226,44 @@ T.update({
   faq=[('スタジオは初めてですが大丈夫？','もちろん。セッションはコーチ付き：ウォームアップしてフロウを練り、一歩ずつ曲を作ります。'),('自分のビートを持ち込めますか？','はい。WAV（あればステムも）を持ってきてください。リリースに必要なライセンスがあるか確認を。'),('録音の権利は誰のもの？','あなたです。ボーカルとマスター音源はあなたのもの — ビートが私たちのものの場合のみプロデューサークレジットをお願いします。'),('分割払いはできますか？','はい、すべてのパックは分割払い可能です。前金で予約が確定します。')],
 ),
 })
+# Real home studio (24/11/2026): only the user's own gear is shown.
+REAL = {
+ 'en': ('Inside HUMPIRE Records', 'A real home studio: black acoustic foam on the walls, a tall mic stand and LED lights for the vibe.',
+        ['The desk', 'The vocal corner'],
+        ['Home studio desk with gaming PC, Novation FLkey keyboard, audio interface and a TV on the wall', 'Condenser microphone on a tall stand in front of black acoustic foam'],
+        'Vocal corner treated with acoustic foam, condenser mic on a tall stand, coaching on every take.'),
+ 'fr': ('Bienvenue chez HUMPIRE Records', 'Un vrai home studio : mousse acoustique noire aux murs, grand pied de micro et LED pour l\'ambiance.',
+        ['Le bureau', 'Le coin voix'],
+        ['Bureau du home studio avec PC gamer, clavier Novation FLkey, carte son et TV au mur', 'Micro statique sur grand pied devant la mousse acoustique noire'],
+        'Coin voix traité en mousse acoustique, micro statique sur grand pied, coaching sur chaque prise.'),
+ 'es': ('Dentro de HUMPIRE Records', 'Un home studio real: espuma acústica negra en las paredes, un pie de micro alto y luces LED para el ambiente.',
+        ['El escritorio', 'El rincón de voz'],
+        ['Escritorio del home studio con PC gamer, teclado Novation FLkey, interfaz de audio y TV en la pared', 'Micrófono de condensador en un pie alto delante de la espuma acústica negra'],
+        'Rincón de voz tratado con espuma acústica, micrófono de condensador en pie alto, coaching en cada toma.'),
+ 'pt': ('Dentro da HUMPIRE Records', 'Um home studio de verdade: espuma acústica preta nas paredes, pedestal de microfone alto e luzes LED para a vibe.',
+        ['A mesa', 'O canto de voz'],
+        ['Mesa do home studio com PC gamer, teclado Novation FLkey, interface de áudio e TV na parede', 'Microfone condensador em pedestal alto na frente da espuma acústica preta'],
+        'Canto de voz tratado com espuma acústica, microfone condensador em pedestal alto, coaching em cada take.'),
+ 'de': ('Willkommen bei HUMPIRE Records', 'Ein echtes Homestudio: schwarzer Akustikschaum an den Wänden, ein hohes Mikrofonstativ und LED-Licht für die Stimmung.',
+        ['Der Arbeitsplatz', 'Die Gesangsecke'],
+        ['Homestudio-Schreibtisch mit Gaming-PC, Novation-FLkey-Keyboard, Audio-Interface und Wand-TV', 'Kondensatormikrofon auf hohem Stativ vor schwarzem Akustikschaum'],
+        'Gesangsecke mit Akustikschaum, Kondensatormikrofon auf hohem Stativ, Coaching bei jedem Take.'),
+ 'ar': ('داخل HUMPIRE Records', 'استوديو منزلي حقيقي: إسفنج عازل أسود على الجدران، حامل ميكروفون طويل وإضاءة LED للأجواء.',
+        ['المكتب', 'ركن الصوت'],
+        ['مكتب الاستوديو المنزلي مع كمبيوتر ألعاب ولوحة Novation FLkey وكرت صوت وتلفاز على الجدار', 'ميكروفون مكثّف على حامل طويل أمام إسفنج عازل أسود'],
+        'ركن صوت معالج بالإسفنج العازل، ميكروفون مكثّف على حامل طويل، وتوجيه في كل تسجيلة.'),
+ 'ru': ('Внутри HUMPIRE Records', 'Настоящая домашняя студия: чёрный акустический поролон на стенах, высокая микрофонная стойка и LED-подсветка.',
+        ['Рабочее место', 'Вокальный угол'],
+        ['Стол домашней студии: игровой ПК, клавиатура Novation FLkey, аудиоинтерфейс и телевизор на стене', 'Конденсаторный микрофон на высокой стойке перед чёрным акустическим поролоном'],
+        'Вокальный угол с акустическим поролоном, конденсаторный микрофон на высокой стойке, помощь на каждом дубле.'),
+ 'ja': ('HUMPIRE Records の中へ', '本物のホームスタジオ：壁には黒い吸音材、背の高いマイクスタンド、雰囲気を作るLEDライト。',
+        ['デスク', 'ボーカルコーナー'],
+        ['ゲーミングPC、Novation FLkey、オーディオインターフェース、壁掛けTVのあるホームスタジオのデスク', '黒い吸音材の前、背の高いスタンドに付けたコンデンサーマイク'],
+        '吸音材で処理したボーカルコーナー、背の高いスタンドのコンデンサーマイク、テイクごとのコーチング。'),
+}
+for _l, (_h, _s, _g, _alt, _p0) in REAL.items():
+    T[_l]['room_h'], T[_l]['room_s'], T[_l]['g'], T[_l]['galt'] = _h, _s, _g, _alt
+    T[_l]['pil'][0] = (T[_l]['pil'][0][0], _p0)
 LANGS += ['ar', 'ru', 'ja']
 LABEL.update({'pt': 'PT-BR', 'ar': 'AR', 'ru': 'RU', 'ja': 'JA'})
 RTL = {'ar'}
@@ -240,8 +278,8 @@ def build(lang):
     langs = ''.join(f'<a href="/{path(l)}?lang={l}"{" class=\"on\"" if l==lang else ""} hreflang="{l}">{LABEL[l]}</a>' for l in LANGS)
     pil = ''.join(f'<div><i class="fa-solid {ic}"></i><h3>{e(a)}</h3><p>{e(b)}</p></div>'
                   for ic,(a,b) in zip(['fa-microphone-lines','fa-sliders','fa-compact-disc','fa-crown'], t['pil']))
-    imgs = ['control-room.jpg','artist-booth.jpg','booth.jpg','lounge.jpg']
-    gal = ''.join(f'<figure{" class=\"big\"" if i==0 else ""}><img src="{pre}img/studio/{imgs[i]}" alt="{e(t["galt"][i])}" loading="lazy"><figcaption>{e(t["g"][i])}</figcaption></figure>' for i in range(4))
+    imgs = ['home-desk.jpg','home-mic.jpg']
+    gal = ''.join(f'<figure{" class=\"big\"" if i==0 else ""}><img src="{pre}img/studio/{imgs[i]}" alt="{e(t["galt"][i])}" loading="lazy"><figcaption>{e(t["g"][i])}</figcaption></figure>' for i in range(len(imgs)))
     packs = ''
     for i,(name,sub,items) in enumerate(t['packs']):
         price = [P['single'],P['beat'],P['ep'],P['empire']][i]
@@ -265,14 +303,14 @@ def build(lang):
 {alts}
 <meta property="og:title" content="{html.escape(t["title"])}">
 <meta property="og:description" content="{html.escape(t["desc"])}">
-<meta property="og:image" content="{BASE}/img/studio/control-room.jpg">
+<meta property="og:image" content="{BASE}/img/studio/home-desk.jpg">
 <link rel="icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="{pre}assets/css/theme.css?v=26110401">
 <link rel="stylesheet" href="{pre}assets/css/theme-neon.css?v=26110401">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="{pre}assets/css/studio.css?v=26112402">
+<link rel="stylesheet" href="{pre}assets/css/studio.css?v=26112403">
 </head>
 <body data-page="studio" class="studio-page">
 <!-- generated by tools/build_studio.py — edit the script, not this file -->
