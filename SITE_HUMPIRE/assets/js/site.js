@@ -1,3 +1,4 @@
+(function(){if(!document.querySelector('script[src*="i18n.js"]')){var s=document.createElement('script');s.src='/assets/js/i18n.js?v=26112401';document.head.appendChild(s);}})(); /* HUMPIRE translations */
 /* ============================================================
    DJBILBOX BEATS — Shared site JS
    Header (mobile menu), cart, promo bar, card rendering + filters.

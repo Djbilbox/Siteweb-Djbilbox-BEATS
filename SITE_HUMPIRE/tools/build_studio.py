@@ -152,7 +152,7 @@ def build(lang):
     t = T[lang]; pre = '' if lang == 'en' else '../'
     alts = '\n'.join(f'<link rel="alternate" hreflang="{l}" href="{BASE}/{path(l)}">' for l in LANGS)
     alts += f'\n<link rel="alternate" hreflang="x-default" href="{BASE}/studio.html">'
-    langs = ''.join(f'<a href="/{path(l)}"{" class=\"on\"" if l==lang else ""} hreflang="{l}">{LABEL[l]}</a>' for l in LANGS)
+    langs = ''.join(f'<a href="/{path(l)}?lang={l}"{" class=\"on\"" if l==lang else ""} hreflang="{l}">{LABEL[l]}</a>' for l in LANGS)
     pil = ''.join(f'<div><i class="fa-solid {ic}"></i><h3>{e(a)}</h3><p>{e(b)}</p></div>'
                   for ic,(a,b) in zip(['fa-microphone-lines','fa-sliders','fa-compact-disc','fa-crown'], t['pil']))
     imgs = ['control-room.jpg','artist-booth.jpg','booth.jpg','lounge.jpg']
@@ -258,7 +258,7 @@ def build(lang):
   </section>
 </main>
 
-<script src="{pre}assets/js/site.js?v=26112401"></script>
+<script src="{pre}assets/js/site.js?v=26112402"></script>
 </body>
 </html>
 '''
