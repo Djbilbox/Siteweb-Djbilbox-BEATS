@@ -144,3 +144,12 @@
 .hr-langs a{font:600 .72rem/1 'Inter',sans-serif;letter-spacing:.12em;color:var(--mute);text-decoration:none;padding:7px 11px;border:1px solid rgba(255,255,255,.1);border-radius:999px}
 .hr-langs a:hover{color:#fff;border-color:var(--gold)}
 .hr-langs a.on{color:#0a0a0a;background:var(--gold);border-color:var(--gold)}
+
+/* right-to-left (Arabic) */
+[dir=rtl] .hr-packs,[dir=rtl] .hr-carte,[dir=rtl] .hr-steps,[dir=rtl] .hr-faq,[dir=rtl] .hr-gallery figcaption{text-align:right}
+[dir=rtl] .hr-pack li{padding:0 20px 11px 0}
+[dir=rtl] .hr-pack li::before{left:auto;right:2px}
+[dir=rtl] .hr-ribbon{right:auto;left:22px}
+[dir=rtl] .hr-logo,[dir=rtl] .hr-price{direction:ltr}
+[dir=rtl] .hr-btn .fa-arrow-down{margin-right:4px}
+:lang(ar) .hr,:lang(ja) .hr,:lang(ru) .hr{--serif:'Unbounded','Noto Sans Arabic','Noto Sans JP','Inter',sans-serif}

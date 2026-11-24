@@ -1073,6 +1073,9 @@
   <url><loc>https://humpireplugins.netlify.app/es/studio.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://humpireplugins.netlify.app/pt/studio.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://humpireplugins.netlify.app/de/studio.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://humpireplugins.netlify.app/ar/studio.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://humpireplugins.netlify.app/ru/studio.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://humpireplugins.netlify.app/ja/studio.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://humpireplugins.netlify.app/streetwear.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url>
     <loc>https://humpireplugins.netlify.app/p/fennec.html</loc>

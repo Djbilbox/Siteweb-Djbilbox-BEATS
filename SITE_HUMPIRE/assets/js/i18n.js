@@ -7,9 +7,88 @@
    ============================================================ */
 (function(){
 if (window.__hpI18n) return; window.__hpI18n = true;
-const LANGS = ['en','fr','es','pt','de'];
-const NAMES = {en:'English',fr:'Français',es:'Español',pt:'Português',de:'Deutsch'};
+const LANGS = ['en','fr','es','pt','de','ar','ru','ja'];
+const NAMES = {en:'English',fr:'Français',es:'Español',pt:'Português (BR)',de:'Deutsch',ar:'العربية',ru:'Русский',ja:'日本語'};
 const IDX = {fr:0,es:1,pt:2,de:3};
+
+/* Arabic, Russian, Japanese: "English": [ar, ru, ja] */
+const D2 = {
+"Browse":["تصفّح","Обзор","探す"],"Library":["المكتبة","Библиотека","ライブラリ"],
+"Sign In":["تسجيل الدخول","Войти","ログイン"],"Sign Up":["إنشاء حساب","Регистрация","新規登録"],
+"Beats":["بيتات","Биты","ビート"],"Studio Records":["Studio Records","Studio Records","Studio Records"],
+"Plugins":["إضافات","Плагины","プラグイン"],"Drum Kits":["درام كيت","Драм-киты","ドラムキット"],
+"Streetwear":["ملابس الشارع","Стритвир","ストリートウェア"],"Mastering":["ماسترينغ","Мастеринг","マスタリング"],
+"Video Studio":["استوديو الفيديو","Видеостудия","ビデオスタジオ"],"Info":["معلومات","Инфо","情報"],
+"Contact":["اتصل بنا","Контакты","お問い合わせ"],"My Account":["حسابي","Мой аккаунт","マイアカウント"],
+"License":["الرخصة","Лицензия","ライセンス"],"Quick links":["روابط سريعة","Быстрые ссылки","クイックリンク"],
+"Legal":["قانوني","Правовая информация","法的情報"],"For Creators":["للمبدعين","Для авторов","クリエイター向け"],
+"Follow DJBILBOX":["تابع DJBILBOX","Подписывайся на DJBILBOX","DJBILBOX をフォロー"],"Home":["الرئيسية","Главная","ホーム"],
+"Discography":["الديسكوغرافيا","Дискография","ディスコグラフィー"],"News":["الأخبار","Новости","ニュース"],
+"Reviews":["الآراء","Отзывы","レビュー"],"Studio Setup":["معدات الاستوديو","Оборудование студии","スタジオ機材"],
+"Services":["الخدمات","Услуги","サービス"],"Beat Licensing":["رخص البيتات","Лицензии на биты","ビートのライセンス"],
+"Pricing":["الأسعار","Цены","料金"],"Free Beats":["بيتات مجانية","Бесплатные биты","無料ビート"],
+"Free VST Plugins":["إضافات VST مجانية","Бесплатные VST-плагины","無料VSTプラグイン"],
+"Beats — licenses from $29":["بيتات — رخص من 29 $","Биты — лицензии от 29 $","ビート — ライセンス29ドルから"],
+"Academy (Discord)":["الأكاديمية (Discord)","Академия (Discord)","アカデミー（Discord）"],
+"Mix & Master":["ميكس وماستر","Сведение и мастеринг","ミックス＆マスタリング"],
+"Global Cities":["مدن العالم","Города мира","世界の都市"],
+"© 2026 DJBILBOX BEATS — All rights reserved.":["© 2026 DJBILBOX BEATS — جميع الحقوق محفوظة.","© 2026 DJBILBOX BEATS — Все права защищены.","© 2026 DJBILBOX BEATS — 無断転載禁止。"],
+"🔥 800+ Beats":["🔥 أكثر من 800 بيت","🔥 800+ битов","🔥 800以上のビート"],
+"— Free tagged MP3 · licenses from $29.":["— MP3 مجاني بالعلامة · رخص من 29 $.","— бесплатный MP3 с тегом · лицензии от 29 $.","— タグ付きMP3無料 · ライセンス29ドルから。"],
+"Browse beats":["تصفّح البيتات","Смотреть биты","ビートを見る"],"Cart":["السلة","Корзина","カート"],
+"Your cart":["سلتك","Твоя корзина","カート"],"Your Cart":["سلتك","Твоя корзина","カート"],"Total":["المجموع","Итого","合計"],
+"FREE":["مجاني","БЕСПЛАТНО","無料"],"Free":["مجاني","Бесплатно","無料"],
+"View full cart":["عرض السلة","Открыть корзину","カートを見る"],
+"Checkout on Gumroad":["الدفع عبر Gumroad","Оплатить на Gumroad","Gumroad で購入"],
+"Clear cart":["إفراغ السلة","Очистить корзину","カートを空にする"],
+"Your cart is empty.":["سلتك فارغة.","Корзина пуста.","カートは空です。"],
+"Buy":["شراء","Купить","購入"],"Buy now":["اشترِ الآن","Купить сейчас","今すぐ購入"],
+"Add":["أضف","Добавить","追加"],"New":["جديد","Новинка","新着"],"NEW":["جديد","НОВИНКА","新着"],
+"SALE":["تخفيض","СКИДКА","セール"],"Sale":["تخفيض","Скидка","セール"],
+"Free demo":["نسخة تجريبية مجانية","Бесплатное демо","無料デモ"],"View details":["التفاصيل","Подробнее","詳細を見る"],
+"Coming soon":["قريباً","Скоро","近日公開"],"COMING SOON":["قريباً","СКОРО","近日公開"],
+"Download":["تحميل","Скачать","ダウンロード"],"Free Download":["تحميل مجاني","Скачать бесплатно","無料ダウンロード"],
+"Download free":["تحميل مجاني","Скачать бесплатно","無料でダウンロード"],"Download for free":["تحميل مجاني","Скачать бесплатно","無料でダウンロード"],
+"Play":["تشغيل","Играть","再生"],"Store":["المتجر","Магазин","ストア"],"All products":["كل المنتجات","Все товары","全商品"],
+"Language":["اللغة","Язык","言語"],"Details":["التفاصيل","Подробнее","詳細"],"Get it":["احصل عليه","Получить","入手する"],
+"Subscribe":["اشترك","Подписаться","登録"],"Watch on YouTube":["شاهد على YouTube","Смотреть на YouTube","YouTubeで見る"],
+"Free for profit":["مجاني للاستخدام التجاري","Бесплатно для коммерции","商用利用無料"],
+"Beatmaker, producer":["صانع بيتات، منتج","Битмейкер, продюсер","ビートメイカー、プロデューサー"],
+"plugin maker.":["وصانع إضافات.","создатель плагинов.","プラグイン開発者。"],
+"Listen to beats":["استمع إلى البيتات","Слушать биты","ビートを聴く"],
+"Create free account":["أنشئ حساباً مجانياً","Создать бесплатный аккаунт","無料アカウント作成"],
+"Free VST plugins":["إضافات VST مجانية","Бесплатные VST-плагины","無料VSTプラグイン"],
+"VST Plugins":["إضافات VST","VST-плагины","VSTプラグイン"],"All VST Plugins":["كل إضافات VST","Все VST-плагины","すべてのVSTプラグイン"],
+"View all →":["عرض الكل ←","Смотреть все →","すべて見る →"],"Explore":["استكشف","Исследуй","探索"],
+"Who is DJBILBOX BEATS?":["من هو DJBILBOX BEATS؟","Кто такой DJBILBOX BEATS?","DJBILBOX BEATS とは？"],
+"Stay in the loop":["ابقَ على اطلاع","Будь в курсе","最新情報を受け取る"],
+"Beats that move.":["بيتات تحرّك.","Биты, которые качают.","心を動かすビート。"],
+"Built for your next record.":["مصنوعة لأغنيتك القادمة.","Для твоего следующего трека.","次の作品のために。"],
+"Licenses from $29":["رخص من 29 $","Лицензии от 29 $","ライセンス29ドルから"],
+"Search a beat, an artist, a mood…":["ابحث عن بيت، فنان، أجواء…","Найди бит, артиста, настроение…","ビート、アーティスト、ムードで検索…"],
+"Load more beats":["المزيد من البيتات","Загрузить ещё","もっと見る"],"Licenses":["الرخص","Лицензии","ライセンス"],
+"Choose a beat":["اختر بيت","Выбрать бит","ビートを選ぶ"],"Newest":["الأحدث","Новые","新着順"],"Shuffle":["عشوائي","Случайно","シャッフル"],
+"Real instruments.":["آلات حقيقية.","Настоящие инструменты.","本物の楽器。"],"Zero menus.":["بدون قوائم.","Ноль меню.","メニューなし。"],
+"Search plugins, bundles…":["ابحث عن إضافات، باقات…","Поиск плагинов, бандлов…","プラグイン、バンドルを検索…"],
+"Instant download":["تحميل فوري","Мгновенная загрузка","即ダウンロード"],"Royalty-free":["بدون حقوق ملكية","Без роялти","ロイヤリティフリー"],
+"Windows & macOS":["Windows و macOS","Windows и macOS","Windows & macOS"],"Try before you buy":["جرّب قبل الشراء","Попробуй перед покупкой","購入前に試せる"],
+"Sounds from my own records":["أصوات من أغانيّ الخاصة","Звуки из моих треков","自分の作品のサウンド"],
+"Straight from":["مباشرة من","Прямо из","セッションから"],"the sessions.":["الجلسات.","сессий.","直送。"],
+"Search kits, loops, bundles…":["ابحث عن كيتات، لوبات، باقات…","Поиск китов, лупов, бандлов…","キット、ループ、バンドルを検索…"],
+"Collections":["المجموعات","Коллекции","コレクション"],"Shop all":["تسوّق الكل","Все товары","すべて見る"],
+"Worldwide shipping":["شحن لكل العالم","Доставка по всему миру","世界中に配送"],"Secure checkout":["دفع آمن","Безопасная оплата","安全な決済"],
+"Overview":["نظرة عامة","Обзор","概要"],"← Back to catalog":["→ العودة إلى الكتالوج","← Назад в каталог","← カタログに戻る"],
+"Key features":["الميزات الرئيسية","Основные функции","主な機能"],"Features":["الميزات","Функции","機能"],
+"System requirements":["متطلبات النظام","Системные требования","動作環境"],"Technical specs":["المواصفات التقنية","Технические характеристики","技術仕様"],
+"Get it on Gumroad":["احصل عليه من Gumroad","Купить на Gumroad","Gumroad で入手"],"Hear it in action":["استمع إليه","Послушай в деле","実際の音を聴く"],
+"Instant download · Secure checkout on Gumroad":["تحميل فوري · دفع آمن عبر Gumroad","Мгновенная загрузка · безопасная оплата на Gumroad","即ダウンロード · Gumroad で安全に決済"],
+"Royalty-free sounds":["أصوات بدون حقوق ملكية","Звуки без роялти","ロイヤリティフリーのサウンド"],"Made by DJBILBOX BEATS":["من صنع DJBILBOX BEATS","Сделано DJBILBOX BEATS","DJBILBOX BEATS 制作"],
+"Effects":["مؤثرات","Эффекты","エフェクト"],"Synths and instruments":["سينثات وآلات","Синтезаторы и инструменты","シンセと楽器"],
+"Share:":["شارك:","Поделиться:","シェア："],"FAQ":["أسئلة شائعة","Вопросы","よくある質問"],
+"Order summary":["ملخص الطلب","Сводка заказа","注文内容"],"Subtotal":["المجموع الفرعي","Подытог","小計"],
+"Promo code":["رمز الخصم","Промокод","プロモコード"],"Apply":["تطبيق","Применить","適用"],"Thank you!":["شكراً!","Спасибо!","ありがとう！"],
+"Copy code":["نسخ الرمز","Скопировать код","コードをコピー"],"Close":["إغلاق","Закрыть","閉じる"],"Discover":["اكتشف","Узнать","見る"],
+};
 const KEY = 'hp_lang';
 
 /* pages that have their own static version in /fr/ /es/ /pt/ /de/ */
@@ -415,10 +494,12 @@ if (STATIC.includes(file)) {
   if (cur !== lang) { location.replace(staticUrl(lang)); return; }
 }
 
-const i = IDX[lang];
+const i = IDX[lang], j = {ar:0,ru:1,ja:2}[lang];
 const done = new WeakMap();
 const norm = s => s.replace(/\s+/g,' ').trim();
-function tr(s){ const v = D[norm(s)]; return v ? v[i] : null; }
+function tr(s){ const k = norm(s);
+  if (j !== undefined) { const v = D2[k]; return v ? v[j] : null; }
+  const v = D[k]; return v ? v[i] : null; }
 function doText(n){
   if (done.get(n) === n.nodeValue) return;
   const raw = n.nodeValue, t = tr(raw);
@@ -444,7 +525,7 @@ function walk(root){
 function picker(){
   if (document.querySelector('.hp-lang')) return;
   const sel = document.createElement('select');
-  sel.className = 'hp-lang'; sel.setAttribute('data-no-i18n',''); sel.setAttribute('aria-label', lang==='en'?'Language':D.Language[i]);
+  sel.className = 'hp-lang'; sel.setAttribute('data-no-i18n',''); sel.setAttribute('aria-label', tr('Language')||'Language');
   sel.innerHTML = LANGS.map(l=>`<option value="${l}"${l===lang?' selected':''}>${l.toUpperCase()} · ${NAMES[l]}</option>`).join('');
   sel.onchange = () => {
     const l = sel.value; try { localStorage.setItem(KEY, l); } catch(e){}

@@ -1,4 +1,4 @@
-(function(){if(!document.querySelector('script[src*="i18n.js"]')){var s=document.createElement('script');s.src='/assets/js/i18n.js?v=26112401';document.head.appendChild(s);}})(); /* HUMPIRE translations */
+(function(){if(!document.querySelector('script[src*="i18n.js"]')){var s=document.createElement('script');s.src='/assets/js/i18n.js?v=26112402';document.head.appendChild(s);}})(); /* HUMPIRE translations */
 /* ============================================================
    PRODUCT PAGE (p/*.html) — promo price block, code copy,
    YouTube click-to-play, mobile buy bar.
