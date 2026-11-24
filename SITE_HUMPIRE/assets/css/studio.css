@@ -1,6 +1,12 @@
 /* ============================================================
-   HUMPIRE RECORDS — recording studio page (black & champagne gold)
+   HUMPIRE RECORDS — recording studio page (neon green & pink)
    ============================================================ */
+/* currency selector */
+.hr-cur{display:flex;flex-direction:column;align-items:center;gap:6px;margin:-14px 0 30px}
+.hr-cur label{display:inline-flex;align-items:center;gap:10px;color:#a3aca7;font:600 .8rem/1 Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.hr-cur i{color:#3dff6e}
+.hr-cur select{background:#141217;color:#fff;border:1px solid rgba(255,61,242,.35);border-radius:999px;padding:8px 14px;font:700 .85rem Inter,sans-serif;cursor:pointer}
+.hr-cur small{color:#a3aca7;font-size:.78rem}
 .studio-page{background:#070707}
 .hr{--gold:#3dff6e;--gold-2:#a6ffbf;--gold-3:#d946ef;--pink:#ff3df2;--ink:#f2f5f3;--mute:#a3aca7;--line:rgba(61,255,110,.2);
   --serif:'Unbounded','Inter',sans-serif;
@@ -16,7 +22,7 @@
 .hr-hero{margin:0 -20px;padding-left:20px;padding-right:20px}
 .hr-hero-bg{position:absolute;inset:0;z-index:-2;background:url(../../img/studio/home-desk.jpg) center 30%/cover no-repeat;opacity:.75;
   -webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
-.hr-hero-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.hr-hero-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 78%}
 .hr-hero-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 50% 45%,rgba(7,7,7,.62),rgba(7,7,7,.85))}
 
 /* gallery */
@@ -156,3 +162,123 @@
 :lang(ar) .hr,:lang(ja) .hr,:lang(ru) .hr{--serif:'Unbounded','Noto Sans Arabic','Noto Sans JP','Inter',sans-serif}
 
 @media (prefers-reduced-motion:reduce){.hr-hero-bg video{display:none}}
+
+/* =========================================================
+   MOTION v2 — full-screen hero, neon intro, counters, marquee
+   ========================================================= */
+body.studio-page{overflow-x:clip}
+.hr-hero{position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:0;min-height:min(92vh,980px);
+  display:flex;flex-direction:column;justify-content:center;padding:110px 20px 90px}
+.hr-hero-bg{-webkit-mask-image:none;mask-image:none;opacity:1;background:#060606}
+.hr-hero-bg video{opacity:0;transition:opacity 1.4s ease;transform:scale(1.02)}
+.hr-hero-bg video.on{opacity:1}
+html:not(.hr-js) .hr-hero-bg video:first-child,.hr-hero-bg video:only-child{opacity:1}
+.hr-hero-bg::after{background:
+  radial-gradient(circle at var(--mx,50%) var(--my,40%),rgba(255,61,242,.16),transparent 32%),
+  linear-gradient(180deg,rgba(6,6,6,.55) 0%,rgba(6,6,6,.25) 35%,rgba(6,6,6,.55) 75%,#070707 100%),
+  radial-gradient(70% 60% at 50% 45%,rgba(6,6,6,.15),rgba(6,6,6,.55))}
+.hr-hero-in{position:relative;max-width:980px;margin:0 auto;text-align:center}
+.hr-hero .hr-meter{position:relative;left:auto;top:auto;transform:none;margin:38px auto 0;height:42px;gap:6px;opacity:.9;justify-content:center}
+.hr-hero .hr-meter i{width:5px}
+@keyframes hrVu{0%{height:6px}100%{height:42px}}
+
+/* neon H badge: power-on flicker, float, pulse rings */
+.hr-badge{position:relative;width:92px;height:92px;margin:0 auto 22px;display:grid;place-items:center;animation:hrFloat 5s ease-in-out infinite}
+.hr-badge svg{position:relative;z-index:1;width:76px;height:76px;fill:var(--gold);filter:drop-shadow(0 0 6px var(--gold)) drop-shadow(0 0 22px rgba(61,255,110,.7));
+  animation:hrPower 1.6s steps(1) .2s both}
+.hr-badge svg rect:nth-child(n+3){fill:var(--pink);animation:hrBars 1.1s ease-in-out infinite alternate;transform-origin:50% 50%;transform-box:fill-box}
+.hr-badge svg rect:nth-child(4){animation-delay:-.3s}.hr-badge svg rect:nth-child(5){animation-delay:-.6s}.hr-badge svg rect:nth-child(6){animation-delay:-.15s}
+.hr-badge .ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(61,255,110,.55);animation:hrRing 3s ease-out infinite}
+.hr-badge .r2{animation-delay:1s;border-color:rgba(255,61,242,.5)}.hr-badge .r3{animation-delay:2s}
+@keyframes hrPower{0%{opacity:0}10%{opacity:1}14%{opacity:.15}20%{opacity:1}26%{opacity:.3}32%,100%{opacity:1}}
+@keyframes hrFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes hrRing{0%{transform:scale(.9);opacity:.9}100%{transform:scale(2.1);opacity:0}}
+@keyframes hrBars{from{transform:scaleY(.45)}to{transform:scaleY(1.15)}}
+
+/* title: letters drop in, colours drift */
+.hr-logo{background-size:220% 100%;animation:hrHue 7s ease-in-out infinite alternate}
+.hr-logo span{display:inline-block;background:linear-gradient(100deg,var(--gold) 10%,#b6ff3d 40%,var(--pink) 75%,#a855f7 100%);
+  background-size:700% 100%;background-position:calc(var(--i) * 16%) 50%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  transition:opacity .7s ease,transform .8s cubic-bezier(.2,.9,.25,1.3),filter .7s ease;transition-delay:calc(.45s + var(--i) * .07s)}
+.hr-js .hr-logo span{opacity:0;transform:translateY(.45em) rotateX(70deg);filter:blur(8px)}
+.hr-ready .hr-logo span{opacity:1;transform:none;filter:none}
+.hr-logo em{transition:opacity .9s ease 1.1s,letter-spacing 1.2s ease 1.1s}
+.hr-js .hr-logo em{opacity:0;letter-spacing:1.2em}
+.hr-ready .hr-logo em{opacity:1;letter-spacing:.6em}
+@keyframes hrHue{from{background-position:0% 50%}to{background-position:100% 50%}}
+.hr-hero .hr-tag,.hr-hero .hr-lead,.hr-hero .hr-cta,.hr-hero .hr-eyebrow{transition:opacity .8s ease,transform .8s ease}
+.hr-js .hr-hero .hr-tag,.hr-js .hr-hero .hr-lead,.hr-js .hr-hero .hr-cta,.hr-js .hr-hero .hr-eyebrow{opacity:0;transform:translateY(18px)}
+.hr-ready .hr-hero .hr-eyebrow{opacity:1;transform:none;transition-delay:.3s}
+.hr-ready .hr-hero .hr-tag{opacity:1;transform:none;transition-delay:1.2s}
+.hr-ready .hr-hero .hr-lead{opacity:1;transform:none;transition-delay:1.35s}
+.hr-ready .hr-hero .hr-cta{opacity:1;transform:none;transition-delay:1.5s}
+.hr-hero .hr-lead{color:#e5e9e6;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.hr-hero .hr-btn:not(.ghost){animation:hrBlink 2.6s ease-in-out 2.4s infinite}
+@keyframes hrBlink{0%,100%{box-shadow:0 0 24px rgba(255,61,242,.35)}50%{box-shadow:0 0 44px rgba(255,61,242,.75),0 0 80px rgba(61,255,110,.35)}}
+.hr-hero .hr-btn.ghost{background:rgba(0,0,0,.35);backdrop-filter:blur(6px)}
+
+/* scroll hint */
+.hr-scroll{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);width:26px;height:42px;border:2px solid rgba(255,255,255,.5);border-radius:14px}
+.hr-scroll span{position:absolute;left:50%;top:8px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:var(--gold);animation:hrWheel 1.6s ease-in-out infinite}
+@keyframes hrWheel{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(14px)}}
+
+/* counters */
+.hr-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:-40px auto 0;position:relative;z-index:2;max-width:980px}
+.hr-stats>div{text-align:center;padding:26px 16px;border-radius:18px;background:rgba(14,12,16,.82);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,61,242,.22);box-shadow:0 20px 60px -30px rgba(255,61,242,.4)}
+.hr-stats b{font:800 clamp(2rem,4.6vw,3rem)/1 var(--serif);background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hr-stats span{font:800 1.4rem var(--serif);color:var(--pink)}
+.hr-stats p{margin:8px 0 0;color:var(--mute);font-size:.86rem;letter-spacing:.08em;text-transform:uppercase}
+
+/* genre marquee */
+.hr-marquee{width:100vw;margin:60px 0 0 calc(50% - 50vw);overflow:hidden;border-block:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(90deg,rgba(61,255,110,.08),rgba(255,61,242,.08));transform:rotate(-1.2deg)}
+.hr-marquee>div{display:flex;width:max-content;animation:hrMarquee 32s linear infinite}
+.hr-marquee span{font:800 clamp(1.2rem,2.6vw,2rem)/1 var(--serif);padding:18px 26px;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.55);white-space:nowrap}
+.hr-marquee span:nth-of-type(3n+1){color:var(--gold);-webkit-text-stroke:0;text-shadow:0 0 18px rgba(61,255,110,.5)}
+.hr-marquee i{align-self:center;color:var(--pink);font-style:normal}
+@keyframes hrMarquee{to{transform:translateX(-50%)}}
+[dir=rtl] .hr-marquee>div{animation-direction:reverse}
+
+/* scroll reveals */
+.rv{opacity:0;transform:translateY(34px) scale(.98);transition:opacity .8s ease var(--d,0ms),transform .9s cubic-bezier(.2,.8,.2,1) var(--d,0ms)}
+.rv.in{opacity:1;transform:none}
+
+/* tilt cards with a neon glow under the pointer */
+.tilt{will-change:transform;position:relative}
+.rv.in.tilt{transition:transform .25s ease,border-color .25s,box-shadow .25s,opacity .8s}
+.tilt::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(260px circle at var(--gx,50%) var(--gy,50%),rgba(255,61,242,.18),transparent 60%)}
+.tilt:hover::after{opacity:1}
+
+/* star pack: rotating neon border */
+@property --ang{syntax:"<angle>";initial-value:0deg;inherits:false}
+.hr-pack.star{background:linear-gradient(#120d14,#0b0a0c) padding-box,conic-gradient(from var(--ang),var(--pink),var(--gold),#7c3aed,var(--pink)) border-box;animation:hrSpin 5s linear infinite}
+@keyframes hrSpin{to{--ang:360deg}}
+.hr-ribbon{animation:hrBlink 2.4s ease-in-out infinite}
+
+/* floating booking button */
+.hr-float{position:fixed;right:18px;bottom:78px;z-index:60;display:inline-flex;align-items:center;gap:9px;padding:13px 20px;border-radius:999px;
+  font:700 .78rem/1 Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;
+  background:linear-gradient(90deg,#ff3df2,#3dff6e);box-shadow:0 10px 30px -8px rgba(255,61,242,.7);
+  transform:translateY(140%);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s}
+.hr-float.show{transform:none;opacity:1;pointer-events:auto;animation:hrBlink 2.6s ease-in-out infinite}
+[dir=rtl] .hr-float{right:auto;left:18px}
+
+@media (max-width:760px){
+  .hr-hero{min-height:88vh;padding:90px 16px 80px}
+  .hr-stats{grid-template-columns:1fr;margin-top:-24px;gap:10px}
+  .hr-stats>div{padding:18px}
+  .hr-badge{width:74px;height:74px}.hr-badge svg{width:60px;height:60px}
+  .hr-float{right:12px;bottom:70px;padding:12px 16px}
+}
+@media (prefers-reduced-motion:reduce){
+  .hr-logo span,.hr-logo em,.hr-hero .hr-tag,.hr-hero .hr-lead,.hr-hero .hr-cta,.hr-hero .hr-eyebrow{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}
+  .hr-badge,.hr-badge svg,.hr-badge .ring,.hr-marquee>div,.hr-pack.star,.hr-btn,.hr-float{animation:none!important}
+  .hr-badge svg{opacity:1}
+  .rv{opacity:1;transform:none}
+}
+
+/* right-to-left: full-bleed blocks break out on the other side */
+[dir=rtl] .hr-hero{margin-left:0;margin-right:calc(50% - 50vw)}
+[dir=rtl] .hr-marquee{margin-left:0;margin-right:calc(50% - 50vw)}

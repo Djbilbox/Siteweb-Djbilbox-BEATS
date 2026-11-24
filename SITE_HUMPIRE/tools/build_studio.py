@@ -1,7 +1,7 @@
 # Builds the HUMPIRE RECORDS studio page in every site language.
 # Run: python tools/build_studio.py   (from SITE_HUMPIRE)
 # Output: studio.html (EN) + fr/ es/ pt/ de/ studio.html
-import os, html
+import os, html, re
 
 BASE = 'https://humpireplugins.netlify.app'
 LANGS = ['en', 'fr', 'es', 'pt', 'de']
@@ -230,35 +230,35 @@ T.update({
 REAL = {
  'en': ('Inside HUMPIRE Records', 'A real home studio: black acoustic foam on the walls, a tall mic stand and LED lights for the vibe.',
         ['The desk', 'The vocal corner'],
-        ['Home studio desk with gaming PC, Novation FLkey keyboard, audio interface and a TV on the wall', 'Condenser microphone on a tall stand in front of black acoustic foam'],
+        ['Beatmaker at the home studio desk playing a Novation FLkey 49, curved monitor, studio speakers and the HUMPIRE RECORDS logo on the wall TV', 'Condenser microphone on a tall stand in front of black acoustic foam'],
         'Vocal corner treated with acoustic foam, condenser mic on a tall stand, coaching on every take.'),
  'fr': ('Bienvenue chez HUMPIRE Records', 'Un vrai home studio : mousse acoustique noire aux murs, grand pied de micro et LED pour l\'ambiance.',
         ['Le bureau', 'Le coin voix'],
-        ['Bureau du home studio avec PC gamer, clavier Novation FLkey, carte son et TV au mur', 'Micro statique sur grand pied devant la mousse acoustique noire'],
+        ['Beatmaker au bureau du home studio sur un Novation FLkey 49, écran incurvé, enceintes et logo HUMPIRE RECORDS sur la TV', 'Micro statique sur grand pied devant la mousse acoustique noire'],
         'Coin voix traité en mousse acoustique, micro statique sur grand pied, coaching sur chaque prise.'),
  'es': ('Dentro de HUMPIRE Records', 'Un home studio real: espuma acústica negra en las paredes, un pie de micro alto y luces LED para el ambiente.',
         ['El escritorio', 'El rincón de voz'],
-        ['Escritorio del home studio con PC gamer, teclado Novation FLkey, interfaz de audio y TV en la pared', 'Micrófono de condensador en un pie alto delante de la espuma acústica negra'],
+        ['Beatmaker en el escritorio del home studio con un Novation FLkey 49, monitor curvo, altavoces y el logo HUMPIRE RECORDS en la TV', 'Micrófono de condensador en un pie alto delante de la espuma acústica negra'],
         'Rincón de voz tratado con espuma acústica, micrófono de condensador en pie alto, coaching en cada toma.'),
  'pt': ('Dentro da HUMPIRE Records', 'Um home studio de verdade: espuma acústica preta nas paredes, pedestal de microfone alto e luzes LED para a vibe.',
         ['A mesa', 'O canto de voz'],
-        ['Mesa do home studio com PC gamer, teclado Novation FLkey, interface de áudio e TV na parede', 'Microfone condensador em pedestal alto na frente da espuma acústica preta'],
+        ['Beatmaker na mesa do home studio com um Novation FLkey 49, monitor curvo, caixas de som e o logo HUMPIRE RECORDS na TV', 'Microfone condensador em pedestal alto na frente da espuma acústica preta'],
         'Canto de voz tratado com espuma acústica, microfone condensador em pedestal alto, coaching em cada take.'),
  'de': ('Willkommen bei HUMPIRE Records', 'Ein echtes Homestudio: schwarzer Akustikschaum an den Wänden, ein hohes Mikrofonstativ und LED-Licht für die Stimmung.',
         ['Der Arbeitsplatz', 'Die Gesangsecke'],
-        ['Homestudio-Schreibtisch mit Gaming-PC, Novation-FLkey-Keyboard, Audio-Interface und Wand-TV', 'Kondensatormikrofon auf hohem Stativ vor schwarzem Akustikschaum'],
+        ['Beatmaker am Homestudio-Schreibtisch mit Novation FLkey 49, Curved-Monitor, Studiolautsprechern und HUMPIRE-RECORDS-Logo auf dem Wand-TV', 'Kondensatormikrofon auf hohem Stativ vor schwarzem Akustikschaum'],
         'Gesangsecke mit Akustikschaum, Kondensatormikrofon auf hohem Stativ, Coaching bei jedem Take.'),
  'ar': ('داخل HUMPIRE Records', 'استوديو منزلي حقيقي: إسفنج عازل أسود على الجدران، حامل ميكروفون طويل وإضاءة LED للأجواء.',
         ['المكتب', 'ركن الصوت'],
-        ['مكتب الاستوديو المنزلي مع كمبيوتر ألعاب ولوحة Novation FLkey وكرت صوت وتلفاز على الجدار', 'ميكروفون مكثّف على حامل طويل أمام إسفنج عازل أسود'],
+        ['صانع بيتات على مكتب الاستوديو المنزلي يعزف على Novation FLkey 49 مع شاشة منحنية وسماعات وشعار HUMPIRE RECORDS على التلفاز', 'ميكروفون مكثّف على حامل طويل أمام إسفنج عازل أسود'],
         'ركن صوت معالج بالإسفنج العازل، ميكروفون مكثّف على حامل طويل، وتوجيه في كل تسجيلة.'),
  'ru': ('Внутри HUMPIRE Records', 'Настоящая домашняя студия: чёрный акустический поролон на стенах, высокая микрофонная стойка и LED-подсветка.',
         ['Рабочее место', 'Вокальный угол'],
-        ['Стол домашней студии: игровой ПК, клавиатура Novation FLkey, аудиоинтерфейс и телевизор на стене', 'Конденсаторный микрофон на высокой стойке перед чёрным акустическим поролоном'],
+        ['Битмейкер за столом домашней студии играет на Novation FLkey 49, изогнутый монитор, мониторы и логотип HUMPIRE RECORDS на телевизоре', 'Конденсаторный микрофон на высокой стойке перед чёрным акустическим поролоном'],
         'Вокальный угол с акустическим поролоном, конденсаторный микрофон на высокой стойке, помощь на каждом дубле.'),
  'ja': ('HUMPIRE Records の中へ', '本物のホームスタジオ：壁には黒い吸音材、背の高いマイクスタンド、雰囲気を作るLEDライト。',
         ['デスク', 'ボーカルコーナー'],
-        ['ゲーミングPC、Novation FLkey、オーディオインターフェース、壁掛けTVのあるホームスタジオのデスク', '黒い吸音材の前、背の高いスタンドに付けたコンデンサーマイク'],
+        ['Novation FLkey 49を弾くビートメイカー、曲面モニター、スピーカー、TVにHUMPIRE RECORDSのロゴがあるホームスタジオのデスク', '黒い吸音材の前、背の高いスタンドに付けたコンデンサーマイク'],
         '吸音材で処理したボーカルコーナー、背の高いスタンドのコンデンサーマイク、テイクごとのコーチング。'),
 }
 for _l, (_h, _s, _g, _alt, _p0) in REAL.items():
@@ -268,6 +268,35 @@ LANGS += ['ar', 'ru', 'ja']
 LABEL.update({'pt': 'PT-BR', 'ar': 'AR', 'ru': 'RU', 'ja': 'JA'})
 RTL = {'ar'}
 HREF = {'pt': 'pt-BR'}
+
+
+# Stats shown in the counter band (real figures from the home page)
+STATS = {
+ 'en': ('Beats online', 'YouTube views', 'Tracks on Spotify', 'Scroll'),
+ 'fr': ('Instrus en ligne', 'Vues YouTube', 'Titres sur Spotify', 'Défiler'),
+ 'es': ('Beats en línea', 'Vistas en YouTube', 'Temas en Spotify', 'Desliza'),
+ 'pt': ('Beats online', 'Visualizações no YouTube', 'Faixas no Spotify', 'Role'),
+ 'de': ('Beats online', 'YouTube-Aufrufe', 'Tracks auf Spotify', 'Scrollen'),
+ 'ar': ('بيتات متاحة', 'مشاهدات YouTube', 'أغانٍ على Spotify', 'مرّر'),
+ 'ru': ('Битов онлайн', 'Просмотров на YouTube', 'Треков в Spotify', 'Листай'),
+ 'ja': ('公開中のビート', 'YouTube再生回数', 'Spotifyの曲', 'スクロール'),
+}
+
+CUR = {
+ 'en': ('Currency', 'Approximate conversion — payment in euros.'),
+ 'fr': ('Devise', 'Conversion indicative — paiement en euros.'),
+ 'es': ('Moneda', 'Conversión aproximada — pago en euros.'),
+ 'pt': ('Moeda', 'Conversão aproximada — pagamento em euros.'),
+ 'de': ('Währung', 'Ungefähre Umrechnung — Zahlung in Euro.'),
+ 'ar': ('العملة', 'تحويل تقريبي — الدفع باليورو.'),
+ 'ru': ('Валюта', 'Примерный пересчёт — оплата в евро.'),
+ 'ja': ('通貨', '換算は目安です — お支払いはユーロです。'),
+}
+GENRES = ['G-FUNK', 'TRAP', 'DRILL', 'ORIENTAL', 'AFRO', 'RAP FR', 'R&B', 'WEST COAST', 'RAÏ', 'HOUSE']
+H_SVG = ('<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="22" y="20" width="12" height="60" rx="3"/>'
+         '<rect x="66" y="20" width="12" height="60" rx="3"/><rect x="38" y="44" width="4" height="12" rx="2"/>'
+         '<rect x="44" y="37" width="4" height="26" rx="2"/><rect x="48.5" y="30" width="3" height="40" rx="1.5"/>'
+         '<rect x="52" y="37" width="4" height="26" rx="2"/><rect x="58" y="44" width="4" height="12" rx="2"/></svg>')
 
 def e(s): return html.escape(s, quote=False)
 
@@ -279,7 +308,7 @@ def build(lang):
     pil = ''.join(f'<div><i class="fa-solid {ic}"></i><h3>{e(a)}</h3><p>{e(b)}</p></div>'
                   for ic,(a,b) in zip(['fa-microphone-lines','fa-sliders','fa-compact-disc','fa-crown'], t['pil']))
     imgs = ['home-desk.jpg','home-mic.jpg']
-    VIDS = {'home-desk.jpg': 'home-desk.mp4'}   # stills that have a Flow video
+    VIDS = {'home-desk.jpg': 'home-desk.mp4', 'home-mic.jpg': 'home-mic.mp4'}   # stills that have a video
     def media(i):
         im = imgs[i]
         if im in VIDS:
@@ -293,9 +322,11 @@ def build(lang):
         star = i == 2
         lis = ''.join(f'<li>{e(x)}</li>' for x in items)
         packs += (f'<article class="hr-pack{" star" if star else ""}">' + (f'<span class="hr-ribbon">{e(t["most"])}</span>' if star else '') +
-                  f'<h3>{e(name)}</h3><p class="hr-pack-for">{e(sub)}</p><div class="hr-price"><b>{price}</b><span>€</span></div>'
+                  f'<h3>{e(name)}</h3><p class="hr-pack-for">{e(sub)}</p><div class="hr-price" data-eur="{price.replace(" ","")}"><b>{price}</b><span>€</span></div>'
                   f'<ul>{lis}</ul><a class="hr-btn{"" if star else " ghost"}" href="#book">{e(t["book"])}</a></article>\n')
-    carte = ''.join(f'<div class="hr-row"><span>{e(a)}</span><i></i><b>{e(b)}</b></div>' for a,b in t['carte'])
+    def money(txt):   # "40 € / h" -> <span data-eur="40">40 €</span> / h
+        return re.sub(r'(\d[\d ]*)\s?€', lambda m: f'<span class="eur" data-eur="{m.group(1).replace(" ","")}">{m.group(1)} €</span>', e(txt))
+    carte = ''.join(f'<div class="hr-row"><span>{e(a)}</span><i></i><b>{money(b)}</b></div>' for a,b in t['carte'])
     steps = ''.join(f'<li><b>0{i+1}</b><h3>{e(a)}</h3><p>{e(b)}</p></li>' for i,(a,b) in enumerate(t['steps']))
     hours = ''.join(f'<li><span>{e(a)}</span><b>{e(b)}</b></li>' for a,b in t['hours'])
     faq = ''.join(f'<details><summary>{e(q)}</summary><p>{e(a)}</p></details>' for q,a in t['faq'])
@@ -317,7 +348,7 @@ def build(lang):
 <link rel="stylesheet" href="{pre}assets/css/theme.css?v=26110401">
 <link rel="stylesheet" href="{pre}assets/css/theme-neon.css?v=26110401">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="{pre}assets/css/studio.css?v=26112404">
+<link rel="stylesheet" href="{pre}assets/css/studio.css?v=26112406">
 </head>
 <body data-page="studio" class="studio-page">
 <!-- generated by tools/build_studio.py — edit the script, not this file -->
@@ -325,18 +356,33 @@ def build(lang):
   <nav class="hr-langs" aria-label="Language">{langs}</nav>
 
   <section class="hr-hero">
-    <div class="hr-hero-bg" aria-hidden="true"><video src="{pre}video/studio/home-desk.mp4" poster="{pre}img/studio/home-desk.jpg" autoplay muted loop playsinline preload="auto"></video></div>
-    <div class="hr-hero-glow" aria-hidden="true"></div>
-    <div class="hr-meter" aria-hidden="true">{"<i></i>"*16}</div>
-    <p class="hr-eyebrow">{e(t["eyebrow"])}</p>
-    <h1 class="hr-logo">HUMPIRE<em>Records</em></h1>
-    <p class="hr-tag">{e(t["tag"])} <span>{e(t["tag2"])}</span></p>
-    <p class="hr-lead">{e(t["lead"])}</p>
-    <div class="hr-cta">
-      <a class="hr-btn" href="#packs">{e(t["cta1"])} <i class="fa-solid fa-arrow-down"></i></a>
-      <a class="hr-btn ghost" href="#book"><i class="fa-regular fa-calendar"></i> {e(t["cta2"])}</a>
+    <div class="hr-hero-bg" aria-hidden="true">
+      <video src="{pre}video/studio/home-desk.mp4" poster="{pre}img/studio/home-desk.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <video src="{pre}video/studio/home-mic.mp4" muted playsinline preload="metadata"></video>
     </div>
+    <div class="hr-hero-glow" aria-hidden="true"></div>
+    <div class="hr-hero-in">
+      <div class="hr-badge" aria-hidden="true"><span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span>{H_SVG}</div>
+      <p class="hr-eyebrow">{e(t["eyebrow"])}</p>
+      <h1 class="hr-logo" aria-label="HUMPIRE Records">{"".join(f'<span style="--i:{k}">{ch}</span>' for k,ch in enumerate("HUMPIRE"))}<em>Records</em></h1>
+      <p class="hr-tag">{e(t["tag"])} <span>{e(t["tag2"])}</span></p>
+      <p class="hr-lead">{e(t["lead"])}</p>
+      <div class="hr-cta">
+        <a class="hr-btn" href="#packs">{e(t["cta1"])} <i class="fa-solid fa-arrow-down"></i></a>
+        <a class="hr-btn ghost" href="#book"><i class="fa-regular fa-calendar"></i> {e(t["cta2"])}</a>
+      </div>
+      <div class="hr-meter" aria-hidden="true">{"<i></i>"*28}</div>
+    </div>
+    <a class="hr-scroll" href="#room" aria-label="{e(STATS[lang][3])}"><span></span></a>
   </section>
+
+  <section class="hr-stats">
+    <div><b data-to="800">0</b><span>+</span><p>{e(STATS[lang][0])}</p></div>
+    <div><b data-to="423">0</b><span>K+</span><p>{e(STATS[lang][1])}</p></div>
+    <div><b data-to="475">0</b><span>+</span><p>{e(STATS[lang][2])}</p></div>
+  </section>
+
+  <div class="hr-marquee" aria-hidden="true"><div>{"".join(f"<span>{g}</span><i>✦</i>" for g in GENRES*2)}</div></div>
 
   <section class="hr-pillars">{pil}</section>
 
@@ -351,6 +397,8 @@ def build(lang):
     <p class="hr-eyebrow">{e(t["pr_e"])}</p>
     <h2>{e(t["pr_h"])}</h2>
     <p class="hr-sub">{e(t["pr_s"])}</p>
+    <div class="hr-cur"><label><i class="fa-solid fa-coins"></i> {e(CUR[lang][0])}
+      <select id="hrCur" aria-label="{e(CUR[lang][0])}"></select></label><small id="hrCurNote" hidden>{e(CUR[lang][1])}</small></div>
     <div class="hr-packs">
 {packs}    </div>
   </section>
@@ -388,7 +436,9 @@ def build(lang):
   </section>
 </main>
 
+<a class="hr-float" href="#book"><i class="fa-regular fa-calendar"></i> {e(t["cta2"])}</a>
 <script src="{pre}assets/js/site.js?v=26112402"></script>
+<script src="{pre}assets/js/studio.js?v=26112403"></script>
 </body>
 </html>
 '''
