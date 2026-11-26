@@ -29,15 +29,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure (Visual Studio, x64)
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64
+      - name: MSVC x64 + Ninja (the runner image no longer ships the "Visual Studio 17 2022" generator)
+        uses: ilammy/msvc-dev-cmd@v1
+        with: { arch: x64 }
+      - name: Ninja
+        run: pip install ninja
+
+      - name: Configure (MSVC x64, Ninja)
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build VST3, Standalone and the render test
         run: cmake --build build --config Release --parallel 4 --target NeonSynth80s_VST3 NeonSynth80s_Standalone NeonTest NeonLoadTest
 
       - name: Load test (host without Common Controls v6, like Ableton Live's plug-in scanner)
         run: |
-          ./build/Release/NeonLoadTest.exe "$((Resolve-Path "build\NeonSynth80s_artefacts\Release\VST3\$env:PRODUCT.vst3\Contents\x86_64-win\$env:PRODUCT.vst3").Path)"
+          ./build/NeonLoadTest.exe "$((Resolve-Path "build\NeonSynth80s_artefacts\Release\VST3\$env:PRODUCT.vst3\Contents\x86_64-win\$env:PRODUCT.vst3").Path)"
           if ($LASTEXITCODE -ne 0) { throw "the VST3 does not load without a Common Controls v6 host manifest (Ableton would hide it)" }
 
       - name: Render test (70 presets, voice modes, state recall)
