@@ -28,5 +28,5 @@ foreach ($p in $Plugins) {
     $lines += "$state  $name  (tests reussis: $passed, echoues: $failed, code $code)"
     Write-Host "::group::validator $name"; Write-Host $out; Write-Host '::endgroup::'
 }
-$lines | Tee-Object -FilePath $Report | Write-Host
+$lines | Tee-Object -FilePath $Report | ForEach-Object { Write-Host "::notice::validator $_" }
 if ($Strict -and $bad.Count) { throw "Validateur VST3 en echec : $($bad -join ', ')" }
