@@ -50,7 +50,7 @@ jobs:
         continue-on-error: true
         shell: pwsh
         run: |
-          cmake -S HUMPIRE_ORBIT -B build/orbit -G Ninja -DCMAKE_BUILD_TYPE=Release -DFETCHCONTENT_SOURCE_DIR_JUCE="$env:JUCE_DIR" -DHUMPIRE_BUILD_STANDALONE=OFF -DHUMPIRE_BUILD_TESTS=OFF
+          cmake -S HUMPIRE_ORBIT -B build/orbit -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PROJECT_INCLUDE="$env:GITHUB_WORKSPACE/ALL_PLUGINS/cmake/comctl6.cmake" -DFETCHCONTENT_SOURCE_DIR_JUCE="$env:JUCE_DIR" -DHUMPIRE_BUILD_STANDALONE=OFF -DHUMPIRE_BUILD_TESTS=OFF
           if ($LASTEXITCODE -ne 0) { exit 1 }
           $targets = (ninja -C build/orbit -t targets all) | ForEach-Object { if ($_ -match '^([A-Za-z0-9_]+_VST3):' -and $Matches[1] -notlike 'cmake_*') { $Matches[1] } } | Sort-Object -Unique
           ninja -C build/orbit -k 0 @targets
@@ -62,7 +62,7 @@ jobs:
         continue-on-error: true
         shell: pwsh
         run: |
-          cmake -S HUMPIRE_Chaabi_Orchestra -B build/chaabi -G Ninja -DCMAKE_BUILD_TYPE=Release -DHUMPIRE_JUCE_DIR="$env:JUCE_DIR" -DHUMPIRE_COPY_PLUGIN=OFF -DHUMPIRE_BUILD_TESTS=OFF
+          cmake -S HUMPIRE_Chaabi_Orchestra -B build/chaabi -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PROJECT_INCLUDE="$env:GITHUB_WORKSPACE/ALL_PLUGINS/cmake/comctl6.cmake" -DHUMPIRE_JUCE_DIR="$env:JUCE_DIR" -DHUMPIRE_COPY_PLUGIN=OFF -DHUMPIRE_BUILD_TESTS=OFF
           if ($LASTEXITCODE -ne 0) { exit 1 }
           ninja -C build/chaabi -k 0 HumpireChaabiOrchestra_VST3
           if ($LASTEXITCODE -ne 0) { exit 1 }
@@ -72,7 +72,7 @@ jobs:
         continue-on-error: true
         shell: pwsh
         run: |
-          cmake -S ROCKPUNK -B build/rockpunk -G Ninja -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR="$env:JUCE_DIR"
+          cmake -S ROCKPUNK -B build/rockpunk -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PROJECT_INCLUDE="$env:GITHUB_WORKSPACE/ALL_PLUGINS/cmake/comctl6.cmake" -DJUCE_DIR="$env:JUCE_DIR"
           if ($LASTEXITCODE -ne 0) { exit 1 }
           ninja -C build/rockpunk ROCKPUNK_VST3 ROCKPUNK_RenderTest
           if ($LASTEXITCODE -ne 0) { exit 1 }
@@ -106,6 +106,20 @@ jobs:
           Stage "build/orbit" "orbit"
           Stage "build/chaabi" "chaabi"
           Stage "build/rockpunk" "synths"
+
+      # A host without Common Controls v6 (like Ableton Live's plug-in scanner) must be able to load every VST3
+      - name: Load test (every VST3, host without Common Controls v6)
+        shell: pwsh
+        run: |
+          cl /nologo /O1 ALL_PLUGINS/tools/LoadTest.c /Fe:loadtest.exe
+          if ($LASTEXITCODE -ne 0) { throw "LoadTest did not compile" }
+          $bad = @()
+          Get-ChildItem stage -Recurse -File -Filter *.vst3 | Where-Object { $_.Directory.Name -eq 'x86_64-win' } | ForEach-Object {
+            $out = & ./loadtest.exe $_.FullName
+            Write-Host "$($_.Name): $out"
+            if ($LASTEXITCODE -ne 0) { $bad += $_.Name }
+          }
+          if ($bad.Count) { throw "These VST3s would be hidden by Ableton Live: $($bad -join ', ')" }
 
       - name: pluginval (informatif)
         continue-on-error: true

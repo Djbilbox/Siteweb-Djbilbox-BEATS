@@ -14,7 +14,7 @@ jobs:
         shell: bash
         run: ./scripts/fetch_fonts.sh
       - name: Configure
-        run: cmake -S . -B build -A x64 -DHUMPIRE_BUILD_STANDALONE=OFF
+        run: cmake -S . -B build -A x64 -DHUMPIRE_BUILD_STANDALONE=OFF -DCMAKE_PROJECT_INCLUDE="${{ github.workspace }}/ALL_PLUGINS/cmake/comctl6.cmake"
       - name: Build (8 plugins)
         run: cmake --build build --config Release --parallel
       - name: pluginval (informatif)

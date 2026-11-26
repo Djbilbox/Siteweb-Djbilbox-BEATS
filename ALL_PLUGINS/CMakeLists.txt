@@ -9,6 +9,9 @@
 cmake_minimum_required(VERSION 3.22)
 project(DJBILBOX_ALL_PLUGINS VERSION 1.0.0 LANGUAGES C CXX)
 
+# Common Controls v6 in every plug-in manifest (MSVC): Ableton Live would scan the VST3s without listing them
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/comctl6.cmake")
+
 # JUCE une seule fois : les FetchContent_Declare(JUCE) des sous-projets deviennent des no-op.
 include(FetchContent)
 FetchContent_Declare(JUCE GIT_REPOSITORY https://github.com/juce-framework/JUCE.git GIT_TAG 8.0.4 GIT_SHALLOW ON)
