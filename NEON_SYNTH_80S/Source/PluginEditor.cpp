@@ -428,7 +428,7 @@ void NeonPanel::renderStatic (juce::Graphics& g)
     g.drawRoundedRectangle (lcd, 10.f, 1.3f);
 
     // panneaux de la console
-    auto P = [] (float x, float y, float w, float h) { return juce::Rectangle<float> (x, y + (float) dy, w, h); };
+    auto P = [dy] (float x, float y, float w, float h) { return juce::Rectangle<float> (x, y + (float) dy, w, h); };
     glassPanel (g, P (20.f, 100.f, 250.f, 180.f), "OSC 1", cyan);
     glassPanel (g, P (280.f, 100.f, 330.f, 180.f), "OSC 2", cyan);
     glassPanel (g, P (620.f, 100.f, 460.f, 180.f), "FILTER", pink);
