@@ -2,7 +2,7 @@
 # Le validateur est un vrai hote VST3 compile SANS manifeste Common Controls v6, comme le scanner d'Ableton Live :
 # il charge la DLL, cree le plug-in, active l'audio, envoie du MIDI et fait tourner le traitement.
 # usage : vst3_validator.ps1 -Report rapport.txt [-Strict] <chemin\Plugin.vst3> [...]
-param([string]$Report = 'vst3_validator_report.txt', [switch]$Strict, [Parameter(ValueFromRemainingArguments)][string[]]$Plugins)
+param([string]$Report = 'vst3_validator_report.txt', [string]$LogDir = '', [switch]$Strict, [Parameter(ValueFromRemainingArguments)][string[]]$Plugins)
 $ErrorActionPreference = 'Stop'
 $sdk = Join-Path $env:RUNNER_TEMP 'vst3sdk'
 if (-not (Test-Path "$sdk\CMakeLists.txt")) {
@@ -20,6 +20,7 @@ $lines = @(); $bad = @()
 foreach ($p in $Plugins) {
     $name = Split-Path $p -Leaf
     $out = & $val $p 2>&1 | Out-String
+    if ($LogDir) { New-Item -ItemType Directory -Force $LogDir | Out-Null; $out | Out-File (Join-Path $LogDir ($name + '.txt')) }
     $code = $LASTEXITCODE
     $failed = ([regex]::Matches($out, '\[Failed\]')).Count
     $passed = ([regex]::Matches($out, '\[Succeeded\]')).Count

@@ -1,0 +1,83 @@
+name: Test installateurs Windows (comme un client Ableton)
+# Installe les VRAIS installateurs publies (tous les plugins, NEON, GFUNK) sur un PC Windows propre de GitHub,
+# puis teste chaque VST3 installe dans C:\Program Files\Common Files\VST3 :
+#  - chargement depuis un hote sans Common Controls v6 (comme le scanner d'Ableton Live),
+#  - validateur VST3 officiel Steinberg.
+# Rapport complet + journaux publies dans une release "vst3-install-test-N".
+on:
+  push:
+    branches: [claude/blissful-newton-cxepis]
+    paths: ['.github/workflows/vst3-install-test.yml', 'ALL_PLUGINS/tools/vst3_validator.ps1']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+    defaults: { run: { shell: pwsh } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with: { arch: x64 }
+      - name: Ninja
+        run: pip install ninja
+
+      - name: Telecharger les derniers installateurs publies
+        run: |
+          $tags = gh release list --limit 100 --json tagName --jq '.[].tagName'
+          function Latest($prefix) { $tags | Where-Object { $_ -like "$prefix*" } | Select-Object -First 1 }
+          New-Item -ItemType Directory -Force dl | Out-Null
+          $all = Latest 'djbilbox-all-plugins-v'; $neon = Latest 'neon-synth-80s-2-windows-v'; $gf = Latest 'gfunk2027-windows-v'
+          "all=$all neon=$neon gfunk=$gf" | Tee-Object dl/SOURCES.txt
+          gh release download $all -p DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe -D dl
+          gh release download $neon -p NEON_SYNTH_80s_2_Setup.exe -D dl
+          gh release download $gf -p GFUNK_2027_Windows.zip -p GFUNK_2027_Free_Windows.zip -D dl
+          Get-ChildItem dl | Format-Table Name, Length
+
+      - name: Installer (silencieux, comme un client)
+        run: |
+          foreach ($exe in 'dl\DJBILBOX_BEATS_ALL_PLUGINS_Setup.exe', 'dl\NEON_SYNTH_80s_2_Setup.exe') {
+            $p = Start-Process $exe -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-' -Wait -PassThru
+            Write-Host "$exe -> code $($p.ExitCode)"
+            if ($p.ExitCode -ne 0) { throw "installateur $exe en echec" }
+          }
+          # GFUNK : installateur IExpress (boite de dialogue finale) -> on extrait le meme payload et on fait la copie de install.ps1
+          foreach ($z in 'GFUNK_2027_Windows', 'GFUNK_2027_Free_Windows') {
+            Expand-Archive "dl\$z.zip" "dl\$z"
+            $setup = Get-ChildItem "dl\$z" -Recurse -Filter *Setup.exe | Select-Object -First 1
+            $x = "dl\x_$z"; New-Item -ItemType Directory -Force $x | Out-Null
+            Start-Process $setup.FullName -ArgumentList '/C', "/T:$((Resolve-Path $x).Path)", '/Q' -Wait
+            Expand-Archive "$x\payload.zip" "$x\payload"
+            Get-ChildItem "$x\payload" -Directory -Filter *.vst3 | ForEach-Object { Copy-Item $_.FullName "$env:CommonProgramFiles\VST3" -Recurse -Force }
+          }
+          Get-ChildItem "$env:CommonProgramFiles\VST3" -Directory | Format-Table Name
+
+      - name: Test de chargement (hote sans Common Controls v6, comme Ableton)
+        run: |
+          cl /nologo /O1 ALL_PLUGINS/tools/LoadTest.c /Fe:loadtest.exe | Out-Null
+          $res = @(); $bad = 0
+          Get-ChildItem "$env:CommonProgramFiles\VST3" -Recurse -File -Filter *.vst3 | Where-Object { $_.Directory.Name -eq 'x86_64-win' } | ForEach-Object {
+            $o = & ./loadtest.exe $_.FullName; if ($LASTEXITCODE -ne 0) { $bad++ }
+            $res += "$($_.Name) : $o"
+          }
+          New-Item -ItemType Directory -Force out | Out-Null
+          $res | Tee-Object out/LOAD_TEST.txt
+          if ($bad) { Write-Host "::error::$bad VST3 ne se chargent pas comme dans Ableton" }
+
+      - name: Validateur VST3 Steinberg sur les plugins installes
+        continue-on-error: true
+        run: |
+          $all = Get-ChildItem "$env:CommonProgramFiles\VST3" -Directory -Filter *.vst3 | ForEach-Object { $_.FullName }
+          ./ALL_PLUGINS/tools/vst3_validator.ps1 -Report out/VALIDATOR.txt -LogDir out/validator_logs @all
+
+      - name: Publier le rapport
+        if: always()
+        run: |
+          Copy-Item dl/SOURCES.txt out/ -ErrorAction SilentlyContinue
+          Compress-Archive out/* vst3_install_test.zip -Force
+          $files = @('vst3_install_test.zip')
+          foreach ($f in 'out/LOAD_TEST.txt', 'out/VALIDATOR.txt') { if (Test-Path $f) { $files += $f } }
+          gh release create "vst3-install-test-${{ github.run_number }}" @files --target ${{ github.sha }} --title "Test installateurs Windows ${{ github.run_number }}" --notes "Installateurs reels installes sur un PC Windows propre, chaque VST3 teste comme Ableton (chargement sans Common Controls v6) + validateur Steinberg."
