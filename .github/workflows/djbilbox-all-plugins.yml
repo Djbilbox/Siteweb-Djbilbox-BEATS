@@ -121,6 +121,13 @@ jobs:
           }
           if ($bad.Count) { throw "These VST3s would be hidden by Ableton Live: $($bad -join ', ')" }
 
+      - name: Validateur VST3 Steinberg (informatif, hote sans Common Controls v6 comme Ableton)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $all = Get-ChildItem stage -Recurse -Directory -Filter *.vst3 | Where-Object { $_.Parent.Parent.Name -eq 'stage' } | ForEach-Object { $_.FullName }
+          ./ALL_PLUGINS/tools/vst3_validator.ps1 -Report stage/vst3_validator_report.txt @all
+
       - name: pluginval (informatif)
         continue-on-error: true
         shell: pwsh

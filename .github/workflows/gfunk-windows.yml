@@ -56,6 +56,10 @@ jobs:
           New-Item -ItemType Directory -Force dist\GFUNK_2027_Free_Windows | Out-Null
           ./installer/build_installer.ps1 -Free -Bin $bin -Out "$((Resolve-Path dist).Path)\GFUNK_2027_Free_Windows\GFUNK_2027_Free_Setup.exe"
 
+      - name: Validateur VST3 Steinberg (hote sans Common Controls v6, comme Ableton Live)
+        run: |
+          ../ALL_PLUGINS/tools/vst3_validator.ps1 -Report dist_validator.txt "build\GFUNK2027_artefacts\Release\VST3\GFUNK 2027.vst3" "build_free\GFUNK2027_artefacts\Release\VST3\GFUNK 2027 Free.vst3"
+
       - name: Render test (every preset, no NaN / silence / clipping)
         run: |
           ./build/GFunkRenderTest_artefacts/Release/GFunkRenderTest.exe
@@ -78,6 +82,7 @@ jobs:
           (Get-Content installer\README_FIRST.txt -Raw).Replace('GFUNK_2027_Setup.exe', 'GFUNK_2027_Free_Setup.exe').Replace('GFUNK 2027', 'GFUNK 2027 Free') | Set-Content dist\GFUNK_2027_Free_Windows\README_FIRST.txt
           Compress-Archive -Path dist\GFUNK_2027_Free_Windows -DestinationPath dist\GFUNK_2027_Free_Windows.zip -CompressionLevel Optimal
           Get-FileHash dist\GFUNK_2027_Windows.zip, dist\GFUNK_2027_Windows\GFUNK_2027_Setup.exe, dist\GFUNK_2027_Free_Windows.zip -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $(Split-Path $_.Path -Leaf)" } | Out-File dist\SHA256SUMS.txt
+          Copy-Item dist_validator.txt dist\VST3_VALIDATOR_REPORT.txt
           Get-Content dist\SHA256SUMS.txt
 
       - uses: actions/upload-artifact@v4
@@ -87,6 +92,7 @@ jobs:
             GFUNK_2027_VST_Project/dist/GFUNK_2027_Windows.zip
             GFUNK_2027_VST_Project/dist/GFUNK_2027_Free_Windows.zip
             GFUNK_2027_VST_Project/dist/SHA256SUMS.txt
+            GFUNK_2027_VST_Project/dist/VST3_VALIDATOR_REPORT.txt
 
       - name: Release GitHub
         uses: softprops/action-gh-release@v2
@@ -99,3 +105,4 @@ jobs:
             GFUNK_2027_VST_Project/dist/GFUNK_2027_Windows.zip
             GFUNK_2027_VST_Project/dist/GFUNK_2027_Free_Windows.zip
             GFUNK_2027_VST_Project/dist/SHA256SUMS.txt
+            GFUNK_2027_VST_Project/dist/VST3_VALIDATOR_REPORT.txt

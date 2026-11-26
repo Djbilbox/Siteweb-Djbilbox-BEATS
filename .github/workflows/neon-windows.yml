@@ -46,6 +46,10 @@ jobs:
           ./build/NeonLoadTest.exe "$((Resolve-Path "build\NeonSynth80s_artefacts\Release\VST3\$env:PRODUCT.vst3\Contents\x86_64-win\$env:PRODUCT.vst3").Path)"
           if ($LASTEXITCODE -ne 0) { throw "the VST3 does not load without a Common Controls v6 host manifest (Ableton would hide it)" }
 
+      - name: Validateur VST3 Steinberg (hote sans Common Controls v6, comme Ableton Live)
+        run: |
+          ../ALL_PLUGINS/tools/vst3_validator.ps1 -Report validator.txt "build\NeonSynth80s_artefacts\Release\VST3\$env:PRODUCT.vst3"
+
       - name: Render test (70 presets, voice modes, state recall)
         run: ./build/NeonTest_artefacts/Release/NeonTest.exe
 
@@ -76,6 +80,7 @@ jobs:
           Compress-Archive -Path $root -DestinationPath dist\NEON_SYNTH_80s_2_Windows_Mac.zip -CompressionLevel Optimal
           "mac package from release $tag" | Out-File dist\SOURCE.txt
           Get-FileHash dist\*.zip, dist\*.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $(Split-Path $_.Path -Leaf)" } | Out-File dist\SHA256SUMS.txt
+          Copy-Item validator.txt dist\VST3_VALIDATOR_REPORT.txt
           Get-Content dist\SHA256SUMS.txt
 
       - uses: actions/upload-artifact@v4
@@ -85,6 +90,7 @@ jobs:
             NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Windows_Mac.zip
             NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Setup.exe
             NEON_SYNTH_80S/dist/SHA256SUMS.txt
+            NEON_SYNTH_80S/dist/VST3_VALIDATOR_REPORT.txt
 
       - name: Release GitHub
         uses: softprops/action-gh-release@v2
@@ -97,3 +103,4 @@ jobs:
             NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Windows_Mac.zip
             NEON_SYNTH_80S/dist/NEON_SYNTH_80s_2_Setup.exe
             NEON_SYNTH_80S/dist/SHA256SUMS.txt
+            NEON_SYNTH_80S/dist/VST3_VALIDATOR_REPORT.txt
