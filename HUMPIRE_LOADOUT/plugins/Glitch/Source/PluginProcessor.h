@@ -28,7 +28,7 @@ public:
     int getNumPrograms() override { return 1; }
     int getCurrentProgram() override { return 0; }
     void setCurrentProgram (int) override {}
-    const juce::String getProgramName (int) override { return {}; }
+    const juce::String getProgramName (int) override { return "Default"; }   // the VST3 validator wants a named program
     void changeProgramName (int, const juce::String&) override {}
 
     juce::AudioProcessorParameter* getBypassParameter() const override { return bypassParam; }
