@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(GFUNK2027 VERSION 2.0.0 LANGUAGES C CXX)
+project(GFUNK2027 VERSION 2.3.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -101,4 +101,14 @@ if(MINGW)
             target_link_options(GFUNK2027_${fmt} PRIVATE -static)
         endif()
     endforeach()
+    # Common Controls v6 manifest inside the VST3 DLL: Ableton Live (and FL Studio's bridge) could not load it otherwise
+    target_sources(GFUNK2027_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source/win/plugin_manifest.rc)
+endif()
+
+# Load test: opens the VST3 DLL from a process without a Common Controls v6 manifest (like Ableton's scanner)
+if(WIN32 AND GFUNK_BUILD_TESTS)
+    add_executable(GFunkLoadTest Tests/LoadTest.c)
+    if(MINGW)
+        target_link_options(GFunkLoadTest PRIVATE -municode)
+    endif()
 endif()

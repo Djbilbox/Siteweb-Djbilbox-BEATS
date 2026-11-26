@@ -1,5 +1,11 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+
+// Common Controls v6 in the plug-in's own manifest (MSVC; MinGW builds use Source/win/plugin_manifest.rc).
+// Without it Ableton Live scans the VST3 but cannot load it (TaskDialogIndirect, error 127) and hides it.
+#if defined (_MSC_VER)
+ #pragma comment (linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
 #include <algorithm>
 #include <cmath>
 

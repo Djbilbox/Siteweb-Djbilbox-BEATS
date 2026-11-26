@@ -7,7 +7,9 @@ INSTALL (Windows 10 / 11, 64-bit)
 2. Approve the administrator prompt. The installer copies:
    - GFUNK 2027.vst3  ->  C:\Program Files\Common Files\VST3
    - GFUNK 2027 (standalone app)  ->  C:\Program Files\HUMPIRE\GFUNK 2027  (+ Start menu shortcut)
-3. Open your DAW, rescan plug-ins, and load GFUNK 2027 on an instrument track.
+3. Open your DAW, rescan plug-ins, and load GFUNK 2027 on an instrument track.
+   Ableton Live: Settings > Plug-ins > turn on "Use VST3 Plug-in System Folders", then click Rescan.
+   GFUNK 2027 is listed under Plug-ins > VST3 > HUMPIRE by Djbilbox BEATS.
 
 UNINSTALL: Windows Settings > Apps > GFUNK 2027 > Uninstall.
 

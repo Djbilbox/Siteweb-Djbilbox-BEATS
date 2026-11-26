@@ -1,0 +1,5 @@
+// Common Controls v6 for the plug-in DLL (MinGW builds; MSVC builds get it from the #pragma in PluginProcessor.cpp).
+// JUCE imports TaskDialogIndirect, which only exists in Common Controls v6. A DLL needs resource ID 2
+// (ISOLATIONAWARE_MANIFEST_RESOURCE_ID): without it, hosts whose process has no v6 manifest (Ableton Live's
+// plug-in scanner, FL Studio's bridge) get error 127 from LoadLibrary and silently drop the plug-in.
+2 24 "comctl6.manifest"

@@ -46,7 +46,7 @@ if (-not $test) {
     $key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GFUNK2027'
     New-Item -Path $key -Force | Out-Null
     Set-ItemProperty $key DisplayName 'GFUNK 2027'
-    Set-ItemProperty $key DisplayVersion '2.1.1'
+    Set-ItemProperty $key DisplayVersion '2.3.0'
     Set-ItemProperty $key Publisher 'HUMPIRE by Djbilbox BEATS'
     Set-ItemProperty $key InstallLocation $appDir
     Set-ItemProperty $key DisplayIcon (Join-Path $appDir 'GFUNK 2027.exe')

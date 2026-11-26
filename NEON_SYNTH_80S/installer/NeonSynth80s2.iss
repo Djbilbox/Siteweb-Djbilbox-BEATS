@@ -3,7 +3,7 @@
 ; Les images de l'assistant sont produites par make_art.py (dossier art\).
 
 #define AppName "NEON SYNTH 80s 2.0"
-#define AppVersion "2.0.0"
+#define AppVersion "2.0.1"
 #define Publisher "HUMPIRE by Djbilbox BEATS"
 #ifndef BinDir
   #define BinDir "C:\work\neon_bin"

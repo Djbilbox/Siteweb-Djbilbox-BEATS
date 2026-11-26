@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(NEON_SYNTH_80S VERSION 2.0.0)
+project(NEON_SYNTH_80S VERSION 2.0.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -29,6 +29,18 @@ target_compile_definitions(NeonSynth80s PUBLIC
 target_link_libraries(NeonSynth80s PRIVATE NeonAssets
     juce::juce_audio_utils juce::juce_dsp
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+
+# Common Controls v6 manifest inside the VST3 DLL (MinGW; MSVC gets it from the #pragma in PluginProcessor.cpp):
+# without it Ableton Live scans the plug-in but cannot load it (TaskDialogIndirect, error 127) and hides it.
+if(MINGW)
+    target_sources(NeonSynth80s_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source/win/plugin_manifest.rc)
+endif()
+if(WIN32)
+    add_executable(NeonLoadTest Tools/LoadTest.c)
+    if(MINGW)
+        target_link_options(NeonLoadTest PRIVATE -municode)
+    endif()
+endif()
 
 # Test console : rend les 70 presets et execute la suite de validation (desactiver : -DNEON_SYNTH_80S_BUILD_TESTS=OFF)
 option(NEON_SYNTH_80S_BUILD_TESTS "Build NeonTest" ON)
