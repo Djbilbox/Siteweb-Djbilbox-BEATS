@@ -1,4 +1,5 @@
 name: Test installateurs Windows (comme un client Ableton)
+# relance 2 : apres le correctif "Default" des effets
 # Installe les VRAIS installateurs publies (tous les plugins, NEON, GFUNK) sur un PC Windows propre de GitHub,
 # puis teste chaque VST3 installe dans C:\Program Files\Common Files\VST3 :
 #  - chargement depuis un hote sans Common Controls v6 (comme le scanner d'Ableton Live),
